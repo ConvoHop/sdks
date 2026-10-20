@@ -1,16 +1,16 @@
 import {
-  ConvoHopTransport, parseId, parseObject, type AsyncRecoveryStorage, type GraphqlTypes, type ProtocolObject, type RecoveryStorage,
-} from "@convohop/core";
+  RelayTransport, parseId, parseObject, type AsyncRecoveryStorage, type GraphqlTypes, type ProtocolObject, type RecoveryStorage,
+} from "@instantrelay/core";
 import { required } from "./result.js";
 
 export type DeploymentOptions = Omit<GraphqlTypes.CreateDeploymentRequestInput, "orgId">;
 export type ProjectOptions = Omit<GraphqlTypes.CreateProjectRequestInput, "deploymentId" | "name">;
 
 /** Operator-token client for organizations, deployments, projects and backend keys. */
-export class ConvoHopManagementClient {
-  readonly http: ConvoHopTransport;
+export class RelayManagementClient {
+  readonly http: RelayTransport;
   constructor(options: { baseUrl: string; accessToken: string; actorId: string; recoveryStorage?: RecoveryStorage; asyncRecoveryStorage?: AsyncRecoveryStorage; fetch?: typeof fetch }) {
-    this.http = new ConvoHopTransport({ baseUrl: options.baseUrl, credential: options.accessToken,
+    this.http = new RelayTransport({ baseUrl: options.baseUrl, credential: options.accessToken,
       namespace: "management:" + parseId(options.actorId),
       ...(options.recoveryStorage === undefined ? {} : { recoveryStorage: options.recoveryStorage }),
       ...(options.asyncRecoveryStorage === undefined ? {} : { asyncRecoveryStorage: options.asyncRecoveryStorage }),

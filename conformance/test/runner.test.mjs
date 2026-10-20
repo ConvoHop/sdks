@@ -14,19 +14,19 @@ import { run } from "../runner.mjs";
 
 const FAKE = fileURLToPath(new URL("./fixtures/fake-driver.mjs", import.meta.url));
 const DEV_STACK = fileURLToPath(new URL("../targets/dev-stack.json", import.meta.url));
-const REFERENCE = "convohop-typescript-reference";
+const REFERENCE = "relay-typescript-reference";
 const ALL_IDS = readdirSync(SCENARIO_DIR).filter(name => name.endsWith(".json")).sort()
   .flatMap(name => JSON.parse(readFileSync(join(SCENARIO_DIR, name), "utf8")).scenarios.map(scenario => scenario.id));
 const VECTORS = JSON.parse(readFileSync(specFile("vectors/webhooks.json"), "utf8")).vectors;
 const FEATURES = JSON.parse(readFileSync(specFile("scenario.schema.json"), "utf8")).$defs.feature.enum;
-const DEV_STACK_VARIABLES = Object.keys(process.env).filter(name => name.startsWith("CONVOHOP_DEV_"));
+const DEV_STACK_VARIABLES = Object.keys(process.env).filter(name => name.startsWith("RELAY_DEV_"));
 
 const fake = (...args) => [`"${process.execPath}"`, `"${FAKE}"`, ...args].join(" ");
 const lines = (text, prefix) => text.split("\n").filter(line => line.startsWith(prefix));
 const count = (text, pattern) => text.match(pattern)?.length ?? 0;
 
 let work, runs = 0;
-before(async () => { work = await mkdtemp(join(tmpdir(), "convohop-conformance-runner-")); });
+before(async () => { work = await mkdtemp(join(tmpdir(), "relay-conformance-runner-")); });
 after(async () => { await rm(work, { recursive: true, force: true }); });
 
 /** Runs the CLI with captured streams, isolated reports and no CI step summary unless `env` sets one. */
@@ -61,7 +61,7 @@ async function assertConsistent(result) {
   assert.equal(lines(result.stdout, "PASS ").length, passed);
   assert.equal(lines(result.stdout, "FAIL ").length, failed);
   assert.equal(lines(result.stdout, "SKIP ").length, skipped);
-  assert.match(reports.junit, new RegExp(`<testsuites name="ConvoHop conformance" tests="${scenarios.length}" failures="${failed}" errors="0" skipped="${skipped}"`));
+  assert.match(reports.junit, new RegExp(`<testsuites name="Relay conformance" tests="${scenarios.length}" failures="${failed}" errors="0" skipped="${skipped}"`));
   assert.equal(count(reports.junit, /<testcase /g), scenarios.length);
   assert.equal(count(reports.junit, /<failure /g), failed);
   assert.equal(count(reports.junit, /<skipped /g), skipped);
@@ -199,7 +199,7 @@ describe("the TypeScript reference driver against the mock", () => {
     assert.match(result.stdout, /\nSKIP webhooks\.valid-single-secret: driver fake-driver does not declare feature webhooks\.verify\n/);
     assert.match(result.stdout, /\n--strict: skipped scenarios count as failures\n$/);
     const appended = await readFile(stepSummary, "utf8");
-    assert.ok(appended.startsWith("previous step\n## ConvoHop conformance\n"), appended);
+    assert.ok(appended.startsWith("previous step\n## Relay conformance\n"), appended);
     assert.match(appended, /\| `webhooks\.valid-single-secret` \| driver fake-driver does not declare feature webhooks\.verify \|/);
   });
 });

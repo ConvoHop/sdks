@@ -1,7 +1,7 @@
 using System;
 using System.IO;
 
-namespace ConvoHop.Docgen;
+namespace Relay.Docgen;
 
 /// <summary>Prints the surface JSON of a language file's packages. tools/docgen/extractors/dotnet.mjs builds and runs it.</summary>
 internal static class Program
@@ -10,7 +10,7 @@ internal static class Program
     {
         if (args.Length != 2)
         {
-            Console.Error.WriteLine("usage: dotnet ConvoHop.Docgen.dll <repository root> <language.json>");
+            Console.Error.WriteLine("usage: dotnet Relay.Docgen.dll <repository root> <language.json>");
             return 2;
         }
         try

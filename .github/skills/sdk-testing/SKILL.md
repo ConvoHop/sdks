@@ -1,6 +1,6 @@
 ---
 name: sdk-testing
-description: Build maintainable current ConvoHop Browser/Node regression tests with node:test. Use for SDK validation, recovery/protocol changes and integration coverage.
+description: Build maintainable current Relay Browser/Node regression tests with node:test. Use for SDK validation, recovery/protocol changes and integration coverage.
 ---
 
 # SDK framework testing

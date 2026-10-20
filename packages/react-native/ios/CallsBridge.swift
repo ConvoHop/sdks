@@ -1,13 +1,13 @@
-internal import ConvoHopCalls
-internal import ConvoHopPush
+internal import RelayCalls
+internal import RelayPush
 import Foundation
 
-/// React Native plumbing, not app API: the Swift half of the `ConvoHopCalls` TurboModule. `ConvoHopCallsModule.mm`
+/// React Native plumbing, not app API: the Swift half of the `RelayCalls` TurboModule. `RelayCallsModule.mm`
 /// calls it on the main thread.
 @MainActor
-@objc(ConvoHopCallsBridge)
-public final class ConvoHopCallsBridge: NSObject, PromiseOwner {
-    weak var emitter: (any ConvoHopCallsEmitter)?
+@objc(RelayCallsBridge)
+public final class RelayCallsBridge: NSObject, PromiseOwner {
+    weak var emitter: (any RelayCallsEmitter)?
     private(set) var isInvalidated = false
 
     nonisolated override public init() {
@@ -16,7 +16,7 @@ public final class ConvoHopCallsBridge: NSObject, PromiseOwner {
 
     /// Starts emitting to `emitter`, once React Native has set its event callback.
     @objc(attachEmitter:)
-    public func attach(_ emitter: any ConvoHopCallsEmitter) {
+    public func attach(_ emitter: any RelayCallsEmitter) {
         guard !isInvalidated else { return }
         self.emitter = emitter
         Hub.shared.attach(self)
@@ -45,7 +45,7 @@ public final class ConvoHopCallsBridge: NSObject, PromiseOwner {
             promise.resolve(false)
             return
         }
-        promise.resolve(ConvoHopCalls.shared.forget(uuid))
+        promise.resolve(RelayCalls.shared.forget(uuid))
     }
 
     @objc(startOutgoingCall:conversationId:handle:displayName:hasVideo:resolve:reject:)
@@ -69,7 +69,7 @@ public final class ConvoHopCallsBridge: NSObject, PromiseOwner {
         }
         Task {
             do {
-                let uuid = try await ConvoHopCalls.shared.startOutgoingCall(
+                let uuid = try await RelayCalls.shared.startOutgoingCall(
                     liveSessionId: liveSessionId, conversationId: conversationId, handle: handle,
                     displayName: displayName, hasVideo: hasVideo)
                 promise.resolve(uuid.uuidString.lowercased())
@@ -90,7 +90,7 @@ public final class ConvoHopCallsBridge: NSObject, PromiseOwner {
         }
         Task {
             do {
-                try await ConvoHopCalls.shared.answer(uuid)
+                try await RelayCalls.shared.answer(uuid)
                 promise.resolve()
             } catch {
                 promise.reject(callKit: error, id: callId, stateMessage: "Only a ringing call can be answered")
@@ -110,7 +110,7 @@ public final class ConvoHopCallsBridge: NSObject, PromiseOwner {
             return
         }
         Task {
-            try? await ConvoHopCalls.shared.end(uuid)
+            try? await RelayCalls.shared.end(uuid)
             promise.resolve()
         }
     }
@@ -132,9 +132,9 @@ public final class ConvoHopCallsBridge: NSObject, PromiseOwner {
         }
         Task {
             if Hub.shared.call(uuid)?.state == .ringing {
-                let reason = ConvoHopCallEndReason(rawValue: serverReason)
+                let reason = RelayCallEndReason(rawValue: serverReason)
                 if reason == .expired { Hub.shared.serverExpired.insert(uuid) }
-                try? await ConvoHopCalls.shared.end(uuid, reason: reason)
+                try? await RelayCalls.shared.end(uuid, reason: reason)
             }
             promise.resolve()
         }
@@ -147,7 +147,7 @@ public final class ConvoHopCallsBridge: NSObject, PromiseOwner {
         let promise = JSPromise(self, resolve, reject)
         guard let uuid = answered(callId, promise) else { return }
         // A connected call stays connected.
-        if Hub.shared.call(uuid)?.state != .connected { ConvoHopCalls.shared.reportConnecting(uuid) }
+        if Hub.shared.call(uuid)?.state != .connected { RelayCalls.shared.reportConnecting(uuid) }
         promise.resolve()
     }
 
@@ -157,7 +157,7 @@ public final class ConvoHopCallsBridge: NSObject, PromiseOwner {
     ) {
         let promise = JSPromise(self, resolve, reject)
         guard let uuid = answered(callId, promise) else { return }
-        ConvoHopCalls.shared.reportConnected(uuid)
+        RelayCalls.shared.reportConnected(uuid)
         promise.resolve()
     }
 
@@ -172,7 +172,7 @@ public final class ConvoHopCallsBridge: NSObject, PromiseOwner {
             return
         }
         guard let uuid = live(callId, promise) else { return }
-        ConvoHopCalls.shared.update(uuid, localizedCallerName: callerName, hasVideo: hasVideo?.boolValue)
+        RelayCalls.shared.update(uuid, localizedCallerName: callerName, hasVideo: hasVideo?.boolValue)
         promise.resolve()
     }
 
@@ -185,7 +185,7 @@ public final class ConvoHopCallsBridge: NSObject, PromiseOwner {
         guard let uuid = live(callId, promise) else { return }
         Task {
             do {
-                try await ConvoHopCalls.shared.setMuted(muted, for: uuid)
+                try await RelayCalls.shared.setMuted(muted, for: uuid)
                 promise.resolve()
             } catch {
                 promise.reject(callKit: error, id: callId, stateMessage: "CallKit can't change this call's mute now")
@@ -200,13 +200,13 @@ public final class ConvoHopCallsBridge: NSObject, PromiseOwner {
     ) {
         let promise = JSPromise(self, resolve, reject)
         if Hub.shared.options?.supportsHolding == false {
-            promise.reject(Code.unsupported, "Holding is off; set supportsHolding in ConvoHopReactNative.Options")
+            promise.reject(Code.unsupported, "Holding is off; set supportsHolding in RelayReactNative.Options")
             return
         }
         guard let uuid = answered(callId, promise, stateMessage: "Only an answered call can be held") else { return }
         Task {
             do {
-                try await ConvoHopCalls.shared.setHeld(held, for: uuid)
+                try await RelayCalls.shared.setHeld(held, for: uuid)
                 promise.resolve()
             } catch {
                 promise.reject(callKit: error, id: callId, stateMessage: "Only an answered call can be held")

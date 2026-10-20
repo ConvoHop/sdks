@@ -32,7 +32,7 @@ final class TypingIndicator {
     }
   }
 
-  final ConvoHopClient client;
+  final RelayClient client;
   final String conversationId;
 
   /// The shortest time between two signals while the user keeps typing.
@@ -105,7 +105,7 @@ final class TypingIndicator {
       next = null;
       try {
         await client.sendTyping(conversationId, isTyping: value);
-      } on ConvoHopProblem catch (problem) {
+      } on RelayProblem catch (problem) {
         if (problem.code == 'FEATURE_UNSUPPORTED') {
           _supported = false;
           _typing = false;

@@ -1,7 +1,7 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "urn:convohop:conformance:scenario",
-  "title": "ConvoHop conformance scenario suite",
+  "title": "Relay conformance scenario suite",
   "description": "One file under spec/conformance/scenarios/ named <suite>.json. See spec/conformance/README.md.",
   "type": "object",
   "additionalProperties": false,

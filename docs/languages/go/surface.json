@@ -677,7 +677,7 @@
           "name": "ErrRefreshRequired",
           "kind": "constant",
           "signatures": [
-            "var ErrRefreshRequired = errors.New(\"convohop: the page sequence requires a refresh; start again from the first page\")"
+            "var ErrRefreshRequired = errors.New(\"relay: the page sequence requires a refresh; start again from the first page\")"
           ],
           "docs": "ErrRefreshRequired reports a page sequence the authority can no longer continue consistently, for example after a visibility change. A Pages iterator yields the page that requires the refresh together with this error and stops. Start again from the first page."
         },
@@ -2025,7 +2025,7 @@
               "signatures": [
                 "func (c *ManagementClient) OrganizationBilling(ctx context.Context, input OrganizationBillingRequestInput, opts ...CallOption) (*OrganizationBillingReply, error)"
               ],
-              "docs": "OrganizationBilling calls the management.organizationBilling query. Read the billing state of an organization in any status: the plan whose limits apply, whether ConvoHop bills the organization and, when it does, its standing and subscription.\n\nIdempotency: safe. Read-only. Repeat freely; each attempt may use a new requestId. Authorized by portalCredential (condition: owner)."
+              "docs": "OrganizationBilling calls the management.organizationBilling query. Read the billing state of an organization in any status: the plan whose limits apply, whether Relay bills the organization and, when it does, its standing and subscription.\n\nIdempotency: safe. Read-only. Repeat freely; each attempt may use a new requestId. Authorized by portalCredential (condition: owner)."
             },
             {
               "name": "WebhookEndpoints",

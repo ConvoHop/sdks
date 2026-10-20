@@ -1,11 +1,11 @@
-// Calling quickstart snippets. The analyzer checks them, but no test runs them: a call needs a ConvoHop project with
+// Calling quickstart snippets. The analyzer checks them, but no test runs them: a call needs a Relay project with
 // calls and a LiveKit media server, which the conformance mock doesn't provide.
 
 // #region imports
 import 'dart:async';
 
-import 'package:convohop/calls.dart';
-import 'package:convohop/convohop.dart';
+import 'package:instantrelay/calls.dart';
+import 'package:instantrelay/instantrelay.dart';
 import 'package:flutter/foundation.dart';
 
 // #endregion imports
@@ -13,7 +13,7 @@ import 'package:flutter/foundation.dart';
 // #region start-call
 // The conversation's current call, or a new voice call once it has started. startVideo() starts a video call. A
 // conversation has one call at a time: starting another fails with LIVE_SESSION_EXISTS.
-Future<LiveSessionHandle> startCall(ConvoHopClient client, String conversationId) async {
+Future<LiveSessionHandle> startCall(RelayClient client, String conversationId) async {
   final live = client.conversation(conversationId).live;
   return await live.current() ?? await (await live.startVoice()).ready();
 }
@@ -100,6 +100,6 @@ Future<void> leaveCall(JoinedCall joined) async {
 // media on purpose, so it doesn't reconnect.
 Future<void> endCallForEveryone(JoinedCall joined) async {
   await leaveCall(joined);
-  await (await joined.participation.live.end()).completed(); // Waits until ConvoHop has ended the call.
+  await (await joined.participation.live.end()).completed(); // Waits until Relay has ended the call.
 }
 // #endregion end-call

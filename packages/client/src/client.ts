@@ -1,19 +1,19 @@
 import {
-  ConvoHopProblem, parseConversation, parseCounter, parseCursor, parseId, parseMembership, parseMessage, operationCatalog, parsePage, parseObject, parseSearchHit, parseString,
+  RelayProblem, parseConversation, parseCounter, parseCursor, parseId, parseMembership, parseMessage, operationCatalog, parsePage, parseObject, parseSearchHit, parseString,
   type OperationPayload, type PageOptions, type Conversation, type ConversationCursor, type Membership, type ConversationMessage, type ItemPage, type ProtocolObject,
   type RecoveryStorage, type ProjectRoute, type SearchHit, type SendReceipt, type SessionMetadata, type SessionBootstrap,
-  type SessionRefresh, type SessionRefreshState, type ConvoHopTransport, type AsyncRecoveryStorage, type ConvoHopPlatform,
+  type SessionRefresh, type SessionRefreshState, type RelayTransport, type AsyncRecoveryStorage, type RelayPlatform,
   type PlatformWebSocket, type PlatformWebSocketConstructor,
-} from "@convohop/core";
+} from "@instantrelay/core";
 import {
   authenticatedTransport, canonical, closeProblem, currentSession, eventPage, jsonClone, origin, parseURL, randomUUID,
   reconnectAction, reconnectDelay, retryableCode, retryDelay, route, sameSession, sessionExpiry, sessionMetadata, timestamp,
   validateOutput, validatePlatform, type TransportAuthentication,
-} from "@convohop/core/internal";
+} from "@instantrelay/core/internal";
 import { ConversationHandle, LiveSessionHandle } from "./live.js";
 import { aggregateError, connectivityOf, lifecycleOf, listen } from "./platform.js";
 import { asError, pageLimit } from "./util.js";
-export interface ConvoHopClientOptions {
+export interface RelayClientOptions {
   baseUrl: string; projectId: string; sessionToken: string; incarnation: string; principalId: string;
   /** Synchronous storage, such as `localStorage`, for mutation recovery records and replay cursors. Never tokens. */
   recoveryStorage?: RecoveryStorage;
@@ -23,8 +23,8 @@ export interface ConvoHopClientOptions {
    */
   asyncRecoveryStorage?: AsyncRecoveryStorage;
   fetch?: typeof fetch; sessionRefresh?: SessionRefresh;
-  /** Runtime services that replace missing browser globals, such as in React Native. See {@link ConvoHopPlatform}. */
-  platform?: ConvoHopPlatform;
+  /** Runtime services that replace missing browser globals, such as in React Native. See {@link RelayPlatform}. */
+  platform?: RelayPlatform;
 }
 /** One member's delivery and read progress, valid for its membership and visibility epochs. */
 export type ReadReceipt = NonNullable<OperationPayload<"communication.receipts">["result"]>["items"][number];
@@ -45,13 +45,13 @@ interface ReplayRefresh {
   resume: (route: ProjectRoute, token: string) => Promise<void>;
 }
 const replayRefresh = new WeakMap<ConversationStream, ReplayRefresh>();
-export class ConvoHopClient {
-  readonly projectId: string; readonly principalId: string; readonly http: ConvoHopTransport;
+export class RelayClient {
+  readonly projectId: string; readonly principalId: string; readonly http: RelayTransport;
   #token: string; readonly storage: RecoveryStorage | undefined;
   /** The configured `asyncRecoveryStorage`, if any. */
   readonly asyncStorage: AsyncRecoveryStorage | undefined;
   /** The validated `platform` option, frozen. Empty when every service comes from globals. */
-  readonly platform: Readonly<ConvoHopPlatform>;
+  readonly platform: Readonly<RelayPlatform>;
   readonly #authentication: TransportAuthentication;
   readonly #sessionRefresh: SessionRefresh | undefined;
   #session: SessionMetadata | undefined;
@@ -61,7 +61,7 @@ export class ConvoHopClient {
   #route: ProjectRoute | undefined;
   readonly #streams = new Set<ConversationStream>();
   readonly #replayGenerations = new Map<string, number>();
-  constructor(options: ConvoHopClientOptions) {
+  constructor(options: RelayClientOptions) {
     if (options.sessionRefresh !== undefined && typeof options.sessionRefresh !== "function")
       throw new TypeError("sessionRefresh must be an asynchronous backend renewal hook");
     this.projectId = parseId(options.projectId); this.principalId = parseId(options.principalId); this.#token = options.sessionToken; this.storage = options.recoveryStorage;
@@ -86,7 +86,7 @@ export class ConvoHopClient {
   }
   #validateRoute(input: unknown): ProjectRoute {
     const value = route(input);
-    if (value.projectId !== this.projectId || value.incarnation !== this.http.incarnation) throw new ConvoHopProblem("INCARNATION_MISMATCH", randomUUID(this.platform), "rejected", 409, "Explicit session/route recovery required");
+    if (value.projectId !== this.projectId || value.incarnation !== this.http.incarnation) throw new RelayProblem("INCARNATION_MISMATCH", randomUUID(this.platform), "rejected", 409, "Explicit session/route recovery required");
     const socket = parseURL(value.wssUrl, this.platform), base = parseURL(this.http.baseUrl, this.platform);
     if (origin(value.communicationBase, this.platform) !== this.http.baseUrl || socket.host !== base.host ||
         socket.protocol !== (base.protocol === "https:" ? "wss:" : "ws:") ||
@@ -101,7 +101,7 @@ export class ConvoHopClient {
       const enrollment = this.#sessionInitialization ??= this.http.execute("communication.currentSession", this.projectId, {}).then(proof => {
         const binding = currentSession(proof);
         if (binding.principalId !== this.principalId || binding.incarnation !== this.http.incarnation)
-          throw new ConvoHopProblem("SESSION_REFRESH_REJECTED", proof.requestId, "rejected", 409,
+          throw new RelayProblem("SESSION_REFRESH_REJECTED", proof.requestId, "rejected", 409,
             "Original session authority does not match this client's principal and incarnation");
         this.#session = binding;
       });
@@ -116,7 +116,7 @@ export class ConvoHopClient {
     const hook = this.#sessionRefresh, binding = this.#session, currentRoute = this.#route;
     if (!hook || !binding || !currentRoute || sessionExpiry(binding) <= Date.now() ||
         binding.incarnation !== this.http.incarnation)
-      return Promise.reject(new ConvoHopProblem("SESSION_REFRESH_REQUIRED", randomUUID(this.platform), "rejected", 409,
+      return Promise.reject(new RelayProblem("SESSION_REFRESH_REQUIRED", randomUUID(this.platform), "rejected", 409,
         "Configure sessionRefresh and initialize with the original valid bearer before renewal or expiry"));
     const pending = this.#refreshSession(hook, jsonClone(binding), currentRoute).finally(() => {
       if (this.#refreshing === pending) this.#refreshing = undefined;
@@ -134,7 +134,7 @@ export class ConvoHopClient {
   scheduleSessionRefresh(options: SessionRefreshSchedule = {}): () => void {
     const lead = options.leadMs ?? 60000;
     if (!Number.isSafeInteger(lead) || lead < 0) throw new RangeError("leadMs must be a non-negative safe integer");
-    if (!this.#sessionRefresh) throw new ConvoHopProblem("SESSION_REFRESH_REQUIRED", randomUUID(this.platform), "rejected", 409,
+    if (!this.#sessionRefresh) throw new RelayProblem("SESSION_REFRESH_REQUIRED", randomUUID(this.platform), "rejected", 409,
       "Configure sessionRefresh before scheduling renewal");
     let timer: ReturnType<typeof setTimeout> | undefined, due = 0, disposed = false, failures = 0;
     // One target per session revision: never earlier than halfway through the remaining lifetime, so short sessions don't renew in a loop.
@@ -164,7 +164,7 @@ export class ConvoHopClient {
       if (!binding) {
         this.initialize().then(() => { failures = 0; arm(0); }, error => {
           report(error);
-          if (error instanceof ConvoHopProblem && reconnectAction(error) !== "stop")
+          if (error instanceof RelayProblem && reconnectAction(error) !== "stop")
             arm(Math.max(1000 * 2 ** Math.min(failures++, 5), (error.retryAfter ?? 0) * 1000));
         });
         return;
@@ -207,7 +207,7 @@ export class ConvoHopClient {
     const quiescing: { replays: Map<ConversationStream, ReplayRefresh>; work: Promise<void>[] } = { replays: new Map(), work: [] };
     this.#quiescing = quiescing;
     let release: (() => void) | undefined, replacement: SessionMetadata | undefined;
-    let invalidated = false, failure: ConvoHopProblem | undefined, replayRoute = oldRoute;
+    let invalidated = false, failure: RelayProblem | undefined, replayRoute = oldRoute;
     const drain = async () => {
       if (!release) {
         let resume: () => void = () => { throw new Error("Uninitialized refresh barrier"); };
@@ -223,11 +223,11 @@ export class ConvoHopClient {
       const retired = await Promise.allSettled(quiescing.work);
       for (const result of retired) if (result.status === "rejected") throw result.reason;
       await drain();
-      if (sessionExpiry(binding) <= Date.now()) throw new ConvoHopProblem("SESSION_REFRESH_REQUIRED", randomUUID(this.platform),
+      if (sessionExpiry(binding) <= Date.now()) throw new RelayProblem("SESSION_REFRESH_REQUIRED", randomUUID(this.platform),
         "rejected", 409, "Original bearer expired while work drained; explicitly retire and bootstrap a new client");
       let supplied: SessionBootstrap;
       try { supplied = await hook(jsonClone(binding)); }
-      catch { throw new ConvoHopProblem("SESSION_REFRESH_FAILED", randomUUID(this.platform), "unknown", 0,
+      catch { throw new RelayProblem("SESSION_REFRESH_FAILED", randomUUID(this.platform), "unknown", 0,
         "Session renewal hook failed; retain the original renewal request and verify its outcome"); }
       validateOutput(supplied, "SessionBootstrap!");
       const candidate = { session: sessionMetadata(supplied.session),
@@ -244,7 +244,7 @@ export class ConvoHopClient {
           BigInt(verified.sessionRevision) <= BigInt(binding.sessionRevision) ||
           sessionExpiry(verified) <= sessionExpiry(binding) || canonical(verified) !== canonical(candidate.session) ||
           candidate.tokenExpiresAt !== verified.expiresAt || Date.parse(nextRoute.expiresAt) <= Date.now())
-        throw new ConvoHopProblem("SESSION_REFRESH_REJECTED", proof.requestId, "unknown", 409,
+        throw new RelayProblem("SESSION_REFRESH_REJECTED", proof.requestId, "unknown", 409,
           "Replacement must preserve the original session, advance its live revision and expiry, and match authority metadata");
       this.#token = candidate.sessionToken; authentication.credential = candidate.sessionToken;
       this.#session = verified; replacement = verified; this.#route = nextRoute;
@@ -252,7 +252,7 @@ export class ConvoHopClient {
       this.http.servingEpoch = nextRoute.servingEpoch;
       authentication.blocked = false;
     } catch (error) {
-      failure = error instanceof ConvoHopProblem ? error : new ConvoHopProblem("SESSION_REFRESH_REJECTED", randomUUID(this.platform),
+      failure = error instanceof RelayProblem ? error : new RelayProblem("SESSION_REFRESH_REJECTED", randomUUID(this.platform),
         "unknown", 409, "Session replacement or application retirement could not be verified");
       await drain();
       authentication.blocked = true;
@@ -262,11 +262,11 @@ export class ConvoHopClient {
           if (canonical(old) !== canonical(binding)) throw new TypeError("Original session authority changed");
           authentication.blocked = false;
         } catch {
-          failure = new ConvoHopProblem("SESSION_REFRESH_UNVERIFIED", failure.requestId, "unknown", 0,
+          failure = new RelayProblem("SESSION_REFRESH_UNVERIFIED", failure.requestId, "unknown", 0,
             "Renewal and original session authority are unverified; HTTP and realtime remain refresh-blocked", { cause: failure });
         }
       } else {
-        failure = new ConvoHopProblem("SESSION_REFRESH_UNVERIFIED", failure.requestId, "unknown", 0,
+        failure = new RelayProblem("SESSION_REFRESH_UNVERIFIED", failure.requestId, "unknown", 0,
           "Authority observed a renewed original session; the old bearer cannot be restored", { cause: failure });
       }
     } finally {
@@ -417,7 +417,7 @@ export class ConvoHopClient {
   }
   #checkReplayAdmission(): void {
     if (this.#authentication.blocked || this.#quiescing)
-      throw new ConvoHopProblem("SESSION_REFRESH_REQUIRED", randomUUID(this.platform), "rejected", 409,
+      throw new RelayProblem("SESSION_REFRESH_REQUIRED", randomUUID(this.platform), "rejected", 409,
         "Session refresh holds replay admission; await verified refresh before opening or resynchronizing history");
   }
   async #openReplay(conversationId: string, apply: (events: ProtocolObject[]) => Promise<void>,
@@ -460,7 +460,7 @@ export class ConversationStream {
   #currentRoute: ProjectRoute;
   readonly #storageKey: string;
   #token: string;
-  constructor(readonly client: ConvoHopClient, readonly conversationId: string, readonly route: ProjectRoute, token: string,
+  constructor(readonly client: RelayClient, readonly conversationId: string, readonly route: ProjectRoute, token: string,
     readonly apply: (events: ProtocolObject[]) => Promise<void>, readonly onError: (error: Error) => void,
     readonly onClose?: () => void) {
     this.#token = token;
@@ -540,10 +540,10 @@ export class ConversationStream {
     this.#unsubscribe.push(listen(lifecycleOf(this.client.platform), state => { if (state === "active") this.#wakeReconnect?.(); }));
     await this.#loadCursor();
     await this.client.recoverPending(this.onError);
-    if (this.#paused) throw new ConvoHopProblem("SESSION_REFRESH_REQUIRED", randomUUID(this.client.platform), "rejected", 409,
+    if (this.#paused) throw new RelayProblem("SESSION_REFRESH_REQUIRED", randomUUID(this.client.platform), "rejected", 409,
       "Replay startup was paused by session refresh; open it after verified refresh");
     const more = await this.#reconcileRound();
-    if (this.#paused) throw new ConvoHopProblem("SESSION_REFRESH_REQUIRED", randomUUID(this.client.platform), "rejected", 409,
+    if (this.#paused) throw new RelayProblem("SESSION_REFRESH_REQUIRED", randomUUID(this.client.platform), "rejected", 409,
       "Replay startup was paused by session refresh; open it after verified refresh");
     this.#proceed(more);
   }
@@ -563,7 +563,7 @@ export class ConversationStream {
       if (this.#closed || this.#paused || this.#socket !== ws) return;
       try {
         const text = parseString(event.data);
-        if (text.length > 65536) throw new ConvoHopProblem("ADMISSION_LIMIT", subscriptionId, "rejected", 503, "Subscription frame exceeds its budget");
+        if (text.length > 65536) throw new RelayProblem("ADMISSION_LIMIT", subscriptionId, "rejected", 503, "Subscription frame exceeds its budget");
         const frame = parseObject(JSON.parse(text));
         if (frame.type === "connection_ack") {
           this.#reconnectAttempts = 0;
@@ -582,12 +582,12 @@ export class ConversationStream {
           if (Array.isArray(payload.errors) && payload.errors.length) {
             const problem = parseObject(payload.errors[0]), extensions = parseObject(problem.extensions);
             const retryAfter = retryDelay(extensions.retryAfter);
-            throw new ConvoHopProblem(parseString(extensions.code), parseId(extensions.requestId), parseString(extensions.outcome),
+            throw new RelayProblem(parseString(extensions.code), parseId(extensions.requestId), parseString(extensions.outcome),
               Number(extensions.status), parseString(problem.message), retryAfter === undefined ? undefined : { retryAfter });
           }
           this.#page(parseObject(payload.data).conversationEvents);
         } else if (frame.type === "complete") {
-          throw new ConvoHopProblem("AUTHORITY_UNAVAILABLE", subscriptionId, "unknown", 503, "Resume the subscription from its applied cursor");
+          throw new RelayProblem("AUTHORITY_UNAVAILABLE", subscriptionId, "unknown", 503, "Resume the subscription from its applied cursor");
         }
       } catch (error) { this.#fail(error); }
     };
@@ -605,7 +605,7 @@ export class ConversationStream {
     };
   }
   #page(value: unknown): void {
-    if (this.#pendingPages >= 4) throw new ConvoHopProblem("ADMISSION_LIMIT", randomUUID(this.client.platform), "unknown", 503, "Application must resume from its applied cursor");
+    if (this.#pendingPages >= 4) throw new RelayProblem("ADMISSION_LIMIT", randomUUID(this.client.platform), "unknown", 503, "Application must resume from its applied cursor");
     const page = eventPage(value, this.#currentRoute.incarnation, this.conversationId);
     if (page.refreshRequired) throw new Error("Explicit authorized history resynchronization required");
     const generation = this.#queueGeneration;
@@ -668,7 +668,7 @@ export class ConversationStream {
       return;
     }
     // Network, timeout, rate-limit and server failures reconnect; WRONG_REGION does too, since reconnecting routes again.
-    if (error instanceof ConvoHopProblem && reconnectAction(error) !== "stop") {
+    if (error instanceof RelayProblem && reconnectAction(error) !== "stop") {
       const socket = this.#socket; this.#socket = undefined;
       socket?.close(4000, "Retrying authoritative connection");
       this.onError(error); this.#retry(error.retryAfter); return;
@@ -679,7 +679,7 @@ export class ConversationStream {
   // One bounded round of at most ten pages; resolves true only when the current replay has more work.
   #reconcileRound(): Promise<boolean> {
     if (this.#closed) return Promise.resolve(false);
-    if (this.#paused) return Promise.reject(new ConvoHopProblem("SESSION_REFRESH_REQUIRED", randomUUID(this.client.platform), "rejected", 409,
+    if (this.#paused) return Promise.reject(new RelayProblem("SESSION_REFRESH_REQUIRED", randomUUID(this.client.platform), "rejected", 409,
       "Realtime application work is paused until session authority is verified"));
     const generation = this.#queueGeneration;
     // Rounds coalesce only within one stream generation; earlier queued or superseded work settles first.

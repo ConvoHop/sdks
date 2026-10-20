@@ -1,8 +1,8 @@
-# `convohop.types`
+# `instantrelay.types`
 
-Generated request and response models of the ConvoHop GraphQL API, as frozen dataclasses.
+Generated request and response models of the Relay GraphQL API, as frozen dataclasses.
 
-**Layer:** Server. **Runtime:** Python 3.11 or later. **Source:** `python/src/convohop`.
+**Layer:** Server. **Runtime:** Python 3.11 or later. **Source:** `python/src/instantrelay`.
 
 ## Classes
 

@@ -10,23 +10,23 @@
   "snippetRoots": ["examples/src/main"],
   "packages": [
     {
-      "name": "com.convohop:convohop-android",
+      "name": "dev.instantrelay:relay-android",
       "slug": "android",
       "layer": "client",
       "summary": "The SDK an Android app depends on: SQLite and SharedPreferences storage, network monitoring, LiveKit calls and message text for notifications. It brings in the other two packages.",
       "runtime": "Android 7.0 (API 24) or later. Apps compile against API 36. Tested with Kotlin 2.2.21.",
-      "source": "android/convohop"
+      "source": "android/relay"
     },
     {
-      "name": "com.convohop:convohop-android-core",
+      "name": "dev.instantrelay:relay-android-core",
       "slug": "android-core",
       "layer": "client",
-      "summary": "The platform-free client that `convohop-android` brings in: sessions and their renewal, conversations, the store, the offline outbox, timelines, recovery, live sessions and the generated protocol types.",
-      "runtime": "Android 7.0 (API 24) or later, through `convohop-android`. It isn't a supported entry point on its own.",
+      "summary": "The platform-free client that `relay-android` brings in: sessions and their renewal, conversations, the store, the offline outbox, timelines, recovery, live sessions and the generated protocol types.",
+      "runtime": "Android 7.0 (API 24) or later, through `relay-android`. It isn't a supported entry point on its own.",
       "source": "android/core"
     },
     {
-      "name": "com.convohop:convohop-android-push",
+      "name": "dev.instantrelay:relay-android-push",
       "slug": "android-push",
       "layer": "client",
       "summary": "FCM registration, notifications and Telecom incoming calls, with no networking, LiveKit or coroutines, so a React Native or Flutter wrapper can ship it alone.",

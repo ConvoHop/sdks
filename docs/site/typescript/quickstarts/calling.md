@@ -1,6 +1,6 @@
 # TypeScript calling quickstart
 
-Add voice and video calls to a conversation with `@convohop/client`: start a call and ring other members, join the current call, and leave or end it.
+Add voice and video calls to a conversation with `@instantrelay/client`: start a call and ring other members, join the current call, and leave or end it.
 
 ## Before you start
 
@@ -10,12 +10,12 @@ Calls need a browser with WebRTC, and a client connected with the user's session
 
 ```ts snippet=docs/languages/typescript/examples/src/calling.ts#start-call
 import type {
-  ConvoHopClient,
+  RelayClient,
   LiveParticipationHandle,
   LiveSessionHandle,
   MediaConnection,
   RemoteMedia,
-} from "@convohop/client";
+} from "@instantrelay/client";
 
 // Your call screen.
 export interface CallView {
@@ -33,7 +33,7 @@ export interface Call {
 }
 
 // Starts a video call in a conversation and joins it.
-export async function startCall(client: ConvoHopClient, conversationId: string, view: CallView): Promise<Call> {
+export async function startCall(client: RelayClient, conversationId: string, view: CallView): Promise<Call> {
   const start = await client.conversation(conversationId).live.startVideo(); // startVoice() for audio only.
   const session = await start.ready(); // The call can be joined. Nothing is captured yet.
   return joinCall(session, view);
@@ -53,7 +53,7 @@ Ringing gives each principal you ring a `notification.call` webhook event, which
 
 ```ts snippet=docs/languages/typescript/examples/src/calling.ts#join-call
 // Any member can join the conversation's current call. A ring isn't required.
-export async function answerCall(client: ConvoHopClient, conversationId: string, view: CallView): Promise<Call | null> {
+export async function answerCall(client: RelayClient, conversationId: string, view: CallView): Promise<Call | null> {
   const session = await client.conversation(conversationId).live.current();
   return session ? joinCall(session, view) : null;
 }
@@ -110,17 +110,17 @@ Leaving ends this device's participation, and the call goes on for everyone else
 
 ## Calls in React
 
-With `@convohop/react`, inside the provider that the [client quickstart](client.md#use-react) sets up:
+With `@instantrelay/react`, inside the provider that the [client quickstart](client.md#use-react) sets up:
 
 ```tsx snippet=docs/languages/typescript/examples/src/react.tsx#call
 import { useCallback } from "react";
-import type { LiveParticipationHandle, LiveSessionHandle } from "@convohop/client";
-import { useConvoHopClient, useLiveSession, useMediaConnection } from "@convohop/react";
+import type { LiveParticipationHandle, LiveSessionHandle } from "@instantrelay/client";
+import { useRelayClient, useLiveSession, useMediaConnection } from "@instantrelay/react";
 
 // Starts, joins and leaves a conversation's call. Mount it beside the conversation's Thread: useLiveSession reloads
 // on the call events that useConversation receives.
 export function CallPanel({ conversationId }: { conversationId: string }) {
-  const client = useConvoHopClient();
+  const client = useRelayClient();
   const live = useLiveSession(conversationId);
   const media = useMediaConnection();
   const [participation, setParticipation] = useState<LiveParticipationHandle>();
@@ -226,4 +226,4 @@ The SDK gets a single-use token for this device's participation, then calls your
 
 - [Push notifications quickstart](push.md): ring members whose app isn't open.
 - [`LiveParticipationHandle` reference](../reference/client.md#liveparticipationhandle-class): join, connect, leave and end.
-- [`@convohop/react` reference](../reference/react.md): `useLiveSession` and `useMediaConnection`.
+- [`@instantrelay/react` reference](../reference/react.md): `useLiveSession` and `useMediaConnection`.

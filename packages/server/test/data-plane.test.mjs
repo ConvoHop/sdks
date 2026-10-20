@@ -1,7 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
-import { ScopeRequiredProblem, ConvoHopProblem, ProjectServerClient, operationCatalog } from "@convohop/server";
+import { ScopeRequiredProblem, RelayProblem, ProjectServerClient, operationCatalog } from "@instantrelay/server";
 import { full, reply } from "../../../test/graphql-fixtures.mjs";
 
 const schema = name => JSON.parse(readFileSync(new URL(`../../../schema/${name}`, import.meta.url), "utf8"));
@@ -137,7 +137,7 @@ test("every annotated backend-key operation has a typed Server SDK method, or a 
   for (const [key, call, input] of calls) {
     const before = requests.length, scope = backendKeyScopes.get(key)[0]?.[0];
     await assert.rejects(call(server), error => {
-      assert.ok(error instanceof ConvoHopProblem, key);
+      assert.ok(error instanceof RelayProblem, key);
       assert.equal(error.requestId, requests.at(-1).requestId, key);
       assert.equal(error.message.includes(backendKey), false, key);
       if (scope === undefined) {
@@ -282,14 +282,14 @@ test("ending a live session completes only with an enforced media cutoff", async
     failure: { code: "LIVE_SESSION_CLOSED", message: "The live session already ended" } })]);
   await assert.rejects((await failed.server.liveSession(liveSessionId).end({ expectedGeneration: "1",
     expectedRevision: "6" }, { requestId })).completed(), error => {
-    assert.ok(error instanceof ConvoHopProblem);
+    assert.ok(error instanceof RelayProblem);
     assert.deepEqual([error.code, error.requestId, error.outcome, error.status], ["LIVE_SESSION_CLOSED", requestId, "accepted", 409]);
     return true;
   });
 
   const pending = liveServer([liveOperation("RUNNING"), liveOperation("RUNNING")]);
   await assert.rejects(pending.server.liveOperation(operationId).completed({ timeoutMs: 1 }),
-    { name: "ConvoHopProblem", code: "RESOLUTION_REQUIRED", outcome: "accepted" });
+    { name: "RelayProblem", code: "RESOLUTION_REQUIRED", outcome: "accepted" });
   await assert.rejects(pending.server.liveOperation(operationId).completed({ timeoutMs: 0 }), RangeError);
 
   const moved = liveServer([liveOperation("RUNNING"), liveOperation("RUNNING", { liveSessionId: crypto.randomUUID() })]);

@@ -13,7 +13,7 @@
     <application>
         <!-- Used only on Android 8 and later; earlier versions ring with the notification alone. -->
         <service
-            android:name=".ConvoHopConnectionService"
+            android:name=".RelayConnectionService"
             android:exported="true"
             android:permission="android.permission.BIND_TELECOM_CONNECTION_SERVICE"
             tools:targetApi="26">
@@ -23,11 +23,11 @@
         </service>
 
         <receiver
-            android:name=".ConvoHopCallActionReceiver"
+            android:name=".RelayCallActionReceiver"
             android:exported="false" />
 
         <activity
-            android:name=".ConvoHopAnswerActivity"
+            android:name=".RelayAnswerActivity"
             android:excludeFromRecents="true"
             android:exported="false"
             android:noHistory="true"

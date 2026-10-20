@@ -11,12 +11,12 @@ plugins {
     `maven-publish`
 }
 
-group = "com.convohop"
-version = providers.gradleProperty("convohopVersion").get()
-description = "Push notifications and incoming-call handling for the ConvoHop Android SDK."
+group = "dev.instantrelay"
+version = providers.gradleProperty("relayVersion").get()
+description = "Push notifications and incoming-call handling for the Relay Android SDK."
 
 android {
-    namespace = "com.convohop.android.push"
+    namespace = "dev.instantrelay.android.push"
     compileSdk = 35
 
     defaultConfig {
@@ -82,7 +82,7 @@ dependencies {
 publishing {
     publications {
         create<MavenPublication>("release") {
-            artifactId = "convohop-android-push"
+            artifactId = "relay-android-push"
             afterEvaluate { from(components["release"]) }
         }
     }

@@ -12,9 +12,9 @@ from typing import Any
 import httpx
 import pytest
 
-from convohop import ConvoHopManagement, ConvoHopProblem, MemoryStorage
-from convohop import _engine as engine
-from convohop._generated.operations import OPERATIONS
+from instantrelay import RelayManagement, RelayProblem, MemoryStorage
+from instantrelay import _engine as engine
+from instantrelay._generated.operations import OPERATIONS
 
 from .graphql import (
     BACKEND_KEY,
@@ -89,11 +89,11 @@ def ack(conversation_id: str = CONVERSATION) -> dict[str, Any]:
     return full("MessageAck", values | {"cursor": cursor})
 
 
-def create_organization(client: ConvoHopManagement, request_id: str) -> object:
+def create_organization(client: RelayManagement, request_id: str) -> object:
     return client.create_organization(name="Original", terms_ref="fixture", request_id=request_id)
 
 
-def create_deployment(client: ConvoHopManagement, request_id: str) -> object:
+def create_deployment(client: RelayManagement, request_id: str) -> object:
     return client.create_deployment(
         org_id=ORG,
         offering="managedShared",
@@ -104,7 +104,7 @@ def create_deployment(client: ConvoHopManagement, request_id: str) -> object:
     )
 
 
-MUTATIONS: dict[str, tuple[str, Callable[[ConvoHopManagement, str], object]]] = {
+MUTATIONS: dict[str, tuple[str, Callable[[RelayManagement, str], object]]] = {
     "committed": ("management.createOrganization", create_organization),
     "accepted": ("management.createDeployment", create_deployment),
 }
@@ -436,7 +436,7 @@ def test_an_unknown_replay_only_request_is_never_looked_up_and_settles_only_by_a
 
 def test_a_different_payload_for_an_in_flight_request_is_a_conflict() -> None:
     request_id, sent = uid(), ack()
-    inner: list[ConvoHopProblem] = []
+    inner: list[RelayProblem] = []
 
     def respond(request: Received) -> httpx.Response:
         if not inner:

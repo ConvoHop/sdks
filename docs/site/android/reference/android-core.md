@@ -1,8 +1,8 @@
-# `com.convohop:convohop-android-core`
+# `dev.instantrelay:relay-android-core`
 
-The platform-free client that `convohop-android` brings in: sessions and their renewal, conversations, the store, the offline outbox, timelines, recovery, live sessions and the generated protocol types.
+The platform-free client that `relay-android` brings in: sessions and their renewal, conversations, the store, the offline outbox, timelines, recovery, live sessions and the generated protocol types.
 
-**Layer:** Client. **Runtime:** Android 7.0 (API 24) or later, through `convohop-android`. It isn't a supported entry point on its own. **Source:** `android/core`.
+**Layer:** Client. **Runtime:** Android 7.0 (API 24) or later, through `relay-android`. It isn't a supported entry point on its own. **Source:** `android/core`.
 
 ## Classes
 
@@ -14,7 +14,7 @@ public object CanonicalJson
 
 Canonical JSON: sorted keys, no whitespace, bounded numbers. Request bodies and fingerprints use it.
 
-Package: `com.convohop.android.core`.
+Package: `dev.instantrelay.android.core`.
 
 #### `CanonicalJson.encode` static method
 
@@ -38,7 +38,7 @@ public fun fingerprint(value: JsonElement): String
 public fun parse(text: String): JsonElement
 ```
 
-Parses strict JSON text; anything else is a `ConvoHopProtocolException`.
+Parses strict JSON text; anything else is a `RelayProtocolException`.
 
 ### `ConversationHandle` class
 
@@ -48,12 +48,12 @@ public class ConversationHandle
 
 One conversation: its messages, this user's mute setting and its calls.
 
-Package: `com.convohop.android.core`.
+Package: `dev.instantrelay.android.core`.
 
 #### `ConversationHandle.client` property
 
 ```kotlin
-public val client: ConvoHopClient
+public val client: RelayClient
 ```
 
 #### `ConversationHandle.conversationId` property
@@ -158,7 +158,7 @@ public class ConversationLive
 
 Calls and broadcasts in one conversation.
 
-Package: `com.convohop.android.core`.
+Package: `dev.instantrelay.android.core`.
 
 #### `ConversationLive.current` method
 
@@ -227,7 +227,7 @@ problem closes the replay and goes to the error callback: a close that names
 authorization failures and protocol violations. Open a new replay once the
 cause is resolved, such as after obtaining a current session.
 
-Package: `com.convohop.android.core`.
+Package: `dev.instantrelay.android.core`.
 
 #### `ConversationStream.conversationId` property
 
@@ -291,722 +291,6 @@ work remains; call it again to continue.
 
 Sends [`communication.events`](../../operations/communication/events.md).
 
-### `ConvoHopAggregateException` class
-
-```kotlin
-public class ConvoHopAggregateException : RuntimeException
-```
-
-Several independent failures, such as a failed renewal and a replay that could not resume.
-
-Package: `com.convohop.android.core`.
-
-#### `ConvoHopAggregateException` constructor
-
-```kotlin
-public constructor(message: String, errors: List<Throwable>)
-```
-
-#### `ConvoHopAggregateException.errors` property
-
-```kotlin
-public val errors: List<Throwable>
-```
-
-### `ConvoHopClient` class
-
-```kotlin
-public class ConvoHopClient : AutoCloseable
-```
-
-The user-session client: conversations, messages, receipts, replay and
-calls for one principal in one project incarnation.
-
-Every operation runs on a private serial dispatcher, so the client is safe
-to call from any thread. Mutations keep their request ID, payload,
-incarnation and retry budget across retries; an unknown outcome is
-reported as unknown, never as rejection or commit. `close` cancels
-in-flight work; recovery records in storage survive it.
-
-Package: `com.convohop.android.core`.
-
-#### `ConvoHopClient` constructor
-
-```kotlin
-public constructor(options: ConvoHopClientOptions)
-```
-
-#### `ConvoHopClient.projectId` property
-
-```kotlin
-public val projectId: String
-```
-
-#### `ConvoHopClient.principalId` property
-
-```kotlin
-public val principalId: String
-```
-
-#### `ConvoHopClient.incarnation` property
-
-```kotlin
-public val incarnation: String
-```
-
-The incarnation this client is bound to.
-
-#### `ConvoHopClient.sessionBinding` property
-
-```kotlin
-public val sessionBinding: Session?
-```
-
-The verified session binding, once `initialize` ran with a `SessionRefresh` hook.
-
-#### `ConvoHopClient.sessionRefreshState` property
-
-```kotlin
-public val sessionRefreshState: SessionRefreshState
-```
-
-#### `ConvoHopClient.requests` property
-
-```kotlin
-public val requests: Requests
-```
-
-Mutation recovery and request resolution.
-
-##### `ConvoHopClient.requests.resolve` method
-
-```kotlin
-public suspend fun resolve(requestId: String): RequestResolution
-```
-
-Reads what the authority knows about `requestId` without resending it.
-
-Sends [`communication.resolveRequest`](../../operations/communication/resolveRequest.md).
-
-##### `ConvoHopClient.requests.retry` method
-
-```kotlin
-public suspend fun retry(requestId: String): RequestResolution
-```
-
-Resolves `requestId` and resends the original request only when the
-authority has not observed it and its retry budget remains.
-
-Sends [`communication.resolveRequest`](../../operations/communication/resolveRequest.md).
-
-##### `ConvoHopClient.requests.records` method
-
-```kotlin
-public suspend fun records(): List<RecoveryRecord>
-```
-
-Snapshots of the stored recovery records. They never contain credentials.
-
-#### `ConvoHopClient.liveAlerts` property
-
-```kotlin
-public val liveAlerts: LiveAlerts
-```
-
-Live-session alerts addressed to this principal.
-
-##### `ConvoHopClient.liveAlerts.list` method
-
-```kotlin
-public suspend fun list(cursor: String? = null, limit: Int? = null): LiveAlertPage
-```
-
-Sends [`communication.liveSessionAlerts`](../../operations/communication/liveSessionAlerts.md).
-
-#### `ConvoHopClient.initialize` method
-
-```kotlin
-public suspend fun initialize(): ProjectRoute
-```
-
-Loads the signed project route and, with a `SessionRefresh` hook, binds
-the original session. Call it before `refreshSession`.
-
-Sends [`communication.route`](../../operations/communication/route.md) and [`communication.currentSession`](../../operations/communication/currentSession.md).
-
-#### `ConvoHopClient.refreshSession` method
-
-```kotlin
-public suspend fun refreshSession(): Session
-```
-
-Renews the session through the `SessionRefresh` hook. Concurrent calls
-share one renewal. New requests wait while in-flight ones drain; replays
-pause and resume on the verified route. When neither the replacement nor
-the original bearer can be verified, the client stays `SessionRefreshState.BLOCKED`.
-
-Sends [`communication.route`](../../operations/communication/route.md) and [`communication.currentSession`](../../operations/communication/currentSession.md).
-
-#### `ConvoHopClient.refreshAutomatically` method
-
-```kotlin
-public fun refreshAutomatically(onError: (Throwable) -> Unit): AutoCloseable
-```
-
-Renews the session through the `SessionRefresh` hook before it expires,
-at least 30 seconds and at most 5 minutes ahead. A failed renewal goes to
-`onError` and is retried with backoff until the session expires; the
-schedule stops when renewal is `SessionRefreshState.BLOCKED`, the session
-has expired, the returned handle is closed or the client is closed.
-Initializes the client first if needed. A failed initialization goes to
-`onError` too; one with a retryable code and a status of 0, 408, 429 or
-5xx, or `WRONG_REGION`, is tried again with backoff, never sooner than its
-`retryAfter`, and any other stops the schedule.
-
-Sends [`communication.route`](../../operations/communication/route.md) and [`communication.currentSession`](../../operations/communication/currentSession.md).
-
-#### `ConvoHopClient.reconnectNow` method
-
-```kotlin
-public fun reconnectNow()
-```
-
-Skips the reconnect backoff of every replay that is waiting to
-reconnect, for example when the device is back online, though never the
-wait that the authority's `retryAfter` asked for.
-
-#### `ConvoHopClient.conversation` method
-
-```kotlin
-public fun conversation(conversationId: String): ConversationHandle
-```
-
-A handle for one conversation's messages, mute setting and calls.
-
-#### `ConvoHopClient.liveSession` method
-
-```kotlin
-public suspend fun liveSession(liveSessionId: String): LiveSessionHandle
-```
-
-Loads one live session (call or broadcast) by ID.
-
-Sends [`communication.liveSession`](../../operations/communication/liveSession.md).
-
-#### `ConvoHopClient.getConversation` method
-
-```kotlin
-public suspend fun getConversation(
-    conversationId: String,
-): com.convohop.android.generated.Conversation
-```
-
-Sends [`communication.getConversation`](../../operations/communication/getConversation.md).
-
-#### `ConvoHopClient.getMessage` method
-
-```kotlin
-public suspend fun getMessage(conversationId: String, messageId: String): Message
-```
-
-One message by ID, as this principal is currently allowed to see it.
-
-Sends [`communication.getMessage`](../../operations/communication/getMessage.md).
-
-#### `ConvoHopClient.messages` method
-
-```kotlin
-public suspend fun messages(conversationId: String, beforeSequence: String? = null): MessagePage
-```
-
-The newest 100 messages, or the 100 before `beforeSequence`.
-
-Sends [`communication.messages`](../../operations/communication/messages.md).
-
-#### `ConvoHopClient.send` method
-
-```kotlin
-public suspend fun send(
-    conversationId: String,
-    text: String,
-    requestId: String? = null,
-    props: JsonObject = EMPTY_INPUT,
-): SendReceipt
-```
-
-Sends a text message with optional application `props`. Pass the same
-`requestId` to resend after an unknown outcome; a new ID is a new message.
-
-Sends [`communication.sendMessage`](../../operations/communication/sendMessage.md).
-
-#### `ConvoHopClient.edit` method
-
-```kotlin
-public suspend fun edit(message: Message, text: String, requestId: String? = null): Message
-```
-
-Replaces the text of `message` if it is still at its revision.
-
-Sends [`communication.editMessage`](../../operations/communication/editMessage.md).
-
-#### `ConvoHopClient.delete` method
-
-```kotlin
-public suspend fun delete(message: Message, requestId: String? = null): Message
-```
-
-Deletes `message` if it is still at its revision.
-
-Sends [`communication.deleteMessage`](../../operations/communication/deleteMessage.md).
-
-#### `ConvoHopClient.events` method
-
-```kotlin
-public suspend fun events(conversationId: String, after: Cursor? = null): EventPage
-```
-
-Up to 100 authorized events after `after`, checked for order and scope.
-
-Sends [`communication.events`](../../operations/communication/events.md).
-
-#### `ConvoHopClient.reportRead` method
-
-```kotlin
-public suspend fun reportRead(
-    conversationId: String,
-    membership: Member,
-    throughSequence: String,
-): ReadReceipt
-```
-
-Reports that this principal read `conversationId` through `throughSequence`
-under `membership`, which also covers delivery. Returns its current receipt.
-
-Sends [`communication.reportReceipt`](../../operations/communication/reportReceipt.md).
-
-#### `ConvoHopClient.reportDelivered` method
-
-```kotlin
-public suspend fun reportDelivered(
-    conversationId: String,
-    membership: Member,
-    throughSequence: String,
-): ReadReceipt
-```
-
-Reports that this principal received `conversationId` through
-`throughSequence` under `membership`, for example when a push arrives.
-Returns its current receipt.
-
-Sends [`communication.reportReceipt`](../../operations/communication/reportReceipt.md).
-
-#### `ConvoHopClient.receipts` method
-
-```kotlin
-public suspend fun receipts(conversationId: String): ReceiptPage
-```
-
-The members' current read receipts.
-
-Sends [`communication.receipts`](../../operations/communication/receipts.md).
-
-#### `ConvoHopClient.members` method
-
-```kotlin
-public suspend fun members(
-    conversationId: String,
-    cursor: String? = null,
-    limit: Int = 100,
-): MemberPage
-```
-
-One page of `conversationId`'s members: up to `limit` (1 to 100), after `cursor` from the previous page.
-
-Sends [`communication.members`](../../operations/communication/members.md).
-
-#### `ConvoHopClient.inbox` method
-
-```kotlin
-public suspend fun inbox(cursor: String? = null, limit: Int = 100): InboxPage
-```
-
-One page of the conversations this principal can see: up to `limit`
-(1 to 100), after `cursor` from the previous page. A page with a
-`partialReason` is incomplete for that reason.
-
-Sends [`communication.inbox`](../../operations/communication/inbox.md).
-
-#### `ConvoHopClient.capabilities` method
-
-```kotlin
-public suspend fun capabilities(): Capabilities
-```
-
-The project's features, limits and media policy. Check `features?.typing`
-before sending typing signals and `features?.inbox` before listing the inbox.
-
-Sends [`communication.capabilities`](../../operations/communication/capabilities.md).
-
-#### `ConvoHopClient.search` method
-
-```kotlin
-public suspend fun search(query: String, conversationIds: List<String>? = null): SearchPage
-```
-
-Lexical search across readable conversations, optionally limited to `conversationIds`.
-
-Sends [`communication.search`](../../operations/communication/search.md).
-
-#### `ConvoHopClient.typing` method
-
-```kotlin
-public suspend fun typing(conversationId: String, isTyping: Boolean): Boolean
-```
-
-Sends an ephemeral typing signal. It is not recorded for recovery and is
-never retried; returns whether the authority accepted it. Check
-`features?.typing` in `capabilities` first.
-
-Sends [`communication.typing`](../../operations/communication/typing.md).
-
-#### `ConvoHopClient.recoverPending` method
-
-```kotlin
-public suspend fun recoverPending(onError: (Throwable) -> Unit): Unit
-```
-
-Settles up to 16 stored mutations that may still come to something: those
-whose outcome is pending or unknown, and those rejected with a retryable
-code. Resends the original when its last attempt failed transiently and
-budget remains, otherwise resolves it read-only. Failures go to `onError`.
-
-Sends [`communication.resolveRequest`](../../operations/communication/resolveRequest.md).
-
-#### `ConvoHopClient.watch` method
-
-```kotlin
-public suspend fun watch(
-    conversationId: String,
-    apply: suspend (List<Event>) -> Unit,
-    onError: (Throwable) -> Unit,
-): ConversationStream
-```
-
-Replays `conversationId` from its stored cursor, then follows it live.
-`apply` receives each authorized batch in order on the client's serial
-dispatcher; the cursor advances only after it returns. Do not await
-`refreshSession` inside `apply`.
-
-Sends [`communication.events`](../../operations/communication/events.md) and [`communication.conversationEvents`](../../operations/communication/conversationEvents.md).
-
-#### `ConvoHopClient.resyncAuthorizedHistory` method
-
-```kotlin
-public suspend fun resyncAuthorizedHistory(
-    conversationId: String,
-    apply: suspend (List<Event>) -> Unit,
-    onError: (Throwable) -> Unit,
-): ConversationStream
-```
-
-Closes every replay of `conversationId` and replays authorized history
-from the start, ignoring the stored cursor until the first batch
-replaces it. Use it when the authority requires resynchronization.
-
-Sends [`communication.getConversation`](../../operations/communication/getConversation.md), [`communication.events`](../../operations/communication/events.md) and [`communication.conversationEvents`](../../operations/communication/conversationEvents.md).
-
-#### `ConvoHopClient.close` method
-
-```kotlin
-public override fun close()
-```
-
-Closes every replay and cancels in-flight work. Later calls fail.
-
-### `ConvoHopClientOptions` class
-
-```kotlin
-public class ConvoHopClientOptions
-```
-
-Options for `ConvoHopClient`. The session token stays in memory; it is
-never written to `recoveryStorage`, logs or errors.
-
-Package: `com.convohop.android.core`.
-
-#### `ConvoHopClientOptions` constructor
-
-```kotlin
-public constructor(
-    baseUrl: String,
-    projectId: String,
-    sessionToken: String,
-    incarnation: String,
-    principalId: String,
-    recoveryStorage: RecoveryStorage? = null,
-    sessionRefresh: SessionRefresh? = null,
-    http: HttpEngine = OkHttpEngine(),
-    realtime: RealtimeConnector = OkHttpRealtimeConnector(),
-    environment: ConvoHopEnvironment = ConvoHopEnvironment.System,
-    dispatcher: CoroutineDispatcher = Dispatchers.IO,
-)
-```
-
-#### `ConvoHopClientOptions.baseUrl` property
-
-```kotlin
-public val baseUrl: String
-```
-
-The authority's HTTPS origin, or explicit loopback HTTP for local development.
-
-#### `ConvoHopClientOptions.projectId` property
-
-```kotlin
-public val projectId: String
-```
-
-#### `ConvoHopClientOptions.sessionToken` property
-
-```kotlin
-public val sessionToken: String
-```
-
-The short-lived user session bearer your backend issued. Never ship a backend key in an app.
-
-#### `ConvoHopClientOptions.incarnation` property
-
-```kotlin
-public val incarnation: String
-```
-
-#### `ConvoHopClientOptions.principalId` property
-
-```kotlin
-public val principalId: String
-```
-
-#### `ConvoHopClientOptions.recoveryStorage` property
-
-```kotlin
-public val recoveryStorage: RecoveryStorage?
-```
-
-Durable storage for mutation recovery records and replay cursors. It never receives credentials.
-
-#### `ConvoHopClientOptions.sessionRefresh` property
-
-```kotlin
-public val sessionRefresh: SessionRefresh?
-```
-
-Your backend's renewal hook. Without it `ConvoHopClient.refreshSession` is unavailable.
-
-#### `ConvoHopClientOptions.http` property
-
-```kotlin
-public val http: HttpEngine
-```
-
-#### `ConvoHopClientOptions.realtime` property
-
-```kotlin
-public val realtime: RealtimeConnector
-```
-
-#### `ConvoHopClientOptions.environment` property
-
-```kotlin
-public val environment: ConvoHopEnvironment
-```
-
-#### `ConvoHopClientOptions.dispatcher` property
-
-```kotlin
-public val dispatcher: CoroutineDispatcher
-```
-
-Runs the client's state machine. The client narrows it to one task at a time.
-
-### `ConvoHopProblem` class
-
-```kotlin
-public open class ConvoHopProblem : RuntimeException
-```
-
-An authority or SDK problem in the protocol's normalized form.
-
-`outcome` says what is known about the request: `rejected` (not applied),
-`committed` or `accepted` (applied), or `unknown` (resolve the original
-request before deciding). Transport uncertainty is never reported as
-rejection or commit. Messages never contain credentials.
-
-Package: `com.convohop.android.core`.
-
-#### `ConvoHopProblem` constructor
-
-```kotlin
-public constructor(
-    code: String,
-    requestId: String,
-    outcome: String,
-    status: Int,
-    message: String,
-    retryAfter: Long? = null,
-    cause: Throwable? = null,
-)
-```
-
-#### `ConvoHopProblem.code` property
-
-```kotlin
-public val code: String
-```
-
-#### `ConvoHopProblem.requestId` property
-
-```kotlin
-public val requestId: String
-```
-
-#### `ConvoHopProblem.outcome` property
-
-```kotlin
-public val outcome: String
-```
-
-#### `ConvoHopProblem.status` property
-
-```kotlin
-public val status: Int
-```
-
-The HTTP status, or 0 when no authority response was observed.
-
-#### `ConvoHopProblem.message` property
-
-```kotlin
-public override val message: String
-```
-
-#### `ConvoHopProblem.retryAfter` property
-
-```kotlin
-public val retryAfter: Long?
-```
-
-Whole seconds to wait before resending the same request, when the authority sent a delay (for example
-with `RATE_LIMITED`). The SDK never resends a call that the app made. When it reconnects a conversation's
-stream or resends a queued message on its own, it waits at least this long first.
-
-#### `ConvoHopProblem.toString` method
-
-```kotlin
-public override fun toString(): String
-```
-
-### `ConvoHopProtocolException` class
-
-```kotlin
-public class ConvoHopProtocolException : RuntimeException
-```
-
-A value that breaks the protocol: a malformed response, stored record or
-argument. Inside a request the SDK reports it as `INVALID_RESPONSE`.
-
-Package: `com.convohop.android.core`.
-
-#### `ConvoHopProtocolException` constructor
-
-```kotlin
-public constructor(message: String)
-```
-
-### `ConvoHopStore` class
-
-```kotlin
-public class ConvoHopStore : AutoCloseable
-```
-
-The offline-first layer over a `ConvoHopClient`: one `Outbox` for
-optimistic sends that survive restarts, and `Timeline`s that show stored
-messages at once and keep them current.
-
-`local` keeps messages and the outbox; it never holds credentials. Feed
-`online` from the platform's connectivity: going offline holds the outbox,
-and coming back drains it and skips reconnect backoff, though never the
-wait that the authority's `retryAfter` asked for. Errors that the store
-handles by retrying or by marking a message are still reported to
-`onError`, for logging.
-
-Package: `com.convohop.android.core`.
-
-#### `ConvoHopStore` constructor
-
-```kotlin
-public constructor(
-    client: ConvoHopClient,
-    local: LocalStore = MemoryLocalStore(),
-    online: StateFlow<Boolean> = MutableStateFlow(true),
-    onError: (Throwable) -> Unit = {},
-)
-```
-
-#### `ConvoHopStore.client` property
-
-```kotlin
-public val client: ConvoHopClient
-```
-
-#### `ConvoHopStore.local` property
-
-```kotlin
-public val local: LocalStore
-```
-
-#### `ConvoHopStore.online` property
-
-```kotlin
-public val online: StateFlow<Boolean>
-```
-
-#### `ConvoHopStore.outbox` property
-
-```kotlin
-public val outbox: Outbox
-```
-
-Messages sent through this store that the authority has not shown back yet.
-
-#### `ConvoHopStore.timeline` method
-
-```kotlin
-public fun timeline(conversationId: String): Timeline
-```
-
-Opens a timeline of `conversationId`. Each call opens its own; close
-it when the view goes away.
-
-Sends [`communication.getConversation`](../../operations/communication/getConversation.md), [`communication.messages`](../../operations/communication/messages.md), [`communication.getMessage`](../../operations/communication/getMessage.md), [`communication.events`](../../operations/communication/events.md), [`communication.receipts`](../../operations/communication/receipts.md) and [`communication.conversationEvents`](../../operations/communication/conversationEvents.md).
-
-#### `ConvoHopStore.close` method
-
-```kotlin
-public override fun close()
-```
-
-Closes every timeline and stops sending. The outbox stays in `local` for the next store.
-
-#### `ConvoHopStore.signOut` method
-
-```kotlin
-public suspend fun signOut()
-```
-
-Closes the store and deletes everything in `local`, including messages
-that were never sent. Call it when the user signs out, before closing
-the client.
-
 ### `ErrorCodeInfo` class
 
 ```kotlin
@@ -1015,7 +299,7 @@ public class ErrorCodeInfo
 
 What the schema says about one error code.
 
-Package: `com.convohop.android.generated`.
+Package: `dev.instantrelay.android.generated`.
 
 #### `ErrorCodeInfo.code` property
 
@@ -1061,7 +345,7 @@ public object ErrorCodes
 
 Stable error codes. The set is open: handle codes this SDK does not list.
 
-Package: `com.convohop.android.generated`.
+Package: `dev.instantrelay.android.generated`.
 
 #### `ErrorCodes.ADMISSION_LIMIT` static property
 
@@ -1887,7 +1171,7 @@ public class HttpRequest
 
 One authority POST. Implementations must not follow redirects or cache.
 
-Package: `com.convohop.android.core`.
+Package: `dev.instantrelay.android.core`.
 
 #### `HttpRequest` constructor
 
@@ -1943,7 +1227,7 @@ public object Idempotency
 
 Idempotency classes and their retry budgets.
 
-Package: `com.convohop.android.generated`.
+Package: `dev.instantrelay.android.generated`.
 
 #### `Idempotency.ephemeral` static property
 
@@ -2009,7 +1293,7 @@ public class IdempotencyClass
 
 Retry rules for one idempotency class.
 
-Package: `com.convohop.android.generated`.
+Package: `dev.instantrelay.android.generated`.
 
 #### `IdempotencyClass.name` property
 
@@ -2058,12 +1342,12 @@ public abstract class LiveAction
 An accepted start or end request. The authority completes it
 asynchronously; poll it with `get` or wait with `completed`.
 
-Package: `com.convohop.android.core`.
+Package: `dev.instantrelay.android.core`.
 
 #### `LiveAction.client` property
 
 ```kotlin
-public val client: ConvoHopClient
+public val client: RelayClient
 ```
 
 #### `LiveAction.operationId` property
@@ -2118,7 +1402,7 @@ Sends [`communication.liveSessionOperation`](../../operations/communication/live
 public class LiveEndOperation : LiveAction
 ```
 
-Package: `com.convohop.android.core`.
+Package: `dev.instantrelay.android.core`.
 
 #### `LiveEndOperation.receipt` property
 
@@ -2129,7 +1413,7 @@ public val receipt: EndLiveSessionPayload
 #### `LiveEndOperation.client` property
 
 ```kotlin
-public val client: ConvoHopClient
+public val client: RelayClient
 ```
 
 Inherited from `LiveAction`.
@@ -2198,7 +1482,7 @@ This user's participation in one live session: its native media connection
 and leave. While the app keeps a handle, the recovery journal keeps the
 records of the leave and credential requests it holds, even once final.
 
-Package: `com.convohop.android.core`.
+Package: `dev.instantrelay.android.core`.
 
 #### `LiveParticipationHandle.live` property
 
@@ -2262,12 +1546,12 @@ One occurrence (generation) of a call or broadcast. While the app keeps a
 handle, the recovery journal keeps the record of the end request it holds,
 even once final, so a repeated `end` reuses that request.
 
-Package: `com.convohop.android.core`.
+Package: `dev.instantrelay.android.core`.
 
 #### `LiveSessionHandle.client` property
 
 ```kotlin
-public val client: ConvoHopClient
+public val client: RelayClient
 ```
 
 #### `LiveSessionHandle.snapshot` property
@@ -2370,7 +1654,7 @@ Sends [`communication.liveSession`](../../operations/communication/liveSession.m
 public class LiveStartOperation : LiveAction
 ```
 
-Package: `com.convohop.android.core`.
+Package: `dev.instantrelay.android.core`.
 
 #### `LiveStartOperation.receipt` property
 
@@ -2391,7 +1675,7 @@ Sends [`communication.liveSession`](../../operations/communication/liveSession.m
 #### `LiveStartOperation.client` property
 
 ```kotlin
-public val client: ConvoHopClient
+public val client: RelayClient
 ```
 
 Inherited from `LiveAction`.
@@ -2459,7 +1743,7 @@ public class MediaConnection
 A native media connection for one participation, admitted with
 single-use credentials. Connecting never starts capture.
 
-Package: `com.convohop.android.core`.
+Package: `dev.instantrelay.android.core`.
 
 #### `MediaConnection.participation` property
 
@@ -2540,7 +1824,7 @@ public class MediaOptions
 
 How to connect native media.
 
-Package: `com.convohop.android.core`.
+Package: `dev.instantrelay.android.core`.
 
 #### `MediaOptions` constructor
 
@@ -2572,7 +1856,7 @@ public class MemoryLocalStore : LocalStore
 
 A `LocalStore` that lives as long as the process.
 
-Package: `com.convohop.android.core`.
+Package: `dev.instantrelay.android.core`.
 
 #### `MemoryLocalStore` constructor
 
@@ -2642,7 +1926,7 @@ public class MemoryRecoveryStorage : RecoveryStorage
 
 In-memory `RecoveryStorage` for tests and short-lived clients; nothing survives the process.
 
-Package: `com.convohop.android.core`.
+Package: `dev.instantrelay.android.core`.
 
 #### `MemoryRecoveryStorage` constructor
 
@@ -2684,7 +1968,7 @@ to send: not after a dropped response on a pooled connection, a 408 or a
 and its budget. A failed connect, before anything is sent, still falls back
 to the host's other addresses.
 
-Package: `com.convohop.android.core`.
+Package: `dev.instantrelay.android.core`.
 
 #### `OkHttpEngine` constructor
 
@@ -2706,7 +1990,7 @@ public class OkHttpRealtimeConnector : RealtimeConnector
 
 `RealtimeConnector` on OkHttp's WebSocket client, with redirects and cookies disabled.
 
-Package: `com.convohop.android.core`.
+Package: `dev.instantrelay.android.core`.
 
 #### `OkHttpRealtimeConnector` constructor
 
@@ -2732,7 +2016,7 @@ public class OperationDescriptor
 
 What the runtime needs to send one operation, as listed in schema/operations.json.
 
-Package: `com.convohop.android.generated`.
+Package: `dev.instantrelay.android.generated`.
 
 #### `OperationDescriptor.id` property
 
@@ -2852,7 +2136,7 @@ public class OperationSpec<I, R>
 
 A typed operation: its descriptor, input encoder and result decoder.
 
-Package: `com.convohop.android.generated`.
+Package: `dev.instantrelay.android.generated`.
 
 #### `OperationSpec.descriptor` property
 
@@ -2884,7 +2168,7 @@ public object Operations
 
 The client operations, grouped by plane.
 
-Package: `com.convohop.android.generated`.
+Package: `dev.instantrelay.android.generated`.
 
 #### `Operations.all` static property
 
@@ -2910,7 +2194,7 @@ public object Communication
 
 Client operations of the communication plane.
 
-Package: `com.convohop.android.generated`.
+Package: `dev.instantrelay.android.generated`.
 
 #### `Operations.Communication.capabilities` static property
 
@@ -3199,7 +2483,7 @@ public class Outbox
 ```
 
 Sends messages optimistically: `send` stores the message, shows it in
-`pending` at once and delivers it when `ConvoHopStore.online` allows,
+`pending` at once and delivers it when `RelayStore.online` allows,
 oldest first within each conversation.
 
 Every attempt for a message reuses its request ID, payload and the
@@ -3235,7 +2519,7 @@ recovery journal has room. After `WRONG_REGION` the client routes again
 first. The outbox keeps the recovery records of the messages it may still
 resend or resolve from being evicted.
 
-Package: `com.convohop.android.core`.
+Package: `dev.instantrelay.android.core`.
 
 #### `Outbox.pending` property
 
@@ -3291,7 +2575,7 @@ public fun drain()
 
 Retries now: delivers queued messages, skips pending backoff, lifts a
 session hold and checks unconfirmed messages again. A message still
-waits out the authority's `retryAfter`. `ConvoHopStore` calls it when
+waits out the authority's `retryAfter`. `RelayStore` calls it when
 the device comes online and after the client renews its session.
 
 Sends [`communication.resolveRequest`](../../operations/communication/resolveRequest.md) and [`communication.sendMessage`](../../operations/communication/sendMessage.md).
@@ -3304,7 +2588,7 @@ public data class PendingMessage
 
 A message the app sent that the authority has not confirmed into the timeline yet.
 
-Package: `com.convohop.android.core`.
+Package: `dev.instantrelay.android.core`.
 
 #### `PendingMessage` constructor
 
@@ -3385,7 +2669,7 @@ public data class ProjectRoute
 
 A signed project route: where one incarnation's communication requests and realtime socket go.
 
-Package: `com.convohop.android.core`.
+Package: `dev.instantrelay.android.core`.
 
 #### `ProjectRoute` constructor
 
@@ -3451,7 +2735,7 @@ public object ProtocolValues
 
 Checks for the protocol's scalar formats.
 
-Package: `com.convohop.android.core`.
+Package: `dev.instantrelay.android.core`.
 
 #### `ProtocolValues.isId` static method
 
@@ -3485,7 +2769,7 @@ public object Realtime
 
 The realtime envelope, channels and event catalog.
 
-Package: `com.convohop.android.generated`.
+Package: `dev.instantrelay.android.generated`.
 
 #### `Realtime.ENVELOPE_TYPE` static property
 
@@ -3556,7 +2840,7 @@ public class RealtimeChannel
 
 One realtime channel and its limits.
 
-Package: `com.convohop.android.generated`.
+Package: `dev.instantrelay.android.generated`.
 
 #### `RealtimeChannel.name` property
 
@@ -3666,7 +2950,7 @@ public class RealtimeEventType
 
 One event type of the realtime envelope.
 
-Package: `com.convohop.android.generated`.
+Package: `dev.instantrelay.android.generated`.
 
 #### `RealtimeEventType.type` property
 
@@ -3710,7 +2994,7 @@ response passes this to `RealtimeListener.onError`, so the stream classifies
 the response like any other HTTP response: it reconnects, no sooner than the
 response's delay, or stops and reports the problem.
 
-Package: `com.convohop.android.core`.
+Package: `dev.instantrelay.android.core`.
 
 #### `RealtimeUpgradeRefusedException` constructor
 
@@ -3750,7 +3034,7 @@ public data class RecoveryRecord
 
 A snapshot of one mutation's recovery record.
 
-Package: `com.convohop.android.core`.
+Package: `dev.instantrelay.android.core`.
 
 #### `RecoveryRecord` constructor
 
@@ -3854,6 +3138,722 @@ public val resolutionState: String
 public val mediaAdmissionAttempted: Boolean
 ```
 
+### `RelayAggregateException` class
+
+```kotlin
+public class RelayAggregateException : RuntimeException
+```
+
+Several independent failures, such as a failed renewal and a replay that could not resume.
+
+Package: `dev.instantrelay.android.core`.
+
+#### `RelayAggregateException` constructor
+
+```kotlin
+public constructor(message: String, errors: List<Throwable>)
+```
+
+#### `RelayAggregateException.errors` property
+
+```kotlin
+public val errors: List<Throwable>
+```
+
+### `RelayClient` class
+
+```kotlin
+public class RelayClient : AutoCloseable
+```
+
+The user-session client: conversations, messages, receipts, replay and
+calls for one principal in one project incarnation.
+
+Every operation runs on a private serial dispatcher, so the client is safe
+to call from any thread. Mutations keep their request ID, payload,
+incarnation and retry budget across retries; an unknown outcome is
+reported as unknown, never as rejection or commit. `close` cancels
+in-flight work; recovery records in storage survive it.
+
+Package: `dev.instantrelay.android.core`.
+
+#### `RelayClient` constructor
+
+```kotlin
+public constructor(options: RelayClientOptions)
+```
+
+#### `RelayClient.projectId` property
+
+```kotlin
+public val projectId: String
+```
+
+#### `RelayClient.principalId` property
+
+```kotlin
+public val principalId: String
+```
+
+#### `RelayClient.incarnation` property
+
+```kotlin
+public val incarnation: String
+```
+
+The incarnation this client is bound to.
+
+#### `RelayClient.sessionBinding` property
+
+```kotlin
+public val sessionBinding: Session?
+```
+
+The verified session binding, once `initialize` ran with a `SessionRefresh` hook.
+
+#### `RelayClient.sessionRefreshState` property
+
+```kotlin
+public val sessionRefreshState: SessionRefreshState
+```
+
+#### `RelayClient.requests` property
+
+```kotlin
+public val requests: Requests
+```
+
+Mutation recovery and request resolution.
+
+##### `RelayClient.requests.resolve` method
+
+```kotlin
+public suspend fun resolve(requestId: String): RequestResolution
+```
+
+Reads what the authority knows about `requestId` without resending it.
+
+Sends [`communication.resolveRequest`](../../operations/communication/resolveRequest.md).
+
+##### `RelayClient.requests.retry` method
+
+```kotlin
+public suspend fun retry(requestId: String): RequestResolution
+```
+
+Resolves `requestId` and resends the original request only when the
+authority has not observed it and its retry budget remains.
+
+Sends [`communication.resolveRequest`](../../operations/communication/resolveRequest.md).
+
+##### `RelayClient.requests.records` method
+
+```kotlin
+public suspend fun records(): List<RecoveryRecord>
+```
+
+Snapshots of the stored recovery records. They never contain credentials.
+
+#### `RelayClient.liveAlerts` property
+
+```kotlin
+public val liveAlerts: LiveAlerts
+```
+
+Live-session alerts addressed to this principal.
+
+##### `RelayClient.liveAlerts.list` method
+
+```kotlin
+public suspend fun list(cursor: String? = null, limit: Int? = null): LiveAlertPage
+```
+
+Sends [`communication.liveSessionAlerts`](../../operations/communication/liveSessionAlerts.md).
+
+#### `RelayClient.initialize` method
+
+```kotlin
+public suspend fun initialize(): ProjectRoute
+```
+
+Loads the signed project route and, with a `SessionRefresh` hook, binds
+the original session. Call it before `refreshSession`.
+
+Sends [`communication.route`](../../operations/communication/route.md) and [`communication.currentSession`](../../operations/communication/currentSession.md).
+
+#### `RelayClient.refreshSession` method
+
+```kotlin
+public suspend fun refreshSession(): Session
+```
+
+Renews the session through the `SessionRefresh` hook. Concurrent calls
+share one renewal. New requests wait while in-flight ones drain; replays
+pause and resume on the verified route. When neither the replacement nor
+the original bearer can be verified, the client stays `SessionRefreshState.BLOCKED`.
+
+Sends [`communication.route`](../../operations/communication/route.md) and [`communication.currentSession`](../../operations/communication/currentSession.md).
+
+#### `RelayClient.refreshAutomatically` method
+
+```kotlin
+public fun refreshAutomatically(onError: (Throwable) -> Unit): AutoCloseable
+```
+
+Renews the session through the `SessionRefresh` hook before it expires,
+at least 30 seconds and at most 5 minutes ahead. A failed renewal goes to
+`onError` and is retried with backoff until the session expires; the
+schedule stops when renewal is `SessionRefreshState.BLOCKED`, the session
+has expired, the returned handle is closed or the client is closed.
+Initializes the client first if needed. A failed initialization goes to
+`onError` too; one with a retryable code and a status of 0, 408, 429 or
+5xx, or `WRONG_REGION`, is tried again with backoff, never sooner than its
+`retryAfter`, and any other stops the schedule.
+
+Sends [`communication.route`](../../operations/communication/route.md) and [`communication.currentSession`](../../operations/communication/currentSession.md).
+
+#### `RelayClient.reconnectNow` method
+
+```kotlin
+public fun reconnectNow()
+```
+
+Skips the reconnect backoff of every replay that is waiting to
+reconnect, for example when the device is back online, though never the
+wait that the authority's `retryAfter` asked for.
+
+#### `RelayClient.conversation` method
+
+```kotlin
+public fun conversation(conversationId: String): ConversationHandle
+```
+
+A handle for one conversation's messages, mute setting and calls.
+
+#### `RelayClient.liveSession` method
+
+```kotlin
+public suspend fun liveSession(liveSessionId: String): LiveSessionHandle
+```
+
+Loads one live session (call or broadcast) by ID.
+
+Sends [`communication.liveSession`](../../operations/communication/liveSession.md).
+
+#### `RelayClient.getConversation` method
+
+```kotlin
+public suspend fun getConversation(
+    conversationId: String,
+): dev.instantrelay.android.generated.Conversation
+```
+
+Sends [`communication.getConversation`](../../operations/communication/getConversation.md).
+
+#### `RelayClient.getMessage` method
+
+```kotlin
+public suspend fun getMessage(conversationId: String, messageId: String): Message
+```
+
+One message by ID, as this principal is currently allowed to see it.
+
+Sends [`communication.getMessage`](../../operations/communication/getMessage.md).
+
+#### `RelayClient.messages` method
+
+```kotlin
+public suspend fun messages(conversationId: String, beforeSequence: String? = null): MessagePage
+```
+
+The newest 100 messages, or the 100 before `beforeSequence`.
+
+Sends [`communication.messages`](../../operations/communication/messages.md).
+
+#### `RelayClient.send` method
+
+```kotlin
+public suspend fun send(
+    conversationId: String,
+    text: String,
+    requestId: String? = null,
+    props: JsonObject = EMPTY_INPUT,
+): SendReceipt
+```
+
+Sends a text message with optional application `props`. Pass the same
+`requestId` to resend after an unknown outcome; a new ID is a new message.
+
+Sends [`communication.sendMessage`](../../operations/communication/sendMessage.md).
+
+#### `RelayClient.edit` method
+
+```kotlin
+public suspend fun edit(message: Message, text: String, requestId: String? = null): Message
+```
+
+Replaces the text of `message` if it is still at its revision.
+
+Sends [`communication.editMessage`](../../operations/communication/editMessage.md).
+
+#### `RelayClient.delete` method
+
+```kotlin
+public suspend fun delete(message: Message, requestId: String? = null): Message
+```
+
+Deletes `message` if it is still at its revision.
+
+Sends [`communication.deleteMessage`](../../operations/communication/deleteMessage.md).
+
+#### `RelayClient.events` method
+
+```kotlin
+public suspend fun events(conversationId: String, after: Cursor? = null): EventPage
+```
+
+Up to 100 authorized events after `after`, checked for order and scope.
+
+Sends [`communication.events`](../../operations/communication/events.md).
+
+#### `RelayClient.reportRead` method
+
+```kotlin
+public suspend fun reportRead(
+    conversationId: String,
+    membership: Member,
+    throughSequence: String,
+): ReadReceipt
+```
+
+Reports that this principal read `conversationId` through `throughSequence`
+under `membership`, which also covers delivery. Returns its current receipt.
+
+Sends [`communication.reportReceipt`](../../operations/communication/reportReceipt.md).
+
+#### `RelayClient.reportDelivered` method
+
+```kotlin
+public suspend fun reportDelivered(
+    conversationId: String,
+    membership: Member,
+    throughSequence: String,
+): ReadReceipt
+```
+
+Reports that this principal received `conversationId` through
+`throughSequence` under `membership`, for example when a push arrives.
+Returns its current receipt.
+
+Sends [`communication.reportReceipt`](../../operations/communication/reportReceipt.md).
+
+#### `RelayClient.receipts` method
+
+```kotlin
+public suspend fun receipts(conversationId: String): ReceiptPage
+```
+
+The members' current read receipts.
+
+Sends [`communication.receipts`](../../operations/communication/receipts.md).
+
+#### `RelayClient.members` method
+
+```kotlin
+public suspend fun members(
+    conversationId: String,
+    cursor: String? = null,
+    limit: Int = 100,
+): MemberPage
+```
+
+One page of `conversationId`'s members: up to `limit` (1 to 100), after `cursor` from the previous page.
+
+Sends [`communication.members`](../../operations/communication/members.md).
+
+#### `RelayClient.inbox` method
+
+```kotlin
+public suspend fun inbox(cursor: String? = null, limit: Int = 100): InboxPage
+```
+
+One page of the conversations this principal can see: up to `limit`
+(1 to 100), after `cursor` from the previous page. A page with a
+`partialReason` is incomplete for that reason.
+
+Sends [`communication.inbox`](../../operations/communication/inbox.md).
+
+#### `RelayClient.capabilities` method
+
+```kotlin
+public suspend fun capabilities(): Capabilities
+```
+
+The project's features, limits and media policy. Check `features?.typing`
+before sending typing signals and `features?.inbox` before listing the inbox.
+
+Sends [`communication.capabilities`](../../operations/communication/capabilities.md).
+
+#### `RelayClient.search` method
+
+```kotlin
+public suspend fun search(query: String, conversationIds: List<String>? = null): SearchPage
+```
+
+Lexical search across readable conversations, optionally limited to `conversationIds`.
+
+Sends [`communication.search`](../../operations/communication/search.md).
+
+#### `RelayClient.typing` method
+
+```kotlin
+public suspend fun typing(conversationId: String, isTyping: Boolean): Boolean
+```
+
+Sends an ephemeral typing signal. It is not recorded for recovery and is
+never retried; returns whether the authority accepted it. Check
+`features?.typing` in `capabilities` first.
+
+Sends [`communication.typing`](../../operations/communication/typing.md).
+
+#### `RelayClient.recoverPending` method
+
+```kotlin
+public suspend fun recoverPending(onError: (Throwable) -> Unit): Unit
+```
+
+Settles up to 16 stored mutations that may still come to something: those
+whose outcome is pending or unknown, and those rejected with a retryable
+code. Resends the original when its last attempt failed transiently and
+budget remains, otherwise resolves it read-only. Failures go to `onError`.
+
+Sends [`communication.resolveRequest`](../../operations/communication/resolveRequest.md).
+
+#### `RelayClient.watch` method
+
+```kotlin
+public suspend fun watch(
+    conversationId: String,
+    apply: suspend (List<Event>) -> Unit,
+    onError: (Throwable) -> Unit,
+): ConversationStream
+```
+
+Replays `conversationId` from its stored cursor, then follows it live.
+`apply` receives each authorized batch in order on the client's serial
+dispatcher; the cursor advances only after it returns. Do not await
+`refreshSession` inside `apply`.
+
+Sends [`communication.events`](../../operations/communication/events.md) and [`communication.conversationEvents`](../../operations/communication/conversationEvents.md).
+
+#### `RelayClient.resyncAuthorizedHistory` method
+
+```kotlin
+public suspend fun resyncAuthorizedHistory(
+    conversationId: String,
+    apply: suspend (List<Event>) -> Unit,
+    onError: (Throwable) -> Unit,
+): ConversationStream
+```
+
+Closes every replay of `conversationId` and replays authorized history
+from the start, ignoring the stored cursor until the first batch
+replaces it. Use it when the authority requires resynchronization.
+
+Sends [`communication.getConversation`](../../operations/communication/getConversation.md), [`communication.events`](../../operations/communication/events.md) and [`communication.conversationEvents`](../../operations/communication/conversationEvents.md).
+
+#### `RelayClient.close` method
+
+```kotlin
+public override fun close()
+```
+
+Closes every replay and cancels in-flight work. Later calls fail.
+
+### `RelayClientOptions` class
+
+```kotlin
+public class RelayClientOptions
+```
+
+Options for `RelayClient`. The session token stays in memory; it is
+never written to `recoveryStorage`, logs or errors.
+
+Package: `dev.instantrelay.android.core`.
+
+#### `RelayClientOptions` constructor
+
+```kotlin
+public constructor(
+    baseUrl: String,
+    projectId: String,
+    sessionToken: String,
+    incarnation: String,
+    principalId: String,
+    recoveryStorage: RecoveryStorage? = null,
+    sessionRefresh: SessionRefresh? = null,
+    http: HttpEngine = OkHttpEngine(),
+    realtime: RealtimeConnector = OkHttpRealtimeConnector(),
+    environment: RelayEnvironment = RelayEnvironment.System,
+    dispatcher: CoroutineDispatcher = Dispatchers.IO,
+)
+```
+
+#### `RelayClientOptions.baseUrl` property
+
+```kotlin
+public val baseUrl: String
+```
+
+The authority's HTTPS origin, or explicit loopback HTTP for local development.
+
+#### `RelayClientOptions.projectId` property
+
+```kotlin
+public val projectId: String
+```
+
+#### `RelayClientOptions.sessionToken` property
+
+```kotlin
+public val sessionToken: String
+```
+
+The short-lived user session bearer your backend issued. Never ship a backend key in an app.
+
+#### `RelayClientOptions.incarnation` property
+
+```kotlin
+public val incarnation: String
+```
+
+#### `RelayClientOptions.principalId` property
+
+```kotlin
+public val principalId: String
+```
+
+#### `RelayClientOptions.recoveryStorage` property
+
+```kotlin
+public val recoveryStorage: RecoveryStorage?
+```
+
+Durable storage for mutation recovery records and replay cursors. It never receives credentials.
+
+#### `RelayClientOptions.sessionRefresh` property
+
+```kotlin
+public val sessionRefresh: SessionRefresh?
+```
+
+Your backend's renewal hook. Without it `RelayClient.refreshSession` is unavailable.
+
+#### `RelayClientOptions.http` property
+
+```kotlin
+public val http: HttpEngine
+```
+
+#### `RelayClientOptions.realtime` property
+
+```kotlin
+public val realtime: RealtimeConnector
+```
+
+#### `RelayClientOptions.environment` property
+
+```kotlin
+public val environment: RelayEnvironment
+```
+
+#### `RelayClientOptions.dispatcher` property
+
+```kotlin
+public val dispatcher: CoroutineDispatcher
+```
+
+Runs the client's state machine. The client narrows it to one task at a time.
+
+### `RelayProblem` class
+
+```kotlin
+public open class RelayProblem : RuntimeException
+```
+
+An authority or SDK problem in the protocol's normalized form.
+
+`outcome` says what is known about the request: `rejected` (not applied),
+`committed` or `accepted` (applied), or `unknown` (resolve the original
+request before deciding). Transport uncertainty is never reported as
+rejection or commit. Messages never contain credentials.
+
+Package: `dev.instantrelay.android.core`.
+
+#### `RelayProblem` constructor
+
+```kotlin
+public constructor(
+    code: String,
+    requestId: String,
+    outcome: String,
+    status: Int,
+    message: String,
+    retryAfter: Long? = null,
+    cause: Throwable? = null,
+)
+```
+
+#### `RelayProblem.code` property
+
+```kotlin
+public val code: String
+```
+
+#### `RelayProblem.requestId` property
+
+```kotlin
+public val requestId: String
+```
+
+#### `RelayProblem.outcome` property
+
+```kotlin
+public val outcome: String
+```
+
+#### `RelayProblem.status` property
+
+```kotlin
+public val status: Int
+```
+
+The HTTP status, or 0 when no authority response was observed.
+
+#### `RelayProblem.message` property
+
+```kotlin
+public override val message: String
+```
+
+#### `RelayProblem.retryAfter` property
+
+```kotlin
+public val retryAfter: Long?
+```
+
+Whole seconds to wait before resending the same request, when the authority sent a delay (for example
+with `RATE_LIMITED`). The SDK never resends a call that the app made. When it reconnects a conversation's
+stream or resends a queued message on its own, it waits at least this long first.
+
+#### `RelayProblem.toString` method
+
+```kotlin
+public override fun toString(): String
+```
+
+### `RelayProtocolException` class
+
+```kotlin
+public class RelayProtocolException : RuntimeException
+```
+
+A value that breaks the protocol: a malformed response, stored record or
+argument. Inside a request the SDK reports it as `INVALID_RESPONSE`.
+
+Package: `dev.instantrelay.android.core`.
+
+#### `RelayProtocolException` constructor
+
+```kotlin
+public constructor(message: String)
+```
+
+### `RelayStore` class
+
+```kotlin
+public class RelayStore : AutoCloseable
+```
+
+The offline-first layer over a `RelayClient`: one `Outbox` for
+optimistic sends that survive restarts, and `Timeline`s that show stored
+messages at once and keep them current.
+
+`local` keeps messages and the outbox; it never holds credentials. Feed
+`online` from the platform's connectivity: going offline holds the outbox,
+and coming back drains it and skips reconnect backoff, though never the
+wait that the authority's `retryAfter` asked for. Errors that the store
+handles by retrying or by marking a message are still reported to
+`onError`, for logging.
+
+Package: `dev.instantrelay.android.core`.
+
+#### `RelayStore` constructor
+
+```kotlin
+public constructor(
+    client: RelayClient,
+    local: LocalStore = MemoryLocalStore(),
+    online: StateFlow<Boolean> = MutableStateFlow(true),
+    onError: (Throwable) -> Unit = {},
+)
+```
+
+#### `RelayStore.client` property
+
+```kotlin
+public val client: RelayClient
+```
+
+#### `RelayStore.local` property
+
+```kotlin
+public val local: LocalStore
+```
+
+#### `RelayStore.online` property
+
+```kotlin
+public val online: StateFlow<Boolean>
+```
+
+#### `RelayStore.outbox` property
+
+```kotlin
+public val outbox: Outbox
+```
+
+Messages sent through this store that the authority has not shown back yet.
+
+#### `RelayStore.timeline` method
+
+```kotlin
+public fun timeline(conversationId: String): Timeline
+```
+
+Opens a timeline of `conversationId`. Each call opens its own; close
+it when the view goes away.
+
+Sends [`communication.getConversation`](../../operations/communication/getConversation.md), [`communication.messages`](../../operations/communication/messages.md), [`communication.getMessage`](../../operations/communication/getMessage.md), [`communication.events`](../../operations/communication/events.md), [`communication.receipts`](../../operations/communication/receipts.md) and [`communication.conversationEvents`](../../operations/communication/conversationEvents.md).
+
+#### `RelayStore.close` method
+
+```kotlin
+public override fun close()
+```
+
+Closes every timeline and stops sending. The outbox stays in `local` for the next store.
+
+#### `RelayStore.signOut` method
+
+```kotlin
+public suspend fun signOut()
+```
+
+Closes the store and deletes everything in `local`, including messages
+that were never sent. Call it when the user signs out, before closing
+the client.
+
 ### `Scalars` class
 
 ```kotlin
@@ -3862,7 +3862,7 @@ public object Scalars
 
 Codecs for the custom scalars. Decoders check string formats; the server enforces ranges and sizes.
 
-Package: `com.convohop.android.generated`.
+Package: `dev.instantrelay.android.generated`.
 
 #### `Scalars.decodeDecimal` static method
 
@@ -3941,12 +3941,12 @@ public fun encodeUUID(value: String): JsonElement
 ### `ScopeRequiredProblem` class
 
 ```kotlin
-public class ScopeRequiredProblem : ConvoHopProblem
+public class ScopeRequiredProblem : RelayProblem
 ```
 
 `SCOPE_REQUIRED`: the credential lacks a scope the operation needs.
 
-Package: `com.convohop.android.core`.
+Package: `dev.instantrelay.android.core`.
 
 #### `ScopeRequiredProblem` constructor
 
@@ -3974,7 +3974,7 @@ The missing scope, or null when the message does not match the documented wordin
 public val code: String
 ```
 
-Inherited from `ConvoHopProblem`.
+Inherited from `RelayProblem`.
 
 #### `ScopeRequiredProblem.requestId` property
 
@@ -3982,7 +3982,7 @@ Inherited from `ConvoHopProblem`.
 public val requestId: String
 ```
 
-Inherited from `ConvoHopProblem`.
+Inherited from `RelayProblem`.
 
 #### `ScopeRequiredProblem.outcome` property
 
@@ -3990,7 +3990,7 @@ Inherited from `ConvoHopProblem`.
 public val outcome: String
 ```
 
-Inherited from `ConvoHopProblem`.
+Inherited from `RelayProblem`.
 
 #### `ScopeRequiredProblem.status` property
 
@@ -4000,7 +4000,7 @@ public val status: Int
 
 The HTTP status, or 0 when no authority response was observed.
 
-Inherited from `ConvoHopProblem`.
+Inherited from `RelayProblem`.
 
 #### `ScopeRequiredProblem.message` property
 
@@ -4008,7 +4008,7 @@ Inherited from `ConvoHopProblem`.
 public override val message: String
 ```
 
-Inherited from `ConvoHopProblem`.
+Inherited from `RelayProblem`.
 
 #### `ScopeRequiredProblem.retryAfter` property
 
@@ -4020,7 +4020,7 @@ Whole seconds to wait before resending the same request, when the authority sent
 with `RATE_LIMITED`). The SDK never resends a call that the app made. When it reconnects a conversation's
 stream or resends a queued message on its own, it waits at least this long first.
 
-Inherited from `ConvoHopProblem`.
+Inherited from `RelayProblem`.
 
 #### `ScopeRequiredProblem.toString` method
 
@@ -4028,7 +4028,7 @@ Inherited from `ConvoHopProblem`.
 public override fun toString(): String
 ```
 
-Inherited from `ConvoHopProblem`.
+Inherited from `RelayProblem`.
 
 ### `SendReceipt` class
 
@@ -4038,7 +4038,7 @@ public data class SendReceipt
 
 The authority's receipt for a sent message, checked against the conversation and incarnation.
 
-Package: `com.convohop.android.core`.
+Package: `dev.instantrelay.android.core`.
 
 #### `SendReceipt` constructor
 
@@ -4092,7 +4092,7 @@ A response value that does not match the schema. `path` names the value,
 for example `SendMessageReply.result.cursor.sequence`. The runtime reports
 it as INVALID_RESPONSE.
 
-Package: `com.convohop.android.generated`.
+Package: `dev.instantrelay.android.generated`.
 
 #### `ShapeException` constructor
 
@@ -4138,7 +4138,7 @@ Message events carry no content, so the timeline reads new and changed
 messages from the authority as their events arrive. The API has no
 presence or inbound typing events.
 
-Package: `com.convohop.android.core`.
+Package: `dev.instantrelay.android.core`.
 
 #### `Timeline.conversationId` property
 
@@ -4237,7 +4237,7 @@ public data class Pending : TimelineItem
 
 A message this device sent that the timeline does not show from the authority yet.
 
-Package: `com.convohop.android.core`.
+Package: `dev.instantrelay.android.core`.
 
 #### `TimelineItem.Pending` constructor
 
@@ -4267,7 +4267,7 @@ public data class Sent : TimelineItem
 
 A message from the authority's history.
 
-Package: `com.convohop.android.core`.
+Package: `dev.instantrelay.android.core`.
 
 #### `TimelineItem.Sent` constructor
 
@@ -4301,7 +4301,7 @@ The protocol sends `YYYY-MM-DDTHH:MM:SS.mmmZ`; push payloads may use any
 RFC 3339 date-time. Impossible calendar values are rejected rather than
 rolled over.
 
-Package: `com.convohop.android.core`.
+Package: `dev.instantrelay.android.core`.
 
 #### `Timestamps.parseMillis` static method
 
@@ -4335,7 +4335,7 @@ public object Transport
 
 HTTP and WebSocket transport constants.
 
-Package: `com.convohop.android.generated`.
+Package: `dev.instantrelay.android.generated`.
 
 #### `Transport.PATH` static property
 
@@ -4369,7 +4369,7 @@ retried, and failures go to the store's error callback.
 
 The API has no inbound typing events, so other members' typing is not shown.
 
-Package: `com.convohop.android.core`.
+Package: `dev.instantrelay.android.core`.
 
 #### `TypingIndicator.keystroke` method
 
@@ -4393,48 +4393,6 @@ Sends [`communication.typing`](../../operations/communication/typing.md).
 
 ## Interfaces
 
-### `ConvoHopEnvironment` interface
-
-```kotlin
-public interface ConvoHopEnvironment
-```
-
-The clock, identifiers and randomness the SDK uses. Tests replace it; apps normally keep `System`.
-
-Package: `com.convohop.android.core`.
-
-#### `ConvoHopEnvironment.now` method
-
-```kotlin
-public fun now(): Long
-```
-
-Wall-clock time in epoch milliseconds.
-
-#### `ConvoHopEnvironment.uuid` method
-
-```kotlin
-public fun uuid(): String
-```
-
-A new random lowercase UUID.
-
-#### `ConvoHopEnvironment.random` method
-
-```kotlin
-public fun random(): Double
-```
-
-A uniformly distributed value in [0, 1), used for reconnect jitter.
-
-#### `ConvoHopEnvironment.System` static property
-
-```kotlin
-public val System: ConvoHopEnvironment
-```
-
-The device clock, `java.util.UUID` and `Math.random`.
-
 ### `HttpEngine` interface
 
 ```kotlin
@@ -4445,7 +4403,7 @@ Sends authority requests. `post` throws when no response arrived, which
 the SDK reports as an unknown outcome rather than a rejection. A redirect
 must be reported as a failure, never followed.
 
-Package: `com.convohop.android.core`.
+Package: `dev.instantrelay.android.core`.
 
 #### `HttpEngine.post` method
 
@@ -4461,7 +4419,7 @@ public interface HttpResponse
 
 An authority response.
 
-Package: `com.convohop.android.core`.
+Package: `dev.instantrelay.android.core`.
 
 #### `HttpResponse.status` property
 
@@ -4492,12 +4450,12 @@ Throws when the body could not be read completely.
 public interface LocalStore
 ```
 
-Durable state for `ConvoHopStore`: confirmed messages per conversation and
+Durable state for `RelayStore`: confirmed messages per conversation and
 the outbox. It never receives credentials. Keep one store per project and
 principal and `clear` it at sign-out. Implementations must be safe to call
 from any thread.
 
-Package: `com.convohop.android.core`.
+Package: `dev.instantrelay.android.core`.
 
 #### `LocalStore.messages` method
 
@@ -4562,7 +4520,7 @@ public interface MediaRoom
 One native media room that a `MediaConnection` drives. The Android library
 implements it with the official LiveKit SDK; tests use a fake.
 
-Package: `com.convohop.android.core`.
+Package: `dev.instantrelay.android.core`.
 
 #### `MediaRoom.connect` method
 
@@ -4602,7 +4560,7 @@ public fun interface MediaRoomEvents
 
 Room events a `MediaConnection` consumes.
 
-Package: `com.convohop.android.core`.
+Package: `dev.instantrelay.android.core`.
 
 #### `MediaRoomEvents.onDisconnected` method
 
@@ -4620,7 +4578,7 @@ public fun interface MediaRoomFactory
 
 Creates one room per connection attempt.
 
-Package: `com.convohop.android.core`.
+Package: `dev.instantrelay.android.core`.
 
 #### `MediaRoomFactory.create` method
 
@@ -4637,7 +4595,7 @@ public fun interface RealtimeConnector
 Opens realtime sockets. A connector must offer exactly `subprotocol` and
 fail the connection unless the server selects it.
 
-Package: `com.convohop.android.core`.
+Package: `dev.instantrelay.android.core`.
 
 #### `RealtimeConnector.connect` method
 
@@ -4653,7 +4611,7 @@ public interface RealtimeListener
 
 Receives one realtime socket's events, in order, on any thread.
 
-Package: `com.convohop.android.core`.
+Package: `dev.instantrelay.android.core`.
 
 #### `RealtimeListener.onOpen` method
 
@@ -4694,7 +4652,7 @@ public interface RealtimeSocket
 
 A connected or connecting realtime socket.
 
-Package: `com.convohop.android.core`.
+Package: `dev.instantrelay.android.core`.
 
 #### `RealtimeSocket.send` method
 
@@ -4721,7 +4679,7 @@ cursors. Records hold request identities, inputs and outcomes, never
 tokens. `setItem` must return only after the value is durable; a failure
 is reported as `RECOVERY_STORAGE_FAILURE`.
 
-Package: `com.convohop.android.core`.
+Package: `dev.instantrelay.android.core`.
 
 #### `RecoveryStorage.getItem` method
 
@@ -4741,6 +4699,48 @@ public suspend fun setItem(key: String, value: String)
 public suspend fun removeItem(key: String)
 ```
 
+### `RelayEnvironment` interface
+
+```kotlin
+public interface RelayEnvironment
+```
+
+The clock, identifiers and randomness the SDK uses. Tests replace it; apps normally keep `System`.
+
+Package: `dev.instantrelay.android.core`.
+
+#### `RelayEnvironment.now` method
+
+```kotlin
+public fun now(): Long
+```
+
+Wall-clock time in epoch milliseconds.
+
+#### `RelayEnvironment.uuid` method
+
+```kotlin
+public fun uuid(): String
+```
+
+A new random lowercase UUID.
+
+#### `RelayEnvironment.random` method
+
+```kotlin
+public fun random(): Double
+```
+
+A uniformly distributed value in [0, 1), used for reconnect jitter.
+
+#### `RelayEnvironment.System` static property
+
+```kotlin
+public val System: RelayEnvironment
+```
+
+The device clock, `java.util.UUID` and `Math.random`.
+
 ### `SessionRefresh` interface
 
 ```kotlin
@@ -4748,11 +4748,11 @@ public fun interface SessionRefresh
 ```
 
 Renews the current session through your backend. Ask your backend to renew
-exactly `current` and return the bootstrap it received from ConvoHop. The
+exactly `current` and return the bootstrap it received from Relay. The
 hook runs on the client's serial dispatcher; switch dispatchers for
 blocking work. A failure leaves the original renewal's outcome unknown.
 
-Package: `com.convohop.android.core`.
+Package: `dev.instantrelay.android.core`.
 
 #### `SessionRefresh.refresh` method
 
@@ -4768,7 +4768,7 @@ public sealed interface TimelineItem
 
 One row of a `Timeline`.
 
-Package: `com.convohop.android.core`.
+Package: `dev.instantrelay.android.core`.
 
 #### `TimelineItem.key` property
 
@@ -4786,7 +4786,7 @@ A stable list key.
 public enum class LiveConnectionMode
 ```
 
-Package: `com.convohop.android.generated`.
+Package: `dev.instantrelay.android.generated`.
 
 #### `LiveConnectionMode.INITIAL` case
 
@@ -4806,7 +4806,7 @@ RECONNECT
 public enum class LiveCutoffEvidence
 ```
 
-Package: `com.convohop.android.generated`.
+Package: `dev.instantrelay.android.generated`.
 
 #### `LiveCutoffEvidence.NATIVE_FENCE` case
 
@@ -4832,7 +4832,7 @@ NO_GRANTS_ISSUED
 public enum class LiveCutoffScopeKind
 ```
 
-Package: `com.convohop.android.generated`.
+Package: `dev.instantrelay.android.generated`.
 
 #### `LiveCutoffScopeKind.PARTICIPATION` case
 
@@ -4852,7 +4852,7 @@ GENERATION
 public enum class LiveCutoffState
 ```
 
-Package: `com.convohop.android.generated`.
+Package: `dev.instantrelay.android.generated`.
 
 #### `LiveCutoffState.PENDING` case
 
@@ -4878,7 +4878,7 @@ UNKNOWN
 public enum class LiveErrorCode
 ```
 
-Package: `com.convohop.android.generated`.
+Package: `dev.instantrelay.android.generated`.
 
 #### `LiveErrorCode.LIVE_SESSION_EXISTS` case
 
@@ -4964,7 +4964,7 @@ LIVE_PREPARATION_FAILED
 public enum class LiveMediaProfile
 ```
 
-Package: `com.convohop.android.generated`.
+Package: `dev.instantrelay.android.generated`.
 
 #### `LiveMediaProfile.AUDIO_ONLY` case
 
@@ -4984,7 +4984,7 @@ AUDIO_VIDEO
 public enum class LiveOperationKind
 ```
 
-Package: `com.convohop.android.generated`.
+Package: `dev.instantrelay.android.generated`.
 
 #### `LiveOperationKind.START` case
 
@@ -5004,7 +5004,7 @@ END
 public enum class LiveOperationState
 ```
 
-Package: `com.convohop.android.generated`.
+Package: `dev.instantrelay.android.generated`.
 
 #### `LiveOperationState.RUNNING` case
 
@@ -5030,7 +5030,7 @@ FAILED
 public enum class LiveParticipationState
 ```
 
-Package: `com.convohop.android.generated`.
+Package: `dev.instantrelay.android.generated`.
 
 #### `LiveParticipationState.JOINED` case
 
@@ -5074,7 +5074,7 @@ LEFT
 public enum class LiveRole
 ```
 
-Package: `com.convohop.android.generated`.
+Package: `dev.instantrelay.android.generated`.
 
 #### `LiveRole.PUBLISHER` case
 
@@ -5094,7 +5094,7 @@ VIEWER
 public enum class LiveSessionKind
 ```
 
-Package: `com.convohop.android.generated`.
+Package: `dev.instantrelay.android.generated`.
 
 #### `LiveSessionKind.INTERACTIVE` case
 
@@ -5114,7 +5114,7 @@ BROADCAST
 public enum class LiveSessionState
 ```
 
-Package: `com.convohop.android.generated`.
+Package: `dev.instantrelay.android.generated`.
 
 #### `LiveSessionState.PREPARING` case
 
@@ -5160,7 +5160,7 @@ public enum class PendingState
 
 Where an outbox message stands.
 
-Package: `com.convohop.android.core`.
+Package: `dev.instantrelay.android.core`.
 
 #### `PendingState.QUEUED` case
 
@@ -5217,7 +5217,7 @@ public enum class ReplayState
 
 Where a `ConversationStream` stands.
 
-Package: `com.convohop.android.core`.
+Package: `dev.instantrelay.android.core`.
 
 #### `ReplayState.CATCHING_UP` case
 
@@ -5267,7 +5267,7 @@ public enum class SessionRefreshState
 
 Where session renewal stands.
 
-Package: `com.convohop.android.core`.
+Package: `dev.instantrelay.android.core`.
 
 #### `SessionRefreshState.DISABLED` case
 
@@ -5283,7 +5283,7 @@ No `SessionRefresh` hook was configured.
 UNINITIALIZED
 ```
 
-Call `ConvoHopClient.initialize` with the original bearer first.
+Call `RelayClient.initialize` with the original bearer first.
 
 #### `SessionRefreshState.READY` case
 
@@ -5313,7 +5313,7 @@ Renewal could not be verified; HTTP and realtime stay blocked. Retire the client
 public data class ActorRef(public val tenantId: String, public val objectId: String)
 ```
 
-Package: `com.convohop.android.generated`.
+Package: `dev.instantrelay.android.generated`.
 
 ### `AgentGrant` type
 
@@ -5332,7 +5332,7 @@ public data class AgentGrant(
 )
 ```
 
-Package: `com.convohop.android.generated`.
+Package: `dev.instantrelay.android.generated`.
 
 ### `AgentKey` type
 
@@ -5348,7 +5348,7 @@ public data class AgentKey(
 )
 ```
 
-Package: `com.convohop.android.generated`.
+Package: `dev.instantrelay.android.generated`.
 
 ### `AgentSignupStatus` type
 
@@ -5368,7 +5368,7 @@ public data class AgentSignupStatus(
 )
 ```
 
-Package: `com.convohop.android.generated`.
+Package: `dev.instantrelay.android.generated`.
 
 ### `AlertLiveSessionInput` type
 
@@ -5380,7 +5380,7 @@ public data class AlertLiveSessionInput(
 )
 ```
 
-Package: `com.convohop.android.generated`.
+Package: `dev.instantrelay.android.generated`.
 
 ### `AlertLiveSessionPayload` type
 
@@ -5395,7 +5395,7 @@ public data class AlertLiveSessionPayload(
 )
 ```
 
-Package: `com.convohop.android.generated`.
+Package: `dev.instantrelay.android.generated`.
 
 ### `BillingCheckoutSession` type
 
@@ -5408,7 +5408,7 @@ public data class BillingCheckoutSession(
 )
 ```
 
-Package: `com.convohop.android.generated`.
+Package: `dev.instantrelay.android.generated`.
 
 ### `BillingPortalSession` type
 
@@ -5420,7 +5420,7 @@ public data class BillingPortalSession(
 )
 ```
 
-Package: `com.convohop.android.generated`.
+Package: `dev.instantrelay.android.generated`.
 
 ### `BroadcastPermissionChanged` type
 
@@ -5431,7 +5431,7 @@ public data class BroadcastPermissionChanged(
 )
 ```
 
-Package: `com.convohop.android.generated`.
+Package: `dev.instantrelay.android.generated`.
 
 ### `Capabilities` type
 
@@ -5453,7 +5453,7 @@ public data class Capabilities(
 )
 ```
 
-Package: `com.convohop.android.generated`.
+Package: `dev.instantrelay.android.generated`.
 
 ### `CapabilitiesReply` type
 
@@ -5471,7 +5471,7 @@ public data class CapabilitiesReply(
 )
 ```
 
-Package: `com.convohop.android.generated`.
+Package: `dev.instantrelay.android.generated`.
 
 ### `Conversation` type
 
@@ -5486,7 +5486,7 @@ public data class Conversation(
 )
 ```
 
-Package: `com.convohop.android.generated`.
+Package: `dev.instantrelay.android.generated`.
 
 ### `ConversationLiveInput` type
 
@@ -5494,7 +5494,7 @@ Package: `com.convohop.android.generated`.
 public data class ConversationLiveInput(public val conversationId: String)
 ```
 
-Package: `com.convohop.android.generated`.
+Package: `dev.instantrelay.android.generated`.
 
 ### `ConversationMemberBatch` type
 
@@ -5502,7 +5502,7 @@ Package: `com.convohop.android.generated`.
 public data class ConversationMemberBatch(public val items: List<Member>)
 ```
 
-Package: `com.convohop.android.generated`.
+Package: `dev.instantrelay.android.generated`.
 
 ### `ConversationMute` type
 
@@ -5515,7 +5515,7 @@ public data class ConversationMute(
 )
 ```
 
-Package: `com.convohop.android.generated`.
+Package: `dev.instantrelay.android.generated`.
 
 ### `ConversationMuteInput` type
 
@@ -5526,7 +5526,7 @@ public data class ConversationMuteInput(
 )
 ```
 
-Package: `com.convohop.android.generated`.
+Package: `dev.instantrelay.android.generated`.
 
 ### `ConversationMuteReply` type
 
@@ -5539,7 +5539,7 @@ public data class ConversationMuteReply(
 )
 ```
 
-Package: `com.convohop.android.generated`.
+Package: `dev.instantrelay.android.generated`.
 
 ### `CredentialDelivery` type
 
@@ -5556,7 +5556,7 @@ public data class CredentialDelivery(
 )
 ```
 
-Package: `com.convohop.android.generated`.
+Package: `dev.instantrelay.android.generated`.
 
 ### `CredentialDeliveryReceipt` type
 
@@ -5564,7 +5564,7 @@ Package: `com.convohop.android.generated`.
 public data class CredentialDeliveryReceipt(public val deliveryId: String)
 ```
 
-Package: `com.convohop.android.generated`.
+Package: `dev.instantrelay.android.generated`.
 
 ### `CurrentLiveSessionReply` type
 
@@ -5577,7 +5577,7 @@ public data class CurrentLiveSessionReply(
 )
 ```
 
-Package: `com.convohop.android.generated`.
+Package: `dev.instantrelay.android.generated`.
 
 ### `CurrentSessionReply` type
 
@@ -5590,7 +5590,7 @@ public data class CurrentSessionReply(
 )
 ```
 
-Package: `com.convohop.android.generated`.
+Package: `dev.instantrelay.android.generated`.
 
 ### `Cursor` type
 
@@ -5602,7 +5602,7 @@ public data class Cursor(
 )
 ```
 
-Package: `com.convohop.android.generated`.
+Package: `dev.instantrelay.android.generated`.
 
 ### `CursorInput` type
 
@@ -5614,7 +5614,7 @@ public data class CursorInput(
 )
 ```
 
-Package: `com.convohop.android.generated`.
+Package: `dev.instantrelay.android.generated`.
 
 ### `CutoffScope` type
 
@@ -5628,7 +5628,7 @@ public data class CutoffScope(
 )
 ```
 
-Package: `com.convohop.android.generated`.
+Package: `dev.instantrelay.android.generated`.
 
 ### `DeleteMessageReply` type
 
@@ -5646,7 +5646,7 @@ public data class DeleteMessageReply(
 )
 ```
 
-Package: `com.convohop.android.generated`.
+Package: `dev.instantrelay.android.generated`.
 
 ### `DeleteMessageRequestInput` type
 
@@ -5658,7 +5658,7 @@ public data class DeleteMessageRequestInput(
 )
 ```
 
-Package: `com.convohop.android.generated`.
+Package: `dev.instantrelay.android.generated`.
 
 ### `DeliveryAck` type
 
@@ -5666,7 +5666,7 @@ Package: `com.convohop.android.generated`.
 public data class DeliveryAck(public val deliveryId: String, public val acknowledged: Boolean)
 ```
 
-Package: `com.convohop.android.generated`.
+Package: `dev.instantrelay.android.generated`.
 
 ### `EditMessageReply` type
 
@@ -5684,7 +5684,7 @@ public data class EditMessageReply(
 )
 ```
 
-Package: `com.convohop.android.generated`.
+Package: `dev.instantrelay.android.generated`.
 
 ### `EditMessageRequestInput` type
 
@@ -5698,7 +5698,7 @@ public data class EditMessageRequestInput(
 )
 ```
 
-Package: `com.convohop.android.generated`.
+Package: `dev.instantrelay.android.generated`.
 
 ### `EndLiveSessionInput` type
 
@@ -5710,7 +5710,7 @@ public data class EndLiveSessionInput(
 )
 ```
 
-Package: `com.convohop.android.generated`.
+Package: `dev.instantrelay.android.generated`.
 
 ### `EndLiveSessionPayload` type
 
@@ -5726,7 +5726,7 @@ public data class EndLiveSessionPayload(
 )
 ```
 
-Package: `com.convohop.android.generated`.
+Package: `dev.instantrelay.android.generated`.
 
 ### `Event` type
 
@@ -5742,7 +5742,7 @@ public data class Event(
 )
 ```
 
-Package: `com.convohop.android.generated`.
+Package: `dev.instantrelay.android.generated`.
 
 ### `EventPage` type
 
@@ -5755,7 +5755,7 @@ public data class EventPage(
 )
 ```
 
-Package: `com.convohop.android.generated`.
+Package: `dev.instantrelay.android.generated`.
 
 ### `EventPayload` type
 
@@ -5777,7 +5777,7 @@ public data class EventPayload(
 )
 ```
 
-Package: `com.convohop.android.generated`.
+Package: `dev.instantrelay.android.generated`.
 
 ### `EventsReply` type
 
@@ -5795,7 +5795,7 @@ public data class EventsReply(
 )
 ```
 
-Package: `com.convohop.android.generated`.
+Package: `dev.instantrelay.android.generated`.
 
 ### `EventsRequestInput` type
 
@@ -5807,7 +5807,7 @@ public data class EventsRequestInput(
 )
 ```
 
-Package: `com.convohop.android.generated`.
+Package: `dev.instantrelay.android.generated`.
 
 ### `Features` type
 
@@ -5823,7 +5823,7 @@ public data class Features(
 )
 ```
 
-Package: `com.convohop.android.generated`.
+Package: `dev.instantrelay.android.generated`.
 
 ### `GetConversationReply` type
 
@@ -5841,7 +5841,7 @@ public data class GetConversationReply(
 )
 ```
 
-Package: `com.convohop.android.generated`.
+Package: `dev.instantrelay.android.generated`.
 
 ### `GetConversationRequestInput` type
 
@@ -5849,7 +5849,7 @@ Package: `com.convohop.android.generated`.
 public data class GetConversationRequestInput(public val conversationId: String)
 ```
 
-Package: `com.convohop.android.generated`.
+Package: `dev.instantrelay.android.generated`.
 
 ### `GetMessageReply` type
 
@@ -5867,7 +5867,7 @@ public data class GetMessageReply(
 )
 ```
 
-Package: `com.convohop.android.generated`.
+Package: `dev.instantrelay.android.generated`.
 
 ### `GetMessageRequestInput` type
 
@@ -5879,7 +5879,7 @@ public data class GetMessageRequestInput(
 )
 ```
 
-Package: `com.convohop.android.generated`.
+Package: `dev.instantrelay.android.generated`.
 
 ### `GetOperationReply` type
 
@@ -5897,7 +5897,7 @@ public data class GetOperationReply(
 )
 ```
 
-Package: `com.convohop.android.generated`.
+Package: `dev.instantrelay.android.generated`.
 
 ### `GetOperationRequestInput` type
 
@@ -5905,7 +5905,7 @@ Package: `com.convohop.android.generated`.
 public data class GetOperationRequestInput(public val operationId: String)
 ```
 
-Package: `com.convohop.android.generated`.
+Package: `dev.instantrelay.android.generated`.
 
 ### `InboxItem` type
 
@@ -5920,7 +5920,7 @@ public data class InboxItem(
 )
 ```
 
-Package: `com.convohop.android.generated`.
+Package: `dev.instantrelay.android.generated`.
 
 ### `InboxPage` type
 
@@ -5934,7 +5934,7 @@ public data class InboxPage(
 )
 ```
 
-Package: `com.convohop.android.generated`.
+Package: `dev.instantrelay.android.generated`.
 
 ### `InboxReply` type
 
@@ -5952,7 +5952,7 @@ public data class InboxReply(
 )
 ```
 
-Package: `com.convohop.android.generated`.
+Package: `dev.instantrelay.android.generated`.
 
 ### `InboxRequestInput` type
 
@@ -5964,7 +5964,7 @@ public data class InboxRequestInput(
 )
 ```
 
-Package: `com.convohop.android.generated`.
+Package: `dev.instantrelay.android.generated`.
 
 ### `JoinLiveSessionInput` type
 
@@ -5975,7 +5975,7 @@ public data class JoinLiveSessionInput(
 )
 ```
 
-Package: `com.convohop.android.generated`.
+Package: `dev.instantrelay.android.generated`.
 
 ### `JoinLiveSessionPayload` type
 
@@ -5990,7 +5990,7 @@ public data class JoinLiveSessionPayload(
 )
 ```
 
-Package: `com.convohop.android.generated`.
+Package: `dev.instantrelay.android.generated`.
 
 ### `LeaveLiveSessionInput` type
 
@@ -6002,7 +6002,7 @@ public data class LeaveLiveSessionInput(
 )
 ```
 
-Package: `com.convohop.android.generated`.
+Package: `dev.instantrelay.android.generated`.
 
 ### `LeaveLiveSessionPayload` type
 
@@ -6017,7 +6017,7 @@ public data class LeaveLiveSessionPayload(
 )
 ```
 
-Package: `com.convohop.android.generated`.
+Package: `dev.instantrelay.android.generated`.
 
 ### `Limit` type
 
@@ -6032,7 +6032,7 @@ public data class Limit(
 )
 ```
 
-Package: `com.convohop.android.generated`.
+Package: `dev.instantrelay.android.generated`.
 
 ### `LimitEntry` type
 
@@ -6040,7 +6040,7 @@ Package: `com.convohop.android.generated`.
 public data class LimitEntry(public val key: String, public val value: Limit)
 ```
 
-Package: `com.convohop.android.generated`.
+Package: `dev.instantrelay.android.generated`.
 
 ### `LiveAlert` type
 
@@ -6056,7 +6056,7 @@ public data class LiveAlert(
 )
 ```
 
-Package: `com.convohop.android.generated`.
+Package: `dev.instantrelay.android.generated`.
 
 ### `LiveAlertBatch` type
 
@@ -6068,7 +6068,7 @@ public data class LiveAlertBatch(
 )
 ```
 
-Package: `com.convohop.android.generated`.
+Package: `dev.instantrelay.android.generated`.
 
 ### `LiveAlertPage` type
 
@@ -6082,7 +6082,7 @@ public data class LiveAlertPage(
 )
 ```
 
-Package: `com.convohop.android.generated`.
+Package: `dev.instantrelay.android.generated`.
 
 ### `LiveAlertPageReply` type
 
@@ -6095,7 +6095,7 @@ public data class LiveAlertPageReply(
 )
 ```
 
-Package: `com.convohop.android.generated`.
+Package: `dev.instantrelay.android.generated`.
 
 ### `LiveAlertsInput` type
 
@@ -6103,7 +6103,7 @@ Package: `com.convohop.android.generated`.
 public data class LiveAlertsInput(public val limit: Int? = null, public val cursor: String? = null)
 ```
 
-Package: `com.convohop.android.generated`.
+Package: `dev.instantrelay.android.generated`.
 
 ### `LiveConnectionGrant` type
 
@@ -6126,7 +6126,7 @@ public data class LiveConnectionGrant(
 )
 ```
 
-Package: `com.convohop.android.generated`.
+Package: `dev.instantrelay.android.generated`.
 
 ### `LiveCredentialIssuance` type
 
@@ -6142,7 +6142,7 @@ public data class LiveCredentialIssuance(
 )
 ```
 
-Package: `com.convohop.android.generated`.
+Package: `dev.instantrelay.android.generated`.
 
 ### `LiveCutoffScope` type
 
@@ -6155,7 +6155,7 @@ public data class LiveCutoffScope(
 )
 ```
 
-Package: `com.convohop.android.generated`.
+Package: `dev.instantrelay.android.generated`.
 
 ### `LiveMediaCutoff` type
 
@@ -6169,7 +6169,7 @@ public data class LiveMediaCutoff(
 )
 ```
 
-Package: `com.convohop.android.generated`.
+Package: `dev.instantrelay.android.generated`.
 
 ### `LiveMediaPermissions` type
 
@@ -6181,7 +6181,7 @@ public data class LiveMediaPermissions(
 )
 ```
 
-Package: `com.convohop.android.generated`.
+Package: `dev.instantrelay.android.generated`.
 
 ### `LiveOperationFailure` type
 
@@ -6189,7 +6189,7 @@ Package: `com.convohop.android.generated`.
 public data class LiveOperationFailure(public val code: LiveErrorCode, public val message: String)
 ```
 
-Package: `com.convohop.android.generated`.
+Package: `dev.instantrelay.android.generated`.
 
 ### `LiveParticipantPage` type
 
@@ -6203,7 +6203,7 @@ public data class LiveParticipantPage(
 )
 ```
 
-Package: `com.convohop.android.generated`.
+Package: `dev.instantrelay.android.generated`.
 
 ### `LiveParticipantPageReply` type
 
@@ -6216,7 +6216,7 @@ public data class LiveParticipantPageReply(
 )
 ```
 
-Package: `com.convohop.android.generated`.
+Package: `dev.instantrelay.android.generated`.
 
 ### `LiveParticipantsInput` type
 
@@ -6228,7 +6228,7 @@ public data class LiveParticipantsInput(
 )
 ```
 
-Package: `com.convohop.android.generated`.
+Package: `dev.instantrelay.android.generated`.
 
 ### `LiveParticipation` type
 
@@ -6246,7 +6246,7 @@ public data class LiveParticipation(
 )
 ```
 
-Package: `com.convohop.android.generated`.
+Package: `dev.instantrelay.android.generated`.
 
 ### `LiveSession` type
 
@@ -6267,7 +6267,7 @@ public data class LiveSession(
 )
 ```
 
-Package: `com.convohop.android.generated`.
+Package: `dev.instantrelay.android.generated`.
 
 ### `LiveSessionCredentialsInput` type
 
@@ -6281,7 +6281,7 @@ public data class LiveSessionCredentialsInput(
 )
 ```
 
-Package: `com.convohop.android.generated`.
+Package: `dev.instantrelay.android.generated`.
 
 ### `LiveSessionCredentialsPayload` type
 
@@ -6296,7 +6296,7 @@ public data class LiveSessionCredentialsPayload(
 )
 ```
 
-Package: `com.convohop.android.generated`.
+Package: `dev.instantrelay.android.generated`.
 
 ### `LiveSessionEndRequested` type
 
@@ -6308,7 +6308,7 @@ public data class LiveSessionEndRequested(
 )
 ```
 
-Package: `com.convohop.android.generated`.
+Package: `dev.instantrelay.android.generated`.
 
 ### `LiveSessionInput` type
 
@@ -6316,7 +6316,7 @@ Package: `com.convohop.android.generated`.
 public data class LiveSessionInput(public val liveSessionId: String)
 ```
 
-Package: `com.convohop.android.generated`.
+Package: `dev.instantrelay.android.generated`.
 
 ### `LiveSessionJoined` type
 
@@ -6328,7 +6328,7 @@ public data class LiveSessionJoined(
 )
 ```
 
-Package: `com.convohop.android.generated`.
+Package: `dev.instantrelay.android.generated`.
 
 ### `LiveSessionLeft` type
 
@@ -6340,7 +6340,7 @@ public data class LiveSessionLeft(
 )
 ```
 
-Package: `com.convohop.android.generated`.
+Package: `dev.instantrelay.android.generated`.
 
 ### `LiveSessionOperation` type
 
@@ -6359,7 +6359,7 @@ public data class LiveSessionOperation(
 )
 ```
 
-Package: `com.convohop.android.generated`.
+Package: `dev.instantrelay.android.generated`.
 
 ### `LiveSessionOperationCompletion` type
 
@@ -6374,7 +6374,7 @@ public data class LiveSessionOperationCompletion(
 )
 ```
 
-Package: `com.convohop.android.generated`.
+Package: `dev.instantrelay.android.generated`.
 
 ### `LiveSessionOperationInput` type
 
@@ -6382,7 +6382,7 @@ Package: `com.convohop.android.generated`.
 public data class LiveSessionOperationInput(public val operationId: String)
 ```
 
-Package: `com.convohop.android.generated`.
+Package: `dev.instantrelay.android.generated`.
 
 ### `LiveSessionOperationReply` type
 
@@ -6395,7 +6395,7 @@ public data class LiveSessionOperationReply(
 )
 ```
 
-Package: `com.convohop.android.generated`.
+Package: `dev.instantrelay.android.generated`.
 
 ### `LiveSessionPage` type
 
@@ -6409,7 +6409,7 @@ public data class LiveSessionPage(
 )
 ```
 
-Package: `com.convohop.android.generated`.
+Package: `dev.instantrelay.android.generated`.
 
 ### `LiveSessionPageReply` type
 
@@ -6422,7 +6422,7 @@ public data class LiveSessionPageReply(
 )
 ```
 
-Package: `com.convohop.android.generated`.
+Package: `dev.instantrelay.android.generated`.
 
 ### `LiveSessionReply` type
 
@@ -6435,7 +6435,7 @@ public data class LiveSessionReply(
 )
 ```
 
-Package: `com.convohop.android.generated`.
+Package: `dev.instantrelay.android.generated`.
 
 ### `LiveSessionStarted` type
 
@@ -6449,7 +6449,7 @@ public data class LiveSessionStarted(
 )
 ```
 
-Package: `com.convohop.android.generated`.
+Package: `dev.instantrelay.android.generated`.
 
 ### `LiveSessionsInput` type
 
@@ -6461,7 +6461,7 @@ public data class LiveSessionsInput(
 )
 ```
 
-Package: `com.convohop.android.generated`.
+Package: `dev.instantrelay.android.generated`.
 
 ### `MediaCutoff` type
 
@@ -6469,7 +6469,7 @@ Package: `com.convohop.android.generated`.
 public data class MediaCutoff(public val state: String, public val scope: CutoffScope? = null)
 ```
 
-Package: `com.convohop.android.generated`.
+Package: `dev.instantrelay.android.generated`.
 
 ### `MediaPolicy` type
 
@@ -6484,7 +6484,7 @@ public data class MediaPolicy(
 )
 ```
 
-Package: `com.convohop.android.generated`.
+Package: `dev.instantrelay.android.generated`.
 
 ### `Member` type
 
@@ -6502,7 +6502,7 @@ public data class Member(
 )
 ```
 
-Package: `com.convohop.android.generated`.
+Package: `dev.instantrelay.android.generated`.
 
 ### `MemberPage` type
 
@@ -6515,7 +6515,7 @@ public data class MemberPage(
 )
 ```
 
-Package: `com.convohop.android.generated`.
+Package: `dev.instantrelay.android.generated`.
 
 ### `MembersReply` type
 
@@ -6533,7 +6533,7 @@ public data class MembersReply(
 )
 ```
 
-Package: `com.convohop.android.generated`.
+Package: `dev.instantrelay.android.generated`.
 
 ### `MembersRequestInput` type
 
@@ -6545,7 +6545,7 @@ public data class MembersRequestInput(
 )
 ```
 
-Package: `com.convohop.android.generated`.
+Package: `dev.instantrelay.android.generated`.
 
 ### `Message` type
 
@@ -6565,7 +6565,7 @@ public data class Message(
 )
 ```
 
-Package: `com.convohop.android.generated`.
+Package: `dev.instantrelay.android.generated`.
 
 ### `MessageAck` type
 
@@ -6580,7 +6580,7 @@ public data class MessageAck(
 )
 ```
 
-Package: `com.convohop.android.generated`.
+Package: `dev.instantrelay.android.generated`.
 
 ### `MessagePage` type
 
@@ -6593,7 +6593,7 @@ public data class MessagePage(
 )
 ```
 
-Package: `com.convohop.android.generated`.
+Package: `dev.instantrelay.android.generated`.
 
 ### `MessagesReply` type
 
@@ -6611,7 +6611,7 @@ public data class MessagesReply(
 )
 ```
 
-Package: `com.convohop.android.generated`.
+Package: `dev.instantrelay.android.generated`.
 
 ### `MessagesRequestInput` type
 
@@ -6624,7 +6624,7 @@ public data class MessagesRequestInput(
 )
 ```
 
-Package: `com.convohop.android.generated`.
+Package: `dev.instantrelay.android.generated`.
 
 ### `Operation` type
 
@@ -6643,7 +6643,7 @@ public data class Operation(
 )
 ```
 
-Package: `com.convohop.android.generated`.
+Package: `dev.instantrelay.android.generated`.
 
 ### `OperationRef` type
 
@@ -6656,7 +6656,7 @@ public data class OperationRef(
 )
 ```
 
-Package: `com.convohop.android.generated`.
+Package: `dev.instantrelay.android.generated`.
 
 ### `OperationResult` type
 
@@ -6682,7 +6682,7 @@ public data class OperationResult(
 )
 ```
 
-Package: `com.convohop.android.generated`.
+Package: `dev.instantrelay.android.generated`.
 
 ### `OperationStep` type
 
@@ -6690,7 +6690,7 @@ Package: `com.convohop.android.generated`.
 public data class OperationStep(public val stepId: String, public val state: String)
 ```
 
-Package: `com.convohop.android.generated`.
+Package: `dev.instantrelay.android.generated`.
 
 ### `Organization` type
 
@@ -6703,7 +6703,7 @@ public data class Organization(
 )
 ```
 
-Package: `com.convohop.android.generated`.
+Package: `dev.instantrelay.android.generated`.
 
 ### `OrganizationSpend` type
 
@@ -6732,7 +6732,7 @@ public data class OrganizationSpend(
 )
 ```
 
-Package: `com.convohop.android.generated`.
+Package: `dev.instantrelay.android.generated`.
 
 ### `Principal` type
 
@@ -6745,7 +6745,7 @@ public data class Principal(
 )
 ```
 
-Package: `com.convohop.android.generated`.
+Package: `dev.instantrelay.android.generated`.
 
 ### `ReadReceipt` type
 
@@ -6760,7 +6760,7 @@ public data class ReadReceipt(
 )
 ```
 
-Package: `com.convohop.android.generated`.
+Package: `dev.instantrelay.android.generated`.
 
 ### `ReceiptPage` type
 
@@ -6773,7 +6773,7 @@ public data class ReceiptPage(
 )
 ```
 
-Package: `com.convohop.android.generated`.
+Package: `dev.instantrelay.android.generated`.
 
 ### `ReceiptsReply` type
 
@@ -6791,7 +6791,7 @@ public data class ReceiptsReply(
 )
 ```
 
-Package: `com.convohop.android.generated`.
+Package: `dev.instantrelay.android.generated`.
 
 ### `ReceiptsRequestInput` type
 
@@ -6803,7 +6803,7 @@ public data class ReceiptsRequestInput(
 )
 ```
 
-Package: `com.convohop.android.generated`.
+Package: `dev.instantrelay.android.generated`.
 
 ### `ReportReceiptReply` type
 
@@ -6821,7 +6821,7 @@ public data class ReportReceiptReply(
 )
 ```
 
-Package: `com.convohop.android.generated`.
+Package: `dev.instantrelay.android.generated`.
 
 ### `ReportReceiptRequestInput` type
 
@@ -6835,7 +6835,7 @@ public data class ReportReceiptRequestInput(
 )
 ```
 
-Package: `com.convohop.android.generated`.
+Package: `dev.instantrelay.android.generated`.
 
 ### `RequestContextInput` type
 
@@ -6849,7 +6849,7 @@ public data class RequestContextInput(
 )
 ```
 
-Package: `com.convohop.android.generated`.
+Package: `dev.instantrelay.android.generated`.
 
 ### `RequestResolution` type
 
@@ -6863,7 +6863,7 @@ public data class RequestResolution(
 )
 ```
 
-Package: `com.convohop.android.generated`.
+Package: `dev.instantrelay.android.generated`.
 
 ### `ResolveRequestReply` type
 
@@ -6881,7 +6881,7 @@ public data class ResolveRequestReply(
 )
 ```
 
-Package: `com.convohop.android.generated`.
+Package: `dev.instantrelay.android.generated`.
 
 ### `ResolveRequestRequestInput` type
 
@@ -6889,7 +6889,7 @@ Package: `com.convohop.android.generated`.
 public data class ResolveRequestRequestInput(public val requestId: String)
 ```
 
-Package: `com.convohop.android.generated`.
+Package: `dev.instantrelay.android.generated`.
 
 ### `ResolvedReceipt` type
 
@@ -6907,7 +6907,7 @@ public data class ResolvedReceipt(
 )
 ```
 
-Package: `com.convohop.android.generated`.
+Package: `dev.instantrelay.android.generated`.
 
 ### `ResourceRef` type
 
@@ -6915,7 +6915,7 @@ Package: `com.convohop.android.generated`.
 public data class ResourceRef(public val kind: String, public val id: String)
 ```
 
-Package: `com.convohop.android.generated`.
+Package: `dev.instantrelay.android.generated`.
 
 ### `RetainedResult` type
 
@@ -6952,7 +6952,7 @@ public data class RetainedResult(
 
 Exactly one typed field contains the retained, currently authorized receipt result.
 
-Package: `com.convohop.android.generated`.
+Package: `dev.instantrelay.android.generated`.
 
 ### `RevokeSessionReply` type
 
@@ -6970,7 +6970,7 @@ public data class RevokeSessionReply(
 )
 ```
 
-Package: `com.convohop.android.generated`.
+Package: `dev.instantrelay.android.generated`.
 
 ### `RevokeSessionRequestInput` type
 
@@ -6981,7 +6981,7 @@ public data class RevokeSessionRequestInput(
 )
 ```
 
-Package: `com.convohop.android.generated`.
+Package: `dev.instantrelay.android.generated`.
 
 ### `RouteReply` type
 
@@ -6999,7 +6999,7 @@ public data class RouteReply(
 )
 ```
 
-Package: `com.convohop.android.generated`.
+Package: `dev.instantrelay.android.generated`.
 
 ### `SearchHit` type
 
@@ -7007,7 +7007,7 @@ Package: `com.convohop.android.generated`.
 public data class SearchHit(public val conversationId: String, public val message: Message? = null)
 ```
 
-Package: `com.convohop.android.generated`.
+Package: `dev.instantrelay.android.generated`.
 
 ### `SearchPage` type
 
@@ -7020,7 +7020,7 @@ public data class SearchPage(
 )
 ```
 
-Package: `com.convohop.android.generated`.
+Package: `dev.instantrelay.android.generated`.
 
 ### `SearchReply` type
 
@@ -7038,7 +7038,7 @@ public data class SearchReply(
 )
 ```
 
-Package: `com.convohop.android.generated`.
+Package: `dev.instantrelay.android.generated`.
 
 ### `SearchRequestInput` type
 
@@ -7052,7 +7052,7 @@ public data class SearchRequestInput(
 )
 ```
 
-Package: `com.convohop.android.generated`.
+Package: `dev.instantrelay.android.generated`.
 
 ### `SearchScopeInput` type
 
@@ -7060,7 +7060,7 @@ Package: `com.convohop.android.generated`.
 public data class SearchScopeInput(public val conversationIds: List<String>)
 ```
 
-Package: `com.convohop.android.generated`.
+Package: `dev.instantrelay.android.generated`.
 
 ### `SendMessageReply` type
 
@@ -7078,7 +7078,7 @@ public data class SendMessageReply(
 )
 ```
 
-Package: `com.convohop.android.generated`.
+Package: `dev.instantrelay.android.generated`.
 
 ### `SendMessageRequestInput` type
 
@@ -7091,7 +7091,7 @@ public data class SendMessageRequestInput(
 )
 ```
 
-Package: `com.convohop.android.generated`.
+Package: `dev.instantrelay.android.generated`.
 
 ### `Session` type
 
@@ -7107,7 +7107,7 @@ public data class Session(
 )
 ```
 
-Package: `com.convohop.android.generated`.
+Package: `dev.instantrelay.android.generated`.
 
 ### `SessionBootstrap` type
 
@@ -7119,7 +7119,7 @@ public data class SessionBootstrap(
 )
 ```
 
-Package: `com.convohop.android.generated`.
+Package: `dev.instantrelay.android.generated`.
 
 ### `SessionRevocation` type
 
@@ -7131,7 +7131,7 @@ public data class SessionRevocation(
 )
 ```
 
-Package: `com.convohop.android.generated`.
+Package: `dev.instantrelay.android.generated`.
 
 ### `SetConversationMuteInput` type
 
@@ -7144,7 +7144,7 @@ public data class SetConversationMuteInput(
 )
 ```
 
-Package: `com.convohop.android.generated`.
+Package: `dev.instantrelay.android.generated`.
 
 ### `SetConversationMutePayload` type
 
@@ -7159,7 +7159,7 @@ public data class SetConversationMutePayload(
 )
 ```
 
-Package: `com.convohop.android.generated`.
+Package: `dev.instantrelay.android.generated`.
 
 ### `StartLiveSessionInput` type
 
@@ -7171,7 +7171,7 @@ public data class StartLiveSessionInput(
 )
 ```
 
-Package: `com.convohop.android.generated`.
+Package: `dev.instantrelay.android.generated`.
 
 ### `StartLiveSessionPayload` type
 
@@ -7187,7 +7187,7 @@ public data class StartLiveSessionPayload(
 )
 ```
 
-Package: `com.convohop.android.generated`.
+Package: `dev.instantrelay.android.generated`.
 
 ### `TypingReply` type
 
@@ -7205,7 +7205,7 @@ public data class TypingReply(
 )
 ```
 
-Package: `com.convohop.android.generated`.
+Package: `dev.instantrelay.android.generated`.
 
 ### `TypingRequestInput` type
 
@@ -7216,7 +7216,7 @@ public data class TypingRequestInput(
 )
 ```
 
-Package: `com.convohop.android.generated`.
+Package: `dev.instantrelay.android.generated`.
 
 ### `TypingStatus` type
 
@@ -7224,7 +7224,7 @@ Package: `com.convohop.android.generated`.
 public data class TypingStatus(public val accepted: Boolean)
 ```
 
-Package: `com.convohop.android.generated`.
+Package: `dev.instantrelay.android.generated`.
 
 ### `UpdateConversationReply` type
 
@@ -7242,7 +7242,7 @@ public data class UpdateConversationReply(
 )
 ```
 
-Package: `com.convohop.android.generated`.
+Package: `dev.instantrelay.android.generated`.
 
 ### `UpdateConversationRequestInput` type
 
@@ -7255,7 +7255,7 @@ public data class UpdateConversationRequestInput(
 )
 ```
 
-Package: `com.convohop.android.generated`.
+Package: `dev.instantrelay.android.generated`.
 
 ## Constants
 
@@ -7267,4 +7267,4 @@ public const val MAX_LIST_ITEMS: Int = 100
 
 The most items one response list may hold.
 
-Package: `com.convohop.android.generated`.
+Package: `dev.instantrelay.android.generated`.

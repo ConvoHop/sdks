@@ -3,7 +3,7 @@ import { byName, namedTypeRef, operationCatalog, printTypeRef, requireType } fro
 import { codegenTypeName, naturalCompare } from "../lib/naming.mjs";
 
 /**
- * TypeScript operation types for @convohop/core.
+ * TypeScript operation types for @instantrelay/core.
  *
  * graphql-types.ts reproduces, byte for byte, what the typescript-operations
  * plugin of graphql-codegen printed for schema/operations.graphql with
@@ -223,7 +223,7 @@ export function renderErrorCodes(ir) {
 
 export default defineEmitter({
   name: "typescript",
-  description: "TypeScript operation types, catalog and error codes for @convohop/core",
+  description: "TypeScript operation types, catalog and error codes for @instantrelay/core",
   emit(ir, { directory = DEFAULT_DIRECTORY } = {}) {
     return [
       { path: `${directory}/errors.ts`, contents: renderErrorCodes(ir) },

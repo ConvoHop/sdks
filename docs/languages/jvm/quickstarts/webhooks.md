@@ -1,6 +1,6 @@
 # Java and Kotlin webhooks quickstart
 
-Receive ConvoHop events in your Java or Kotlin backend with `convohop-server`: verify each signed delivery, acknowledge it quickly, and handle its event in a queue worker.
+Receive Relay events in your Java or Kotlin backend with `relay-server`: verify each signed delivery, acknowledge it quickly, and handle its event in a queue worker.
 
 ## Before you start
 
@@ -8,17 +8,17 @@ Create a webhook endpoint for your project with the [`management.configureWebhoo
 
 The samples on this page use these imports:
 
-```java include=examples/src/main/java/com/convohop/examples/Webhooks.java#imports
+```java include=examples/src/main/java/dev/instantrelay/examples/Webhooks.java#imports
 ```
 
 ## Verify deliveries
 
-ConvoHop signs each delivery with the [Standard Webhooks](https://www.standardwebhooks.com) scheme. `WebhookVerifier` checks the signature and timestamp against the raw body, and returns the event. `receive` works with any HTTP framework, and `webhookHandler` serves it with the JDK's HTTP server.
+Relay signs each delivery with the [Standard Webhooks](https://www.standardwebhooks.com) scheme. `WebhookVerifier` checks the signature and timestamp against the raw body, and returns the event. `receive` works with any HTTP framework, and `webhookHandler` serves it with the JDK's HTTP server.
 
-```java include=examples/src/main/java/com/convohop/examples/Webhooks.java#receive
+```java include=examples/src/main/java/dev/instantrelay/examples/Webhooks.java#receive
 ```
 
-- Pass every secret you hold. While a rotation is pending, ConvoHop signs with both the current and the next secret, and it signs with the replaced secret for 24 hours after the rotation.
+- Pass every secret you hold. While a rotation is pending, Relay signs with both the current and the next secret, and it signs with the replaced secret for 24 hours after the rotation.
 - Verify the exact bytes you received, never re-serialized JSON. A body over 4096 bytes fails.
 - Answer within 5 seconds, and process the event afterwards.
 - Delivery is at least once, and retries keep the webhook ID, so deduplicate on it.
@@ -30,7 +30,7 @@ ConvoHop signs each delivery with the [Standard Webhooks](https://www.standardwe
 
 Events carry IDs and metadata, not content, so read the current state through the API. Events arrive in any order.
 
-```java include=examples/src/main/java/com/convohop/examples/Webhooks.java#handle
+```java include=examples/src/main/java/dev/instantrelay/examples/Webhooks.java#handle
 ```
 
 `isKnown()` is `false` for an event type that this SDK version doesn't know, and for a notification event that doesn't match the [push payload contract](https://github.com/ConvoHop/sdks/blob/main/spec/push-payload/README.md). Both are `WebhookUnknownEvent`. Skip those events rather than failing, as `handleEvent` does.

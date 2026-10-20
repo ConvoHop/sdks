@@ -6,19 +6,19 @@ import { capitalize, pascalCase, screamingSnakeCase } from "../lib/naming.mjs";
  * Java and Kotlin sources for the JVM server SDK in jvm/.
  *
  * Java: an immutable model per enum, object and input type in
- * com.convohop.server.model, the operation catalog (Operations) and one API
- * class per plane in com.convohop.server.api, with a lazy pages method for each
+ * dev.instantrelay.server.model, the operation catalog (Operations) and one API
+ * class per plane in dev.instantrelay.server.api, with a lazy pages method for each
  * query whose pagination style takes a cursor. Kotlin: a suspending wrapper per
- * plane API in com.convohop.server.kotlin, where pages methods return cold
+ * plane API in dev.instantrelay.server.kotlin, where pages methods return cold
  * flows. Only server-layer queries and
  * mutations (layer server or both) get API methods. The generated code uses
- * only com.convohop.server.internal and JSpecify, so the edge golden compiles
+ * only dev.instantrelay.server.internal and JSpecify, so the edge golden compiles
  * against the hand-written runtime without the repository schema.
  */
-export const DEFAULT_DIRECTORY = "jvm/convohop-server/src/generated/java";
-export const DEFAULT_KOTLIN_DIRECTORY = "jvm/convohop-server-kotlin/src/generated/kotlin";
+export const DEFAULT_DIRECTORY = "jvm/relay-server/src/generated/java";
+export const DEFAULT_KOTLIN_DIRECTORY = "jvm/relay-server-kotlin/src/generated/kotlin";
 
-const PACKAGE = "com.convohop.server";
+const PACKAGE = "dev.instantrelay.server";
 const NOTICE = "// Generated from the current unversioned GraphQL schemas. Run npm run generate:graphql.\n";
 // graphql-js prints `@deprecated` without a reason as this default.
 const DEFAULT_DEPRECATION_REASON = "No longer supported";
@@ -69,7 +69,7 @@ const RESERVED_TYPE_NAMES = new Set([
   "WireEnum", "WireException", "WireValue",
 ]);
 const MODEL_KINDS = new Set(["enum", "input", "object"]);
-// The hand-written runtime functions (convohop-server-kotlin) that the suspending wrappers call.
+// The hand-written runtime functions (relay-server-kotlin) that the suspending wrappers call.
 const KOTLIN_CALL_HELPER = "interruptible";
 const KOTLIN_PAGE_HELPER = "pageFlow";
 // How Pages checks that each next cursor advances: ordered styles compare decimal cursors, other cursors must change.
@@ -388,7 +388,7 @@ function renderEnum(type) {
   });
   return `${NOTICE}package ${PACKAGE}.model;
 
-${imports(["com.convohop.server.internal.Wire", "com.convohop.server.internal.WireEnum", "com.convohop.server.internal.WireException", "org.jspecify.annotations.Nullable"])}${javadoc(0, [prose(type.description) || `The ${code(type.name)} enum.`])}public enum ${type.name} implements WireEnum {
+${imports(["dev.instantrelay.server.internal.Wire", "dev.instantrelay.server.internal.WireEnum", "dev.instantrelay.server.internal.WireException", "org.jspecify.annotations.Nullable"])}${javadoc(0, [prose(type.description) || `The ${code(type.name)} enum.`])}public enum ${type.name} implements WireEnum {
 ${values.join(",\n")};
 
   private final String wireValue;
@@ -453,7 +453,7 @@ function renderObject(type, model) {
   const exactlyOne = EXACTLY_ONE_FIELD.has(type.name) ? `    Wire.exactlyOneNonNull(object, ${javaString(type.name)});\n` : "";
   return `${NOTICE}package ${PACKAGE}.model;
 
-${imports(["com.convohop.server.internal.Wire", "com.convohop.server.internal.WireValue", "java.util.LinkedHashMap", "java.util.Map", "java.util.Objects", "org.jspecify.annotations.Nullable", ...(typed.some(({ java }) => java.includes("List<")) ? ["java.util.List"] : [])])}${javadoc(0, [prose(type.description) || `The ${code(type.name)} result type.`])}public final class ${type.name} implements WireValue {
+${imports(["dev.instantrelay.server.internal.Wire", "dev.instantrelay.server.internal.WireValue", "java.util.LinkedHashMap", "java.util.Map", "java.util.Objects", "org.jspecify.annotations.Nullable", ...(typed.some(({ java }) => java.includes("List<")) ? ["java.util.List"] : [])])}${javadoc(0, [prose(type.description) || `The ${code(type.name)} result type.`])}public final class ${type.name} implements WireValue {
 ${fields}
 
   private ${type.name}(
@@ -533,7 +533,7 @@ function renderInput(type, model) {
   }).join("\n\n");
   return `${NOTICE}package ${PACKAGE}.model;
 
-${imports(["com.convohop.server.internal.Wire", "com.convohop.server.internal.WireValue", "java.util.LinkedHashMap", "java.util.Map", "java.util.Objects", "org.jspecify.annotations.Nullable", ...(listy ? ["java.util.List"] : [])])}${javadoc(0, [prose(type.description) || `The ${code(type.name)} input type.`, "Build instances with {@link #builder()}. Fields without a value are omitted from the request."])}public final class ${type.name} implements WireValue {
+${imports(["dev.instantrelay.server.internal.Wire", "dev.instantrelay.server.internal.WireValue", "java.util.LinkedHashMap", "java.util.Map", "java.util.Objects", "org.jspecify.annotations.Nullable", ...(listy ? ["java.util.List"] : [])])}${javadoc(0, [prose(type.description) || `The ${code(type.name)} input type.`, "Build instances with {@link #builder()}. Fields without a value are omitted from the request."])}public final class ${type.name} implements WireValue {
 ${fields}
 
   private ${type.name}(Builder builder) {
@@ -582,7 +582,7 @@ ${setters}
 }
 
 function renderScalars(scalars) {
-  const names = new Set(["com.convohop.server.internal.Wire"]);
+  const names = new Set(["dev.instantrelay.server.internal.Wire"]);
   const constants = scalars.map(scalar => {
     const mapping = scalarMapping(scalar);
     if (mapping.factory.includes("List.of")) names.add("java.util.List");
@@ -743,7 +743,7 @@ ${lines.map(line => `          ${line}`).join("\n")}
   });
   const resolve = ir.planes.filter(plane => plane.resolveOperation && described.some(entry => entry.operation.id === plane.resolveOperation));
   const names = new Set([
-    "com.convohop.server.internal.OperationCatalog", "com.convohop.server.internal.OperationDescriptor", "com.convohop.server.internal.Wire",
+    "dev.instantrelay.server.internal.OperationCatalog", "dev.instantrelay.server.internal.OperationDescriptor", "dev.instantrelay.server.internal.Wire",
     "java.util.List", "java.util.Map", ...[...uses].map(name => `${PACKAGE}.model.${name}`),
   ]);
   if (constants.some(text => text.includes("@Nullable"))) names.add("org.jspecify.annotations.Nullable");
@@ -809,7 +809,7 @@ function renderPaginator(entry, model, uses) {
   const paragraphs = [
     `Every page of {@link #${entry.method}(${input.name})}, each requested when iteration reaches it. Later requests set ${code(paginator.cursorField)} to the previous page's ${code("nextCursor")}, and iteration ends after the page whose ${code("complete")} is true. Each iteration starts again from ${code("input")}, and every request has a new request ID.`,
     `Pagination: ${code(paginator.style.name)}. ${prose(paginator.style.summary)}`,
-    `Iteration throws {@link com.convohop.server.ConvoHopProblem} if the authority rejects a request or a page is malformed or does not advance, and {@link IllegalStateException} if a page reports ${code("refreshRequired")}: start again from current state, not from the cursor.`,
+    `Iteration throws {@link dev.instantrelay.server.RelayProblem} if the authority rejects a request or a page is malformed or does not advance, and {@link IllegalStateException} if a page reports ${code("refreshRequired")}: start again from current state, not from the cursor.`,
   ];
   const tags = [
     `@param input the first page's input${entry.inputRequired ? "" : ", or {@code null} to send none"}`,
@@ -858,7 +858,7 @@ function renderPlaneApi(plane, entries, model) {
     return lists.map(parameters => {
       const signature = parameters.map(parameter => `${typeOf(parameter)} ${parameter.name}`).join(", ");
       const tags = [...parameters.map(describe), "@return the authority result",
-        "@throws com.convohop.server.ConvoHopProblem if the authority rejects the request or its outcome is unknown", ...deprecated];
+        "@throws dev.instantrelay.server.RelayProblem if the authority rejects the request or its outcome is unknown", ...deprecated];
       let body;
       if (parameters === full) {
         const inputValue = !input ? "null"
@@ -872,8 +872,8 @@ function renderPlaneApi(plane, entries, model) {
       return `${javadoc(2, paragraphs, tags)}${annotation}  public ${result} ${entry.method}(${signature}) {\n    ${body}\n  }`;
     }).concat(entry.paginator ? [renderPaginator(entry, model, uses)] : []).join("\n\n");
   });
-  const names = new Set(["com.convohop.server.internal.OperationExecutor", "com.convohop.server.internal.Wire", ...[...uses].map(name => `${PACKAGE}.model.${name}`)]);
-  if (entries.some(entry => entry.paginator)) names.add("com.convohop.server.internal.Pages");
+  const names = new Set(["dev.instantrelay.server.internal.OperationExecutor", "dev.instantrelay.server.internal.Wire", ...[...uses].map(name => `${PACKAGE}.model.${name}`)]);
+  if (entries.some(entry => entry.paginator)) names.add("dev.instantrelay.server.internal.Pages");
   if (methods.some(text => text.includes("@Nullable"))) names.add("org.jspecify.annotations.Nullable");
   if (methods.some(text => text.includes("List<"))) names.add("java.util.List");
   if (methods.some(text => text.includes("Map<"))) names.add("java.util.Map");
@@ -988,7 +988,7 @@ export function renderJava(ir, { directory = DEFAULT_DIRECTORY, kotlinDirectory 
 export default defineEmitter({
   name: "java",
   description: "Java models, operation catalog and plane APIs, with Kotlin coroutine wrappers, for the JVM server SDK",
-  owns: ["jvm/convohop-server/src/generated", "jvm/convohop-server-kotlin/src/generated"],
+  owns: ["jvm/relay-server/src/generated", "jvm/relay-server-kotlin/src/generated"],
   emit(ir, options = {}) {
     return renderJava(ir, options);
   },

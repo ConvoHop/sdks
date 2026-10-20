@@ -1,4 +1,4 @@
-"""Starts the conformance mock, a local stand-in for the ConvoHop API, as a Node.js process."""
+"""Starts the conformance mock, a local stand-in for the Relay API, as a Node.js process."""
 
 import json
 import shutil

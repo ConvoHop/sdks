@@ -4,19 +4,19 @@ import { pascalCase } from "../lib/naming.mjs";
 
 /**
  * Kotlin models and operation catalog for the Android client SDK
- * (android/core, package com.convohop.android.generated).
+ * (android/core, package dev.instantrelay.android.generated).
  *
  * Only what a user-session client reaches is emitted: operations whose layer
  * is `client` or `both`, and the types reachable from their arguments and
- * results. Decoders follow @convohop/core's output validation: a missing
+ * results. Decoders follow @instantrelay/core's output validation: a missing
  * field, a wrong JSON type, an unknown enum value, a malformed string scalar
  * or a list over 100 items throws ShapeException; unknown fields are ignored.
  * Input classes omit null fields so server defaults apply. Kotlin names are
  * the GraphQL names. Hard keywords are backticked, and names that would
  * shadow what the generated code refers to are rejected.
  */
-export const DIRECTORY = "android/core/src/main/kotlin/com/convohop/android/generated";
-export const PACKAGE = "com.convohop.android.generated";
+export const DIRECTORY = "android/core/src/main/kotlin/dev/instantrelay/android/generated";
+export const PACKAGE = "dev.instantrelay.android.generated";
 
 const NOTICE = "// Generated from the current unversioned GraphQL schemas. Run npm run generate:graphql.\n";
 const CLIENT_LAYERS = new Set(["client", "both"]);

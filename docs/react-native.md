@@ -1,7 +1,7 @@
 # React Native SDK design
 
-[`@convohop/react-native`](../packages/react-native/README.md) runs the
-TypeScript client SDK, [`@convohop/client`](../packages/client/README.md),
+[`@instantrelay/react-native`](../packages/react-native/README.md) runs the
+TypeScript client SDK, [`@instantrelay/client`](../packages/client/README.md),
 in React Native apps. It adds push notifications and calls in the system
 call UI through the iOS and Android SDKs' native helpers, and media through
 LiveKit's React Native SDK. This document describes how it's built, what
@@ -15,7 +15,7 @@ The package is built in two phases.
 | --- | --- | --- |
 | Platform adapter, `createPlatform` | 1 | Written. Tested on Node.js with the globals Hermes lacks removed. Run on Hermes once, by hand, in the example on an Android emulator and once on an iOS simulator. |
 | JavaScript API for push, calls and media | 1 | Written. Tested against fakes of the native modules, React Native and LiveKit. |
-| Codegen specs for `ConvoHopPlatform`, `ConvoHopPush` and `ConvoHopCalls` | 1 | Written. The tests run React Native 0.87.1's Codegen on them. React Native 0.76.0's Codegen generated them once, by hand. |
+| Codegen specs for `RelayPlatform`, `RelayPush` and `RelayCalls` | 1 | Written. The tests run React Native 0.87.1's Codegen on them. React Native 0.76.0's Codegen generated them once, by hand. |
 | Conformance driver | 1 | Runs the shared scenarios through `createPlatform` against the mock. |
 | Example app's JavaScript | 1 | Written and type-checked. |
 | Android: Kotlin modules, Gradle build and the example's `android/` project | 2 | Written. CI runs the JVM tests and builds the example. The example ran once, by hand, on an Android 15 emulator; see [Testing](#testing). |
@@ -26,7 +26,7 @@ The package is built in two phases.
 
 Goals:
 
-- Reuse `@convohop/core` and `@convohop/client` unchanged. Web and React
+- Reuse `@instantrelay/core` and `@instantrelay/client` unchanged. Web and React
   Native share one implementation of the protocol, the outbox, replay,
   receipts, live sessions and push payload parsing.
 - Keep one implementation of push and calls per platform: wrap the iOS and
@@ -34,7 +34,7 @@ Goals:
 - Work before JavaScript runs. A VoIP push must reach CallKit, a call must
   ring, and a push for another user must be dropped while the app starts
   or stays suspended.
-- Join calls with LiveKit's official React Native SDK and ConvoHop's
+- Join calls with LiveKit's official React Native SDK and Relay's
   admission, as
   [Calls with the official LiveKit SDKs](sdk-strategy.md#calls-with-the-official-livekit-sdks)
   describes.
@@ -56,29 +56,29 @@ Not in scope:
 
 ```mermaid
 flowchart TB
-  App["Your app"] --> Hooks["@convohop/react"]
-  App --> RN["@convohop/react-native"]
-  Hooks --> Client["@convohop/client"]
+  App["Your app"] --> Hooks["@instantrelay/react"]
+  App --> RN["@instantrelay/react-native"]
+  Hooks --> Client["@instantrelay/client"]
   RN --> Client
-  Client --> Core["@convohop/core"]
+  Client --> Core["@instantrelay/core"]
   RN -- "./media" --> LiveKit["@livekit/react-native"]
-  RN -- "TurboModules" --> Modules["ConvoHopPlatform, ConvoHopPush, ConvoHopCalls"]
-  Modules -- "iOS" --> Swift["ConvoHop Swift SDK: APNs, PushKit, CallKit"]
-  Modules -- "Android" --> Kotlin["convohop-android-push: FCM, Telecom"]
+  RN -- "TurboModules" --> Modules["RelayPlatform, RelayPush, RelayCalls"]
+  Modules -- "iOS" --> Swift["Relay Swift SDK: APNs, PushKit, CallKit"]
+  Modules -- "Android" --> Kotlin["relay-android-push: FCM, Telecom"]
 ```
 
-- `createPlatform()` gives `@convohop/client` the runtime services that
+- `createPlatform()` gives `@instantrelay/client` the runtime services that
   Hermes lacks, through the client's `platform` option. The client has no
   React Native code.
-- Hooks come from [`@convohop/react`](../packages/react/README.md), which
-  imports only `react` and `@convohop/client`, never `react-dom`. Its
+- Hooks come from [`@instantrelay/react`](../packages/react/README.md), which
+  imports only `react` and `@instantrelay/client`, never `react-dom`. Its
   `useMediaConnection` is for browsers; React Native apps connect calls
-  with `@convohop/react-native/media`.
-- `@convohop/react-native/media` is a separate entry point, so apps without
+  with `@instantrelay/react-native/media`.
+- `@instantrelay/react-native/media` is a separate entry point, so apps without
   calls don't install or load LiveKit.
 - The package ships its specs in `src/specs`, and the app's build runs
-  Codegen on them. The Codegen library is `RNConvoHopSpec`, and the Android
-  package is `com.convohop.reactnative`.
+  Codegen on them. The Codegen library is `RNRelaySpec`, and the Android
+  package is `dev.instantrelay.reactnative`.
 
 ## Platform seams
 
@@ -89,7 +89,7 @@ option with no default.
 
 | Seam | Web | React Native |
 | --- | --- | --- |
-| Random UUIDs | `crypto.randomUUID()` | Version 4 UUIDs from `ConvoHopPlatform.getRandomBytes`: `SecRandomCopyBytes` on iOS and `SecureRandom` on Android. The native call is synchronous, because `randomUUID` is. |
+| Random UUIDs | `crypto.randomUUID()` | Version 4 UUIDs from `RelayPlatform.getRandomBytes`: `SecRandomCopyBytes` on iOS and `SecureRandom` on Android. The native call is synchronous, because `randomUUID` is. |
 | SHA-256, for request fingerprints | Web Crypto | JavaScript. The tests compare its digests with Web Crypto's. |
 | `URL` | The global | `whatwg-url-without-unicode`, with the host lowercased, which the core's URL check needs. Hosts must be ASCII, so write internationalized domain names in Punycode. React Native's own `URL` is incomplete. |
 | UTF-8 encoding | `TextEncoder` | `TextEncoder` where the runtime has it; otherwise the core encodes UTF-8 itself |
@@ -122,9 +122,9 @@ are checked before they reach the app.
 
 | Module | Spec | Purpose |
 | --- | --- | --- |
-| `ConvoHopPlatform` | [`NativeConvoHopPlatform.ts`](../packages/react-native/src/specs/NativeConvoHopPlatform.ts) | Secure random bytes |
-| `ConvoHopPush` | [`NativeConvoHopPush.ts`](../packages/react-native/src/specs/NativeConvoHopPush.ts) | Permission, registration, the push recipient, notifications |
-| `ConvoHopCalls` | [`NativeConvoHopCalls.ts`](../packages/react-native/src/specs/NativeConvoHopCalls.ts) | Calls in CallKit or Telecom, the VoIP token, the iOS audio session |
+| `RelayPlatform` | [`NativeRelayPlatform.ts`](../packages/react-native/src/specs/NativeRelayPlatform.ts) | Secure random bytes |
+| `RelayPush` | [`NativeRelayPush.ts`](../packages/react-native/src/specs/NativeRelayPush.ts) | Permission, registration, the push recipient, notifications |
+| `RelayCalls` | [`NativeRelayCalls.ts`](../packages/react-native/src/specs/NativeRelayCalls.ts) | Calls in CallKit or Telecom, the VoIP token, the iOS audio session |
 
 The modules wrap the platform SDKs' helpers. They add no push parsing,
 ledger or call state of their own, except where a table below says so.
@@ -132,16 +132,16 @@ ledger or call state of their own, except where a table below says so.
 ### iOS
 
 The modules wrap the [Swift SDK's](sdk-strategy.md#client-sdks) push and
-call helpers: `ConvoHopCalls.shared` for PushKit and CallKit, and the
-`ConvoHopPush` types for APNs payloads and tokens. They link only the
-`ConvoHopPush` and `ConvoHopCalls` products.
+call helpers: `RelayCalls.shared` for PushKit and CallKit, and the
+`RelayPush` types for APNs payloads and tokens. They link only the
+`RelayPush` and `RelayCalls` products.
 
 - **Build.** React Native's iOS autolinking still reads a podspec, so the
-  package ships a local `ConvoHopReactNative.podspec`. It isn't published
+  package ships a local `RelayReactNative.podspec`. It isn't published
   to the CocoaPods trunk. It adds the Swift SDK with React Native's
   `spm_dependency`, as a local Swift package: this repository's `swift/`,
-  or the checkout that `CONVOHOP_SWIFT_PACKAGE` names. A copy installed
-  from npm has no `swift/`, so it needs `CONVOHOP_SWIFT_PACKAGE`; see
+  or the checkout that `RELAY_SWIFT_PACKAGE` names. A copy installed
+  from npm has no `swift/`, so it needs `RELAY_SWIFT_PACKAGE`; see
   [Open questions](#open-questions). `pod install` warns that a Swift
   package in a statically linked pod might cause linker errors. The example
   links statically and builds, because only this pod links the products.
@@ -151,16 +151,16 @@ call helpers: `ConvoHopCalls.shared` for PushKit and CallKit, and the
   The pod has a privacy manifest for the push ledger's `UserDefaults`.
 - **App delegate.** iOS can launch the app for a VoIP push, and reports
   the notification that launched it only to a notification center delegate
-  set during launch. So the app calls `ConvoHopReactNative.configure(_:)`
+  set during launch. So the app calls `RelayReactNative.configure(_:)`
   in `application(_:didFinishLaunchingWithOptions:)`, before React Native
   starts, and forwards the APNs token callbacks to
   `didRegisterForRemoteNotifications(deviceToken:)` and
   `didFailToRegisterForRemoteNotifications(error:)`. `configure` starts
-  `ConvoHopCalls.shared` with `start(configuration:delegate:)`, which
+  `RelayCalls.shared` with `start(configuration:delegate:)`, which
   registers for VoIP pushes, and becomes the notification center's
   delegate. It forwards other pushes, and `openSettingsFor`, to the
   delegate it replaced. An app that sets its own delegate later calls
-  `ConvoHopReactNative.userNotificationCenter(_:willPresent:withCompletionHandler:)`
+  `RelayReactNative.userNotificationCenter(_:willPresent:withCompletionHandler:)`
   and `userNotificationCenter(_:didReceive:withCompletionHandler:)` first
   from it; each returns `false`, without calling the completion handler,
   for a push it doesn't handle. The options' `appGroup` is the
@@ -169,7 +169,7 @@ call helpers: `ConvoHopCalls.shared` for PushKit and CallKit, and the
   registration. The package doesn't swizzle the app delegate. Until
   `configure` runs, `register`, `startOutgoingCall` and `setRecipient` with
   a recipient reject with `E_NOT_CONFIGURED`.
-- **VoIP pushes.** `ConvoHopCalls.shared` reports every VoIP push to
+- **VoIP pushes.** `RelayCalls.shared` reports every VoIP push to
   CallKit before `pushRegistry(_:didReceiveIncomingPushWith:)` returns, as
   iOS requires. Otherwise iOS terminates the app and, after repeated
   failures, stops delivering VoIP pushes. A push for another recipient is
@@ -178,7 +178,7 @@ call helpers: `ConvoHopCalls.shared` for PushKit and CallKit, and the
   background itself: `CONVOHOP_MESSAGE`, or the push's text when the
   project opts in to previews. A Notification Service Extension can replace
   the text; it's native code that uses the Swift SDK's
-  `ConvoHopNotificationService`, because React Native doesn't run in an
+  `RelayNotificationService`, because React Native doesn't run in an
   extension. With the App Group's ledger, the extension also hides the text
   of a push for anyone but the recipient.
 
@@ -186,12 +186,12 @@ call helpers: `ConvoHopCalls.shared` for PushKit and CallKit, and the
 | --- | --- |
 | `getRandomBytes` | `SecRandomCopyBytes` |
 | `getPermissionStatus`, `requestPermission` | `UNUserNotificationCenter` authorization. Authorized and ephemeral are `granted`. `requestPermission` resolves the status after the request, also when iOS refuses it. |
-| `register` | `registerForRemoteNotifications()`, and resolves. The app delegate forwards the token, and `onPushRegistration` reports it as lowercase hex, from `ConvoHopPushToken.hex`, with the options' `apnsEnvironment`. A failure the app delegate forwards is `onPushRegistrationError`. |
+| `register` | `registerForRemoteNotifications()`, and resolves. The app delegate forwards the token, and `onPushRegistration` reports it as lowercase hex, from `RelayPushToken.hex`, with the options' `apnsEnvironment`. A failure the app delegate forwards is `onPushRegistrationError`. |
 | `unregister` | Rejects with `E_UNSUPPORTED`: Apple advises apps not to unregister. The backend deletes the registrations. |
-| `handleRemoteMessage` | Rejects with `E_UNSUPPORTED`: iOS delivers ConvoHop pushes through the notification center delegate. |
-| `setRecipient` | `ConvoHopCalls.shared.recipient`: `.only(projectId:recipientId:)`, or `.nobody` for `null`. The Swift SDK keeps it in its push ledger, in the App Group's defaults when there is one, where the Notification Service Extension reads it. Nothing in the package sets `.any`, so `configure` turns a recipient that reads `.any`, which nothing set yet, into `.nobody`. See [Recipient filter](#recipient-filter). |
+| `handleRemoteMessage` | Rejects with `E_UNSUPPORTED`: iOS delivers Relay pushes through the notification center delegate. |
+| `setRecipient` | `RelayCalls.shared.recipient`: `.only(projectId:recipientId:)`, or `.nobody` for `null`. The Swift SDK keeps it in its push ledger, in the App Group's defaults when there is one, where the Notification Service Extension reads it. Nothing in the package sets `.any`, so `configure` turns a recipient that reads `.any`, which nothing set yet, into `.nobody`. See [Recipient filter](#recipient-filter). |
 | `getRegistrations` | The latest APNs token this process received. `getPushRegistrations` adds the VoIP token from `getVoipToken`. |
-| `onNotification`, `takeInitialNotification` | The notification center delegate, for pushes the recipient filter accepts. In the foreground, a message is `received` and shows as the options' `foregroundPresentation`. A call goes to `ConvoHopCalls.shared.handle`, which rings it, and doesn't show. A cancellation goes to `handle` too, which ends its ring, and shows only for a missed call. The default action on a notification is `opened`, after a call or cancellation goes to `handle`. The payload is `{"convohop": …}` with the notification's text. See [Cold start](#cold-start). |
+| `onNotification`, `takeInitialNotification` | The notification center delegate, for pushes the recipient filter accepts. In the foreground, a message is `received` and shows as the options' `foregroundPresentation`. A call goes to `RelayCalls.shared.handle`, which rings it, and doesn't show. A cancellation goes to `handle` too, which ends its ring, and shows only for a missed call. The default action on a notification is `opened`, after a call or cancellation goes to `handle`. The payload is `{"convohop": …}` with the notification's text. See [Cold start](#cold-start). |
 | `getCalls`, `forgetCall` | `calls` and `forget`. An ended call stays in `calls` for a minute. |
 | `startOutgoingCall` | `startOutgoingCall(liveSessionId:conversationId:handle:displayName:hasVideo:)` |
 | `answerCall` | `answer`, which requests a CallKit action. A call that isn't ringing rejects with `E_CALL_STATE`. |
@@ -204,14 +204,14 @@ call helpers: `ConvoHopCalls.shared` for PushKit and CallKit, and the
 | `canUseFullScreenIntent` | `true` |
 | `getVoipToken`, `onVoipToken` | The PushKit token, from `didUpdateVoIPToken` |
 | `isAudioSessionActive`, `onAudioSession` | CallKit's `didActivate` and `didDeactivate`. A provider reset deactivates it. |
-| `onCallEvent` | The `ConvoHopCalls` delegate for `incoming`, `outgoing` and `answered`, and its calls observer for `changed` and `ended`. `incoming` comes once CallKit accepts the report, if the call is still ringing, so a ring that stops first reports only `ended`. |
+| `onCallEvent` | The `RelayCalls` delegate for `incoming`, `outgoing` and `answered`, and its calls observer for `changed` and `ended`. `incoming` comes once CallKit accepts the report, if the call is still ringing, so a ring that stops first reports only `ended`. |
 
 The iOS modules reject with these codes. They're Android's, plus
 `E_CALLKIT`.
 
 | Code | When |
 | --- | --- |
-| `E_NOT_CONFIGURED` | `ConvoHopReactNative.configure` hasn't run. |
+| `E_NOT_CONFIGURED` | `RelayReactNative.configure` hasn't run. |
 | `E_INVALID_ARGUMENT` | An argument JavaScript checks first, so apps don't see it |
 | `E_CALL_NOT_FOUND`, `E_CALL_STATE` | No call has the ID, or the call's state doesn't allow the request. |
 | `E_CALLKIT` | CallKit refused the request for another reason. The message has the error's domain and code. |
@@ -220,25 +220,25 @@ The iOS modules reject with these codes. They're Android's, plus
 ### Android
 
 The modules wrap the [Android SDK's](../android/README.md#push-notifications)
-`com.convohop.android.push`: `ConvoHopFirebase` for registration and
-`ConvoHopNotifications` for notifications and Telecom calls.
+`dev.instantrelay.android.push`: `RelayFirebase` for registration and
+`RelayNotifications` for notifications and Telecom calls.
 
 - **Build.** The package's Gradle module, in `android/`, depends on
-  `com.convohop:convohop-android-push` and `firebase-messaging`. It reads
+  `dev.instantrelay:relay-android-push` and `firebase-messaging`. It reads
   `compileSdkVersion`, `minSdkVersion`, `convohopAndroidVersion` and
   `firebaseMessagingVersion` from the app's root `ext` when the app sets
   them. Until the Android SDK is on Maven Central, the example publishes
   this repository's push library to a local Maven repository,
-  `android/build/repo`, and takes only the `com.convohop` group from there.
+  `android/build/repo`, and takes only the `dev.instantrelay` group from there.
 - **Manifest.** The app declares the Android SDK's
-  `ConvoHopMessagingService` for `com.google.firebase.MESSAGING_EVENT`. If
+  `RelayMessagingService` for `com.google.firebase.MESSAGING_EVENT`. If
   another library, such as React Native Firebase, owns that event, it
-  passes ConvoHop data messages to `handleRemoteMessage`. The Android SDK's
+  passes Relay data messages to `handleRemoteMessage`. The Android SDK's
   and LiveKit's manifests declare the permissions.
 - **`MainApplication.onCreate`.** A push can start the process before
   JavaScript runs, so the app configures notifications there:
-  `ConvoHopReactNative.configure(this, options)` instead of setting
-  `ConvoHopNotifications.options`. It wraps the options' `recipientFilter`
+  `RelayReactNative.configure(this, options)` instead of setting
+  `RelayNotifications.options`. It wraps the options' `recipientFilter`
   in the package's, and their `conversationIntent` in one that adds the
   push's payload, signed. It also adds the listener that the modules
   forward to JavaScript. The app passes its small icon and, optionally, a
@@ -282,10 +282,10 @@ The modules wrap the [Android SDK's](../android/README.md#push-notifications)
 | --- | --- |
 | `getRandomBytes` | `SecureRandom` |
 | `getPermissionStatus`, `requestPermission` | `POST_NOTIFICATIONS` on Android 13 and later, requested through the React Native activity; before that, `areNotificationsEnabled()`. The status is `undetermined` until the app has asked once. Requests made together share one prompt. If another library replaced the activity's permission listener, they settle when the app resumes. |
-| `register`, `unregister` | `ConvoHopFirebase.register` and `unregister`, in the app's FCM mode: the registration token, or the Firebase installation ID when the manifest sets `firebase_messaging_installation_id_enabled`. The registration arrives through `onPushRegistration`. `unregister` resolves the registration it removed. |
-| `onPushRegistration`, `onPushUnregistration`, `getRegistrations` | The listener's `onRegistered` and `onUnregistered`, and `ConvoHopNotifications.registration`. Android never emits `onPushRegistrationError`: `register` rejects instead. |
+| `register`, `unregister` | `RelayFirebase.register` and `unregister`, in the app's FCM mode: the registration token, or the Firebase installation ID when the manifest sets `firebase_messaging_installation_id_enabled`. The registration arrives through `onPushRegistration`. `unregister` resolves the registration it removed. |
+| `onPushRegistration`, `onPushUnregistration`, `getRegistrations` | The listener's `onRegistered` and `onUnregistered`, and `RelayNotifications.registration`. Android never emits `onPushRegistrationError`: `register` rejects instead. |
 | `setRecipient` | Stores the IDs in the module's own `SharedPreferences`. The package's `RecipientFilter` accepts only that recipient, and only if the app's own filter accepts it too. See [Recipient filter](#recipient-filter). |
-| `handleRemoteMessage` | `ConvoHopNotifications.handleNotification`, on the module's worker thread, because the app's `MessageContentProvider` may block |
+| `handleRemoteMessage` | `RelayNotifications.handleNotification`, on the module's worker thread, because the app's `MessageContentProvider` may block |
 | `onNotification` | The listener's `onMessage` is `received`. A tap opens the signed `conversationIntent`, and that's `opened`. The listener and intents get the parsed push, so the module writes its payload back as the `convohop` JSON. |
 | `takeInitialNotification` | The notification that opened the activity, once. It waits for an activity, and resolves `null` once the app has resumed without one. A notification opened before it resolves goes to it rather than to `onNotification`. |
 | `getCalls`, `forgetCall` | `calls()` and `forget` |
@@ -306,7 +306,7 @@ on the rejected `Error`'s `code`.
 
 | Code | When |
 | --- | --- |
-| `E_NOT_CONFIGURED` | `ConvoHopReactNative.configure` hasn't run. |
+| `E_NOT_CONFIGURED` | `RelayReactNative.configure` hasn't run. |
 | `E_FIREBASE_NOT_INITIALIZED` | `register` and `unregister` without Firebase, such as without `google-services.json` |
 | FCM's code, such as `SERVICE_NOT_AVAILABLE`, or else `E_REGISTRATION` | FCM couldn't register or unregister. Only the code reaches JavaScript. |
 | `E_NO_ACTIVITY` | `requestPermission` without a React Native activity |
@@ -331,14 +331,14 @@ on the rejected `Error`'s `code`.
    registration the backend failed to store is offered again if the
    platform reports it again. When FCM unregisters one, the `unregister`
    callback deletes it from the backend.
-3. ConvoHop sends the app's backend a signed webhook for each notification
+3. Relay sends the app's backend a signed webhook for each notification
    event. The backend builds the push with the server SDKs' helpers and
-   sends it through APNs or FCM with its own credentials. ConvoHop never
+   sends it through APNs or FCM with its own credentials. Relay never
    holds device tokens.
 4. The native helpers show message notifications, ring calls and stop
    rings, with or without JavaScript. `onNotification` and
    `takeInitialNotification` give JavaScript each push's payload, parsed by
-   `@convohop/client/push`, to update the UI or navigate.
+   `@instantrelay/client/push`, to update the UI or navigate.
 
 ### Recipient filter
 
@@ -347,11 +347,11 @@ registrations, which can fail or come late, for example when the device is
 offline at sign-out. So the device itself checks whom each push is for.
 
 - `setPushRecipient({ projectId, recipientId })` stores the signed-in
-  user's IDs on the device, through `ConvoHopPush.setRecipient`. The native
-  handlers then drop every ConvoHop push for anyone else, including one
+  user's IDs on the device, through `RelayPush.setRecipient`. The native
+  handlers then drop every Relay push for anyone else, including one
   that starts the app before JavaScript runs.
 - Before the first call, and after `setPushRecipient(null)` at sign-out,
-  they drop every ConvoHop push.
+  they drop every Relay push.
 - The IDs are lowercase, non-nil UUIDs. JavaScript checks them before they
   reach native code. The device stores only the two IDs, never a token or
   other credential.
@@ -359,7 +359,7 @@ offline at sign-out. So the device itself checks whom each push is for.
   reported to CallKit, then ended at once. iOS shows a message push that
   arrives in the background itself; a Notification Service Extension with
   the App Group's ledger hides its text, leaving no title and a
-  `CONVOHOP_*` string as the body.
+  `RELAY_*` string as the body.
 - On Android, the Android SDK's `RecipientFilter` sees only the recipient
   ID. That's enough, because principal IDs are UUIDs.
 - Until `setPushRecipient` resolves, the previous recipient applies. Apps
@@ -389,7 +389,7 @@ the native helpers have already shown or rung them.
 3. `subscribeAnsweredCalls` first replays the answered calls that are still
    current, then reports new ones, so a call answered before JavaScript
    started isn't lost. `forgetCall` drops an ended call from `getCalls()`.
-4. The app joins the call's live session with `@convohop/client`, then
+4. The app joins the call's live session with `@instantrelay/client`, then
    connects media with `createRoomConnector`; see [Media](#media).
 5. The call's state follows the system UI: `onCallEvent` reports
    `incoming`, `outgoing`, `answered`, `ended` and `changed`. Muting and
@@ -402,8 +402,8 @@ expires:
 - On Android, the server's cancellation push stops it.
 - iOS gets no VoIP push for that, because iOS would make the app report a
   VoIP push as a new call. A ring that ended or expired gets an alert push
-  with `CONVOHOP_MISSED_CALL`; ConvoHop alert pushes that reach the app go
-  to `ConvoHopCalls.shared.handle`, which ends that ring. A ring answered
+  with `CONVOHOP_MISSED_CALL`; Relay alert pushes that reach the app go
+  to `RelayCalls.shared.handle`, which ends that ring. A ring answered
   or declined on another device gets no push.
 - `watchRingingCalls` lists the user's live alerts while a call rings, and
   stops a ring whose alert is gone from two complete listings in a row:
@@ -422,14 +422,14 @@ their audio too. The app joins, then reports `reportConnecting` and
 
 ## Media
 
-`@convohop/react-native/media` connects with LiveKit's React Native SDK.
+`@instantrelay/react-native/media` connects with LiveKit's React Native SDK.
 
 - `setupMedia` runs first, at the top of the app's entry file. It gives the
   global `crypto` a secure `getRandomValues` and `randomUUID` where they're
   missing, so LiveKit doesn't fall back to `Math.random`, then calls
   LiveKit's `registerGlobals()`.
 - **Admission.** `participation.connectWith(createRoomConnector(room))`
-  gets each attempt's credentials from ConvoHop. The connector connects
+  gets each attempt's credentials from Relay. The connector connects
   once with the attempt's single-use `connectToken`, with no retries of its
   own. LiveKit may resume that connection with the media server's refresh
   tokens. `onDisconnected` runs when the connection is lost past what
@@ -444,7 +444,7 @@ their audio too. The app joins, then reports `reportConnecting` and
   microphone and camera with `room.localParticipant`.
 - **iOS audio.** With `setupMedia({ callKit: true })`, LiveKit doesn't
   configure the audio session. CallKit activates it for each call, and
-  `ConvoHopCalls`' `onAudioSession` tells WebRTC through `RTCAudioSession`.
+  `RelayCalls`' `onAudioSession` tells WebRTC through `RTCAudioSession`.
   `isAudioSessionActive` covers an activation that happened before
   JavaScript listened.
 - **Android audio.** `MainApplication.onCreate` calls LiveKit's
@@ -477,7 +477,7 @@ order.
 
 ## Security
 
-- The app holds only the user's short-lived ConvoHop session, in memory.
+- The app holds only the user's short-lived Relay session, in memory.
   Backend keys stay in the app's backend.
 - Recovery storage holds unconfirmed sends, replay cursors and the outbox.
   Native storage holds the push recipient's two IDs and the helpers' push
@@ -503,7 +503,7 @@ What runs in CI, without a device:
   package's exports.
 - The client's send, outbox and push paths on `createPlatform`, on Node.js
   with the globals Hermes lacks removed, such as Web Crypto and a complete
-  `URL`. `@convohop/react`'s hooks load there too, without `react-dom`.
+  `URL`. `@instantrelay/react`'s hooks load there too, without `react-dom`.
 - An outbox on a fake AsyncStorage across killed launches: queued messages
   outlive a kill, and a send cut off by one reaches the server once.
 - React Native 0.87.1's Codegen on the specs, generating the iOS and
@@ -541,7 +541,7 @@ without Firebase. Pushes went in through `handleRemoteMessage`, the way
 React Native Firebase passes them. That run verified:
 
 - `createPlatform` on Hermes: random bytes and UUIDs, SHA-256 and `URL`.
-  `ConvoHopClient` and a `ConversationStore` ran against the conformance
+  `RelayClient` and a `ConversationStore` ran against the conformance
   mock, reached through `adb reverse`. A sent message was confirmed and
   left the outbox, another user's message arrived over the subscription,
   and counters stayed strings.
@@ -569,7 +569,7 @@ Pushes went in with `xcrun simctl push`, built with the server SDK's push
 payload builders. That run verified:
 
 - `createPlatform` on Hermes: random bytes and UUIDs, SHA-256 and `URL`.
-  `ConvoHopClient` and a `ConversationStore` ran against the conformance
+  `RelayClient` and a `ConversationStore` ran against the conformance
   mock. A sent message was confirmed and left the outbox, another user's
   message arrived over the subscription, and counters stayed strings.
 - Push: the PushKit VoIP token, from `getVoipToken` and
@@ -629,12 +629,12 @@ Not verified:
 - **A local podspec with a local Swift package.** Autolinking needs a
   podspec, and a local one isn't affected by the CocoaPods trunk becoming
   read-only. Its `spm_dependency` adds the Swift SDK from a path, this
-  repository's `swift/` or `CONVOHOP_SWIFT_PACKAGE`, because the Swift SDK
+  repository's `swift/` or `RELAY_SWIFT_PACKAGE`, because the Swift SDK
   has no package URL yet. React Native takes a local path from 0.84, so
   that's the floor on iOS, and the podspec checks it. Android keeps 0.76.
 - **The Swift SDK's push and call products only.** The modules link
-  `ConvoHopPush` and `ConvoHopCalls`. Apps get the client from
-  `@convohop/client` and media from LiveKit's React Native SDK.
+  `RelayPush` and `RelayCalls`. Apps get the client from
+  `@instantrelay/client` and media from LiveKit's React Native SDK.
 - **Configured from the app delegate, without swizzling.** The app calls
   `configure` and forwards the APNs token callbacks. The package replaces
   no app delegate methods, so an app that uses other push libraries decides
@@ -645,14 +645,14 @@ Not verified:
 - **One client per signed-in user.** The example claims the recovery
   storage for one user and clears it when another user signs in.
 - **The app's FCM mode.** Android registers by token or by Firebase
-  installation ID as the app's manifest selects. There's no ConvoHop
+  installation ID as the app's manifest selects. There's no Relay
   option.
 - **Drop pushes by default.** A device with no recipient, or a `null` one,
-  shows and rings no ConvoHop push.
+  shows and rings no Relay push.
 - **A local Maven repository for the Android SDK.** Until
-  `com.convohop:convohop-android-push` is on Maven Central, the example and
+  `dev.instantrelay:relay-android-push` is on Maven Central, the example and
   CI publish it from this repository's `android/` build to
-  `android/build/repo`, and take only the `com.convohop` group from there.
+  `android/build/repo`, and take only the `dev.instantrelay` group from there.
   The package depends on `0.1.0-SNAPSHOT` unless the app sets
   `convohopAndroidVersion`.
 - **React Native's template.** The example's `android/` and `ios/`
@@ -682,7 +682,7 @@ Not verified:
   workspaces. Its own `node_modules` and lockfile hold React Native,
   LiveKit and the other packages with native code, which must have one
   copy. Metro takes the SDK packages from the repository's workspaces, and
-  autolinking links `@convohop/react-native` from `packages/react-native`.
+  autolinking links `@instantrelay/react-native` from `packages/react-native`.
 - **No Dependabot entries for the example.** A test requires the example's
   dependencies to match the versions the package is tested with, so they
   change with those.
@@ -693,12 +693,12 @@ Not verified:
 ## Open questions
 
 - **Swift package source.** A copy of the package installed from npm has no
-  `swift/`, so apps set `CONVOHOP_SWIFT_PACKAGE` to a checkout of the Swift
+  `swift/`, so apps set `RELAY_SWIFT_PACKAGE` to a checkout of the Swift
   SDK. Once the Swift SDK has its own repository, the podspec can add it by
   URL and version instead.
 - **LiveKit in the Swift package.** Resolving the Swift package downloads
   LiveKit's Swift SDK and its binary frameworks, about 190 MB, for the
-  `ConvoHopLiveKit` product, which the modules don't link. A package of
+  `RelayLiveKit` product, which the modules don't link. A package of
   only the push and call products would avoid the download.
 - **Android SDK setters.** The Android SDK has no setter for a call's mute
   state, caller name or video, and its calls have no connecting state. The

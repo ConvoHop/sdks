@@ -1,14 +1,14 @@
-// Fake ConvoHop TurboModules. Each implements its whole spec with defaults that tests override, and logs every call.
+// Fake Relay TurboModules. Each implements its whole spec with defaults that tests override, and logs every call.
 import { Buffer } from "node:buffer";
 import { randomBytes } from "node:crypto";
 import { linkModule } from "react-native";
 
 const modules = {
-  ConvoHopPlatform: {
+  RelayPlatform: {
     methods: { getRandomBytes: length => Buffer.from(randomBytes(length)).toString("base64") },
     events: [],
   },
-  ConvoHopPush: {
+  RelayPush: {
     methods: {
       getPermissionStatus: async () => "undetermined",
       requestPermission: async () => "granted",
@@ -17,11 +17,11 @@ const modules = {
       setRecipient: async () => {},
       getRegistrations: async () => [],
       takeInitialNotification: async () => null,
-      handleRemoteMessage: async () => "notConvoHop",
+      handleRemoteMessage: async () => "notRelay",
     },
     events: ["onPushRegistration", "onPushRegistrationError", "onPushUnregistration", "onNotification"],
   },
-  ConvoHopCalls: {
+  RelayCalls: {
     methods: {
       getCalls: async () => [],
       forgetCall: async () => true,
@@ -56,9 +56,9 @@ function link(name, overrides) {
     methods[key] = (...args) => { log.push([key, ...args]); return method(...args); };
   return { ...linkModule(name, methods, events), log };
 }
-export const linkPlatform = (overrides = {}) => link("ConvoHopPlatform", overrides);
-export const linkPush = (overrides = {}) => link("ConvoHopPush", overrides);
-export const linkCalls = (overrides = {}) => link("ConvoHopCalls", overrides);
+export const linkPlatform = (overrides = {}) => link("RelayPlatform", overrides);
+export const linkPush = (overrides = {}) => link("RelayPush", overrides);
+export const linkCalls = (overrides = {}) => link("RelayCalls", overrides);
 
 export const uuid = () => crypto.randomUUID();
 /** A valid native call snapshot: a ringing incoming call unless `fields` says otherwise. */

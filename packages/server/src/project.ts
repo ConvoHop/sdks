@@ -1,9 +1,9 @@
 import {
-  ConvoHopTransport, ConvoHopProblem, parseId, parseObject, parseString, parseConversation, parseCounter, parseSearchHit,
+  RelayTransport, RelayProblem, parseId, parseObject, parseString, parseConversation, parseCounter, parseSearchHit,
   type RecoveryStorage, type AsyncRecoveryStorage, type SessionBootstrap, type SessionMetadata,
   type RecoveryState, type Conversation, type GraphqlTypes, type Membership, type CommandOptions, type OperationPayload,
   type PageOptions, type SearchHit,
-} from "@convohop/core";
+} from "@instantrelay/core";
 import { ServerConversation } from "./conversation.js";
 import { ServerLiveOperation, ServerLiveSession } from "./live.js";
 import { actAsInput, mismatch, pageLimit, required, type ActAsOptions } from "./result.js";
@@ -106,10 +106,10 @@ function sessionOutcome(proof: OperationPayload<"communication.sessionRequestOut
  * `liveSession(id)` and `liveOperation(id)` send nothing until a method is called.
  */
 export class ProjectServerClient {
-  readonly projectId: string; readonly http: ConvoHopTransport;
+  readonly projectId: string; readonly http: RelayTransport;
   constructor(options: { baseUrl: string; projectId: string; backendKey: string; incarnation: string; recoveryStorage?: RecoveryStorage; asyncRecoveryStorage?: AsyncRecoveryStorage; fetch?: typeof fetch }) {
     this.projectId = parseId(options.projectId);
-    this.http = new ConvoHopTransport({ baseUrl: options.baseUrl, credential: options.backendKey,
+    this.http = new RelayTransport({ baseUrl: options.baseUrl, credential: options.backendKey,
       namespace: "backend:" + options.projectId, incarnation: parseId(options.incarnation),
       ...(options.recoveryStorage === undefined ? {} : { recoveryStorage: options.recoveryStorage }),
       ...(options.asyncRecoveryStorage === undefined ? {} : { asyncRecoveryStorage: options.asyncRecoveryStorage }),
@@ -222,7 +222,7 @@ export class ProjectServerClient {
   async sessionRequestOutcome(requestId: string): Promise<SessionRequestOutcome> {
     parseId(requestId);
     const readId = crypto.randomUUID(), incarnation = this.http.incarnation;
-    if (readId === requestId) throw new ConvoHopProblem("INVALID_REQUEST", readId, "rejected", 400,
+    if (readId === requestId) throw new RelayProblem("INVALID_REQUEST", readId, "rejected", 400,
       "Session outcome requires a separate read request identity");
     const proof = await this.http.execute("communication.sessionRequestOutcome", this.projectId, { requestId }, readId);
     try {
@@ -231,7 +231,7 @@ export class ProjectServerClient {
         this.http.recoveryStates.find(state => state.requestId === requestId));
     } catch (error) {
       if (!(error instanceof TypeError)) throw error;
-      throw new ConvoHopProblem("INVALID_RESPONSE", readId, "unknown", 503,
+      throw new RelayProblem("INVALID_RESPONSE", readId, "unknown", 503,
         "Malformed session request outcome; retain the original request and payload");
     }
   }

@@ -587,7 +587,7 @@
       "kind": "query",
       "field": "organizationBilling",
       "operationName": "ManagementOrganizationBilling",
-      "summary": "Read the billing state of an organization in any status: the plan whose limits apply, whether ConvoHop bills the organization and, when it does, its standing and subscription.",
+      "summary": "Read the billing state of an organization in any status: the plan whose limits apply, whether Relay bills the organization and, when it does, its standing and subscription.",
       "layer": "server",
       "path": "management/organizationBilling.md"
     },

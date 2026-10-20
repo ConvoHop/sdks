@@ -3,7 +3,7 @@
 import { registerGlobals } from "@livekit/react-native";
 import { RTCAudioSession } from "@livekit/react-native-webrtc";
 import { ConnectionState, Room, RoomEvent } from "livekit-client";
-import { parseId, type LiveConnection, type LiveConnector } from "@convohop/client";
+import { parseId, type LiveConnection, type LiveConnector } from "@instantrelay/client";
 import { Platform } from "react-native";
 import { callsModule, report } from "./native.js";
 import { installCrypto } from "./random.js";
@@ -11,7 +11,7 @@ import { installCrypto } from "./random.js";
 export interface MediaSetupOptions {
   /**
    * iOS: CallKit owns the audio session. Set it when calls go through CallKit, as incoming calls rung by
-   * `@convohop/react-native` do: LiveKit then leaves the session to CallKit, and the SDK tells WebRTC each time CallKit
+   * `@instantrelay/react-native` do: LiveKit then leaves the session to CallKit, and the SDK tells WebRTC each time CallKit
    * activates or deactivates it. Start every call with CallKit, including outgoing calls with `startOutgoingCall`,
    * or it has no audio. Ignored on Android. Default `false`.
    */
@@ -78,19 +78,19 @@ function forwardCallKitAudio(calls: ReturnType<typeof callsModule>): void {
     }
   };
   calls.onAudioSession(event => {
-    if (typeof event?.active !== "boolean") report(new TypeError("ConvoHopCalls sent a malformed audio session event"));
+    if (typeof event?.active !== "boolean") report(new TypeError("RelayCalls sent a malformed audio session event"));
     else apply(event.active);
   });
   // CallKit may have activated the session before JavaScript ran, such as for a call answered on the lock screen.
   calls.isAudioSessionActive().then(active => {
     if (known) return;
-    if (typeof active !== "boolean") throw new TypeError("ConvoHopCalls returned a malformed audio session state");
+    if (typeof active !== "boolean") throw new TypeError("RelayCalls returned a malformed audio session state");
     apply(active);
   }).catch(report);
 }
 
 /**
- * A LiveKit room with ConvoHop's media policy, the same as the Web SDK's: one peer connection per direction, no
+ * A LiveKit room with Relay's media policy, the same as the Web SDK's: one peer connection per direction, no
  * simulcast, adaptive stream or dynacast, and VP8 video at up to 320x240, 15 frames per second and 350 kbit/s.
  */
 export function createRoom(): Room {

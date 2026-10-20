@@ -1,4 +1,4 @@
-package convohop
+package relay
 
 import (
 	"bytes"
@@ -21,7 +21,7 @@ import (
 
 const (
 	// maxResponseLength bounds an authority response in UTF-16 code units, as
-	// every ConvoHop SDK does.
+	// every Relay SDK does.
 	maxResponseLength = 1 << 20
 	// maxResponseBytes is the longest UTF-8 encoding of a bounded response,
 	// with a byte order mark.
@@ -33,7 +33,7 @@ const (
 	managementIncarnation = "management"
 )
 
-var errOrigin = errors.New("convohop: use an HTTPS origin, or explicit loopback HTTP for local development")
+var errOrigin = errors.New("relay: use an HTTPS origin, or explicit loopback HTTP for local development")
 
 // responseCheck checks a validated reply against the request that produced it.
 type responseCheck func(t *transport, requestID string, input map[string]any, reply any) error
@@ -83,7 +83,7 @@ func newTransport(config transportConfig, s *settings) (*transport, error) {
 		return nil, err
 	}
 	if !validCredential(config.credential) && !(config.permitOnly && config.credential == "") {
-		return nil, errors.New("convohop: the credential must be 1 to 8192 visible ASCII characters")
+		return nil, errors.New("relay: the credential must be 1 to 8192 visible ASCII characters")
 	}
 	return &transport{
 		endpoint:    origin + graphQLPath,
@@ -200,7 +200,7 @@ func (t *transport) setServingEpoch(epoch string) {
 func (t *transport) call(ctx context.Context, id string, input any, permit any, out any, options []CallOption) error {
 	op := catalog.operations[id]
 	if op == nil {
-		return fmt.Errorf("convohop: unknown operation %s", id)
+		return fmt.Errorf("relay: unknown operation %s", id)
 	}
 	var call callSettings
 	for _, option := range options {

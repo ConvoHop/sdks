@@ -1,4 +1,4 @@
-# ConvoHop Go server SDK
+# Relay Go server SDK
 
 `github.com/ConvoHop/sdks/go` is the Go SDK for the current Conversation and
 Management APIs. Use it only in trusted backends, because it holds secret
@@ -39,13 +39,13 @@ Authenticate the application user before looking up its project-scoped
 principal. A caller-supplied principal ID is not proof of login.
 
 ```go
-import convohop "github.com/ConvoHop/sdks/go"
+import instantrelay "github.com/ConvoHop/sdks/go"
 
-client, err := convohop.NewProjectClient(convohop.ProjectConfig{
+client, err := relay.NewProjectClient(relay.ProjectConfig{
 	BaseURL:     communicationBase,
 	ProjectID:   projectID,
 	Incarnation: incarnation,
-	BackendKey:  os.Getenv("CONVOHOP_BACKEND_KEY"), // Trusted secret storage only.
+	BackendKey:  os.Getenv("RELAY_BACKEND_KEY"), // Trusted secret storage only.
 })
 if err != nil {
 	return err
@@ -53,11 +53,11 @@ if err != nil {
 if err := client.Initialize(ctx); err != nil {
 	return err
 }
-principal, err := client.CreatePrincipal(ctx, convohop.CreatePrincipalRequestInput{ExternalUserID: authenticatedAccountID})
+principal, err := client.CreatePrincipal(ctx, relay.CreatePrincipalRequestInput{ExternalUserID: authenticatedAccountID})
 if err != nil {
 	return err
 }
-bootstrap, err := client.IssueSession(ctx, convohop.IssueSessionRequestInput{
+bootstrap, err := client.IssueSession(ctx, relay.IssueSessionRequestInput{
 	PrincipalID: principal.Result.PrincipalID, DeviceID: deviceID, RequestedTTLMs: "900000",
 })
 if err != nil {
@@ -80,9 +80,9 @@ if err != nil {
 - `RequestedTTLMs` is the session lifetime in milliseconds; the TypeScript
   and JVM SDKs default to 15 minutes, `"900000"`. The bootstrap holds the
   user's session token, so return it only to that user.
-- IDs are canonical lowercase UUIDs (`convohop.UUID`). Counters such as
+- IDs are canonical lowercase UUIDs (`instantrelay.UUID`). Counters such as
   sequences, revisions and lifetimes are decimal strings
-  (`convohop.Decimal`), never floating-point numbers.
+  (`instantrelay.Decimal`), never floating-point numbers.
 
 [`example_test.go`](example_test.go) has this flow and the other examples
 below as compiled code.
@@ -145,10 +145,10 @@ pages:
 
 ```go
 member := teammatePrincipalID
-for page, err := range client.MessagesPages(ctx, convohop.MessagesRequestInput{
+for page, err := range client.MessagesPages(ctx, relay.MessagesRequestInput{
 	ConversationID: conversationID, Limit: 50, ActAsPrincipalID: &member,
 }) {
-	if errors.Is(err, convohop.ErrRefreshRequired) {
+	if errors.Is(err, relay.ErrRefreshRequired) {
 		break // Start again from the latest message.
 	}
 	if err != nil {
@@ -171,19 +171,19 @@ cursor cycle can't repeat pages forever.
 ### Errors
 
 Every failure that the authority or the transport reports is a
-`*convohop.Problem`:
+`*instantrelay.Problem`:
 
 ```go
-var problem *convohop.Problem
+var problem *relay.Problem
 if errors.As(err, &problem) {
 	switch {
-	case errors.Is(err, convohop.ErrorCodeScopeRequired):
+	case errors.Is(err, relay.ErrorCodeScopeRequired):
 		scope, _ := problem.Scope()
 		log.Printf("grant the backend key the %s scope", scope)
-	case errors.Is(err, convohop.ErrorCodeRateLimited):
+	case errors.Is(err, relay.ErrorCodeRateLimited):
 		wait, _ := problem.RetryAfter()
 		log.Printf("wait %s, then send again with request ID %s", wait, problem.RequestID)
-	case problem.Outcome == convohop.OutcomeUnknown:
+	case problem.Outcome == relay.OutcomeUnknown:
 		log.Printf("settle request %s with Retry", problem.RequestID)
 	}
 }
@@ -224,10 +224,10 @@ its original request ID with `Retry`, never by sending it again under a new
 one:
 
 ```go
-requestID := convohop.NewRequestID() // Keep it with the work it identifies.
-_, err := client.SendMessage(ctx, input, convohop.WithRequestID(requestID))
-var problem *convohop.Problem
-if errors.As(err, &problem) && problem.Outcome == convohop.OutcomeUnknown {
+requestID := relay.NewRequestID() // Keep it with the work it identifies.
+_, err := client.SendMessage(ctx, input, relay.WithRequestID(requestID))
+var problem *relay.Problem
+if errors.As(err, &problem) && problem.Outcome == relay.OutcomeUnknown {
 	resolution, err := client.Retry(ctx, problem.RequestID)
 	if err != nil {
 		return err
@@ -295,15 +295,15 @@ if errors.As(err, &problem) && problem.Outcome == convohop.OutcomeUnknown {
 an operator access token:
 
 ```go
-management, err := convohop.NewManagementClient(convohop.ManagementConfig{
+management, err := relay.NewManagementClient(relay.ManagementConfig{
 	BaseURL:     managementBase,
 	AccessToken: operatorToken, // Trusted secret storage only.
 	ActorID:     operatorID,
-}, convohop.WithRecoveryStore(requestStore))
+}, relay.WithRecoveryStore(requestStore))
 if err != nil {
 	return err
 }
-issued, err := management.IssueBackendKey(ctx, convohop.IssueBackendKeyRequestInput{
+issued, err := management.IssueBackendKey(ctx, relay.IssueBackendKeyRequestInput{
 	ProjectID: projectID, Name: "orders-service", Scopes: scopes, ExpiresAt: expiresAt,
 })
 if err != nil {
@@ -324,26 +324,26 @@ names a credential `Delivery`, which hands the key over once.
 
 1. Ask the `ManagementClient` for a permit: `CredentialPermit` with the
    project, the delivery ID and a new redemption request ID. Its `Result` is
-   the permit, a `convohop.SignedProof`. Keep it in memory only.
+   the permit, a `instantrelay.SignedProof`. Keep it in memory only.
 2. Redeem the delivery with a `ProjectClient` for the project, under the
    redemption request ID. Store the capsule in `Result` in trusted secret
    storage.
 3. Acknowledge the delivery with the same permit.
 
 ```go
-delivery, err := convohop.NewProjectClient(convohop.ProjectConfig{
+delivery, err := relay.NewProjectClient(relay.ProjectConfig{
 	BaseURL: communicationBase, ProjectID: projectID, Incarnation: incarnation,
 })
 if err != nil {
 	return err
 }
-redeemed, err := delivery.RedeemCredential(ctx, permit, convohop.RedeemCredentialRequestInput{DeliveryID: deliveryID},
-	convohop.WithRequestID(redemptionRequestID))
+redeemed, err := delivery.RedeemCredential(ctx, permit, relay.RedeemCredentialRequestInput{DeliveryID: deliveryID},
+	relay.WithRequestID(redemptionRequestID))
 if err != nil {
 	return err
 }
 // Store redeemed.Result in trusted secret storage, then acknowledge the delivery.
-_, err = delivery.AcknowledgeCredential(ctx, permit, convohop.AcknowledgeCredentialRequestInput{DeliveryID: deliveryID})
+_, err = delivery.AcknowledgeCredential(ctx, permit, relay.AcknowledgeCredentialRequestInput{DeliveryID: deliveryID})
 ```
 
 - `RedeemCredential` and `AcknowledgeCredential` send the permit instead of
@@ -358,7 +358,7 @@ _, err = delivery.AcknowledgeCredential(ctx, permit, convohop.AcknowledgeCredent
 
 ## Webhooks
 
-`webhooks.Verify` checks a delivery and returns its event. ConvoHop signs
+`webhooks.Verify` checks a delivery and returns its event. Relay signs
 deliveries with the Standard Webhooks symmetric `v1` scheme.
 
 ```go
@@ -394,7 +394,7 @@ event delivered to two endpoints has the same event ID and different
   UTF-8 byte order mark is ignored when the event is parsed.
 - Pass the request's `http.Header`. Names match case-insensitively, and a
   repeated `webhook-id`, `webhook-timestamp` or `webhook-signature` fails.
-- Pass every `whsec_` secret you hold. ConvoHop signs with the current
+- Pass every `whsec_` secret you hold. Relay signs with the current
   secret, with the next secret while a rotation is pending (at most 5
   minutes), and with the replaced secret for 24 hours after the rotation. A
   `v1` entry that matches any secret is accepted. Entries with other version
@@ -435,13 +435,13 @@ message never contains secrets, signatures or the body.
 | `TIMESTAMP_EXPIRED` | The timestamp is more than the tolerance before now. |
 | `TIMESTAMP_FUTURE` | The timestamp is more than the tolerance after now. |
 | `BODY_TOO_LARGE` | The body is over 4096 bytes. |
-| `TOO_MANY_SIGNATURES` | `webhook-signature` has more than 8 entries. ConvoHop sends 1 to 3. |
+| `TOO_MANY_SIGNATURES` | `webhook-signature` has more than 8 entries. Relay sends 1 to 3. |
 | `NO_MATCHING_SIGNATURE` | No `v1` entry matches any secret. |
 | `INVALID_BODY` | `Verify` only: the signed body isn't a UTF-8 JSON event envelope. |
 
 ## Push payloads
 
-ConvoHop doesn't send push notifications for you
+Relay doesn't send push notifications for you
 ([bring your own](../docs/sdk-strategy.md#push-notifications-bring-your-own)).
 The `push` package builds APNs, FCM and Web Push requests from a
 notification event, following the
@@ -512,10 +512,10 @@ way.
 
 ## Not included
 
-- The defaults of `@convohop/server`'s helpers, such as a 15-minute session
+- The defaults of `@instantrelay/server`'s helpers, such as a 15-minute session
   lifetime and local deployment and project configuration. Pass every
   input; [Methods](#methods) has the rules.
-- The checks that `@convohop/server`'s `sessionRequestOutcome` helper adds.
+- The checks that `@instantrelay/server`'s `sessionRequestOutcome` helper adds.
   `SessionRequestOutcome` checks its reply's types like every method, but
   not the reply's fields against each other or against the recovery
   records.
@@ -528,12 +528,12 @@ way.
 cd go
 gofmt -l .                                  # Lists unformatted files: expect none
 go vet ./...
-CONVOHOP_REQUIRE_SPEC=1 go test -race ./...
+RELAY_REQUIRE_SPEC=1 go test -race ./...
 ```
 
 The tests read the shared vectors in [`../spec`](../spec). They skip those
 tests when the module is copied without the repository, unless
-`CONVOHOP_REQUIRE_SPEC=1`, as in CI. To run the
+`RELAY_REQUIRE_SPEC=1`, as in CI. To run the
 [conformance suite](../spec/conformance/README.md) with the Go driver, from
 the repository root:
 

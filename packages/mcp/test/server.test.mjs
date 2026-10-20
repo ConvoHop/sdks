@@ -4,9 +4,9 @@ import { readFileSync } from "node:fs";
 import test from "node:test";
 import { InMemoryTransport, LATEST_PROTOCOL_VERSION } from "@modelcontextprotocol/server";
 import {
-  REDACTED, createConvoHopMcpServer, mcpTools, operationMetaKey, retryToolName, withheldOperations,
-} from "@convohop/mcp";
-import { operationCatalog } from "@convohop/server";
+  REDACTED, createRelayMcpServer, mcpTools, operationMetaKey, retryToolName, withheldOperations,
+} from "@instantrelay/mcp";
+import { operationCatalog } from "@instantrelay/server";
 import { ControlClient } from "../../../conformance/lib/control.mjs";
 import { startMockTarget } from "../../../conformance/mock/server.mjs";
 import { full, reply, resolution } from "../../../test/graphql-fixtures.mjs";
@@ -22,7 +22,7 @@ const DESTRUCTIVE = [
 
 /** Connects a raw JSON-RPC client to a new server. `received` keeps every message the client receives. */
 async function connect(t, options) {
-  const server = createConvoHopMcpServer(options);
+  const server = createRelayMcpServer(options);
   const [client, transport] = InMemoryTransport.createLinkedPair();
   const pending = new Map(), received = [];
   let lastId = 0;
@@ -43,7 +43,7 @@ async function connect(t, options) {
     return message.result;
   }
   const initialized = await rpc("initialize", { protocolVersion: LATEST_PROTOCOL_VERSION, capabilities: {},
-    clientInfo: { name: "convohop-mcp-test", version: "0.0.0" } });
+    clientInfo: { name: "relay-mcp-test", version: "0.0.0" } });
   await client.send({ jsonrpc: "2.0", method: "notifications/initialized" });
   return {
     initialized, received,
@@ -77,8 +77,8 @@ function fakeAuthority(answers = {}) {
   };
   return {
     projectId, requests,
-    options: { managementUrl: "https://management.convohop.test", portalToken: PORTAL_TOKEN,
-      communicationUrl: "https://communication.convohop.test", projectId, incarnation, backendKey: BACKEND_KEY, fetch },
+    options: { managementUrl: "https://management.relay.test", portalToken: PORTAL_TOKEN,
+      communicationUrl: "https://communication.relay.test", projectId, incarnation, backendKey: BACKEND_KEY, fetch },
   };
 }
 
@@ -90,7 +90,7 @@ const capabilities = request => reply(request, { result: full("Capabilities", { 
 test("the server lists every generated tool with its hints and operation annotations, then retry_request", async t => {
   const { initialized, tools } = await connect(t, fakeAuthority().options);
   assert.equal(initialized.protocolVersion, LATEST_PROTOCOL_VERSION);
-  assert.deepEqual(initialized.serverInfo, { name: "convohop", title: "ConvoHop", version: manifest.version });
+  assert.deepEqual(initialized.serverInfo, { name: "relay", title: "Relay", version: manifest.version });
   assert.ok(initialized.capabilities.tools);
   assert.match(initialized.instructions, /call retry_request with its requestId/);
   assert.match(initialized.instructions, /Confirm with the user before calling them/);
@@ -151,10 +151,10 @@ test("each plane lists its tools only when all of its options are set", async t 
     assert.deepEqual(listed.map(tool => tool.name),
       [...mcpTools.filter(tool => tool.operation.plane === plane).map(tool => tool.name), retryToolName], plane);
   }
-  assert.throws(() => createConvoHopMcpServer({}),
+  assert.throws(() => createRelayMcpServer({}),
     new TypeError("Configure the management plane, the communication plane or both"));
-  assert.throws(() => createConvoHopMcpServer({ managementUrl }), new TypeError("Set managementUrl and portalToken together"));
-  assert.throws(() => createConvoHopMcpServer({ managementUrl, portalToken, backendKey: BACKEND_KEY }),
+  assert.throws(() => createRelayMcpServer({ managementUrl }), new TypeError("Set managementUrl and portalToken together"));
+  assert.throws(() => createRelayMcpServer({ managementUrl, portalToken, backendKey: BACKEND_KEY }),
     new TypeError("Set communicationUrl, projectId, incarnation and backendKey together"));
 });
 
@@ -202,7 +202,7 @@ test("retry_request resolves an unknown mutation outcome and resends only a requ
     assert.equal(lost.structuredContent.next,
       `Call retry_request with requestId ${requestId}. Don't call this tool again: that sends a new request.`);
     assert.match(lost.content[0].text, new RegExp(
-      `^ConvoHop TRANSPORT_UNKNOWN: .+\\noutcome: unknown\\nrequestId: ${requestId}\\nnext: Call retry_request`));
+      `^Relay TRANSPORT_UNKNOWN: .+\\noutcome: unknown\\nrequestId: ${requestId}\\nnext: Call retry_request`));
 
     for (let attempt = 0; attempt < 2; attempt += 1) {
       const resolved = await call(retryToolName, { requestId });
@@ -305,7 +305,7 @@ test("results and errors never carry the configured credentials or credential fi
   assert.equal(rejected.structuredContent.message, `The credential ${REDACTED} is malformed`);
   const unauthenticated = await call("management_capabilities");
   assert.equal(unauthenticated.structuredContent.message, `Bearer ${REDACTED} expired`);
-  assert.match(unauthenticated.content[0].text, /^ConvoHop UNAUTHENTICATED: Bearer \[REDACTED\] expired\n/);
+  assert.match(unauthenticated.content[0].text, /^Relay UNAUTHENTICATED: Bearer \[REDACTED\] expired\n/);
 
   const text = JSON.stringify(received);
   for (const secret of [BACKEND_KEY, PORTAL_TOKEN, sessionToken, "fixture-signature"]) assert.ok(!text.includes(secret), secret);

@@ -1,6 +1,6 @@
 # API operations
 
-Every operation in the ConvoHop GraphQL API, with its authorization, idempotency, input, result and errors, and the SDK members that send it.
+Every operation in the Relay GraphQL API, with its authorization, idempotency, input, result and errors, and the SDK members that send it.
 
 ## Communication
 
@@ -73,7 +73,7 @@ Organizations, deployments, projects, backend keys and webhooks.
 | [`management.deploymentUsage`](management/deploymentUsage.md) | query | server | Read the metered usage of a deployment, summed over its projects. The range defaults to the current UTC month to date, both bounds round up to whole UTC hours, and it spans at most 400 days. |
 | [`management.projectUsage`](management/projectUsage.md) | query | server | Read the metered usage of a project. The range defaults to the current UTC month to date, both bounds round up to whole UTC hours, and it spans at most 400 days. |
 | [`management.organizationUsage`](management/organizationUsage.md) | query | server | Read the metered usage of an organization in any status, summed over its projects. The range defaults to the current UTC month to date, both bounds round up to whole UTC hours, and it spans at most 400 days. |
-| [`management.organizationBilling`](management/organizationBilling.md) | query | server | Read the billing state of an organization in any status: the plan whose limits apply, whether ConvoHop bills the organization and, when it does, its standing and subscription. |
+| [`management.organizationBilling`](management/organizationBilling.md) | query | server | Read the billing state of an organization in any status: the plan whose limits apply, whether Relay bills the organization and, when it does, its standing and subscription. |
 | [`management.webhookEndpoints`](management/webhookEndpoints.md) | query | server | List the webhook endpoints of a project with their status, signing-secret rotation and delivery health. |
 | [`management.webhookDeliveries`](management/webhookDeliveries.md) | query | server | List recent deliveries of a webhook endpoint. |
 | [`management.resolveRequest`](management/resolveRequest.md) | query | server | Look up the stored outcome of an earlier management mutation by its requestId. |

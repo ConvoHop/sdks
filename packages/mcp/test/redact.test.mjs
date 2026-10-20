@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import test from "node:test";
-import { REDACTED, redact, redactObject, redactedFields, withheldOperations } from "@convohop/mcp";
+import { REDACTED, redact, redactObject, redactedFields, withheldOperations } from "@instantrelay/mcp";
 
 const ir = JSON.parse(readFileSync(new URL("../../../schema/ir.json", import.meta.url), "utf8"));
 const credentialLike = /token|secret|key|permit|ticket|password|credential|lease|proof|signature/i;

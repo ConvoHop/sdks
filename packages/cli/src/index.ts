@@ -25,7 +25,7 @@ const groups = new Set(commands.flatMap(command => command.name.includes(" ") ? 
 
 /** What run reads and writes. Each defaults to the process's own. */
 export interface RunOptions {
-  /** The arguments after convohop. */
+  /** The arguments after relay. */
   readonly argv: readonly string[];
   readonly env?: Environment;
   readonly stdin?: InputStream;
@@ -45,7 +45,7 @@ export interface RunOptions {
 function packageVersion(): string {
   const manifest: unknown = JSON.parse(readFileSync(new URL("../package.json", import.meta.url), "utf8"));
   const version = manifest !== null && typeof manifest === "object" && "version" in manifest ? manifest.version : undefined;
-  if (typeof version !== "string") throw new TypeError("The @convohop/cli package manifest has no version");
+  if (typeof version !== "string") throw new TypeError("The @instantrelay/cli package manifest has no version");
   return version;
 }
 
@@ -84,7 +84,7 @@ async function dispatch(context: Context, argv: readonly string[]): Promise<void
 }
 
 /**
- * Runs convohop with argv, as the convohop binary does, and returns its exit code: 0 success, 1 failure, 2 usage error,
+ * Runs relay with argv, as the relay binary does, and returns its exit code: 0 success, 1 failure, 2 usage error,
  * 3 unknown outcome and 130 interrupted. Output never contains a credential.
  */
 export async function run(options: RunOptions): Promise<number> {
@@ -109,7 +109,7 @@ export async function run(options: RunOptions): Promise<number> {
     return 0;
   } catch (error) {
     if (signal.aborted && !(error instanceof CliError)) {
-      printer.note("convohop: Interrupted");
+      printer.note("relay: Interrupted");
       return 130;
     }
     return printer.error(error);

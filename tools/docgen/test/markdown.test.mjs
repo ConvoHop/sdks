@@ -22,7 +22,7 @@ const errorsOf = markdown => parsePage(markdown).errors;
 
 test("heading IDs match GitHub's slugs", () => {
   const cases = [
-    ["`ConvoHopClient` class", "convohopclient-class"],
+    ["`RelayClient` class", "relayclient-class"],
     ["`ServerClient.connect` static method", "serverclientconnect-static-method"],
     ["`[Symbol.asyncIterator]` method", "symbolasynciterator-method"],
     ["What's new?", "whats-new"],

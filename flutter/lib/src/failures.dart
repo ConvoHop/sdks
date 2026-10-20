@@ -46,9 +46,9 @@ enum ReconnectAction { retry, reroute, stop }
 /// response), 408, 429 or 5xx is retried; `WRONG_REGION` routes again first.
 /// Anything else stops: `QUOTA_EXCEEDED`, `PLAN_LIMIT_EXCEEDED`,
 /// authentication and scope problems, and errors that aren't a
-/// [ConvoHopProblem].
+/// [RelayProblem].
 ReconnectAction reconnectAction(Object error) {
-  if (error is! ConvoHopProblem) return ReconnectAction.stop;
+  if (error is! RelayProblem) return ReconnectAction.stop;
   if (error.code == 'WRONG_REGION') return ReconnectAction.reroute;
   if (!retryableCode(error.code)) return ReconnectAction.stop;
   final status = error.status;
@@ -76,7 +76,7 @@ int reconnectDelay(int attempt, int? retryAfter, Random random) {
 /// `retryAfter=` seconds, whatever the close code. Otherwise a close code
 /// that ends realtime authorization reports `UNAUTHENTICATED`, and any other
 /// close reports nothing, so the stream reconnects.
-ConvoHopProblem? closeProblem(int code, String reason, String requestId) {
+RelayProblem? closeProblem(int code, String reason, String requestId) {
   final words = reason.trim().split(RegExp(r'\s+'));
   final name = words.first;
   final known = errorCodes[name];
@@ -92,7 +92,7 @@ ConvoHopProblem? closeProblem(int code, String reason, String requestId) {
     );
   }
   if (_events.terminalCloseCodes.contains(code)) {
-    return ConvoHopProblem(
+    return RelayProblem(
       'UNAUTHENTICATED',
       requestId,
       'rejected',

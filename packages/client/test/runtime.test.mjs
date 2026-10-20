@@ -6,7 +6,7 @@ import { fileURLToPath } from "node:url";
 function run(runtime) {
   const { NODE_TEST_CONTEXT, ...env } = process.env;
   const child = spawnSync(process.execPath, [fileURLToPath(new URL("bare-runtime.mjs", import.meta.url))],
-    { env: { ...env, CONVOHOP_RUNTIME: runtime }, encoding: "utf8", timeout: 30_000 });
+    { env: { ...env, RELAY_RUNTIME: runtime }, encoding: "utf8", timeout: 30_000 });
   assert.equal(child.status, 0, `The ${runtime} runtime failed:\n${child.stderr}`);
   return JSON.parse(child.stdout);
 }

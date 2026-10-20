@@ -1,4 +1,4 @@
-package convohop
+package relay
 
 import (
 	"encoding/json"
@@ -7,7 +7,7 @@ import (
 	"testing"
 )
 
-// The request identity vector every ConvoHop SDK reproduces.
+// The request identity vector every Relay SDK reproduces.
 const (
 	parityInput     = `{"operation":"communication.sendMessage","projectId":"11111111-1111-4111-8111-111111111111","input":{"conversationId":"22222222-2222-4222-8222-222222222222","text":"h\u00e9llo \u2028 <b>&\"\\\n\u0001\ud83d\ude00\u007f","props":{"z":1,"\u00e9":0.1,"\ud83d\ude00":9007199254740991,"\uffff":-0,"a":[1.5,true,null,1e-7,5e-324,-9007199254740991,2.50,-1E+3,0.000001]}}}`
 	parityCanonical = `{"input":{"conversationId":"22222222-2222-4222-8222-222222222222","props":{"a":[1.5,true,null,1e-7,5e-324,-9007199254740991,2.5,-1000,0.000001],"z":1,"é":0.1,"😀":9007199254740991,"` + "\uffff" + `":0},"text":"héllo ` + "\u2028" + ` <b>&\"\\\n\u0001😀` + "\u007f" + `"},"operation":"communication.sendMessage","projectId":"11111111-1111-4111-8111-111111111111"}`

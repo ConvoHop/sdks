@@ -1,10 +1,10 @@
 # Java and Kotlin push notifications quickstart
 
-Send push notifications for ConvoHop messages and calls: `convohop-server` turns notification events into APNs, FCM and Web Push requests, and you send them with your own push credentials and libraries.
+Send push notifications for Relay messages and calls: `relay-server` turns notification events into APNs, FCM and Web Push requests, and you send them with your own push credentials and libraries.
 
 ## Before you start
 
-ConvoHop doesn't send push notifications itself. You need:
+Relay doesn't send push notifications itself. You need:
 
 - A webhook endpoint that receives `notification.message`, `notification.call` and `notification.callCancelled` events, as the [webhooks quickstart](webhooks.md) shows. Each of these events is addressed to one recipient. Events arrive at least once and in any order, so deduplicate on `getEventId()` before you send.
 - The devices that your app registered for each user, in your own database.
@@ -12,19 +12,19 @@ ConvoHop doesn't send push notifications itself. You need:
 
 The sample uses these imports:
 
-```java snippet=docs/languages/jvm/examples/src/main/java/com/convohop/examples/Push.java#imports
-import com.convohop.server.push.ApnsRequest;
-import com.convohop.server.push.FcmRequest;
-import com.convohop.server.push.PushOptions;
-import com.convohop.server.push.PushPayloads;
-import com.convohop.server.push.WebPushRequest;
-import com.convohop.server.webhooks.WebhookNotificationEvent;
+```java snippet=docs/languages/jvm/examples/src/main/java/dev/instantrelay/examples/Push.java#imports
+import dev.instantrelay.server.push.ApnsRequest;
+import dev.instantrelay.server.push.FcmRequest;
+import dev.instantrelay.server.push.PushOptions;
+import dev.instantrelay.server.push.PushPayloads;
+import dev.instantrelay.server.push.WebPushRequest;
+import dev.instantrelay.server.webhooks.WebhookNotificationEvent;
 import java.util.List;
 ```
 
 ## Build and send the requests
 
-```java snippet=docs/languages/jvm/examples/src/main/java/com/convohop/examples/Push.java#notify
+```java snippet=docs/languages/jvm/examples/src/main/java/dev/instantrelay/examples/Push.java#notify
 // The devices that your app registered for a user, from your own database.
 public interface Device {}
 
@@ -136,7 +136,7 @@ A Web Push library encrypts the payload, signs the request with your VAPID keys 
 
 The Firebase Admin SDK for Java takes the Android options in its own form, with the TTL in milliseconds. Convert them:
 
-```java snippet=docs/languages/jvm/examples/src/main/java/com/convohop/examples/Push.java#fcm-imports
+```java snippet=docs/languages/jvm/examples/src/main/java/dev/instantrelay/examples/Push.java#fcm-imports
 import com.google.firebase.messaging.AndroidConfig;
 import com.google.firebase.messaging.FirebaseMessaging;
 import com.google.firebase.messaging.FirebaseMessagingException;
@@ -144,7 +144,7 @@ import com.google.firebase.messaging.Message;
 import java.util.concurrent.TimeUnit;
 ```
 
-```java snippet=docs/languages/jvm/examples/src/main/java/com/convohop/examples/Push.java#fcm
+```java snippet=docs/languages/jvm/examples/src/main/java/dev/instantrelay/examples/Push.java#fcm
 // The Firebase Admin SDK takes the Android options in its own form. setTtl takes milliseconds: passing
 // getTtlSeconds() as is would make a ring expire almost at once.
 @SuppressWarnings("deprecation") // setToken

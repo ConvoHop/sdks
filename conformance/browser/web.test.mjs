@@ -13,8 +13,8 @@ import { readFile } from "node:fs/promises";
 import { after, before, beforeEach, describe, test } from "node:test";
 import { setTimeout as delay } from "node:timers/promises";
 import { isDeepStrictEqual } from "node:util";
-import { ConvoHopClient } from "@convohop/client";
-import { ProjectServerClient } from "@convohop/server";
+import { RelayClient } from "@instantrelay/client";
+import { ProjectServerClient } from "@instantrelay/server";
 import { chromium, firefox, webkit } from "playwright";
 import { ControlClient } from "../lib/control.mjs";
 import { PUSH_VECTOR_FILE } from "../lib/push-vectors.mjs";
@@ -118,7 +118,7 @@ for (const name of names) {
       const requestId = await page.evaluate(text => window.harness.send(text), "Hello from the browser");
       await until(page, delivered, "Hello from the browser");
 
-      const other = new ConvoHopClient({ baseUrl: mock.descriptor.communicationUrl, ...bob });
+      const other = new RelayClient({ baseUrl: mock.descriptor.communicationUrl, ...bob });
       await other.send(conversationId, "Hello from Node");
       const view = await until(page, text => window.harness.view().messages.some(message => message.text === text),
         "Hello from Node");
@@ -218,7 +218,7 @@ for (const name of names) {
       assert.deepEqual(view.outbox.map(entry => entry.requestId), [fromA, fromB]);
       await until(c.page, prefix => !Object.keys(localStorage).some(key => key.startsWith(prefix)), base);
       assert.deepEqual([(await sends(fromA)).length, (await sends(fromB)).length], [1, 1]);
-      const reader = new ConvoHopClient({ baseUrl: mock.descriptor.communicationUrl, ...bob });
+      const reader = new RelayClient({ baseUrl: mock.descriptor.communicationUrl, ...bob });
       assert.deepEqual((await reader.messages(conversationId)).items.map(message => message.text).sort(),
         ["Written in tab A", "Written in tab B"]);
       assert.deepEqual(view.errors, []);
@@ -266,7 +266,7 @@ for (const name of names) {
       const last = (await records(b.page, journal))[fromA];
       assert.deepEqual([last.attemptCount, last.firstSubmittedAt, last.retryDeadline, last.resolutionState],
         [2, first.firstSubmittedAt, first.retryDeadline, "committed"], "b resends a's original request within its budget");
-      const reader = new ConvoHopClient({ baseUrl: mock.descriptor.communicationUrl, ...bob });
+      const reader = new RelayClient({ baseUrl: mock.descriptor.communicationUrl, ...bob });
       assert.deepEqual((await reader.messages(conversationId)).items.map(message => message.text).sort(),
         ["Written in tab A", "Written in tab B"]);
       assert.deepEqual(view.errors, []);
@@ -374,7 +374,7 @@ describe("Web Push in a Chromium service worker", { skip: !names.includes("chrom
     assert.deepEqual(worker.errors, []);
   });
 
-  test("passes a push that isn't a ConvoHop notification to onError", limit, async t => {
+  test("passes a push that isn't a Relay notification to onError", limit, async t => {
     const worker = await serviceWorker(t);
     await worker.push("not JSON");
     await worker.shown(list => list.length === 1 && list[0].tag === "push-error");

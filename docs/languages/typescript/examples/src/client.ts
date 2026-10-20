@@ -3,11 +3,11 @@
 
 // #region connect
 import {
-  ConvoHopClient,
+  RelayClient,
   type RecoveryStorage,
   type SessionBootstrap,
   type SessionRefresh,
-} from "@convohop/client";
+} from "@instantrelay/client";
 
 // What your backend's login endpoint returns. See the server quickstart.
 export type UserBootstrap = SessionBootstrap & { baseUrl: string; projectId: string };
@@ -16,8 +16,8 @@ export async function connectUser(
   bootstrap: UserBootstrap,
   storage: RecoveryStorage,
   sessionRefresh?: SessionRefresh, // Optional: renews the session before it expires.
-): Promise<ConvoHopClient> {
-  const client = new ConvoHopClient({
+): Promise<RelayClient> {
+  const client = new RelayClient({
     baseUrl: bootstrap.baseUrl,
     projectId: bootstrap.projectId,
     incarnation: bootstrap.session.incarnation,
@@ -34,11 +34,11 @@ export async function connectUser(
 // #endregion connect
 
 // #region renew
-import type { SessionMetadata } from "@convohop/client";
+import type { SessionMetadata } from "@instantrelay/client";
 
 // Pass it to connectUser as sessionRefresh. The client calls it with the session's metadata, never its token.
 export async function renewSession(current: Readonly<SessionMetadata>): Promise<SessionBootstrap> {
-  // Your backend's endpoint, behind your app's own sign-in. It renews the session with @convohop/server.
+  // Your backend's endpoint, behind your app's own sign-in. It renews the session with @instantrelay/server.
   const response = await fetch("/api/convohop/session/renew", {
     method: "POST",
     headers: { "content-type": "application/json" },
@@ -46,21 +46,21 @@ export async function renewSession(current: Readonly<SessionMetadata>): Promise<
     signal: AbortSignal.timeout(10_000), // The client pauses its streams until this settles.
   });
   if (!response.ok) throw new Error(`Session renewal failed with HTTP ${response.status}`);
-  return response.json(); // The client checks the renewed session with ConvoHop before it uses it.
+  return response.json(); // The client checks the renewed session with Relay before it uses it.
 }
 
 // Renews the session a minute before it expires, and after each renewal, until you call the returned function.
-export function keepSessionAlive(client: ConvoHopClient): () => void {
+export function keepSessionAlive(client: RelayClient): () => void {
   return client.scheduleSessionRefresh({ onError: error => console.warn("Couldn't renew the session", error) });
 }
 // #endregion renew
 
 // #region store
-import { ConversationStore, Outbox, type ConversationSnapshot } from "@convohop/client";
+import { ConversationStore, Outbox, type ConversationSnapshot } from "@instantrelay/client";
 
 // One outbox for the signed-in user. With persist, unsent messages survive page reloads in the client's
 // recoveryStorage. Close it when the user signs out.
-export function openOutbox(client: ConvoHopClient): Outbox {
+export function openOutbox(client: RelayClient): Outbox {
   return new Outbox(client, {
     persist: true,
     onError: error => console.warn("A message wasn't sent", error),
@@ -69,7 +69,7 @@ export function openOutbox(client: ConvoHopClient): Outbox {
 
 // Loads a conversation, keeps it current and renders every change. Close the store when the view goes away.
 export async function showConversation(
-  client: ConvoHopClient,
+  client: RelayClient,
   outbox: Outbox,
   conversationId: string,
   render: (snapshot: ConversationSnapshot) => void,
@@ -87,9 +87,9 @@ export async function showConversation(
 // #endregion store
 
 // #region outbox
-import type { OutboxEntry } from "@convohop/client";
+import type { OutboxEntry } from "@instantrelay/client";
 
-// The message shows in snapshot.pending at once, and moves to snapshot.messages once ConvoHop commits it.
+// The message shows in snapshot.pending at once, and moves to snapshot.messages once Relay commits it.
 export function sendDraft(store: ConversationStore, draft: string): OutboxEntry | null {
   const text = draft.trim();
   return text ? store.send(text) : null;
@@ -121,11 +121,11 @@ export async function signOut(outbox: Outbox, storage: Storage): Promise<void> {
 // #endregion sign-out
 
 // #region watch
-import type { ConversationMessage, ConversationStream } from "@convohop/client";
+import type { ConversationMessage, ConversationStream } from "@instantrelay/client";
 
 // Renders the latest messages and keeps them current. Close the stream when the view goes away.
 export async function watchConversation(
-  client: ConvoHopClient,
+  client: RelayClient,
   conversationId: string,
   render: (messages: ConversationMessage[]) => void,
 ): Promise<ConversationStream> {
@@ -145,7 +145,7 @@ export async function watchConversation(
 // #region send
 // Keep requestId with the draft until the send succeeds, and reuse it if you send the draft again.
 export async function sendMessage(
-  client: ConvoHopClient,
+  client: RelayClient,
   conversationId: string,
   text: string,
   requestId: string,

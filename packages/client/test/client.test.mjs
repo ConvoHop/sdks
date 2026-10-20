@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { ConvoHopTransport, ConvoHopClient, ConversationStream, ConvoHopProblem, operationCatalog, parseId, parseCounter, parseMessage, parseMembership, parseConversation, parseSearchHit } from "@convohop/client";
+import { RelayTransport, RelayClient, ConversationStream, RelayProblem, operationCatalog, parseId, parseCounter, parseMessage, parseMembership, parseConversation, parseSearchHit } from "@instantrelay/client";
 import { event, full, reply, resolution } from "../../../test/graphql-fixtures.mjs";
 
 const id = () => crypto.randomUUID();
@@ -36,12 +36,12 @@ test("unknown mutation survives restart with same identity, payload and retry de
   const projectId = id(), conversationId = id(), input = { conversationId, text: "original", props: {} };
   const ack = messageAck(conversationId, incarnation);
   const options = { baseUrl: "http://127.0.0.1:18080", credential: "private-never-persist-this", namespace: "test", incarnation, recoveryStorage: saved };
-  const first = new ConvoHopTransport({ ...options, fetch: async () => { submissions++; throw new TypeError("connection lost"); } });
+  const first = new RelayTransport({ ...options, fetch: async () => { submissions++; throw new TypeError("connection lost"); } });
   await assert.rejects(first.execute("communication.sendMessage", projectId, input, requestId), { code: "TRANSPORT_UNKNOWN" });
   const original = first.recoveryStates[0];
   assert.equal(original.resolutionState, "unknown");
   assert.ok(![...saved.values.values()].join("").includes(options.credential));
-  const retried = new ConvoHopTransport({ ...options, fetch: async (url, options) => {
+  const retried = new RelayTransport({ ...options, fetch: async (url, options) => {
     assert.equal(url, "http://127.0.0.1:18080/graphql");
     assert.equal(options.method, "POST");
     const request = JSON.parse(options.body);
@@ -67,12 +67,12 @@ test("unknown mutation survives restart with same identity, payload and retry de
 test("expiry prohibits resends but still allows authoritative resolution", async () => {
   const saved = storage(); const requestId = id();
   const options = { baseUrl: "http://localhost:18080", credential: "private", namespace: "clock", recoveryStorage: saved };
-  const first = new ConvoHopTransport({ ...options, fetch: async () => { throw new Error("transport"); } });
+  const first = new RelayTransport({ ...options, fetch: async () => { throw new Error("transport"); } });
   await assert.rejects(first.execute("management.createOrganization", undefined, { name: "Original", termsRef: "fixture" }, requestId));
   const [key, text] = [...saved.values.entries()][0];
   const states = JSON.parse(text); states[0].retryDeadline = Date.now() - 1; saved.setItem(key, JSON.stringify(states));
   let writes = 0;
-  const expired = new ConvoHopTransport({ ...options, fetch: async (_url, options) => {
+  const expired = new RelayTransport({ ...options, fetch: async (_url, options) => {
     if (JSON.parse(options.body).operationName !== "ManagementResolveRequest") writes++;
     return response("ok", resolution(requestId, "notObservedYet"), options);
   } });
@@ -92,11 +92,11 @@ test("clock rollback and the original attempt limit survive SDK reconstruction",
         return reply(request, { result: resolution(requestId, "notObservedYet") });
       writes++; throw new Error("unknown");
     } };
-  const first = new ConvoHopTransport(options);
+  const first = new RelayTransport(options);
   await assert.rejects(first.execute("management.createOrganization", undefined, input, requestId), { code: "TRANSPORT_UNKNOWN" });
   now += 1000;
   await assert.rejects(first.execute("management.createOrganization", undefined, input, requestId), { code: "TRANSPORT_UNKNOWN" });
-  const restored = new ConvoHopTransport(options);
+  const restored = new RelayTransport(options);
   now -= 1;
   await assert.rejects(restored.retry(requestId), { code: "RESOLUTION_REQUIRED" });
   assert.equal(writes, 2);
@@ -109,7 +109,7 @@ test("clock rollback and the original attempt limit survive SDK reconstruction",
 });
 test("accepts a current same-origin route but never forwards credentials to a redirect", async () => {
   const projectId = id(), incarnation = id();
-  const client = new ConvoHopClient({ baseUrl: "http://127.0.0.1:18080", projectId, incarnation, principalId: id(), sessionToken: "private",
+  const client = new RelayClient({ baseUrl: "http://127.0.0.1:18080", projectId, incarnation, principalId: id(), sessionToken: "private",
     fetch: async (_url, options) => response("ok", { projectId, incarnation, servingEpoch: "1",
       communicationBase: "https://attacker.invalid", wssUrl: "wss://attacker.invalid/graphql",
       expiresAt: new Date(Date.now() + 60000).toISOString(), signature: "opaque-signed-route" }, options) });
@@ -119,7 +119,7 @@ test("accepts a current same-origin route but never forwards credentials to a re
 test("credential redemption and acknowledgement use transient permits without a fabricated bearer", async () => {
   const projectId = id(), deliveryId = id(), saved = storage(), permit = { signature: "opaque" };
   const capsule = full("CredentialCapsule", { kind: "backendKey", backendKey: "fixture-capsule" });
-  const transport = new ConvoHopTransport({ baseUrl: "http://localhost:18080", namespace: "delivery", recoveryStorage: saved, fetch: async (_url, options) => {
+  const transport = new RelayTransport({ baseUrl: "http://localhost:18080", namespace: "delivery", recoveryStorage: saved, fetch: async (_url, options) => {
     assert.equal(options.headers.authorization, undefined);
     const request = JSON.parse(options.body);
     assert.deepEqual(request.variables.context.credentialDeliveryPermit, { signature: "opaque" });
@@ -140,7 +140,7 @@ for (const outcome of ["committed", "accepted"]) {
     const operation = outcome === "committed" ? "management.createOrganization" : "management.createDeployment";
     const input = outcome === "committed" ? { name: "original", termsRef: "fixture" } :
       { orgId: id(), offering: "managedShared", geoId: "local", installationProfileId: "fixture", consentRef: "fixture" };
-    const transport = new ConvoHopTransport({ baseUrl: "http://localhost:18080", credential: "private", namespace: "knowledge",
+    const transport = new RelayTransport({ baseUrl: "http://localhost:18080", credential: "private", namespace: "knowledge",
       fetch: async (_url, options) => {
         if (requests++ === 0) return response(outcome,
           outcome === "committed" ? { orgId: id(), name: "original", status: "active", revision: "1" } : null, options,
@@ -156,13 +156,13 @@ for (const outcome of ["committed", "accepted"]) {
 test("startup and foreground recovery reuse the original mutation without renewing its budget", async () => {
   const saved = storage(), requestId = id();
   const options = { baseUrl: "http://localhost:18080", sessionToken: "private", projectId: id(), incarnation: id(), principalId: id(), recoveryStorage: saved };
-  const first = new ConvoHopClient({ ...options, fetch: async () => { throw new Error("offline"); } });
+  const first = new RelayClient({ ...options, fetch: async () => { throw new Error("offline"); } });
   const conversationId = id(), input = { conversationId, text: "original", props: {} };
   await assert.rejects(first.http.execute("communication.sendMessage", first.projectId, input, requestId));
   const original = first.http.recoveryStates[0];
   const methods = [], ack = messageAck(conversationId, options.incarnation);
   let committed = false;
-  const recovered = new ConvoHopClient({ ...options, fetch: async (_url, options) => {
+  const recovered = new RelayClient({ ...options, fetch: async (_url, options) => {
     const request = JSON.parse(options.body);
     methods.push(request.operationName);
     if (request.operationName === "CommunicationResolveRequest") return response("ok",
@@ -211,18 +211,18 @@ test("expired replay requires explicit current-membership resync and preserves e
   saved.setItem("unrelated-mutation-recovery", "keep original command");
   let member = false, applyFails = true, membershipReads = 0;
   const afters = [];
-  const client = new ConvoHopClient({ projectId, principalId, incarnation, sessionToken: "private",
+  const client = new RelayClient({ projectId, principalId, incarnation, sessionToken: "private",
     baseUrl: "http://localhost:18080", recoveryStorage: saved });
   client.initialize = async () => ({ projectId, incarnation, servingEpoch: "1", wssUrl: "ws://localhost:18080/graphql" });
   client.getConversation = async requested => {
     assert.equal(requested, conversationId); membershipReads++;
-    if (!member) throw new ConvoHopProblem("NOT_FOUND", id(), "rejected", 404, "Current membership required");
+    if (!member) throw new RelayProblem("NOT_FOUND", id(), "rejected", 404, "Current membership required");
     return full("Conversation", { conversationId });
   };
   client.recoverPending = async () => {};
   client.events = async (requested, after) => {
     assert.equal(requested, conversationId); afters.push(after);
-    if (after?.sequence === old.sequence) throw new ConvoHopProblem("CURSOR_EXPIRED", id(), "rejected", 409, "Expired frontier");
+    if (after?.sequence === old.sequence) throw new RelayProblem("CURSOR_EXPIRED", id(), "rejected", 409, "Expired frontier");
     return { items: [], nextCursor: current, complete: true, refreshRequired: false };
   };
   const apply = async () => { if (applyFails) throw new Error("application failed"); };
@@ -262,7 +262,7 @@ test("history resync retires only this client's conversation and keeps other sco
   t.after(() => { globalThis.WebSocket = original; });
   const saved = storage(), projectId = id(), principalId = id(), conversationId = id(), otherConversationId = id(), incarnation = id();
   const makeClient = projectId => {
-    const client = new ConvoHopClient({ projectId, principalId, incarnation, sessionToken: "private",
+    const client = new RelayClient({ projectId, principalId, incarnation, sessionToken: "private",
       baseUrl: "http://localhost:18080", recoveryStorage: saved });
     client.initialize = async () => ({ projectId, incarnation, servingEpoch: "1", wssUrl: "ws://localhost:18080/graphql" });
     client.getConversation = async conversationId => full("Conversation", { conversationId });
@@ -299,7 +299,7 @@ test("an initializing watcher cannot reopen after explicit history resynchroniza
   globalThis.WebSocket = Socket;
   t.after(() => { globalThis.WebSocket = original; });
   const projectId = id(), principalId = id(), conversationId = id(), incarnation = id();
-  const client = new ConvoHopClient({ projectId, principalId, incarnation, sessionToken: "private", baseUrl: "http://localhost:18080" });
+  const client = new RelayClient({ projectId, principalId, incarnation, sessionToken: "private", baseUrl: "http://localhost:18080" });
   const route = { projectId, incarnation, servingEpoch: "1", wssUrl: "ws://localhost:18080/graphql" };
   let release, calls = 0;
   client.initialize = async () => ++calls === 1 ? new Promise(resolve => { release = resolve; }) : route;
@@ -323,7 +323,7 @@ test("resync waits for old application work before applying a fresh authorized s
   const key = `convohop.cursor:${projectId}:${principalId}:${conversationId}`;
   const old = { incarnation, conversationId, sequence: "4" };
   saved.setItem(key, JSON.stringify(old));
-  const client = new ConvoHopClient({ projectId, principalId, incarnation, sessionToken: "private",
+  const client = new RelayClient({ projectId, principalId, incarnation, sessionToken: "private",
     baseUrl: "http://localhost:18080", recoveryStorage: saved });
   client.initialize = async () => ({ projectId, incarnation, servingEpoch: "1", wssUrl: "ws://localhost:18080/graphql" });
   client.getConversation = async () => full("Conversation", { conversationId });
@@ -356,7 +356,7 @@ test("successive resyncs retain closing application work until it retires and on
   globalThis.WebSocket = Socket;
   t.after(() => { globalThis.WebSocket = original; });
   const projectId = id(), principalId = id(), conversationId = id(), incarnation = id(), saved = storage();
-  const client = new ConvoHopClient({ projectId, principalId, incarnation, sessionToken: "private",
+  const client = new RelayClient({ projectId, principalId, incarnation, sessionToken: "private",
     baseUrl: "http://localhost:18080", recoveryStorage: saved });
   client.initialize = async () => ({ projectId, incarnation, servingEpoch: "1", wssUrl: "ws://localhost:18080/graphql" });
   client.getConversation = async () => full("Conversation", { conversationId });
@@ -392,7 +392,7 @@ test("a closing application's failure rejects resync without replacing its saved
   const key = `convohop.cursor:${projectId}:${principalId}:${conversationId}`;
   const cursor = { incarnation, conversationId, sequence: "4" };
   saved.setItem(key, JSON.stringify(cursor));
-  const client = new ConvoHopClient({ projectId, principalId, incarnation, sessionToken: "private",
+  const client = new RelayClient({ projectId, principalId, incarnation, sessionToken: "private",
     baseUrl: "http://localhost:18080", recoveryStorage: saved });
   client.initialize = async () => ({ projectId, incarnation, servingEpoch: "1", wssUrl: "ws://localhost:18080/graphql" });
   client.getConversation = async () => full("Conversation", { conversationId });
@@ -421,7 +421,7 @@ test("HTTP 200 GraphQL errors and malformed envelopes never become successful mu
     [{ data: { createOrganization: null } }, "INVALID_RESPONSE"],
     [{ data: { createOrganization: { status: "committed", requestId: id(), result: {} } } }, "INVALID_RESPONSE"],
   ]) {
-    const transport = new ConvoHopTransport({ baseUrl: "https://management.example.test", namespace: "graphql",
+    const transport = new RelayTransport({ baseUrl: "https://management.example.test", namespace: "graphql",
       fetch: async () => Response.json(value) });
     await assert.rejects(transport.execute("management.createOrganization", undefined, { name: "Fixture", termsRef: "fixture" }),
       { code, outcome: "unknown" });
@@ -519,7 +519,7 @@ test("a failed pushed page invalidates queued successors and resumes from the la
   push(first, subscription, "1");
   push(first, subscription, "2");
   await new Promise(resolve => setImmediate(resolve));
-  rejectFirst(new ConvoHopProblem("AUTHORITY_UNAVAILABLE", id(), "unknown", 503, "Snapshot temporarily unavailable"));
+  rejectFirst(new RelayProblem("AUTHORITY_UNAVAILABLE", id(), "unknown", 503, "Snapshot temporarily unavailable"));
   await new Promise(resolve => setImmediate(resolve));
   assert.deepEqual(attempts, ["1"]);
   assert.deepEqual(replay.cursor, zero);
@@ -677,9 +677,9 @@ test("realtime keeps reconnecting through gateway and server errors, doubling it
   const setup = replayFixture(t, 0), { replay, sockets, errors } = setup;
   await replay.start();
   sockets[0].subscribe();
-  setup.failures.push(new ConvoHopProblem("INVALID_RESPONSE", id(), "unknown", 502, "Unrecognized authority response"),
-    new ConvoHopProblem("HTTP_FAILURE", id(), "unknown", 504, "Authority rejected the request"),
-    new ConvoHopProblem("HTTP_FAILURE", id(), "unknown", 500, "Authority rejected the request"));
+  setup.failures.push(new RelayProblem("INVALID_RESPONSE", id(), "unknown", 502, "Unrecognized authority response"),
+    new RelayProblem("HTTP_FAILURE", id(), "unknown", 504, "Authority rejected the request"),
+    new RelayProblem("HTTP_FAILURE", id(), "unknown", 500, "Authority rejected the request"));
   sockets[0].close(1006);
   for (const [attempt, delay] of [1000, 2000, 4000, 8000].entries()) {
     t.mock.timers.tick(delay - 1); await drain();
@@ -820,7 +820,7 @@ test("a managed replay whose incomplete page stops advancing fails closed instea
 test("read-only resolution and explicit retry preserve typed committed evidence without another mutation", async () => {
   const projectId = id(), incarnation = id(), conversationId = id(), requestId = id();
   const ack = messageAck(conversationId, incarnation), requests = [];
-  const client = new ConvoHopClient({ baseUrl: "http://localhost:18080", projectId, incarnation,
+  const client = new RelayClient({ baseUrl: "http://localhost:18080", projectId, incarnation,
     principalId: id(), sessionToken: "fixture", fetch: async (_url, options) => {
       const request = JSON.parse(options.body); requests.push(request);
       if (request.operationName === "CommunicationSendMessage") throw new Error("unknown commit");
@@ -840,7 +840,7 @@ test("malformed or differently scoped resolutions cannot change recovery evidenc
   for (const mismatch of ["resolution", "receipt", "project"]) {
     const projectId = id(), requestId = id(), conversationId = id(), incarnation = id();
     const ack = messageAck(conversationId, incarnation);
-    const transport = new ConvoHopTransport({ baseUrl: "http://localhost:18080", namespace: mismatch, incarnation,
+    const transport = new RelayTransport({ baseUrl: "http://localhost:18080", namespace: mismatch, incarnation,
       fetch: async (_url, options) => {
         const request = JSON.parse(options.body);
         if (request.operationName === "CommunicationSendMessage") throw new Error("offline");
@@ -859,7 +859,7 @@ test("malformed or differently scoped resolutions cannot change recovery evidenc
 test("absent evidence never authorizes replay of a previously committed command", async () => {
   const projectId = id(), incarnation = id(), conversationId = id(), requestId = id();
   let writes = 0;
-  const transport = new ConvoHopTransport({ baseUrl: "http://localhost:18080", namespace: "nonregression", incarnation,
+  const transport = new RelayTransport({ baseUrl: "http://localhost:18080", namespace: "nonregression", incarnation,
     fetch: async (_url, options) => {
       const request = JSON.parse(options.body);
       if (request.operationName === "CommunicationResolveRequest")
@@ -875,7 +875,7 @@ test("absent evidence never authorizes replay of a previously committed command"
 
 test("current generated operation inputs reject route aliases and wrong-plane scopes before persistence", async () => {
   let fetches = 0;
-  const transport = new ConvoHopTransport({ baseUrl: "http://localhost:18080", namespace: "closed", fetch: async () => { fetches++; } });
+  const transport = new RelayTransport({ baseUrl: "http://localhost:18080", namespace: "closed", fetch: async () => { fetches++; } });
   const projectId = id();
   for (const [key, project, input, permit] of [
     ["communication.removeMember", projectId, { conversationId: id(), principalId: id(), expectedMembershipRevision: "1" }],
@@ -894,7 +894,7 @@ for (const operation of ["communication.redeemCredential", "communication.acknow
 test(`unknown ${operation} needs a fresh permit without unauthorized request lookup`, async () => {
   const saved = storage(), requestId = id(), projectId = id(), deliveryId = id();
   let writes = 0;
-  const transport = new ConvoHopTransport({ baseUrl: "http://localhost:18080", namespace: "delivery-unknown", recoveryStorage: saved,
+  const transport = new RelayTransport({ baseUrl: "http://localhost:18080", namespace: "delivery-unknown", recoveryStorage: saved,
     fetch: async (_url, options) => {
       const request = JSON.parse(options.body);
       assert.notEqual(request.operationName, "CommunicationResolveRequest");
@@ -910,7 +910,7 @@ test(`unknown ${operation} needs a fresh permit without unauthorized request loo
 test("an unknown replay-only request is never looked up; only an explicit resend of the same request settles it", async () => {
   const requestId = id(), sent = [], input = { scopes: ["messageRead"], expiresAt: "2026-12-01T00:00:00.000Z" };
   let lose = true;
-  const transport = new ConvoHopTransport({ baseUrl: "http://localhost:18080", credential: "fixture-agent-verifier",
+  const transport = new RelayTransport({ baseUrl: "http://localhost:18080", credential: "fixture-agent-verifier",
     namespace: "replay-only", recoveryStorage: storage(),
     fetch: async (_url, options) => {
       const request = JSON.parse(options.body);
@@ -934,7 +934,7 @@ test("an unknown replay-only request is never looked up; only an explicit resend
 
 test("missing committed receipt metadata stays unknown despite a complete result object", async () => {
   const requestId = id();
-  const transport = new ConvoHopTransport({ baseUrl: "http://localhost:18080", namespace: "metadata",
+  const transport = new RelayTransport({ baseUrl: "http://localhost:18080", namespace: "metadata",
     fetch: async (_url, options) => reply(JSON.parse(options.body), {
       receiptId: null, result: { orgId: id(), name: "fixture", status: "active", revision: "1" },
     }) });

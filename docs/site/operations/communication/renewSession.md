@@ -92,7 +92,7 @@ mutation CommunicationRenewSession($context: RequestContextInput!, $input: Renew
 | Language | Members |
 | --- | --- |
 | [TypeScript](../../typescript/reference/operations.md) | [`ProjectServerClient.sessions.renew`](../../typescript/reference/server.md#projectserverclientsessionsrenew-property) |
-| [Python](../../python/reference/operations.md) | [`ConvoHop.renew_session`](../../python/reference/convohop.md#convohoprenew_session-method), [`AsyncConvoHop.renew_session`](../../python/reference/convohop.md#asyncconvohoprenew_session-method) |
-| [.NET](../../dotnet/reference/operations.md) | [`ServerSessions.RenewAsync`](../../dotnet/reference/convohop.md#serversessionsrenewasync-method), [`CommunicationApi.RenewSessionAsync`](../../dotnet/reference/api.md#communicationapirenewsessionasync-method) |
+| [Python](../../python/reference/operations.md) | [`Relay.renew_session`](../../python/reference/instantrelay.md#relayrenew_session-method), [`AsyncRelay.renew_session`](../../python/reference/instantrelay.md#asyncrelayrenew_session-method) |
+| [.NET](../../dotnet/reference/operations.md) | [`ServerSessions.RenewAsync`](../../dotnet/reference/relay.md#serversessionsrenewasync-method), [`CommunicationApi.RenewSessionAsync`](../../dotnet/reference/api.md#communicationapirenewsessionasync-method) |
 | [Java and Kotlin](../../jvm/reference/operations.md) | [`ProjectServerClient.sessions.renew`](../../jvm/reference/server.md#projectserverclientsessionsrenew-method), [`CommunicationApi.renewSession`](../../jvm/reference/server.md#communicationapirenewsession-method), [`CommunicationSuspendApi.renewSession`](../../jvm/reference/server-kotlin.md#communicationsuspendapirenewsession-method) |
-| [Go](../../go/reference/operations.md) | [`ProjectClient.RenewSession`](../../go/reference/convohop.md#projectclientrenewsession-method) |
+| [Go](../../go/reference/operations.md) | [`ProjectClient.RenewSession`](../../go/reference/relay.md#projectclientrenewsession-method) |

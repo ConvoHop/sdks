@@ -297,7 +297,7 @@ export function renderSite({ root, config, ir, snippets, languages }) {
   const operationIndex = [
     "# API operations",
     "",
-    "Every operation in the ConvoHop GraphQL API, with its authorization, idempotency, input, result and errors, and the SDK members that send it.",
+    "Every operation in the Relay GraphQL API, with its authorization, idempotency, input, result and errors, and the SDK members that send it.",
   ];
   for (const plane of ir.planes) {
     const operations = ir.operations.filter(operation => operation.plane === plane.name);

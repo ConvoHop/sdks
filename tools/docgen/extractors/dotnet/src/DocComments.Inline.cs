@@ -6,7 +6,7 @@ using System.Text.RegularExpressions;
 using System.Xml.Linq;
 using Microsoft.CodeAnalysis;
 
-namespace ConvoHop.Docgen;
+namespace Relay.Docgen;
 
 internal sealed partial class DocComments
 {
@@ -211,7 +211,7 @@ internal sealed partial class DocComments
         return context.AllInterfaces.Any(item => SymbolEqualityComparer.Default.Equals(item.OriginalDefinition, container));
     }
 
-    /// <summary>The symbol a compiled cref (a documentation ID such as <c>T:ConvoHop.Webhooks</c>) names.</summary>
+    /// <summary>The symbol a compiled cref (a documentation ID such as <c>T:Relay.Webhooks</c>) names.</summary>
     private ISymbol Resolve(string cref, ISymbol owner)
     {
         var symbol = cref.Length > 2 && cref[1] == ':' && cref[0] != '!'

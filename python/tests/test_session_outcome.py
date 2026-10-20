@@ -15,9 +15,9 @@ from typing import Any
 import httpx
 import pytest
 
-from convohop import AsyncConvoHop, ConvoHop, ConvoHopProblem, ScopeRequiredProblem
-from convohop._generated.operations import INPUTS, OPERATIONS
-from convohop.types import SessionRequestOutcome
+from instantrelay import AsyncRelay, Relay, RelayProblem, ScopeRequiredProblem
+from instantrelay._generated.operations import INPUTS, OPERATIONS
+from instantrelay.types import SessionRequestOutcome
 
 from .graphql import (
     BACKEND_KEY,
@@ -107,7 +107,7 @@ def assert_clean(problem: BaseException, *secrets: str) -> None:
         assert secret not in logged
 
 
-def renew(client: ConvoHop, session: Mapping[str, Any], request_id: str) -> object:
+def renew(client: Relay, session: Mapping[str, Any], request_id: str) -> object:
     """Renews ``session`` from its expected revision under the original ``request_id``."""
     return client.renew_session(
         session_id=session["sessionId"],
@@ -146,14 +146,14 @@ class Setup:
         envelope = {"status": "ok", "requestId": request.request_id, "serverTime": CHECKED_AT, "result": self.result}
         return httpx.Response(200, json={"data": {"sessionRequestOutcome": envelope | self.envelope}})
 
-    def async_client(self, **options: Any) -> AsyncConvoHop:
+    def async_client(self, **options: Any) -> AsyncRelay:
         """An asynchronous client of the same project and incarnation."""
         return self.authority.async_project(project_id=self.project_id, incarnation=self.incarnation, **options)
 
     def read(self) -> SessionRequestOutcome:
         return self.client.session_request_outcome(request_id=self.request_id)
 
-    def rejects_invalid(self) -> ConvoHopProblem:
+    def rejects_invalid(self) -> RelayProblem:
         """The read fails for its own request as ``INVALID_RESPONSE``, names no credential and changes no custody."""
         custody, writes = self.client.recovery_states, list(self.storage.writes)
         problem = rejects(self.read, "INVALID_RESPONSE")

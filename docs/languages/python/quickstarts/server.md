@@ -1,23 +1,23 @@
 # Python server quickstart
 
-Call ConvoHop from your Python backend with `convohop`: connect with a backend key, sign in your users, create a conversation, send and read messages as a member, recover a send whose response was lost, and do the same from `asyncio` code.
+Call Relay from your Python backend with `instantrelay`: connect with a backend key, sign in your users, create a conversation, send and read messages as a member, recover a send whose response was lost, and do the same from `asyncio` code.
 
 ## Before you start
 
-You need Python 3.11 or later and `convohop` ([install](../index.md#install)). For your project, you need the Communication API's base URL, the project ID, the project's incarnation and a backend key, which the [`management.issueBackendKey`](../../operations/management/issueBackendKey.md) operation delivers once.
+You need Python 3.11 or later and `instantrelay` ([install](../index.md#install)). For your project, you need the Communication API's base URL, the project ID, the project's incarnation and a backend key, which the [`management.issueBackendKey`](../../operations/management/issueBackendKey.md) operation delivers once.
 
 Keep the backend key in your secret store. Its scopes limit what it can do. This quickstart needs `principalManage`, `sessionIssue`, `conversationManage`, `messageRead` and `messageWrite`.
 
 ## Connect
 
-`initialize()` reads your project's route before the first call. It raises a `ConvoHopProblem` with the code `INCARNATION_MISMATCH` when the project has a new incarnation.
+`initialize()` reads your project's route before the first call. It raises a `RelayProblem` with the code `INCARNATION_MISMATCH` when the project has a new incarnation.
 
 ```python include=examples/src/server.py#connect
 ```
 
 ## Sign in a user
 
-ConvoHop doesn't authenticate your users. After your own login succeeds, map the user to a principal and issue a session for the device. Return the result to the user's app, which passes it to a client SDK, as the [TypeScript client quickstart](../../typescript/quickstarts/client.md) shows.
+Relay doesn't authenticate your users. After your own login succeeds, map the user to a principal and issue a session for the device. Return the result to the user's app, which passes it to a client SDK, as the [TypeScript client quickstart](../../typescript/quickstarts/client.md) shows.
 
 ```python include=examples/src/server.py#bootstrap
 ```
@@ -43,7 +43,7 @@ Your backend isn't a member of the conversation. To send or read as a member, pa
 
 ## Recover a lost response
 
-When a connection drops after a command is sent, the SDK can't tell whether the authority committed it, so it raises a `ConvoHopProblem` whose `outcome` is `"unknown"`. Sending again with a new request ID could post the message twice. Instead, `retry_request` asks the authority about the original request. If the authority never received it, `retry_request` resends the original command first. A `committed` resolution carries the command's result.
+When a connection drops after a command is sent, the SDK can't tell whether the authority committed it, so it raises a `RelayProblem` whose `outcome` is `"unknown"`. Sending again with a new request ID could post the message twice. Instead, `retry_request` asks the authority about the original request. If the authority never received it, `retry_request` resends the original command first. A `committed` resolution carries the command's result.
 
 ```python include=examples/src/server.py#recover
 ```
@@ -52,7 +52,7 @@ Retry with the same client, which keeps the original request in memory. It sends
 
 ## Use asyncio
 
-`AsyncConvoHop` has the same methods as `ConvoHop`, as coroutines, and closes with `async with`.
+`AsyncRelay` has the same methods as `Relay`, as coroutines, and closes with `async with`.
 
 ```python include=examples/src/server.py#async
 ```
@@ -60,4 +60,4 @@ Retry with the same client, which keeps the original request in memory. It sends
 ## Next steps
 
 - [Webhooks quickstart](webhooks.md): react to events in your backend.
-- [`ConvoHop` reference](../reference/convohop.md#convohop-class): every method, with the operation it sends.
+- [`Relay` reference](../reference/instantrelay.md#relay-class): every method, with the operation it sends.

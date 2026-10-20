@@ -4,7 +4,7 @@ using System.Linq;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 
-namespace ConvoHop.Docgen;
+namespace Relay.Docgen;
 
 internal sealed partial class SurfaceBuilder
 {

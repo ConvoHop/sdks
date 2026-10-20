@@ -1,4 +1,4 @@
-# `@convohop/react-native`
+# `@instantrelay/react-native`
 
 React Native support for the client SDK: the platform it needs on Hermes, push registration and notifications through APNs, PushKit and FCM, and calls in CallKit and Android's Telecom.
 
@@ -210,7 +210,7 @@ addEventListener(listener: (state: {
 interface NotificationResponse
 ```
 
-A ConvoHop push the app received while running (`received`) or that the user opened (`opened`).
+A Relay push the app received while running (`received`) or that the user opened (`opened`).
 
 #### `NotificationResponse.action` property
 
@@ -317,7 +317,7 @@ iOS 12+: deliver quietly without asking. The user can promote or turn off notifi
 interface PushRecipient
 ```
 
-The user whose ConvoHop pushes this device accepts: the signed-in user.
+The user whose Relay pushes this device accepts: the signed-in user.
 
 #### `PushRecipient.projectId` property
 
@@ -338,10 +338,10 @@ The user's principal ID: the client's `principalId`.
 ### `ReactNativePlatform` interface
 
 ```ts
-interface ReactNativePlatform extends ConvoHopPlatform
+interface ReactNativePlatform extends RelayPlatform
 ```
 
-A `ConvoHopPlatform` for React Native: pass it as `ConvoHopClient`'s `platform` option.
+A `RelayPlatform` for React Native: pass it as `RelayClient`'s `platform` option.
 
 #### `ReactNativePlatform.randomUUID` property
 
@@ -397,7 +397,7 @@ WebSocket?: PlatformWebSocketConstructor
 
 Opens the realtime connection. Default: the global `WebSocket`.
 
-Inherited from `ConvoHopPlatform`.
+Inherited from `RelayPlatform`.
 
 ### `RegisterForPushOptions` interface
 
@@ -542,12 +542,12 @@ Whether the app may show notifications. `provisional` is iOS's quiet delivery to
 ### `RemoteMessageResult` type
 
 ```ts
-type RemoteMessageResult = "notConvoHop" | "invalid" | "ignored" | "message" | "ringing" | "stopped" | "missed"
+type RemoteMessageResult = "notRelay" | "invalid" | "ignored" | "message" | "ringing" | "stopped" | "missed"
 ```
 
 What the native handler did with an Android data message:
-- `notConvoHop`: the message isn't a ConvoHop push. Handle it yourself.
-- `invalid`: it is a ConvoHop push that doesn't match the push payload contract. It was dropped.
+- `notRelay`: the message isn't a Relay push. Handle it yourself.
+- `invalid`: it is a Relay push that doesn't match the push payload contract. It was dropped.
 - `ignored`: a duplicate, or a ring for a call that already stopped.
 - `message`: it showed a message notification.
 - `ringing`: it started ringing an incoming call.
@@ -557,7 +557,7 @@ What the native handler did with an Android data message:
 ### `RingingClient` type
 
 ```ts
-type RingingClient = Pick<ConvoHopClient, "liveAlerts" | "liveSession">
+type RingingClient = Pick<RelayClient, "liveAlerts" | "liveSession">
 ```
 
 The client methods `watchRingingCalls` uses.
@@ -587,7 +587,7 @@ and alarm apps, and users can revoke it; without it, a call rings as a heads-up 
 function createPlatform(options?: PlatformOptions): ReactNativePlatform
 ```
 
-Creates the React Native platform for `@convohop/client`. It listens to `AppState`, and to NetInfo when you pass
+Creates the React Native platform for `@instantrelay/client`. It listens to `AppState`, and to NetInfo when you pass
 it, from creation until `ReactNativePlatform.dispose`. Create one for the app and share it between clients.
 
 ### `endCall` function
@@ -636,9 +636,9 @@ The push registrations this process has seen: the APNs and PushKit tokens on iOS
 function handleRemoteMessage(data: Readonly<Record<string, string>>): Promise<RemoteMessageResult>
 ```
 
-Android: hands an FCM data message to the native ConvoHop handler, which shows message notifications and rings
+Android: hands an FCM data message to the native Relay handler, which shows message notifications and rings
 calls. Use it when another library, such as React Native Firebase, owns your `FirebaseMessagingService`. Without
-one, the ConvoHop service receives pushes itself and you don't need this.
+one, the Relay service receives pushes itself and you don't need this.
 
 ### `onCallEvent` function
 
@@ -654,7 +654,7 @@ Calls `listener` for each change to a call. Returns a function that stops listen
 function onNotification(listener: (response: NotificationResponse) => void): () => void
 ```
 
-Calls `listener` for each ConvoHop push the app receives while running and each one the user opens. The native
+Calls `listener` for each Relay push the app receives while running and each one the user opens. The native
 modules present pushes and ring calls themselves; use this to update your UI or navigate.
 
 ### `openFullScreenIntentSettings` function
@@ -671,7 +671,7 @@ Android 14 and later: opens the setting that lets this app ring full screen.
 function registerForPush(options: RegisterForPushOptions): Promise<() => void>
 ```
 
-Registers this device for ConvoHop pushes. It starts the platform's registration and passes each registration to
+Registers this device for Relay pushes. It starts the platform's registration and passes each registration to
 your `register` callback, which stores it with your backend. It resolves once the APNs token (iOS) or the FCM
 registration (Android) is stored, and keeps passing new registrations until you call the function it resolves or
 abort `signal`. It rejects when the platform can't register, `register` fails for that registration, `timeoutMs`
@@ -737,13 +737,13 @@ Mutes or unmutes the call in the system UI. Mute your LiveKit microphone track f
 function setPushRecipient(recipient: PushRecipient | null): Promise<void>
 ```
 
-Sets the user whose ConvoHop pushes this device shows and rings, or `null` for nobody. Call it with the client's
+Sets the user whose Relay pushes this device shows and rings, or `null` for nobody. Call it with the client's
 `projectId` and `principalId` after sign-in, before `registerForPush`, and with `null` when sign-out starts. The
 device keeps the two IDs, never a credential, so the filter also applies to a push that starts the app before
 JavaScript runs.
 
-The native handlers drop every ConvoHop push for anyone else, and `onNotification` and `takeInitialNotification`
-never see it. Until the first call, and after `null`, they drop every ConvoHop push, so a registration your backend
+The native handlers drop every Relay push for anyone else, and `onNotification` and `takeInitialNotification`
+never see it. Until the first call, and after `null`, they drop every Relay push, so a registration your backend
 failed to delete reaches nobody. iOS still reports a dropped VoIP push to CallKit, which ends it at once. On iOS, a
 message push that arrives while the app isn't in the foreground is shown by iOS itself: see the README.
 
@@ -784,7 +784,7 @@ joined. Returns a function that stops listening.
 function takeInitialNotification(): Promise<NotificationResponse | null>
 ```
 
-The ConvoHop notification the user opened to launch the app. Resolves it once, then `null`.
+The Relay notification the user opened to launch the app. Resolves it once, then `null`.
 
 ### `unregisterFromPush` function
 

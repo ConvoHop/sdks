@@ -39,7 +39,7 @@ jobs:
           if-no-files-found: ignore
           retention-days: 14
 
-  # Runs the suite against the ConvoHop dev stack: the private, development-only
+  # Runs the suite against the Relay dev stack: the private, development-only
   # linux/arm64 image that runs the whole platform in one container (see
   # spec/conformance/targets.md). conformance/dev-stack.mjs starts the stack and
   # shows why it stopped; every dev-stack job, here and in the SDK workflows,

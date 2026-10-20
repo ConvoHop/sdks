@@ -11,7 +11,7 @@ import { codeUnitCompare } from "./naming.mjs";
  *   export default defineEmitter({
  *     name: "python-models",
  *     description: "Python models and operations",
- *     owns: ["packages/python/src/convohop/_generated"], // optional: directories only it writes to
+ *     owns: ["packages/python/src/instantrelay/_generated"], // optional: directories only it writes to
  *     emit(ir, options) { return [{ path: "relative/posix/path", contents: "text\n" }]; },
  *   });
  *

@@ -1,4 +1,4 @@
-import 'package:convohop/convohop.dart';
+import 'package:instantrelay/instantrelay.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'support/realtime_fakes.dart';
@@ -68,7 +68,7 @@ void main() {
 
     typing.keystroke();
     await pumpEventQueue();
-    expect(errors.single, isA<ConvoHopProblem>().having((problem) => problem.code, 'code', 'FORBIDDEN'));
+    expect(errors.single, isA<RelayProblem>().having((problem) => problem.code, 'code', 'FORBIDDEN'));
     now += 101;
     typing.keystroke();
     await pumpEventQueue();

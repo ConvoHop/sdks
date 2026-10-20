@@ -2,12 +2,12 @@
 
 // #region start-call
 import type {
-  ConvoHopClient,
+  RelayClient,
   LiveParticipationHandle,
   LiveSessionHandle,
   MediaConnection,
   RemoteMedia,
-} from "@convohop/client";
+} from "@instantrelay/client";
 
 // Your call screen.
 export interface CallView {
@@ -25,7 +25,7 @@ export interface Call {
 }
 
 // Starts a video call in a conversation and joins it.
-export async function startCall(client: ConvoHopClient, conversationId: string, view: CallView): Promise<Call> {
+export async function startCall(client: RelayClient, conversationId: string, view: CallView): Promise<Call> {
   const start = await client.conversation(conversationId).live.startVideo(); // startVoice() for audio only.
   const session = await start.ready(); // The call can be joined. Nothing is captured yet.
   return joinCall(session, view);
@@ -39,7 +39,7 @@ export async function ring(call: Call, principalIds: string[]): Promise<void> {
 
 // #region join-call
 // Any member can join the conversation's current call. A ring isn't required.
-export async function answerCall(client: ConvoHopClient, conversationId: string, view: CallView): Promise<Call | null> {
+export async function answerCall(client: RelayClient, conversationId: string, view: CallView): Promise<Call | null> {
   const session = await client.conversation(conversationId).live.current();
   return session ? joinCall(session, view) : null;
 }

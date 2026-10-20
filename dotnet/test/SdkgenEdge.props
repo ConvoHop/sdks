@@ -8,9 +8,9 @@
     <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <IsPackable>false</IsPackable>
-    <RootNamespace>ConvoHop</RootNamespace>
+    <RootNamespace>Relay</RootNamespace>
     <Golden>$(MSBuildThisFileDirectory)../../tools/sdkgen/test/golden/</Golden>
-    <Runtime>$(MSBuildThisFileDirectory)../src/ConvoHop/</Runtime>
+    <Runtime>$(MSBuildThisFileDirectory)../src/Relay/</Runtime>
   </PropertyGroup>
 
   <ItemGroup Condition="'$(TargetFramework)' == 'netstandard2.0'">
@@ -25,6 +25,6 @@
     <Compile Include="$(Runtime)Internal/PageSequence.cs" Link="Runtime/PageSequence.cs" />
     <Compile Include="$(Runtime)Internal/Protocol.cs" Link="Runtime/Protocol.cs" />
     <Compile Include="$(Runtime)Internal/TypeShape.cs" Link="Runtime/TypeShape.cs" />
-    <Compile Include="$(Golden)$(EdgeGolden)/dotnet/src/ConvoHop/Generated/*.cs" LinkBase="Generated" />
+    <Compile Include="$(Golden)$(EdgeGolden)/dotnet/src/Relay/Generated/*.cs" LinkBase="Generated" />
   </ItemGroup>
 </Project>

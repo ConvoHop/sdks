@@ -1,15 +1,15 @@
-internal import ConvoHopCalls
-internal import ConvoHopPush
+internal import RelayCalls
+internal import RelayPush
 import Foundation
 import UIKit
 import UserNotifications
 
-/// React Native plumbing, not app API: the Swift half of the `ConvoHopPush` TurboModule. `ConvoHopPushModule.mm`
+/// React Native plumbing, not app API: the Swift half of the `RelayPush` TurboModule. `RelayPushModule.mm`
 /// calls it on the main thread.
 @MainActor
-@objc(ConvoHopPushBridge)
-public final class ConvoHopPushBridge: NSObject, PromiseOwner {
-    weak var emitter: (any ConvoHopPushEmitter)?
+@objc(RelayPushBridge)
+public final class RelayPushBridge: NSObject, PromiseOwner {
+    weak var emitter: (any RelayPushEmitter)?
     private(set) var isInvalidated = false
 
     nonisolated override public init() {
@@ -18,7 +18,7 @@ public final class ConvoHopPushBridge: NSObject, PromiseOwner {
 
     /// Starts emitting to `emitter`, once React Native has set its event callback.
     @objc(attachEmitter:)
-    public func attach(_ emitter: any ConvoHopPushEmitter) {
+    public func attach(_ emitter: any RelayPushEmitter) {
         guard !isInvalidated else { return }
         self.emitter = emitter
         Hub.shared.attach(self)
@@ -36,7 +36,7 @@ public final class ConvoHopPushBridge: NSObject, PromiseOwner {
         resolve: @escaping (Any?) -> Void, reject: @escaping (String, String, (any Error)?) -> Void
     ) {
         let promise = JSPromise(self, resolve, reject)
-        ConvoHopPushBridge.permission { promise.resolve($0) }
+        RelayPushBridge.permission { promise.resolve($0) }
     }
 
     /// Asks for permission if iOS hasn't, then resolves the permission.
@@ -53,7 +53,7 @@ public final class ConvoHopPushBridge: NSObject, PromiseOwner {
         if provisional { options.insert(.provisional) }
         // A refusal or an error leaves the permission as it was, which the settings report.
         UNUserNotificationCenter.current().requestAuthorization(options: options) { _, _ in
-            ConvoHopPushBridge.permission { promise.resolve($0) }
+            RelayPushBridge.permission { promise.resolve($0) }
         }
     }
 
@@ -71,7 +71,7 @@ public final class ConvoHopPushBridge: NSObject, PromiseOwner {
         promise.resolve()
     }
 
-    /// Sets whose ConvoHop pushes this device shows, for the app and its Notification Service Extension. `nil`
+    /// Sets whose Relay pushes this device shows, for the app and its Notification Service Extension. `nil`
     /// drops them all.
     @objc(setRecipient:resolve:reject:)
     public func setRecipient(
@@ -80,7 +80,7 @@ public final class ConvoHopPushBridge: NSObject, PromiseOwner {
     ) {
         let promise = JSPromise(self, resolve, reject)
         guard let recipient else {
-            ConvoHopCalls.shared.recipient = .nobody
+            RelayCalls.shared.recipient = .nobody
             promise.resolve()
             return
         }
@@ -94,7 +94,7 @@ public final class ConvoHopPushBridge: NSObject, PromiseOwner {
             promise.reject(Code.invalidArgument, "projectId and recipientId must be lowercase, non-nil UUIDs")
             return
         }
-        ConvoHopCalls.shared.recipient = .only(projectId: projectId, recipientId: recipientId)
+        RelayCalls.shared.recipient = .only(projectId: projectId, recipientId: recipientId)
         promise.resolve()
     }
 

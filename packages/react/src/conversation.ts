@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
-import { ConversationStore, TypingIndicator } from "@convohop/client";
-import type { ConversationSnapshot, ConvoHopClient, Outbox, OutboxEntry, ProtocolObject, SessionMetadata } from "@convohop/client";
-import { useConvoHop, useConvoHopClient, useLatest, useProvidedOutbox } from "./provider.js";
+import { ConversationStore, TypingIndicator } from "@instantrelay/client";
+import type { ConversationSnapshot, RelayClient, Outbox, OutboxEntry, ProtocolObject, SessionMetadata } from "@instantrelay/client";
+import { useRelay, useRelayClient, useLatest, useProvidedOutbox } from "./provider.js";
 
 export interface ConversationOptions {
   /** Called after each new event is applied, including call and live-session events the store doesn't track. */
@@ -36,7 +36,7 @@ const idle: ConversationSnapshot = Object.freeze({
 const notOpen = () => new Error("The conversation isn't open");
 const noop = () => undefined;
 
-interface Held { readonly store: ConversationStore; readonly client: ConvoHopClient; readonly outbox: Outbox | undefined }
+interface Held { readonly store: ConversationStore; readonly client: RelayClient; readonly outbox: Outbox | undefined }
 
 /**
  * Follows a conversation while the component is mounted: it loads the conversation, keeps it live through
@@ -44,7 +44,7 @@ interface Held { readonly store: ConversationStore; readonly client: ConvoHopCli
  * client or outbox closes the old store and opens a new one; `null` closes it.
  */
 export function useConversation(conversationId: string | null | undefined, options: ConversationOptions = {}): ConversationView {
-  const { client, outbox, events } = useConvoHop();
+  const { client, outbox, events } = useRelay();
   const callbacks = useLatest(options);
   const [held, setHeld] = useState<Held>();
   useEffect(() => {
@@ -79,7 +79,7 @@ export function useConversation(conversationId: string | null | undefined, optio
 export function useOutbox(outbox?: Outbox): readonly OutboxEntry[] {
   const provided = useProvidedOutbox();
   const target = outbox ?? provided;
-  if (!target) throw new Error("Pass an outbox, or give the ConvoHopProvider one");
+  if (!target) throw new Error("Pass an outbox, or give the RelayProvider one");
   const subscribe = useCallback((listener: () => void) => target.subscribe(listener), [target]);
   const read = () => target.entries;
   return useSyncExternalStore(subscribe, read, read);
@@ -106,7 +106,7 @@ export interface TypingControls {
  * that typing stopped. The returned functions keep their identity.
  */
 export function useTyping(conversationId: string | null | undefined, options: TypingOptions = {}): TypingControls {
-  const client = useConvoHopClient();
+  const client = useRelayClient();
   const latest = useLatest(options);
   const indicator = useRef<TypingIndicator | undefined>(undefined);
   const { intervalMs, idleMs } = options, enabled = options.enabled ?? true;
@@ -138,7 +138,7 @@ export interface SessionRefreshOptions {
  * without it, throws `SESSION_REFRESH_REQUIRED` to the nearest error boundary.
  */
 export function useSessionRefresh(options: SessionRefreshOptions = {}): void {
-  const client = useConvoHopClient();
+  const client = useRelayClient();
   const latest = useLatest(options);
   const { leadMs } = options, enabled = options.enabled ?? true;
   useEffect(() => {

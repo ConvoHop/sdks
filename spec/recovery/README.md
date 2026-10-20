@@ -1,6 +1,6 @@
 # Recovery and reconnect rules
 
-Every ConvoHop SDK keeps a journal of the mutations it sends. With it, a
+Every Relay SDK keeps a journal of the mutations it sends. With it, a
 request whose outcome is uncertain is resolved, and resent under its
 original request ID, rather than sent twice. SDKs also retry some failures
 on their own: initialization, and in client SDKs the realtime stream and
@@ -167,7 +167,7 @@ The same classifier decides, for each of them, whether to try again.
 
 ### Classification
 
-A failure that isn't a typed ConvoHop problem stops. A problem is classified
+A failure that isn't a typed Relay problem stops. A problem is classified
 by its code first, then by its HTTP status:
 
 | Problem | Action |
@@ -263,7 +263,7 @@ stream's connection, the stream:
    retryable, the stream stops.
 3. otherwise reconnects with backoff, without reporting a problem.
 
-The code in the reason decides, not the close code alone. ConvoHop closes
+The code in the reason decides, not the close code alone. Relay closes
 with 4429 both when a connection is rate limited, which reconnects, and when
 a quota is spent, which doesn't. Its documented closes:
 

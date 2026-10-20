@@ -25,20 +25,20 @@ export type Environment = Readonly<Record<string, string | undefined>>;
 const profileName = /^[A-Za-z0-9][A-Za-z0-9_.-]{0,63}$/;
 const uuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/;
 
-/** The profile a command uses: --profile, else CONVOHOP_PROFILE, else default. */
+/** The profile a command uses: --profile, else RELAY_PROFILE, else default. */
 export function selectedProfile(option: string | undefined, env: Environment): string {
-  const name = option ?? (env.CONVOHOP_PROFILE || "default");
+  const name = option ?? (env.RELAY_PROFILE || "default");
   if (!profileName.test(name))
     throw new UsageError("A profile name has 1 to 64 letters, digits, dots, dashes or underscores, and starts with a letter or digit");
   return name;
 }
 
 /**
- * The directory that holds config.json and credentials.json: CONVOHOP_CONFIG_DIR, else $XDG_CONFIG_HOME/convohop, else
+ * The directory that holds config.json and credentials.json: RELAY_CONFIG_DIR, else $XDG_CONFIG_HOME/convohop, else
  * the platform's user configuration directory.
  */
 export function configDirectory(env: Environment, platform: NodeJS.Platform): string {
-  if (env.CONVOHOP_CONFIG_DIR) return env.CONVOHOP_CONFIG_DIR;
+  if (env.RELAY_CONFIG_DIR) return env.RELAY_CONFIG_DIR;
   if (env.XDG_CONFIG_HOME && isAbsolute(env.XDG_CONFIG_HOME)) return join(env.XDG_CONFIG_HOME, "convohop");
   if (platform === "darwin") return join(homedir(), "Library", "Application Support", "convohop");
   if (platform === "win32") return join(env.APPDATA || join(homedir(), "AppData", "Roaming"), "convohop");
@@ -97,7 +97,7 @@ export class ConfigFiles {
     const value = await this.#readJson(this.configPath, false);
     if (value === undefined) return { profiles: {} };
     const profiles = isRecord(value) && Object.keys(value).length === 1 && isRecord(value.profiles) ? value.profiles : undefined;
-    if (!profiles) throw new CliError(`${this.configPath} is not a convohop configuration; fix or delete it`);
+    if (!profiles) throw new CliError(`${this.configPath} is not a relay configuration; fix or delete it`);
     const parsed: Record<string, Profile> = {};
     for (const [name, profile] of Object.entries(profiles)) {
       const valid = profileName.test(name) ? parseProfile(profile) : undefined;
@@ -136,7 +136,7 @@ export class ConfigFiles {
     if (value === undefined) return {};
     const tokens = isRecord(value) && Object.keys(value).length === 1 && isRecord(value.tokens) ? value.tokens : undefined;
     if (!tokens || Object.values(tokens).some(token => typeof token !== "string"))
-      throw new CliError(`${this.credentialsPath} is not a convohop credentials file; delete it and log in again`);
+      throw new CliError(`${this.credentialsPath} is not a relay credentials file; delete it and log in again`);
     return Object.fromEntries(Object.entries(tokens).filter((entry): entry is [string, string] => typeof entry[1] === "string"));
   }
 

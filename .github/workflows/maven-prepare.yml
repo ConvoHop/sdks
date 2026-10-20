@@ -1,18 +1,26 @@
-# Domain-independent artifact preparation only. No Central token, environment,
-# upload endpoint or publication job until com.convohop is verified.
-name: Prepare Maven Central artifacts
+# Preparation stays credential-free. Publication requires verified namespace
+# ownership, existing signing credentials and a confirmed tag dispatch.
+name: Maven Central release
 
 on:
   workflow_dispatch:
     inputs:
       sdk:
-        description: SDK to package without uploading.
+        description: SDK to prepare or explicitly publish.
         required: true
         type: choice
         default: jvm
         options: [jvm, android]
       version:
         description: Preparation version on main; leave empty on a jvm-v<version> or android-v<version> tag.
+        default: ""
+        type: string
+      publish:
+        description: Publish only after dev.instantrelay ownership and the maven environment are configured.
+        default: false
+        type: boolean
+      confirmation:
+        description: "For publication only: publish maven-jvm <version> or publish maven-android <version>"
         default: ""
         type: string
 
@@ -30,3 +38,61 @@ jobs:
     with:
       registry: ${{ format('maven-{0}', inputs.sdk) }}
       version: ${{ inputs.version }}
+      publish: ${{ inputs.publish }}
+      confirmation: ${{ inputs.confirmation }}
+
+  publish:
+    name: Sign and publish Relay ${{ inputs.sdk }} to Central
+    needs: prepare
+    if: needs.prepare.outputs.publish == 'true'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    environment: maven
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ needs.prepare.outputs.sha }}
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: "24"
+          package-manager-cache: false
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: ${{ needs.prepare.outputs.artifact }}
+          path: ${{ runner.temp }}/registry-assets
+      - name: Verify the exact prepared bytes before accessing signing credentials
+        env:
+          REGISTRY: ${{ format('maven-{0}', inputs.sdk) }}
+          VERSION: ${{ needs.prepare.outputs.version }}
+          SOURCE_SHA: ${{ needs.prepare.outputs.sha }}
+          PUBLISH_ENABLED: ${{ vars.MAVEN_PUBLISH_ENABLED || 'false' }}
+        run: |
+          if [[ "$PUBLISH_ENABLED" != true ]]; then
+            echo "::error::Central publishing is not enabled."
+            exit 1
+          fi
+          node scripts/release/registry.mjs verify --registry "$REGISTRY" --version "$VERSION" \
+            --sha "$SOURCE_SHA" --source-ref "$GITHUB_REF" --directory "$RUNNER_TEMP/registry-assets"
+      - name: Sign the verified artifacts with the existing owner-supplied PGP key
+        env:
+          SDK: ${{ inputs.sdk }}
+          VERSION: ${{ needs.prepare.outputs.version }}
+          MAVEN_SIGNING_KEY: ${{ secrets.MAVEN_SIGNING_KEY }}
+          MAVEN_SIGNING_PASSWORD: ${{ secrets.MAVEN_SIGNING_PASSWORD }}
+        run: >-
+          python3 scripts/release/registry-artifacts.py sign-maven --sdk "$SDK" --version "$VERSION"
+          --source "$RUNNER_TEMP/registry-assets/instantrelay-maven-$SDK-$VERSION-unsigned.tar.gz"
+          --out "$RUNNER_TEMP/central.zip"
+      - name: Upload once and require Central to confirm the exact published coordinates
+        id: central
+        env:
+          REGISTRY: ${{ format('maven-{0}', inputs.sdk) }}
+          VERSION: ${{ needs.prepare.outputs.version }}
+          MAVEN_CENTRAL_USERNAME: ${{ secrets.MAVEN_CENTRAL_USERNAME }}
+          MAVEN_CENTRAL_PASSWORD: ${{ secrets.MAVEN_CENTRAL_PASSWORD }}
+        run: >-
+          node scripts/release/registry.mjs maven-publish --registry "$REGISTRY"
+          --version "$VERSION" --bundle "$RUNNER_TEMP/central.zip"

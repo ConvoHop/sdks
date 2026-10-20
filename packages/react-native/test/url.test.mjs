@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { parseURL } from "@convohop/core/internal";
+import { parseURL } from "@instantrelay/core/internal";
 import { URL as Polyfill } from "whatwg-url-without-unicode";
 import { URL as PlatformURL } from "../dist/url.js";
 

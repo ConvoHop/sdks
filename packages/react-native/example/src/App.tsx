@@ -2,8 +2,8 @@
 import { useCallback, useEffect, useState, useSyncExternalStore } from "react";
 import { BackHandler, StatusBar, StyleSheet, View } from "react-native";
 import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
-import { ConvoHopProvider, useSessionRefresh } from "@convohop/react";
-import { onNotification, takeInitialNotification, type NotificationResponse } from "@convohop/react-native";
+import { RelayProvider, useSessionRefresh } from "@instantrelay/react";
+import { onNotification, takeInitialNotification, type NotificationResponse } from "@instantrelay/react-native";
 import { signIn } from "./backend";
 import { CallScreen } from "./screens/Call";
 import { ConversationScreen } from "./screens/Conversation";
@@ -50,13 +50,13 @@ export default function App() {
       <SafeAreaView style={styles.app}>
         {error !== undefined && <Banner onDismiss={() => { setError(undefined); }} text={error} />}
         {stage.name === "signedIn" ? (
-          <ConvoHopProvider client={stage.session.client} outbox={stage.session.outbox}>
+          <RelayProvider client={stage.session.client} outbox={stage.session.outbox}>
             <SignedIn
               onError={report}
               onSignOut={() => { setStage({ name: "signingOut", session: stage.session }); }}
               session={stage.session}
             />
-          </ConvoHopProvider>
+          </RelayProvider>
         ) : stage.name === "signedOut" ? (
           <SignInScreen onSubmit={start} />
         ) : (

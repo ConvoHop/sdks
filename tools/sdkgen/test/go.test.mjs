@@ -89,11 +89,11 @@ test("Go scalar entries carry every constraint the runtime enforces, and reject 
 test("the Go emitter rejects schema names that collide with the runtime, a client or another member", () => {
   const renamed = name => JSON.parse(JSON.stringify(edgeIr()).replaceAll('"Widget"', JSON.stringify(name)));
   for (const name of ["Problem", "ErrorCode", "Option"]) {
-    assert.throws(() => render(renamed(name), {}), goError(`type ${name}: maps to ${name}, which the hand-written runtime already uses in package convohop`));
+    assert.throws(() => render(renamed(name), {}), goError(`type ${name}: maps to ${name}, which the hand-written runtime already uses in package relay`));
   }
-  assert.throws(() => render(renamed("AlphaClient"), {}), goError("type AlphaClient: maps to AlphaClient, which the alpha client already uses in package convohop"));
+  assert.throws(() => render(renamed("AlphaClient"), {}), goError("type AlphaClient: maps to AlphaClient, which the alpha client already uses in package relay"));
   assert.throws(() => render(edgeIr(), { clients: { alpha: "alphaClient" } }), goError('plane alpha: client name "alphaClient" is not an exported Go identifier'));
-  assert.throws(() => render(edgeIr(), { clients: { alpha: "Problem" } }), goError("the alpha client: maps to Problem, which the hand-written runtime already uses in package convohop"));
+  assert.throws(() => render(edgeIr(), { clients: { alpha: "Problem" } }), goError("the alpha client: maps to Problem, which the hand-written runtime already uses in package relay"));
   for (const [field, method, owner] of [["retry", "Retry", "the hand-written runtime"], ["initialize", "Initialize", "the hand-written runtime"], ["capabilities", "Capabilities", "beta.capabilities"]]) {
     const ir = edgeIr();
     ir.operations.find(operation => operation.id === "beta.widgets").field = field;
@@ -171,7 +171,7 @@ import (
 )
 
 // Reads [{pattern, inputs}] and writes whether each input matches, the way
-// the convohop runtime checks scalar values.
+// the relay runtime checks scalar values.
 func main() {
 	var cases []struct {
 		Pattern string   \`json:"pattern"\`
@@ -194,7 +194,7 @@ func main() {
 }
 `;
 // The runtime declarations the generated files use, other than catalog.go.
-const RUNTIME_STUB = `package convohop
+const RUNTIME_STUB = `package relay
 
 import "context"
 
@@ -215,15 +215,15 @@ function run(command, args, options = {}) {
   return result.stdout;
 }
 
-/** The Go toolchain root, or a skip when Go 1.26+ is missing and CONVOHOP_REQUIRE_GO is not 1. */
+/** The Go toolchain root, or a skip when Go 1.26+ is missing and RELAY_REQUIRE_GO is not 1. */
 function goRoot(t) {
   const result = spawnSync("go", ["env", "GOVERSION", "GOROOT"], { encoding: "utf8", env: GO_ENV });
   const [version, root] = result.status === 0 ? result.stdout.trim().split("\n") : [];
   const match = /^go1\.(\d+)(\.|$|rc|beta)/.exec(version ?? "");
   if (match && Number(match[1]) >= GO_MINIMUM_MINOR) return root;
   const reason = match ? `${version} is older than go1.${GO_MINIMUM_MINOR}` : "Go is not installed";
-  if (process.env.CONVOHOP_REQUIRE_GO === "1") assert.fail(`${reason}, and CONVOHOP_REQUIRE_GO=1 requires it`);
-  t.skip(`${reason}; set CONVOHOP_REQUIRE_GO=1 to require it`);
+  if (process.env.RELAY_REQUIRE_GO === "1") assert.fail(`${reason}, and RELAY_REQUIRE_GO=1 requires it`);
+  t.skip(`${reason}; set RELAY_REQUIRE_GO=1 to require it`);
   return null;
 }
 

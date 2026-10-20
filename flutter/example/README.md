@@ -1,6 +1,6 @@
-# ConvoHop Flutter example
+# Relay Flutter example
 
-A small chat and calling app built with the [ConvoHop Flutter SDK](../README.md).
+A small chat and calling app built with the [Relay Flutter SDK](../README.md).
 It signs in through your backend and shows:
 
 - the inbox;
@@ -12,8 +12,8 @@ It signs in through your backend and shows:
 - voice calls: start or join the conversation's call, ring the other
   members, reconnect, mute from the system call UI, and leave.
 
-It needs a backend of your own, a ConvoHop project and, for push, Firebase
-and APNs credentials. It holds only the user's short-lived ConvoHop session:
+It needs a backend of your own, a Relay project and, for push, Firebase
+and APNs credentials. It holds only the user's short-lived Relay session:
 your backend keeps the backend key.
 
 ## Your backend
@@ -24,11 +24,11 @@ in `AppBackend` in [`lib/main.dart`](lib/main.dart). The example sends none.
 
 | Request | Your backend |
 | --- | --- |
-| `POST <url>` | Signs the user in to ConvoHop with a server SDK's `issueSession` and answers `{"baseUrl", "projectId", "bootstrap"}`, with the session bootstrap as `bootstrap` |
+| `POST <url>` | Signs the user in to Relay with a server SDK's `issueSession` and answers `{"baseUrl", "projectId", "bootstrap"}`, with the session bootstrap as `bootstrap` |
 | `POST <url>/renew` with `{"sessionId", "principalId", "deviceId", "expectedRevision"}` | Checks that the session is the signed-in user's, renews it with the server SDK's `sessions.renew` and answers the new bootstrap |
 | `POST <url>/push-registration` with `{"kind": "fcm", "token" or "fid"}` or `{"kind": "apns" or "apnsVoip", "token"}` | Keeps the device's push registration, the same registration more than once |
 
-To deliver pushes, your backend receives ConvoHop's `notification.*`
+To deliver pushes, your backend receives Relay's `notification.*`
 webhooks and sends each one to the user's registrations with the server SDK's
 [push payload builders](../../packages/server/README.md#push-payloads):
 `fcm` registrations through FCM with their `token` or `fid` as the message's
@@ -42,8 +42,8 @@ set them up as below:
 
 ```sh
 cd flutter/example
-flutter create --platforms=android,ios --org com.convohop --project-name convohop_example .
-flutter run --dart-define=CONVOHOP_SESSION_URL=https://your-backend.example/convohop/session
+flutter create --platforms=android,ios --org dev.instantrelay --project-name relay_example .
+flutter run --dart-define=RELAY_SESSION_URL=https://your-backend.example/convohop/session
 ```
 
 `flutter create` keeps the existing `lib/main.dart` and `pubspec.yaml`. It
@@ -69,7 +69,7 @@ also adds a `test/widget_test.dart` for a different app: delete it.
   Notifications capability and Background Modes with Voice over IP and
   Audio.
 - Add `NSMicrophoneUsageDescription` to `ios/Runner/Info.plist`.
-- Call `ConvoHopPlugin.handleLaunch()` in `ios/Runner/AppDelegate.swift`
+- Call `RelayPlugin.handleLaunch()` in `ios/Runner/AppDelegate.swift`
   and add the `CONVOHOP_MESSAGE`, `CONVOHOP_CALL` and
   `CONVOHOP_MISSED_CALL` strings, as the
   [package README](../README.md#ios-setup) shows.

@@ -16,7 +16,7 @@ export function SignInScreen({ onSubmit }: SignInScreenProps) {
   };
   return (
     <View style={styles.screen}>
-      <Text accessibilityRole="header" style={styles.title}>ConvoHop</Text>
+      <Text accessibilityRole="header" style={styles.title}>Relay</Text>
       <TextInput
         autoCapitalize="none"
         autoComplete="username"

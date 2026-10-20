@@ -35,9 +35,9 @@ export interface Lifecycle {
 /**
  * Runtime services for runtimes that lack a browser global, such as React Native. Every field is optional and
  * falls back to the global of the same name, looked up when it is used. The transport uses `randomUUID`, `sha256`
- * and `URL`; `@convohop/client` also uses `WebSocket`, `connectivity` and `lifecycle`.
+ * and `URL`; `@instantrelay/client` also uses `WebSocket`, `connectivity` and `lifecycle`.
  */
-export interface ConvoHopPlatform {
+export interface RelayPlatform {
   /** A new random UUID in canonical lowercase form. Default: `crypto.randomUUID()`. */
   randomUUID?: () => string;
   /** The 32-byte SHA-256 digest of `data`. Default: `crypto.subtle.digest("SHA-256", data)`. */
@@ -62,15 +62,15 @@ function subscribable(value: unknown): boolean {
   return value !== null && typeof value === "object" && typeof (value as { subscribe?: unknown }).subscribe === "function";
 }
 /** Checks a `platform` option's shape. Returns a frozen copy. */
-export function validatePlatform(value: unknown): Readonly<ConvoHopPlatform> {
+export function validatePlatform(value: unknown): Readonly<RelayPlatform> {
   if (value === undefined) return Object.freeze({});
   if (value === null || typeof value !== "object" || Array.isArray(value)) throw new TypeError("platform must be an object");
-  const platform = value as ConvoHopPlatform;
+  const platform = value as RelayPlatform;
   for (const key of ["randomUUID", "sha256", "URL", "WebSocket"] as const)
     if (platform[key] !== undefined && typeof platform[key] !== "function") throw new TypeError(`platform.${key} must be a function`);
   for (const key of ["connectivity", "lifecycle"] as const)
     if (platform[key] !== undefined && !subscribable(platform[key])) throw new TypeError(`platform.${key} must have a subscribe function`);
-  const copy: ConvoHopPlatform = {};
+  const copy: RelayPlatform = {};
   if (platform.randomUUID) copy.randomUUID = platform.randomUUID;
   if (platform.sha256) copy.sha256 = platform.sha256;
   if (platform.URL) copy.URL = platform.URL;
@@ -87,7 +87,7 @@ type Globals = {
 const globals = globalThis as unknown as Globals;
 
 /** A new request or subscription ID: a canonical lowercase nonzero UUID from the platform. */
-export function randomUUID(platform?: ConvoHopPlatform): string {
+export function randomUUID(platform?: RelayPlatform): string {
   const generate = platform?.randomUUID ?? globals.crypto?.randomUUID?.bind(globals.crypto);
   if (typeof generate !== "function") throw new TypeError("This runtime has no crypto.randomUUID; pass platform.randomUUID");
   const id: unknown = generate();
@@ -119,7 +119,7 @@ function conforms(Url: PlatformURLConstructor): boolean {
  * Parses with the platform's URL constructor, after checking once that it conforms. Invalid input throws a TypeError
  * with the `invalid` message; a missing or nonconforming constructor throws its own TypeError.
  */
-export function parseURL(value: string, platform?: ConvoHopPlatform, invalid = "Invalid URL"): PlatformURL {
+export function parseURL(value: string, platform?: RelayPlatform, invalid = "Invalid URL"): PlatformURL {
   const Url = platform?.URL ?? globals.URL;
   if (typeof Url !== "function") throw new TypeError("This runtime has no URL; pass platform.URL");
   let ok = conformingURL.get(Url);
@@ -157,7 +157,7 @@ async function digest(hash: (data: Uint8Array) => Promise<Uint8Array | ArrayBuff
   return bytes;
 }
 /** SHA-256 with the platform's digest. A supplied digest must first reproduce a known answer. */
-export async function sha256(data: Uint8Array, platform?: ConvoHopPlatform): Promise<Uint8Array> {
+export async function sha256(data: Uint8Array, platform?: RelayPlatform): Promise<Uint8Array> {
   const supplied = platform?.sha256;
   if (supplied) {
     let ok = knownDigests.get(supplied);

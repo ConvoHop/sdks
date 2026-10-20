@@ -4,12 +4,12 @@ import {
   answerCall, canUseFullScreenIntent, endCall, forgetCall, getCalls, onCallEvent, openFullScreenIntentSettings,
   reportConnected, reportConnecting, setAudioRoute, setHeld, setMuted, startOutgoingCall, stopRinging,
   subscribeAnsweredCalls, updateCall,
-} from "@convohop/react-native";
+} from "@instantrelay/react-native";
 import { Platform, reported } from "react-native";
 import { linkCalls, snapshot, turn, uuid } from "./support/native.mjs";
 
 const NIL = "00000000-0000-0000-0000-000000000000";
-const MALFORMED_CALLS = { name: "TypeError", message: "ConvoHopCalls returned malformed calls" };
+const MALFORMED_CALLS = { name: "TypeError", message: "RelayCalls returned malformed calls" };
 const BAD_ID = { name: "TypeError", message: "id must be a lowercase, non-nil UUID" };
 
 test.beforeEach(() => {
@@ -96,7 +96,7 @@ test("onCallEvent passes each valid call event to the listener", () => {
     { type: "changed" }, null, "changed"]) calls.emit("onCallEvent", value);
   assert.equal(seen.length, 5, "malformed events don't reach the listener");
   assert.equal(reported.length, 5);
-  assert.ok(reported.every(error => error instanceof TypeError && error.message === "ConvoHopCalls sent a malformed call event"));
+  assert.ok(reported.every(error => error instanceof TypeError && error.message === "RelayCalls sent a malformed call event"));
 
   reported.length = 0;
   const failure = new Error("listener failed");
@@ -162,7 +162,7 @@ test("subscribeAnsweredCalls reports what it can't deliver and replays nothing o
     subscribeAnsweredCalls(() => assert.fail("nothing to deliver"))();
   }
   await turn();
-  assert.deepEqual(reported.map(error => error.message), ["getCalls failed", "ConvoHopCalls returned malformed calls"]);
+  assert.deepEqual(reported.map(error => error.message), ["getCalls failed", "RelayCalls returned malformed calls"]);
 });
 
 test("call actions pass a validated call ID to the native module", async () => {
@@ -186,7 +186,7 @@ test("forgetCall resolves whether the ended call was dropped", async () => {
   await assert.rejects(forgetCall("call"), BAD_ID);
   assert.equal(calls.log.length, 2);
   linkCalls({ forgetCall: async () => "yes" });
-  await assert.rejects(forgetCall(callId), { name: "TypeError", message: "ConvoHopCalls returned a malformed result" });
+  await assert.rejects(forgetCall(callId), { name: "TypeError", message: "RelayCalls returned a malformed result" });
 });
 
 test("startOutgoingCall reports a validated outgoing call to CallKit on iOS", async () => {
@@ -215,7 +215,7 @@ test("startOutgoingCall reports a validated outgoing call to CallKit on iOS", as
   assert.equal((await startOutgoingCall({ ...valid, handle: "a".repeat(1024) })), callId);
 
   linkCalls({ startOutgoingCall: async () => callId.toUpperCase() });
-  await assert.rejects(startOutgoingCall(valid), { name: "TypeError", message: "ConvoHopCalls returned a malformed call ID" });
+  await assert.rejects(startOutgoingCall(valid), { name: "TypeError", message: "RelayCalls returned a malformed call ID" });
   Platform.OS = "android";
   const android = linkCalls();
   await assert.rejects(startOutgoingCall(valid), { name: "Error", message: "startOutgoingCall is only available on iOS" });
@@ -271,5 +271,5 @@ test("Android-only call controls check the platform and their arguments", async 
     ["canUseFullScreenIntent"], ["openFullScreenIntentSettings"],
   ]);
   linkCalls({ canUseFullScreenIntent: async () => "denied" });
-  await assert.rejects(canUseFullScreenIntent(), { name: "TypeError", message: "ConvoHopCalls returned a malformed result" });
+  await assert.rejects(canUseFullScreenIntent(), { name: "TypeError", message: "RelayCalls returned a malformed result" });
 });

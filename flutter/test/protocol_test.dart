@@ -1,7 +1,7 @@
 import 'dart:convert';
 
-import 'package:convohop/src/generated/generated.dart';
-import 'package:convohop/src/protocol.dart';
+import 'package:instantrelay/src/generated/generated.dart';
+import 'package:instantrelay/src/protocol.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'support/test_data.dart';

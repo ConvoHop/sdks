@@ -4,8 +4,8 @@
 // #region connect
 import type { AsyncStorage } from "@react-native-async-storage/async-storage";
 import NetInfo from "@react-native-community/netinfo";
-import { ConvoHopClient, type SessionBootstrap, type SessionRefresh } from "@convohop/client";
-import { createPlatform } from "@convohop/react-native";
+import { RelayClient, type SessionBootstrap, type SessionRefresh } from "@instantrelay/client";
+import { createPlatform } from "@instantrelay/react-native";
 
 // One for the app, shared by its clients: crypto and URL for Hermes, NetInfo's connectivity and AppState's lifecycle.
 export const platform = createPlatform({ netInfo: NetInfo });
@@ -17,9 +17,9 @@ export async function connectUser(
   bootstrap: UserBootstrap,
   storage: AsyncStorage, // One createAsyncStorage("convohop") for the app. It keeps unsent messages, never tokens.
   sessionRefresh?: SessionRefresh, // Optional: renews the session before it expires.
-): Promise<ConvoHopClient> {
+): Promise<RelayClient> {
   await claimStorage(storage, bootstrap);
-  const client = new ConvoHopClient({
+  const client = new RelayClient({
     baseUrl: bootstrap.baseUrl,
     projectId: bootstrap.projectId,
     incarnation: bootstrap.session.incarnation,
@@ -44,9 +44,9 @@ async function claimStorage(storage: AsyncStorage, { projectId, session }: UserB
 // #endregion connect
 
 // #region renew
-import type { SessionMetadata } from "@convohop/client";
+import type { SessionMetadata } from "@instantrelay/client";
 
-// Your backend, and the user's credential for it from your app's own sign-in. Never a ConvoHop backend key.
+// Your backend, and the user's credential for it from your app's own sign-in. Never a Relay backend key.
 export interface Backend {
   url: string;
   appToken: string;
@@ -58,7 +58,7 @@ export async function renewSession(backend: Backend, current: Readonly<SessionMe
   const timeout = new AbortController();
   const timer = setTimeout(() => timeout.abort(), 10_000); // The client pauses its streams until this settles.
   try {
-    // Your backend's endpoint. It renews the session with @convohop/server.
+    // Your backend's endpoint. It renews the session with @instantrelay/server.
     const response = await fetch(`${backend.url}/convohop/session/renew`, {
       method: "POST",
       headers: { "content-type": "application/json", authorization: `Bearer ${backend.appToken}` },
@@ -66,24 +66,24 @@ export async function renewSession(backend: Backend, current: Readonly<SessionMe
       signal: timeout.signal,
     });
     if (!response.ok) throw new Error(`Session renewal failed with HTTP ${response.status}`);
-    return await response.json(); // The client checks the renewed session with ConvoHop before it uses it.
+    return await response.json(); // The client checks the renewed session with Relay before it uses it.
   } finally {
     clearTimeout(timer);
   }
 }
 
 // Renews the session a minute before it expires, and after each renewal, until you call the returned function.
-export function keepSessionAlive(client: ConvoHopClient): () => void {
+export function keepSessionAlive(client: RelayClient): () => void {
   return client.scheduleSessionRefresh({ onError: error => console.warn("Couldn't renew the session", error) });
 }
 // #endregion renew
 
 // #region store
-import { ConversationStore, Outbox, type ConversationSnapshot } from "@convohop/client";
+import { ConversationStore, Outbox, type ConversationSnapshot } from "@instantrelay/client";
 
 // One outbox for the signed-in user. With persist, unsent messages survive the app's restarts in the client's
 // asyncRecoveryStorage. It waits while the device is offline. Close it when the user signs out.
-export function openOutbox(client: ConvoHopClient): Outbox {
+export function openOutbox(client: RelayClient): Outbox {
   return new Outbox(client, {
     persist: true,
     onError: error => console.warn("A message wasn't sent", error),
@@ -92,7 +92,7 @@ export function openOutbox(client: ConvoHopClient): Outbox {
 
 // Loads a conversation, keeps it current and renders every change. Close the store when the screen goes away.
 export async function showConversation(
-  client: ConvoHopClient,
+  client: RelayClient,
   outbox: Outbox,
   conversationId: string,
   render: (snapshot: ConversationSnapshot) => void,
@@ -110,9 +110,9 @@ export async function showConversation(
 // #endregion store
 
 // #region outbox
-import type { OutboxEntry } from "@convohop/client";
+import type { OutboxEntry } from "@instantrelay/client";
 
-// The message shows in snapshot.pending at once, and moves to snapshot.messages once ConvoHop commits it.
+// The message shows in snapshot.pending at once, and moves to snapshot.messages once Relay commits it.
 export function sendDraft(store: ConversationStore, draft: string): OutboxEntry | null {
   const text = draft.trim();
   return text ? store.send(text) : null;
@@ -144,11 +144,11 @@ export async function signOut(outbox: Outbox, storage: AsyncStorage): Promise<vo
 // #endregion sign-out
 
 // #region watch
-import type { ConversationMessage, ConversationStream } from "@convohop/client";
+import type { ConversationMessage, ConversationStream } from "@instantrelay/client";
 
 // Renders the latest messages and keeps them current. Close the stream when the screen goes away.
 export async function watchConversation(
-  client: ConvoHopClient,
+  client: RelayClient,
   conversationId: string,
   render: (messages: ConversationMessage[]) => void,
 ): Promise<ConversationStream> {
@@ -168,7 +168,7 @@ export async function watchConversation(
 // #region send
 // Keep requestId with the draft until the send succeeds, and reuse it if you send the draft again.
 export async function sendMessage(
-  client: ConvoHopClient,
+  client: RelayClient,
   conversationId: string,
   text: string,
   requestId: string,
@@ -179,7 +179,7 @@ export async function sendMessage(
 
 // Finishes the sends that an earlier launch left unconfirmed, with their request IDs. Call it after connectUser if you
 // send with client.send. The outbox finishes its own sends, so don't call it beside one.
-export async function recoverSends(client: ConvoHopClient): Promise<void> {
+export async function recoverSends(client: RelayClient): Promise<void> {
   await client.recoverPending(error => console.warn("Couldn't recover an earlier send", error));
 }
 // #endregion send

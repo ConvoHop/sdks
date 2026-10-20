@@ -1,7 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { ConvoHopProblem, ConvoHopTransport } from "@convohop/core";
-import { adoptRecovery, beforeSubmitting, retainRecovery } from "@convohop/core/internal";
+import { RelayProblem, RelayTransport } from "@instantrelay/core";
+import { adoptRecovery, beforeSubmitting, retainRecovery } from "@instantrelay/core/internal";
 import { reply, resolution } from "../../../test/graphql-fixtures.mjs";
 import { asyncStorage } from "../../../test/recovery-fixtures.mjs";
 
@@ -65,7 +65,7 @@ const results = {
 };
 
 async function open(fake, shared, kind) {
-  const transport = new ConvoHopTransport({ baseUrl: "http://127.0.0.1:18080", namespace: shared.namespace, incarnation,
+  const transport = new RelayTransport({ baseUrl: "http://127.0.0.1:18080", namespace: shared.namespace, incarnation,
     fetch: fake.fetch, ...(kind === "sync" ? { recoveryStorage: shared.sync } : { asyncRecoveryStorage: shared.async }) });
   await transport.initializeRecovery();
   return transport;
@@ -79,7 +79,7 @@ const stored = (lastAttemptAt, resolutionState, requestId = id()) => ({ requestI
   firstSubmittedAt: lastAttemptAt, retryDeadline: lastAttemptAt + 60000, attemptCount: 1, lastAttemptAt,
   lastAttemptClassification: "submitted", resolutionState });
 /** The typed refusal of request `requestId` while the journal holds 128 records that aren't final. */
-const recoveryLimit = (requestId, outcome = "rejected") => error => error instanceof ConvoHopProblem &&
+const recoveryLimit = (requestId, outcome = "rejected") => error => error instanceof RelayProblem &&
   error.code === "RECOVERY_LIMIT" && error.requestId === requestId && error.outcome === outcome && error.status === 409;
 
 test("synchronous and asynchronous clients sharing a journal keep each other's records", async () => {
@@ -375,7 +375,7 @@ test("an asynchronous journal that can't be read fails a write before anything i
   let failing = false;
   const fake = authority(), namespace = id();
   const saved = asyncStorage({ onRead: () => { if (failing) throw new Error("storage offline"); } });
-  const client = new ConvoHopTransport({ baseUrl: "http://127.0.0.1:18080", namespace, incarnation, fetch: fake.fetch,
+  const client = new RelayTransport({ baseUrl: "http://127.0.0.1:18080", namespace, incarnation, fetch: fake.fetch,
     asyncRecoveryStorage: saved });
   await client.initializeRecovery();
   const committed = id();

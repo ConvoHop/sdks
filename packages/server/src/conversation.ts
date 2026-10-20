@@ -1,7 +1,7 @@
 import {
   parseCounter, parseCursor, parseId, parseString, type CommandOptions, type OperationPayload, type PageOptions, type Conversation,
   type ConversationMute, type GraphqlTypes, type Membership, type ConversationMessage, type ProtocolObject, type SendReceipt,
-} from "@convohop/core";
+} from "@instantrelay/core";
 import type { LiveSession, LiveSessionPage } from "./live.js";
 import type { ProjectServerClient } from "./project.js";
 import { actAsInput, mismatch, pageInput, pageLimit, required, type ActAsOptions } from "./result.js";

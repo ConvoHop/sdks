@@ -1,5 +1,5 @@
-name: convohop_example
-description: A ConvoHop chat and calling example for Flutter on Android and iOS.
+name: relay_example
+description: A Relay chat and calling example for Flutter on Android and iOS.
 publish_to: none
 version: 0.0.0
 
@@ -8,7 +8,7 @@ environment:
   flutter: ">=3.38.0"
 
 dependencies:
-  convohop:
+  instantrelay:
     path: ../
   flutter:
     sdk: flutter

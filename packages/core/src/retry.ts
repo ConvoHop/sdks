@@ -1,5 +1,5 @@
 import { errorCodes, type ErrorCodeDefinition } from "./generated/errors.js";
-import { ConvoHopProblem } from "./protocol.js";
+import { RelayProblem } from "./protocol.js";
 
 /** Whole-second retry delay from `extensions.retryAfter` or an HTTP `Retry-After` delta; anything else is ignored. */
 export function retryDelay(value: unknown): number | undefined {
@@ -23,10 +23,10 @@ export type ReconnectAction = "retry" | "reroute" | "stop";
  * Classifies a failure of initialization, a realtime connection or a queued send. Only a problem whose code is
  * retryable and whose status is 0 (no response), 408, 429 or 5xx is retried; `WRONG_REGION` routes again first.
  * Anything else stops: `QUOTA_EXCEEDED`, `PLAN_LIMIT_EXCEEDED`, authentication and scope problems, and errors that
- * aren't a {@link ConvoHopProblem}.
+ * aren't a {@link RelayProblem}.
  */
 export function reconnectAction(error: unknown): ReconnectAction {
-  if (!(error instanceof ConvoHopProblem)) return "stop";
+  if (!(error instanceof RelayProblem)) return "stop";
   if (error.code === "WRONG_REGION") return "reroute";
   if (!retryableCode(error.code)) return "stop";
   const status = error.status;
@@ -48,14 +48,14 @@ const terminalCloseCodes: readonly number[] = [4400, 4401, 4403, 4408, 4409];
  * code. Otherwise a close code that ends realtime authorization reports `UNAUTHENTICATED`, and any other close reports
  * nothing, so the stream reconnects.
  */
-export function closeProblem(code: number, reason: string, requestId: string): ConvoHopProblem | undefined {
+export function closeProblem(code: number, reason: string, requestId: string): RelayProblem | undefined {
   const words = reason.trim().split(/\s+/), name = words[0] ?? "", known = errorCode(name);
   if (known) {
     const retryAfter = retryDelay(words.find(word => word.startsWith("retryAfter="))?.slice("retryAfter=".length));
-    return new ConvoHopProblem(name, requestId, "rejected", known.status ?? (code >= 4000 && code <= 4999 ? code - 4000 : 0),
+    return new RelayProblem(name, requestId, "rejected", known.status ?? (code >= 4000 && code <= 4999 ? code - 4000 : 0),
       `Realtime connection closed: ${words.join(" ")}`, retryAfter === undefined ? undefined : { retryAfter });
   }
   if (terminalCloseCodes.includes(code))
-    return new ConvoHopProblem("UNAUTHENTICATED", requestId, "rejected", 401, "Realtime authorization ended; obtain a current session");
+    return new RelayProblem("UNAUTHENTICATED", requestId, "rejected", 401, "Realtime authorization ended; obtain a current session");
   return undefined;
 }

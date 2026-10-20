@@ -16,7 +16,7 @@ from typing import Any
 
 import pytest
 
-import convohop
+import instantrelay
 
 from .support import REPOSITORY, new_secret, sign, spec
 
@@ -91,10 +91,10 @@ def test_hello_declares_the_catalog_operations_of_the_server_roles() -> None:
     declared = hello["result"].pop("roles")
     assert hello["result"] == {
         "driver": {
-            "name": "convohop-python",
+            "name": "relay-python",
             "version": "0.1.0",
             "language": "python",
-            "packages": {"convohop": convohop.__version__},
+            "packages": {"instantrelay": instantrelay.__version__},
         },
         "features": ["recovery.eviction", "recovery.spentBudget", "recovery.storage", "retryAfter", "webhooks.verify"],
     }
@@ -219,7 +219,7 @@ def test_reports_sdk_failures_as_results(api: str, refused_url: str) -> None:
     )
     assert status == 0
     assert responses[0]["result"]["driver"]["name"] == (
-        "convohop-python-async" if api == "async" else "convohop-python"
+        "relay-python-async" if api == "async" else "relay-python"
     )
     assert responses[1:2] + responses[3:] == [{"id": 2, "result": {}}, {"id": 4, "result": {}}]
     result = responses[2]["result"]

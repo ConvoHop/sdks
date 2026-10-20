@@ -133,8 +133,8 @@ mutation ManagementCreateProject($context: RequestContextInput!, $input: CreateP
 
 | Language | Members |
 | --- | --- |
-| [TypeScript](../../typescript/reference/operations.md) | [`ConvoHopManagementClient.createProject`](../../typescript/reference/server.md#convohopmanagementclientcreateproject-method) |
-| [Python](../../python/reference/operations.md) | [`ConvoHopManagement.create_project`](../../python/reference/convohop.md#convohopmanagementcreate_project-method), [`AsyncConvoHopManagement.create_project`](../../python/reference/convohop.md#asyncconvohopmanagementcreate_project-method) |
-| [.NET](../../dotnet/reference/operations.md) | [`ConvoHopManagementClient.CreateProjectAsync`](../../dotnet/reference/convohop.md#convohopmanagementclientcreateprojectasync-method), [`ManagementApi.CreateProjectAsync`](../../dotnet/reference/api.md#managementapicreateprojectasync-method) |
+| [TypeScript](../../typescript/reference/operations.md) | [`RelayManagementClient.createProject`](../../typescript/reference/server.md#relaymanagementclientcreateproject-method) |
+| [Python](../../python/reference/operations.md) | [`RelayManagement.create_project`](../../python/reference/instantrelay.md#relaymanagementcreate_project-method), [`AsyncRelayManagement.create_project`](../../python/reference/instantrelay.md#asyncrelaymanagementcreate_project-method) |
+| [.NET](../../dotnet/reference/operations.md) | [`RelayManagementClient.CreateProjectAsync`](../../dotnet/reference/relay.md#relaymanagementclientcreateprojectasync-method), [`ManagementApi.CreateProjectAsync`](../../dotnet/reference/api.md#managementapicreateprojectasync-method) |
 | [Java and Kotlin](../../jvm/reference/operations.md) | [`ManagementApi.createProject`](../../jvm/reference/server.md#managementapicreateproject-method), [`ManagementSuspendApi.createProject`](../../jvm/reference/server-kotlin.md#managementsuspendapicreateproject-method) |
-| [Go](../../go/reference/operations.md) | [`ManagementClient.CreateProject`](../../go/reference/convohop.md#managementclientcreateproject-method) |
+| [Go](../../go/reference/operations.md) | [`ManagementClient.CreateProject`](../../go/reference/relay.md#managementclientcreateproject-method) |

@@ -9,7 +9,7 @@ export const REPO_ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..', 
 export const REPOSITORY = 'ConvoHop/sdks';
 export const REPOSITORY_URL = `git+https://github.com/${REPOSITORY}.git`;
 export const LICENSE_ID = 'Apache-2.0';
-export const INTERNAL_SCOPE = '@convohop/';
+export const INTERNAL_SCOPE = '@instantrelay/';
 // npm trusted publishing (OIDC) needs npm 11.5.1 or later.
 export const MIN_NPM_VERSION = '11.5.1';
 export const RUNTIME_DEPENDENCY_FIELDS = ['dependencies', 'optionalDependencies', 'peerDependencies'];

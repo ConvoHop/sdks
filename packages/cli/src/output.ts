@@ -1,4 +1,4 @@
-import { ConvoHopProblem, ScopeRequiredProblem } from "@convohop/server";
+import { RelayProblem, ScopeRequiredProblem } from "@instantrelay/server";
 
 /** The value that replaces a credential, secret or signed proof in output. */
 export const REDACTED = "[REDACTED]";
@@ -58,8 +58,8 @@ export class UsageError extends CliError {
   }
 }
 
-/** The details of a ConvoHop problem, without its message. */
-export function problemDetails(problem: ConvoHopProblem, next?: string): ErrorDetails {
+/** The details of a Relay problem, without its message. */
+export function problemDetails(problem: RelayProblem, next?: string): ErrorDetails {
   return {
     code: problem.code, outcome: problem.outcome, requestId: problem.requestId, status: problem.status,
     ...(problem.retryAfter === undefined ? {} : { retryAfter: problem.retryAfter }),
@@ -99,14 +99,14 @@ export class Printer {
   /** Reports error on stderr and returns the exit code for it. */
   error(error: unknown): number {
     if (error instanceof UsageError) {
-      this.note(`convohop: ${error.message}`);
-      this.note(`Run convohop ${error.command ?? ""}${error.command ? " " : ""}--help for usage.`);
+      this.note(`relay: ${error.message}`);
+      this.note(`Run relay ${error.command ?? ""}${error.command ? " " : ""}--help for usage.`);
       return error.exitCode;
     }
     const { message, details, exitCode } = error instanceof CliError ? error
-      : error instanceof ConvoHopProblem ? { message: error.message, details: problemDetails(error), exitCode: 1 }
+      : error instanceof RelayProblem ? { message: error.message, details: problemDetails(error), exitCode: 1 }
       : { message: error instanceof Error ? error.message : "The command failed", details: {}, exitCode: 1 };
-    this.note(`convohop: ${details.code ? `${details.code}: ` : ""}${message}`);
+    this.note(`relay: ${details.code ? `${details.code}: ` : ""}${message}`);
     if (details.outcome) this.note(`  outcome: ${details.outcome}`);
     if (details.requestId) this.note(`  requestId: ${details.requestId}`);
     if (details.retryAfter !== undefined) this.note(`  retryAfter: ${details.retryAfter}s`);

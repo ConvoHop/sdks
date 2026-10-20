@@ -1,8 +1,8 @@
-# `ConvoHop.Api`
+# `Relay.Api`
 
 Generated APIs with a method for every communication and management operation a backend can send, and async page streams for paginated ones.
 
-**Layer:** Server. **Runtime:** .NET 8 or later. The `netstandard2.0` build also targets .NET Framework 4.7.2 or later, which isn't tested yet. **Source:** `dotnet/src/ConvoHop`.
+**Layer:** Server. **Runtime:** .NET 8 or later. The `netstandard2.0` build also targets .NET Framework 4.7.2 or later, which isn't tested yet. **Source:** `dotnet/src/Relay`.
 
 ## Classes
 
@@ -32,7 +32,7 @@ Returns: The authority result.
 
 Exceptions:
 
-- `ConvoHopException`: The request was invalid, the authority rejected it, or its outcome is unknown.
+- `RelayException`: The request was invalid, the authority rejected it, or its outcome is unknown.
 
 Idempotency: `safe`. Read-only. Repeat freely; each attempt may use a new requestId.
 
@@ -56,7 +56,7 @@ Returns: The authority result.
 
 Exceptions:
 
-- `ConvoHopException`: The request was invalid, the authority rejected it, or its outcome is unknown.
+- `RelayException`: The request was invalid, the authority rejected it, or its outcome is unknown.
 
 Idempotency: `safe`. Read-only. Repeat freely; each attempt may use a new requestId.
 
@@ -82,7 +82,7 @@ Returns: The authority result.
 Exceptions:
 
 - `ArgumentNullException`: `input` is null.
-- `ConvoHopException`: The request was invalid, the authority rejected it, or its outcome is unknown.
+- `RelayException`: The request was invalid, the authority rejected it, or its outcome is unknown.
 
 Idempotency: `safe`. Read-only. Repeat freely; each attempt may use a new requestId.
 
@@ -108,7 +108,7 @@ Returns: The authority result.
 Exceptions:
 
 - `ArgumentNullException`: `input` is null.
-- `ConvoHopException`: The request was invalid, the authority rejected it, or its outcome is unknown.
+- `RelayException`: The request was invalid, the authority rejected it, or its outcome is unknown.
 
 Idempotency: `safe`. Read-only. Repeat freely; each attempt may use a new requestId.
 
@@ -134,7 +134,7 @@ Returns: The authority result.
 Exceptions:
 
 - `ArgumentNullException`: `input` is null.
-- `ConvoHopException`: The request was invalid, the authority rejected it, or its outcome is unknown.
+- `RelayException`: The request was invalid, the authority rejected it, or its outcome is unknown.
 
 Idempotency: `safe`. Read-only. Repeat freely; each attempt may use a new requestId.
 
@@ -166,7 +166,7 @@ Each page is requested when enumeration reaches it. Later requests set `cursor` 
 
 Pagination: `cursor`. Server-ordered pages. Pass nextCursor back as the cursor input until complete is true.
 
-Enumeration throws `ConvoHopException` if the authority rejects a request or a page is malformed or does not advance, and `InvalidOperationException` if a page reports `refreshRequired`: start again from current state, not from the cursor. These page failures are final. After any other failed request, an enumerator can call `MoveNextAsync` again to repeat it; `await foreach` stops at the first exception.
+Enumeration throws `RelayException` if the authority rejects a request or a page is malformed or does not advance, and `InvalidOperationException` if a page reports `refreshRequired`: start again from current state, not from the cursor. These page failures are final. After any other failed request, an enumerator can call `MoveNextAsync` again to repeat it; `await foreach` stops at the first exception.
 
 Sends [`communication.members`](../../operations/communication/members.md).
 
@@ -188,7 +188,7 @@ Returns: The authority result.
 Exceptions:
 
 - `ArgumentNullException`: `input` is null.
-- `ConvoHopException`: The request was invalid, the authority rejected it, or its outcome is unknown.
+- `RelayException`: The request was invalid, the authority rejected it, or its outcome is unknown.
 
 Idempotency: `safe`. Read-only. Repeat freely; each attempt may use a new requestId.
 
@@ -220,7 +220,7 @@ Each page is requested when enumeration reaches it. Later requests set `beforeSe
 
 Pagination: `sequence`. Newest first. Pass nextCursor back as the sequence cursor input to read older items until complete is true.
 
-Enumeration throws `ConvoHopException` if the authority rejects a request or a page is malformed or does not advance, and `InvalidOperationException` if a page reports `refreshRequired`: start again from current state, not from the cursor. These page failures are final. After any other failed request, an enumerator can call `MoveNextAsync` again to repeat it; `await foreach` stops at the first exception.
+Enumeration throws `RelayException` if the authority rejects a request or a page is malformed or does not advance, and `InvalidOperationException` if a page reports `refreshRequired`: start again from current state, not from the cursor. These page failures are final. After any other failed request, an enumerator can call `MoveNextAsync` again to repeat it; `await foreach` stops at the first exception.
 
 Sends [`communication.messages`](../../operations/communication/messages.md).
 
@@ -242,7 +242,7 @@ Returns: The authority result.
 Exceptions:
 
 - `ArgumentNullException`: `input` is null.
-- `ConvoHopException`: The request was invalid, the authority rejected it, or its outcome is unknown.
+- `RelayException`: The request was invalid, the authority rejected it, or its outcome is unknown.
 
 Idempotency: `safe`. Read-only. Repeat freely; each attempt may use a new requestId.
 
@@ -268,7 +268,7 @@ Returns: The authority result.
 Exceptions:
 
 - `ArgumentNullException`: `input` is null.
-- `ConvoHopException`: The request was invalid, the authority rejected it, or its outcome is unknown.
+- `RelayException`: The request was invalid, the authority rejected it, or its outcome is unknown.
 
 Idempotency: `safe`. Read-only. Repeat freely; each attempt may use a new requestId.
 
@@ -300,7 +300,7 @@ Each page is requested when enumeration reaches it. Later requests set `cursor` 
 
 Pagination: `cursor`. Server-ordered pages. Pass nextCursor back as the cursor input until complete is true.
 
-Enumeration throws `ConvoHopException` if the authority rejects a request or a page is malformed or does not advance, and `InvalidOperationException` if a page reports `refreshRequired`: start again from current state, not from the cursor. These page failures are final. After any other failed request, an enumerator can call `MoveNextAsync` again to repeat it; `await foreach` stops at the first exception.
+Enumeration throws `RelayException` if the authority rejects a request or a page is malformed or does not advance, and `InvalidOperationException` if a page reports `refreshRequired`: start again from current state, not from the cursor. These page failures are final. After any other failed request, an enumerator can call `MoveNextAsync` again to repeat it; `await foreach` stops at the first exception.
 
 Sends [`communication.inbox`](../../operations/communication/inbox.md).
 
@@ -322,7 +322,7 @@ Returns: The authority result.
 Exceptions:
 
 - `ArgumentNullException`: `input` is null.
-- `ConvoHopException`: The request was invalid, the authority rejected it, or its outcome is unknown.
+- `RelayException`: The request was invalid, the authority rejected it, or its outcome is unknown.
 
 Idempotency: `safe`. Read-only. Repeat freely; each attempt may use a new requestId.
 
@@ -354,7 +354,7 @@ Each page is requested when enumeration reaches it. Later requests set `cursor` 
 
 Pagination: `cursor`. Server-ordered pages. Pass nextCursor back as the cursor input until complete is true.
 
-Enumeration throws `ConvoHopException` if the authority rejects a request or a page is malformed or does not advance, and `InvalidOperationException` if a page reports `refreshRequired`: start again from current state, not from the cursor. These page failures are final. After any other failed request, an enumerator can call `MoveNextAsync` again to repeat it; `await foreach` stops at the first exception.
+Enumeration throws `RelayException` if the authority rejects a request or a page is malformed or does not advance, and `InvalidOperationException` if a page reports `refreshRequired`: start again from current state, not from the cursor. These page failures are final. After any other failed request, an enumerator can call `MoveNextAsync` again to repeat it; `await foreach` stops at the first exception.
 
 Sends [`communication.search`](../../operations/communication/search.md).
 
@@ -376,7 +376,7 @@ Returns: The authority result.
 Exceptions:
 
 - `ArgumentNullException`: `input` is null.
-- `ConvoHopException`: The request was invalid, the authority rejected it, or its outcome is unknown.
+- `RelayException`: The request was invalid, the authority rejected it, or its outcome is unknown.
 
 Idempotency: `safe`. Read-only. Repeat freely; each attempt may use a new requestId.
 
@@ -402,7 +402,7 @@ Returns: The authority result.
 Exceptions:
 
 - `ArgumentNullException`: `input` is null.
-- `ConvoHopException`: The request was invalid, the authority rejected it, or its outcome is unknown.
+- `RelayException`: The request was invalid, the authority rejected it, or its outcome is unknown.
 
 Idempotency: `safe`. Read-only. Repeat freely; each attempt may use a new requestId.
 
@@ -428,7 +428,7 @@ Returns: The authority result.
 Exceptions:
 
 - `ArgumentNullException`: `input` is null.
-- `ConvoHopException`: The request was invalid, the authority rejected it, or its outcome is unknown.
+- `RelayException`: The request was invalid, the authority rejected it, or its outcome is unknown.
 
 Idempotency: `safe`. Read-only. Repeat freely; each attempt may use a new requestId.
 
@@ -454,7 +454,7 @@ Returns: The authority result.
 Exceptions:
 
 - `ArgumentNullException`: `input` is null.
-- `ConvoHopException`: The request was invalid, the authority rejected it, or its outcome is unknown.
+- `RelayException`: The request was invalid, the authority rejected it, or its outcome is unknown.
 
 Idempotency: `safe`. Read-only. Repeat freely; each attempt may use a new requestId.
 
@@ -480,7 +480,7 @@ Returns: The authority result.
 Exceptions:
 
 - `ArgumentNullException`: `input` is null.
-- `ConvoHopException`: The request was invalid, the authority rejected it, or its outcome is unknown.
+- `RelayException`: The request was invalid, the authority rejected it, or its outcome is unknown.
 
 Idempotency: `safe`. Read-only. Repeat freely; each attempt may use a new requestId.
 
@@ -506,7 +506,7 @@ Returns: The authority result.
 Exceptions:
 
 - `ArgumentNullException`: `input` is null.
-- `ConvoHopException`: The request was invalid, the authority rejected it, or its outcome is unknown.
+- `RelayException`: The request was invalid, the authority rejected it, or its outcome is unknown.
 
 Idempotency: `safe`. Read-only. Repeat freely; each attempt may use a new requestId.
 
@@ -538,7 +538,7 @@ Each page is requested when enumeration reaches it. Later requests set `cursor` 
 
 Pagination: `cursor`. Server-ordered pages. Pass nextCursor back as the cursor input until complete is true.
 
-Enumeration throws `ConvoHopException` if the authority rejects a request or a page is malformed or does not advance, and `InvalidOperationException` if a page reports `refreshRequired`: start again from current state, not from the cursor. These page failures are final. After any other failed request, an enumerator can call `MoveNextAsync` again to repeat it; `await foreach` stops at the first exception.
+Enumeration throws `RelayException` if the authority rejects a request or a page is malformed or does not advance, and `InvalidOperationException` if a page reports `refreshRequired`: start again from current state, not from the cursor. These page failures are final. After any other failed request, an enumerator can call `MoveNextAsync` again to repeat it; `await foreach` stops at the first exception.
 
 Sends [`communication.liveSessions`](../../operations/communication/liveSessions.md).
 
@@ -560,7 +560,7 @@ Returns: The authority result.
 Exceptions:
 
 - `ArgumentNullException`: `input` is null.
-- `ConvoHopException`: The request was invalid, the authority rejected it, or its outcome is unknown.
+- `RelayException`: The request was invalid, the authority rejected it, or its outcome is unknown.
 
 Idempotency: `safe`. Read-only. Repeat freely; each attempt may use a new requestId.
 
@@ -592,7 +592,7 @@ Each page is requested when enumeration reaches it. Later requests set `cursor` 
 
 Pagination: `cursor`. Server-ordered pages. Pass nextCursor back as the cursor input until complete is true.
 
-Enumeration throws `ConvoHopException` if the authority rejects a request or a page is malformed or does not advance, and `InvalidOperationException` if a page reports `refreshRequired`: start again from current state, not from the cursor. These page failures are final. After any other failed request, an enumerator can call `MoveNextAsync` again to repeat it; `await foreach` stops at the first exception.
+Enumeration throws `RelayException` if the authority rejects a request or a page is malformed or does not advance, and `InvalidOperationException` if a page reports `refreshRequired`: start again from current state, not from the cursor. These page failures are final. After any other failed request, an enumerator can call `MoveNextAsync` again to repeat it; `await foreach` stops at the first exception.
 
 Sends [`communication.liveSessionParticipants`](../../operations/communication/liveSessionParticipants.md).
 
@@ -614,7 +614,7 @@ Returns: The authority result.
 Exceptions:
 
 - `ArgumentNullException`: `input` is null.
-- `ConvoHopException`: The request was invalid, the authority rejected it, or its outcome is unknown.
+- `RelayException`: The request was invalid, the authority rejected it, or its outcome is unknown.
 
 Idempotency: `safe`. Read-only. Repeat freely; each attempt may use a new requestId.
 
@@ -640,7 +640,7 @@ Returns: The authority result.
 Exceptions:
 
 - `ArgumentNullException`: `input` is null.
-- `ConvoHopException`: The request was invalid, the authority rejected it, or its outcome is unknown.
+- `RelayException`: The request was invalid, the authority rejected it, or its outcome is unknown.
 
 Idempotency: `safe`. Read-only. Repeat freely; each attempt may use a new requestId.
 
@@ -667,7 +667,7 @@ Returns: The authority result.
 Exceptions:
 
 - `ArgumentNullException`: `input` is null.
-- `ConvoHopException`: The request was invalid, the authority rejected it, or its outcome is unknown.
+- `RelayException`: The request was invalid, the authority rejected it, or its outcome is unknown.
 
 Idempotency: `idempotent`. Retry with the same requestId and identical input within the retry budget. The authority deduplicates by requestId; resolve an unknown outcome with resolveRequest.
 
@@ -694,7 +694,7 @@ Returns: The authority result.
 Exceptions:
 
 - `ArgumentNullException`: `input` is null.
-- `ConvoHopException`: The request was invalid, the authority rejected it, or its outcome is unknown.
+- `RelayException`: The request was invalid, the authority rejected it, or its outcome is unknown.
 
 Idempotency: `idempotent`. Retry with the same requestId and identical input within the retry budget. The authority deduplicates by requestId; resolve an unknown outcome with resolveRequest.
 
@@ -723,7 +723,7 @@ Returns: The authority result.
 Exceptions:
 
 - `ArgumentNullException`: `input` is null.
-- `ConvoHopException`: The request was invalid, the authority rejected it, or its outcome is unknown.
+- `RelayException`: The request was invalid, the authority rejected it, or its outcome is unknown.
 
 Idempotency: `idempotent`. Retry with the same requestId and identical input within the retry budget. The authority deduplicates by requestId; resolve an unknown outcome with resolveRequest.
 
@@ -750,7 +750,7 @@ Returns: The authority result.
 Exceptions:
 
 - `ArgumentNullException`: `input` is null.
-- `ConvoHopException`: The request was invalid, the authority rejected it, or its outcome is unknown.
+- `RelayException`: The request was invalid, the authority rejected it, or its outcome is unknown.
 
 Idempotency: `idempotent`. Retry with the same requestId and identical input within the retry budget. The authority deduplicates by requestId; resolve an unknown outcome with resolveRequest.
 
@@ -777,7 +777,7 @@ Returns: The authority result.
 Exceptions:
 
 - `ArgumentNullException`: `input` is null.
-- `ConvoHopException`: The request was invalid, the authority rejected it, or its outcome is unknown.
+- `RelayException`: The request was invalid, the authority rejected it, or its outcome is unknown.
 
 Idempotency: `idempotent`. Retry with the same requestId and identical input within the retry budget. The authority deduplicates by requestId; resolve an unknown outcome with resolveRequest.
 
@@ -806,7 +806,7 @@ Returns: The authority result.
 Exceptions:
 
 - `ArgumentNullException`: `input` is null.
-- `ConvoHopException`: The request was invalid, the authority rejected it, or its outcome is unknown.
+- `RelayException`: The request was invalid, the authority rejected it, or its outcome is unknown.
 
 Idempotency: `idempotent`. Retry with the same requestId and identical input within the retry budget. The authority deduplicates by requestId; resolve an unknown outcome with resolveRequest.
 
@@ -833,7 +833,7 @@ Returns: The authority result.
 Exceptions:
 
 - `ArgumentNullException`: `input` is null.
-- `ConvoHopException`: The request was invalid, the authority rejected it, or its outcome is unknown.
+- `RelayException`: The request was invalid, the authority rejected it, or its outcome is unknown.
 
 Idempotency: `idempotent`. Retry with the same requestId and identical input within the retry budget. The authority deduplicates by requestId; resolve an unknown outcome with resolveRequest.
 
@@ -860,7 +860,7 @@ Returns: The authority result.
 Exceptions:
 
 - `ArgumentNullException`: `input` is null.
-- `ConvoHopException`: The request was invalid, the authority rejected it, or its outcome is unknown.
+- `RelayException`: The request was invalid, the authority rejected it, or its outcome is unknown.
 
 Idempotency: `idempotent`. Retry with the same requestId and identical input within the retry budget. The authority deduplicates by requestId; resolve an unknown outcome with resolveRequest.
 
@@ -887,7 +887,7 @@ Returns: The authority result.
 Exceptions:
 
 - `ArgumentNullException`: `input` is null.
-- `ConvoHopException`: The request was invalid, the authority rejected it, or its outcome is unknown.
+- `RelayException`: The request was invalid, the authority rejected it, or its outcome is unknown.
 
 Idempotency: `idempotent`. Retry with the same requestId and identical input within the retry budget. The authority deduplicates by requestId; resolve an unknown outcome with resolveRequest.
 
@@ -914,7 +914,7 @@ Returns: The authority result.
 Exceptions:
 
 - `ArgumentNullException`: `input` is null.
-- `ConvoHopException`: The request was invalid, the authority rejected it, or its outcome is unknown.
+- `RelayException`: The request was invalid, the authority rejected it, or its outcome is unknown.
 
 Idempotency: `idempotent`. Retry with the same requestId and identical input within the retry budget. The authority deduplicates by requestId; resolve an unknown outcome with resolveRequest.
 
@@ -943,7 +943,7 @@ Returns: The authority result.
 Exceptions:
 
 - `ArgumentNullException`: `input` is null.
-- `ConvoHopException`: The request was invalid, the authority rejected it, or its outcome is unknown.
+- `RelayException`: The request was invalid, the authority rejected it, or its outcome is unknown.
 
 Idempotency: `idempotent`. Retry with the same requestId and identical input within the retry budget. The authority deduplicates by requestId; resolve an unknown outcome with resolveRequest.
 
@@ -970,7 +970,7 @@ Returns: The authority result.
 Exceptions:
 
 - `ArgumentNullException`: `input` is null.
-- `ConvoHopException`: The request was invalid, the authority rejected it, or its outcome is unknown.
+- `RelayException`: The request was invalid, the authority rejected it, or its outcome is unknown.
 
 Idempotency: `idempotent`. Retry with the same requestId and identical input within the retry budget. The authority deduplicates by requestId; resolve an unknown outcome with resolveRequest.
 
@@ -997,7 +997,7 @@ Returns: The authority result.
 Exceptions:
 
 - `ArgumentNullException`: `input` is null.
-- `ConvoHopException`: The request was invalid, the authority rejected it, or its outcome is unknown.
+- `RelayException`: The request was invalid, the authority rejected it, or its outcome is unknown.
 
 Idempotency: `idempotent`. Retry with the same requestId and identical input within the retry budget. The authority deduplicates by requestId; resolve an unknown outcome with resolveRequest.
 
@@ -1024,7 +1024,7 @@ Returns: The authority result.
 Exceptions:
 
 - `ArgumentNullException`: `input` is null.
-- `ConvoHopException`: The request was invalid, the authority rejected it, or its outcome is unknown.
+- `RelayException`: The request was invalid, the authority rejected it, or its outcome is unknown.
 
 Idempotency: `idempotent`. Retry with the same requestId and identical input within the retry budget. The authority deduplicates by requestId; resolve an unknown outcome with resolveRequest.
 
@@ -1053,7 +1053,7 @@ Returns: The authority result.
 Exceptions:
 
 - `ArgumentNullException`: `input` is null.
-- `ConvoHopException`: The request was invalid, the authority rejected it, or its outcome is unknown.
+- `RelayException`: The request was invalid, the authority rejected it, or its outcome is unknown.
 
 Idempotency: `idempotent`. Retry with the same requestId and identical input within the retry budget. The authority deduplicates by requestId; resolve an unknown outcome with resolveRequest.
 
@@ -1080,7 +1080,7 @@ Returns: The authority result.
 Exceptions:
 
 - `ArgumentNullException`: `input` is null.
-- `ConvoHopException`: The request was invalid, the authority rejected it, or its outcome is unknown.
+- `RelayException`: The request was invalid, the authority rejected it, or its outcome is unknown.
 
 Idempotency: `idempotent`. Retry with the same requestId and identical input within the retry budget. The authority deduplicates by requestId; resolve an unknown outcome with resolveRequest.
 
@@ -1107,7 +1107,7 @@ Returns: The authority result.
 Exceptions:
 
 - `ArgumentNullException`: `input` is null.
-- `ConvoHopException`: The request was invalid, the authority rejected it, or its outcome is unknown.
+- `RelayException`: The request was invalid, the authority rejected it, or its outcome is unknown.
 
 Idempotency: `idempotent`. Retry with the same requestId and identical input within the retry budget. The authority deduplicates by requestId; resolve an unknown outcome with resolveRequest.
 
@@ -1134,7 +1134,7 @@ Returns: The authority result.
 Exceptions:
 
 - `ArgumentNullException`: `input` is null.
-- `ConvoHopException`: The request was invalid, the authority rejected it, or its outcome is unknown.
+- `RelayException`: The request was invalid, the authority rejected it, or its outcome is unknown.
 
 Idempotency: `idempotent`. Retry with the same requestId and identical input within the retry budget. The authority deduplicates by requestId; resolve an unknown outcome with resolveRequest.
 
@@ -1165,7 +1165,7 @@ Exceptions:
 
 - `ArgumentNullException`: `input` is null.
 - `ArgumentException`: `credentialDeliveryPermit` is a default `JsonElement`.
-- `ConvoHopException`: The request was invalid, the authority rejected it, or its outcome is unknown.
+- `RelayException`: The request was invalid, the authority rejected it, or its outcome is unknown.
 
 Idempotency: `permitBound`. Authorized by a single-delivery permit. Retry with the same requestId and permit; outcomes cannot be resolved by lookup.
 
@@ -1194,7 +1194,7 @@ Exceptions:
 
 - `ArgumentNullException`: `input` is null.
 - `ArgumentException`: `credentialDeliveryPermit` is a default `JsonElement`.
-- `ConvoHopException`: The request was invalid, the authority rejected it, or its outcome is unknown.
+- `RelayException`: The request was invalid, the authority rejected it, or its outcome is unknown.
 
 Idempotency: `permitBound`. Authorized by a single-delivery permit. Retry with the same requestId and permit; outcomes cannot be resolved by lookup.
 
@@ -1228,7 +1228,7 @@ Returns: The authority result.
 
 Exceptions:
 
-- `ConvoHopException`: The request was invalid, the authority rejected it, or its outcome is unknown.
+- `RelayException`: The request was invalid, the authority rejected it, or its outcome is unknown.
 
 Idempotency: `safe`. Read-only. Repeat freely; each attempt may use a new requestId.
 
@@ -1252,7 +1252,7 @@ Returns: The authority result.
 
 Exceptions:
 
-- `ConvoHopException`: The request was invalid, the authority rejected it, or its outcome is unknown.
+- `RelayException`: The request was invalid, the authority rejected it, or its outcome is unknown.
 
 Idempotency: `safe`. Read-only. Repeat freely; each attempt may use a new requestId.
 
@@ -1278,7 +1278,7 @@ Returns: The authority result.
 Exceptions:
 
 - `ArgumentNullException`: `input` is null.
-- `ConvoHopException`: The request was invalid, the authority rejected it, or its outcome is unknown.
+- `RelayException`: The request was invalid, the authority rejected it, or its outcome is unknown.
 
 Idempotency: `safe`. Read-only. Repeat freely; each attempt may use a new requestId.
 
@@ -1304,7 +1304,7 @@ Returns: The authority result.
 Exceptions:
 
 - `ArgumentNullException`: `input` is null.
-- `ConvoHopException`: The request was invalid, the authority rejected it, or its outcome is unknown.
+- `RelayException`: The request was invalid, the authority rejected it, or its outcome is unknown.
 
 Idempotency: `safe`. Read-only. Repeat freely; each attempt may use a new requestId.
 
@@ -1330,7 +1330,7 @@ Returns: The authority result.
 Exceptions:
 
 - `ArgumentNullException`: `input` is null.
-- `ConvoHopException`: The request was invalid, the authority rejected it, or its outcome is unknown.
+- `RelayException`: The request was invalid, the authority rejected it, or its outcome is unknown.
 
 Idempotency: `safe`. Read-only. Repeat freely; each attempt may use a new requestId.
 
@@ -1356,7 +1356,7 @@ Returns: The authority result.
 Exceptions:
 
 - `ArgumentNullException`: `input` is null.
-- `ConvoHopException`: The request was invalid, the authority rejected it, or its outcome is unknown.
+- `RelayException`: The request was invalid, the authority rejected it, or its outcome is unknown.
 
 Idempotency: `safe`. Read-only. Repeat freely; each attempt may use a new requestId.
 
@@ -1382,7 +1382,7 @@ Returns: The authority result.
 Exceptions:
 
 - `ArgumentNullException`: `input` is null.
-- `ConvoHopException`: The request was invalid, the authority rejected it, or its outcome is unknown.
+- `RelayException`: The request was invalid, the authority rejected it, or its outcome is unknown.
 
 Idempotency: `safe`. Read-only. Repeat freely; each attempt may use a new requestId.
 
@@ -1408,7 +1408,7 @@ Returns: The authority result.
 Exceptions:
 
 - `ArgumentNullException`: `input` is null.
-- `ConvoHopException`: The request was invalid, the authority rejected it, or its outcome is unknown.
+- `RelayException`: The request was invalid, the authority rejected it, or its outcome is unknown.
 
 Idempotency: `safe`. Read-only. Repeat freely; each attempt may use a new requestId.
 
@@ -1434,7 +1434,7 @@ Returns: The authority result.
 Exceptions:
 
 - `ArgumentNullException`: `input` is null.
-- `ConvoHopException`: The request was invalid, the authority rejected it, or its outcome is unknown.
+- `RelayException`: The request was invalid, the authority rejected it, or its outcome is unknown.
 
 Idempotency: `safe`. Read-only. Repeat freely; each attempt may use a new requestId.
 
@@ -1448,7 +1448,7 @@ Sends [`management.organizationUsage`](../../operations/management/organizationU
 public Task<OrganizationBillingReply> OrganizationBillingAsync(OrganizationBillingRequestInput input, CancellationToken cancellationToken = default);
 ```
 
-Read the billing state of an organization in any status: the plan whose limits apply, whether ConvoHop bills the organization and, when it does, its standing and subscription.
+Read the billing state of an organization in any status: the plan whose limits apply, whether Relay bills the organization and, when it does, its standing and subscription.
 
 Parameters:
 
@@ -1460,7 +1460,7 @@ Returns: The authority result.
 Exceptions:
 
 - `ArgumentNullException`: `input` is null.
-- `ConvoHopException`: The request was invalid, the authority rejected it, or its outcome is unknown.
+- `RelayException`: The request was invalid, the authority rejected it, or its outcome is unknown.
 
 Idempotency: `safe`. Read-only. Repeat freely; each attempt may use a new requestId.
 
@@ -1484,7 +1484,7 @@ Returns: The authority result.
 Exceptions:
 
 - `ArgumentNullException`: `input` is null.
-- `ConvoHopException`: The request was invalid, the authority rejected it, or its outcome is unknown.
+- `RelayException`: The request was invalid, the authority rejected it, or its outcome is unknown.
 
 Idempotency: `safe`. Read-only. Repeat freely; each attempt may use a new requestId.
 
@@ -1510,7 +1510,7 @@ Returns: The authority result.
 Exceptions:
 
 - `ArgumentNullException`: `input` is null.
-- `ConvoHopException`: The request was invalid, the authority rejected it, or its outcome is unknown.
+- `RelayException`: The request was invalid, the authority rejected it, or its outcome is unknown.
 
 Idempotency: `safe`. Read-only. Repeat freely; each attempt may use a new requestId.
 
@@ -1536,7 +1536,7 @@ Returns: The authority result.
 Exceptions:
 
 - `ArgumentNullException`: `input` is null.
-- `ConvoHopException`: The request was invalid, the authority rejected it, or its outcome is unknown.
+- `RelayException`: The request was invalid, the authority rejected it, or its outcome is unknown.
 
 Idempotency: `safe`. Read-only. Repeat freely; each attempt may use a new requestId.
 
@@ -1562,7 +1562,7 @@ Returns: The authority result.
 Exceptions:
 
 - `ArgumentNullException`: `input` is null.
-- `ConvoHopException`: The request was invalid, the authority rejected it, or its outcome is unknown.
+- `RelayException`: The request was invalid, the authority rejected it, or its outcome is unknown.
 
 Idempotency: `safe`. Read-only. Repeat freely; each attempt may use a new requestId.
 
@@ -1588,7 +1588,7 @@ Returns: The authority result.
 Exceptions:
 
 - `ArgumentNullException`: `input` is null.
-- `ConvoHopException`: The request was invalid, the authority rejected it, or its outcome is unknown.
+- `RelayException`: The request was invalid, the authority rejected it, or its outcome is unknown.
 
 Idempotency: `safe`. Read-only. Repeat freely; each attempt may use a new requestId.
 
@@ -1610,7 +1610,7 @@ Returns: The authority result.
 
 Exceptions:
 
-- `ConvoHopException`: The request was invalid, the authority rejected it, or its outcome is unknown.
+- `RelayException`: The request was invalid, the authority rejected it, or its outcome is unknown.
 
 Idempotency: `safe`. Read-only. Repeat freely; each attempt may use a new requestId.
 
@@ -1634,7 +1634,7 @@ Returns: The authority result.
 Exceptions:
 
 - `ArgumentNullException`: `input` is null.
-- `ConvoHopException`: The request was invalid, the authority rejected it, or its outcome is unknown.
+- `RelayException`: The request was invalid, the authority rejected it, or its outcome is unknown.
 
 Idempotency: `safe`. Read-only. Repeat freely; each attempt may use a new requestId.
 
@@ -1664,7 +1664,7 @@ Each page is requested when enumeration reaches it. Later requests set `cursor` 
 
 Pagination: `cursor`. Server-ordered pages. Pass nextCursor back as the cursor input until complete is true.
 
-Enumeration throws `ConvoHopException` if the authority rejects a request or a page is malformed or does not advance, and `InvalidOperationException` if a page reports `refreshRequired`: start again from current state, not from the cursor. These page failures are final. After any other failed request, an enumerator can call `MoveNextAsync` again to repeat it; `await foreach` stops at the first exception.
+Enumeration throws `RelayException` if the authority rejects a request or a page is malformed or does not advance, and `InvalidOperationException` if a page reports `refreshRequired`: start again from current state, not from the cursor. These page failures are final. After any other failed request, an enumerator can call `MoveNextAsync` again to repeat it; `await foreach` stops at the first exception.
 
 #### `ManagementApi.AgentAuditEventsAsync` method
 
@@ -1684,7 +1684,7 @@ Returns: The authority result.
 Exceptions:
 
 - `ArgumentNullException`: `input` is null.
-- `ConvoHopException`: The request was invalid, the authority rejected it, or its outcome is unknown.
+- `RelayException`: The request was invalid, the authority rejected it, or its outcome is unknown.
 
 Idempotency: `safe`. Read-only. Repeat freely; each attempt may use a new requestId.
 
@@ -1714,7 +1714,7 @@ Each page is requested when enumeration reaches it. Later requests set `cursor` 
 
 Pagination: `cursor`. Server-ordered pages. Pass nextCursor back as the cursor input until complete is true.
 
-Enumeration throws `ConvoHopException` if the authority rejects a request or a page is malformed or does not advance, and `InvalidOperationException` if a page reports `refreshRequired`: start again from current state, not from the cursor. These page failures are final. After any other failed request, an enumerator can call `MoveNextAsync` again to repeat it; `await foreach` stops at the first exception.
+Enumeration throws `RelayException` if the authority rejects a request or a page is malformed or does not advance, and `InvalidOperationException` if a page reports `refreshRequired`: start again from current state, not from the cursor. These page failures are final. After any other failed request, an enumerator can call `MoveNextAsync` again to repeat it; `await foreach` stops at the first exception.
 
 #### `ManagementApi.OrganizationSpendAsync` method
 
@@ -1734,7 +1734,7 @@ Returns: The authority result.
 Exceptions:
 
 - `ArgumentNullException`: `input` is null.
-- `ConvoHopException`: The request was invalid, the authority rejected it, or its outcome is unknown.
+- `RelayException`: The request was invalid, the authority rejected it, or its outcome is unknown.
 
 Idempotency: `safe`. Read-only. Repeat freely; each attempt may use a new requestId.
 
@@ -1759,7 +1759,7 @@ Returns: The authority result.
 Exceptions:
 
 - `ArgumentNullException`: `input` is null.
-- `ConvoHopException`: The request was invalid, the authority rejected it, or its outcome is unknown.
+- `RelayException`: The request was invalid, the authority rejected it, or its outcome is unknown.
 
 Idempotency: `idempotent`. Retry with the same requestId and identical input within the retry budget. The authority deduplicates by requestId; resolve an unknown outcome with resolveRequest.
 
@@ -1786,7 +1786,7 @@ Returns: The authority result.
 Exceptions:
 
 - `ArgumentNullException`: `input` is null.
-- `ConvoHopException`: The request was invalid, the authority rejected it, or its outcome is unknown.
+- `RelayException`: The request was invalid, the authority rejected it, or its outcome is unknown.
 
 Idempotency: `idempotent`. Retry with the same requestId and identical input within the retry budget. The authority deduplicates by requestId; resolve an unknown outcome with resolveRequest.
 
@@ -1813,7 +1813,7 @@ Returns: The authority result.
 Exceptions:
 
 - `ArgumentNullException`: `input` is null.
-- `ConvoHopException`: The request was invalid, the authority rejected it, or its outcome is unknown.
+- `RelayException`: The request was invalid, the authority rejected it, or its outcome is unknown.
 
 Idempotency: `idempotent`. Retry with the same requestId and identical input within the retry budget. The authority deduplicates by requestId; resolve an unknown outcome with resolveRequest.
 
@@ -1840,7 +1840,7 @@ Returns: The authority result.
 Exceptions:
 
 - `ArgumentNullException`: `input` is null.
-- `ConvoHopException`: The request was invalid, the authority rejected it, or its outcome is unknown.
+- `RelayException`: The request was invalid, the authority rejected it, or its outcome is unknown.
 
 Idempotency: `idempotent`. Retry with the same requestId and identical input within the retry budget. The authority deduplicates by requestId; resolve an unknown outcome with resolveRequest.
 
@@ -1867,7 +1867,7 @@ Returns: The authority result.
 Exceptions:
 
 - `ArgumentNullException`: `input` is null.
-- `ConvoHopException`: The request was invalid, the authority rejected it, or its outcome is unknown.
+- `RelayException`: The request was invalid, the authority rejected it, or its outcome is unknown.
 
 Idempotency: `idempotent`. Retry with the same requestId and identical input within the retry budget. The authority deduplicates by requestId; resolve an unknown outcome with resolveRequest.
 
@@ -1896,7 +1896,7 @@ Returns: The authority result.
 Exceptions:
 
 - `ArgumentNullException`: `input` is null.
-- `ConvoHopException`: The request was invalid, the authority rejected it, or its outcome is unknown.
+- `RelayException`: The request was invalid, the authority rejected it, or its outcome is unknown.
 
 Idempotency: `idempotent`. Retry with the same requestId and identical input within the retry budget. The authority deduplicates by requestId; resolve an unknown outcome with resolveRequest.
 
@@ -1923,7 +1923,7 @@ Returns: The authority result.
 Exceptions:
 
 - `ArgumentNullException`: `input` is null.
-- `ConvoHopException`: The request was invalid, the authority rejected it, or its outcome is unknown.
+- `RelayException`: The request was invalid, the authority rejected it, or its outcome is unknown.
 
 Idempotency: `idempotent`. Retry with the same requestId and identical input within the retry budget. The authority deduplicates by requestId; resolve an unknown outcome with resolveRequest.
 
@@ -1950,7 +1950,7 @@ Returns: The authority result.
 Exceptions:
 
 - `ArgumentNullException`: `input` is null.
-- `ConvoHopException`: The request was invalid, the authority rejected it, or its outcome is unknown.
+- `RelayException`: The request was invalid, the authority rejected it, or its outcome is unknown.
 
 Idempotency: `idempotent`. Retry with the same requestId and identical input within the retry budget. The authority deduplicates by requestId; resolve an unknown outcome with resolveRequest.
 
@@ -1977,7 +1977,7 @@ Returns: The authority result.
 Exceptions:
 
 - `ArgumentNullException`: `input` is null.
-- `ConvoHopException`: The request was invalid, the authority rejected it, or its outcome is unknown.
+- `RelayException`: The request was invalid, the authority rejected it, or its outcome is unknown.
 
 Idempotency: `idempotent`. Retry with the same requestId and identical input within the retry budget. The authority deduplicates by requestId; resolve an unknown outcome with resolveRequest.
 
@@ -2004,7 +2004,7 @@ Returns: The authority result.
 Exceptions:
 
 - `ArgumentNullException`: `input` is null.
-- `ConvoHopException`: The request was invalid, the authority rejected it, or its outcome is unknown.
+- `RelayException`: The request was invalid, the authority rejected it, or its outcome is unknown.
 
 Idempotency: `singleUse`. Like idempotent, but the result carries a short-lived credential for one connection. Request a new one instead of reusing an expired result.
 
@@ -2029,7 +2029,7 @@ Returns: The authority result.
 Exceptions:
 
 - `ArgumentNullException`: `input` is null.
-- `ConvoHopException`: The request was invalid, the authority rejected it, or its outcome is unknown.
+- `RelayException`: The request was invalid, the authority rejected it, or its outcome is unknown.
 
 Idempotency: `singleUse`. Like idempotent, but the result carries a short-lived credential for one connection. Request a new one instead of reusing an expired result.
 
@@ -2054,7 +2054,7 @@ Returns: The authority result.
 Exceptions:
 
 - `ArgumentNullException`: `input` is null.
-- `ConvoHopException`: The request was invalid, the authority rejected it, or its outcome is unknown.
+- `RelayException`: The request was invalid, the authority rejected it, or its outcome is unknown.
 
 Idempotency: `idempotent`. Retry with the same requestId and identical input within the retry budget. The authority deduplicates by requestId; resolve an unknown outcome with resolveRequest.
 
@@ -2081,7 +2081,7 @@ Returns: The authority result.
 Exceptions:
 
 - `ArgumentNullException`: `input` is null.
-- `ConvoHopException`: The request was invalid, the authority rejected it, or its outcome is unknown.
+- `RelayException`: The request was invalid, the authority rejected it, or its outcome is unknown.
 
 Idempotency: `idempotent`. Retry with the same requestId and identical input within the retry budget. The authority deduplicates by requestId; resolve an unknown outcome with resolveRequest.
 
@@ -2110,7 +2110,7 @@ Returns: The authority result.
 Exceptions:
 
 - `ArgumentNullException`: `input` is null.
-- `ConvoHopException`: The request was invalid, the authority rejected it, or its outcome is unknown.
+- `RelayException`: The request was invalid, the authority rejected it, or its outcome is unknown.
 
 Idempotency: `idempotent`. Retry with the same requestId and identical input within the retry budget. The authority deduplicates by requestId; resolve an unknown outcome with resolveRequest.
 
@@ -2139,7 +2139,7 @@ Returns: The authority result.
 Exceptions:
 
 - `ArgumentNullException`: `input` is null.
-- `ConvoHopException`: The request was invalid, the authority rejected it, or its outcome is unknown.
+- `RelayException`: The request was invalid, the authority rejected it, or its outcome is unknown.
 
 Idempotency: `idempotent`. Retry with the same requestId and identical input within the retry budget. The authority deduplicates by requestId; resolve an unknown outcome with resolveRequest.
 
@@ -2168,7 +2168,7 @@ Returns: The authority result.
 Exceptions:
 
 - `ArgumentNullException`: `input` is null.
-- `ConvoHopException`: The request was invalid, the authority rejected it, or its outcome is unknown.
+- `RelayException`: The request was invalid, the authority rejected it, or its outcome is unknown.
 
 Idempotency: `idempotent`. Retry with the same requestId and identical input within the retry budget. The authority deduplicates by requestId; resolve an unknown outcome with resolveRequest.
 
@@ -2195,7 +2195,7 @@ Returns: The authority result.
 Exceptions:
 
 - `ArgumentNullException`: `input` is null.
-- `ConvoHopException`: The request was invalid, the authority rejected it, or its outcome is unknown.
+- `RelayException`: The request was invalid, the authority rejected it, or its outcome is unknown.
 
 Idempotency: `replayOnly`. Retry with the same requestId and identical input within the retry budget; the authority answers a repeat with the original outcome. Outcomes cannot be resolved by lookup, so settle an unknown outcome by sending the same request again.
 
@@ -2220,7 +2220,7 @@ Returns: The authority result.
 Exceptions:
 
 - `ArgumentNullException`: `input` is null.
-- `ConvoHopException`: The request was invalid, the authority rejected it, or its outcome is unknown.
+- `RelayException`: The request was invalid, the authority rejected it, or its outcome is unknown.
 
 Idempotency: `replayOnly`. Retry with the same requestId and identical input within the retry budget; the authority answers a repeat with the original outcome. Outcomes cannot be resolved by lookup, so settle an unknown outcome by sending the same request again.
 
@@ -2245,7 +2245,7 @@ Returns: The authority result.
 Exceptions:
 
 - `ArgumentNullException`: `input` is null.
-- `ConvoHopException`: The request was invalid, the authority rejected it, or its outcome is unknown.
+- `RelayException`: The request was invalid, the authority rejected it, or its outcome is unknown.
 
 Idempotency: `idempotent`. Retry with the same requestId and identical input within the retry budget. The authority deduplicates by requestId; resolve an unknown outcome with resolveRequest.
 
@@ -2270,7 +2270,7 @@ Returns: The authority result.
 Exceptions:
 
 - `ArgumentNullException`: `input` is null.
-- `ConvoHopException`: The request was invalid, the authority rejected it, or its outcome is unknown.
+- `RelayException`: The request was invalid, the authority rejected it, or its outcome is unknown.
 
 Idempotency: `replayOnly`. Retry with the same requestId and identical input within the retry budget; the authority answers a repeat with the original outcome. Outcomes cannot be resolved by lookup, so settle an unknown outcome by sending the same request again.
 
@@ -2295,7 +2295,7 @@ Returns: The authority result.
 Exceptions:
 
 - `ArgumentNullException`: `input` is null.
-- `ConvoHopException`: The request was invalid, the authority rejected it, or its outcome is unknown.
+- `RelayException`: The request was invalid, the authority rejected it, or its outcome is unknown.
 
 Idempotency: `replayOnly`. Retry with the same requestId and identical input within the retry budget; the authority answers a repeat with the original outcome. Outcomes cannot be resolved by lookup, so settle an unknown outcome by sending the same request again.
 
@@ -2320,7 +2320,7 @@ Returns: The authority result.
 Exceptions:
 
 - `ArgumentNullException`: `input` is null.
-- `ConvoHopException`: The request was invalid, the authority rejected it, or its outcome is unknown.
+- `RelayException`: The request was invalid, the authority rejected it, or its outcome is unknown.
 
 Idempotency: `idempotent`. Retry with the same requestId and identical input within the retry budget. The authority deduplicates by requestId; resolve an unknown outcome with resolveRequest.
 
@@ -2347,7 +2347,7 @@ Returns: The authority result.
 Exceptions:
 
 - `ArgumentNullException`: `input` is null.
-- `ConvoHopException`: The request was invalid, the authority rejected it, or its outcome is unknown.
+- `RelayException`: The request was invalid, the authority rejected it, or its outcome is unknown.
 
 Idempotency: `idempotent`. Retry with the same requestId and identical input within the retry budget. The authority deduplicates by requestId; resolve an unknown outcome with resolveRequest.
 
@@ -2372,7 +2372,7 @@ Returns: The authority result.
 Exceptions:
 
 - `ArgumentNullException`: `input` is null.
-- `ConvoHopException`: The request was invalid, the authority rejected it, or its outcome is unknown.
+- `RelayException`: The request was invalid, the authority rejected it, or its outcome is unknown.
 
 Idempotency: `replayOnly`. Retry with the same requestId and identical input within the retry budget; the authority answers a repeat with the original outcome. Outcomes cannot be resolved by lookup, so settle an unknown outcome by sending the same request again.
 

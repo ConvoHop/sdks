@@ -45,7 +45,7 @@ export function uuidFrom(text) {
 }
 
 export class Domain {
-  constructor({ seed = "convohop-conformance" } = {}) {
+  constructor({ seed = "relay-conformance" } = {}) {
     this.seed = seed;
     this.bus = new EventEmitter();
     this.bus.setMaxListeners(0);

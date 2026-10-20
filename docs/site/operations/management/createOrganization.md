@@ -81,8 +81,8 @@ mutation ManagementCreateOrganization($context: RequestContextInput!, $input: Cr
 
 | Language | Members |
 | --- | --- |
-| [TypeScript](../../typescript/reference/operations.md) | [`ConvoHopManagementClient.createOrganization`](../../typescript/reference/server.md#convohopmanagementclientcreateorganization-method) |
-| [Python](../../python/reference/operations.md) | [`ConvoHopManagement.create_organization`](../../python/reference/convohop.md#convohopmanagementcreate_organization-method), [`AsyncConvoHopManagement.create_organization`](../../python/reference/convohop.md#asyncconvohopmanagementcreate_organization-method) |
-| [.NET](../../dotnet/reference/operations.md) | [`ConvoHopManagementClient.CreateOrganizationAsync`](../../dotnet/reference/convohop.md#convohopmanagementclientcreateorganizationasync-method), [`ManagementApi.CreateOrganizationAsync`](../../dotnet/reference/api.md#managementapicreateorganizationasync-method) |
+| [TypeScript](../../typescript/reference/operations.md) | [`RelayManagementClient.createOrganization`](../../typescript/reference/server.md#relaymanagementclientcreateorganization-method) |
+| [Python](../../python/reference/operations.md) | [`RelayManagement.create_organization`](../../python/reference/instantrelay.md#relaymanagementcreate_organization-method), [`AsyncRelayManagement.create_organization`](../../python/reference/instantrelay.md#asyncrelaymanagementcreate_organization-method) |
+| [.NET](../../dotnet/reference/operations.md) | [`RelayManagementClient.CreateOrganizationAsync`](../../dotnet/reference/relay.md#relaymanagementclientcreateorganizationasync-method), [`ManagementApi.CreateOrganizationAsync`](../../dotnet/reference/api.md#managementapicreateorganizationasync-method) |
 | [Java and Kotlin](../../jvm/reference/operations.md) | [`ManagementApi.createOrganization`](../../jvm/reference/server.md#managementapicreateorganization-method), [`ManagementSuspendApi.createOrganization`](../../jvm/reference/server-kotlin.md#managementsuspendapicreateorganization-method) |
-| [Go](../../go/reference/operations.md) | [`ManagementClient.CreateOrganization`](../../go/reference/convohop.md#managementclientcreateorganization-method) |
+| [Go](../../go/reference/operations.md) | [`ManagementClient.CreateOrganization`](../../go/reference/relay.md#managementclientcreateorganization-method) |

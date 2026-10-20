@@ -2,14 +2,14 @@ part of 'client.dart';
 
 /// A LiveKit room, as a call connection drives it.
 ///
-/// `package:convohop/calls.dart` provides one built on the official
+/// `package:instantrelay/calls.dart` provides one built on the official
 /// `livekit_client` package. The connection never starts capture on its own.
 abstract interface class LiveMediaRoom {
   /// Connects to [url] with the single-use [token]. Throws when the room
   /// doesn't connect.
   Future<void> connect(String url, String token);
 
-  /// The connected local participant's SID. ConvoHop's media server makes it
+  /// The connected local participant's SID. Relay's media server makes it
   /// the participation's `nativeConnectionId`.
   String? get localParticipantSid;
 
@@ -44,14 +44,14 @@ void _checkMediaUrl(String value) {
   }
 }
 
-RecoveryState? _latestState(ConvoHopTransport transport, String operation, String field, String value) {
+RecoveryState? _latestState(RelayTransport transport, String operation, String field, String value) {
   for (final state in transport.recoveryStates.reversed) {
     if (state.operation == operation && state.input[field] == value) return state;
   }
   return null;
 }
 
-RecoveryState? _savedState(ConvoHopTransport transport, String requestId) {
+RecoveryState? _savedState(RelayTransport transport, String requestId) {
   for (final state in transport.recoveryStates) {
     if (state.requestId == requestId) return state;
   }
@@ -66,7 +66,7 @@ final _heldReleases = Finalizer<void Function()>((release) => release());
 /// grant a connection marks as used. Only a weak reference reaches [handle],
 /// so the app can drop it, which stops the retention. [held] must not capture
 /// [handle].
-void _retainHeld<T extends Object>(ConvoHopTransport transport, T handle, Iterable<String?> Function(T) held) {
+void _retainHeld<T extends Object>(RelayTransport transport, T handle, Iterable<String?> Function(T) held) {
   final reference = WeakReference<T>(handle);
   late final void Function() release;
   release = retainRecovery(transport, () {
@@ -84,7 +84,7 @@ void _retainHeld<T extends Object>(ConvoHopTransport transport, T handle, Iterab
 final class ConversationHandle {
   ConversationHandle._(this.client, this.conversationId);
 
-  final ConvoHopClient client;
+  final RelayClient client;
   final String conversationId;
 
   late final ConversationMessages messages = ConversationMessages._(this);
@@ -213,7 +213,7 @@ sealed class LiveAction {
     parseId(requestId);
   }
 
-  final ConvoHopClient client;
+  final RelayClient client;
   final String operationId;
   final String liveSessionId;
   final LiveOperationKind kind;
@@ -232,7 +232,7 @@ sealed class LiveAction {
   }
 
   /// Polls every 500 ms until the action completes. A failed action throws
-  /// its reason as a [ConvoHopProblem]; `RESOLUTION_REQUIRED` means it is
+  /// its reason as a [RelayProblem]; `RESOLUTION_REQUIRED` means it is
   /// still running when [timeout] (at most 300 seconds) passes. Completing
   /// [abortTrigger] stops the wait with [LiveWaitAborted].
   Future<LiveSessionOperationCompletion> completed({
@@ -263,7 +263,7 @@ sealed class LiveAction {
       }
       if (action.state == LiveOperationState.failed) {
         final failure = action.failure ?? (throw const FormatException('Failed live action is missing its reason'));
-        throw ConvoHopProblem(failure.code.wire, requestId, 'accepted', 409, failure.message);
+        throw RelayProblem(failure.code.wire, requestId, 'accepted', 409, failure.message);
       }
       if (action.state != LiveOperationState.running) throw const FormatException('Unknown live action state');
       final timer = Completer<void>();
@@ -272,7 +272,7 @@ sealed class LiveAction {
       pause.cancel();
     } while (client._clock() < deadline);
     if (aborted) throw const LiveWaitAborted();
-    throw ConvoHopProblem(
+    throw RelayProblem(
       'RESOLUTION_REQUIRED',
       requestId,
       'accepted',
@@ -283,7 +283,7 @@ sealed class LiveAction {
 }
 
 final class LiveStartOperation extends LiveAction {
-  LiveStartOperation._(ConvoHopClient client, this.receipt)
+  LiveStartOperation._(RelayClient client, this.receipt)
     : super._(
         client,
         receipt.result.operationId,
@@ -302,7 +302,7 @@ final class LiveStartOperation extends LiveAction {
 }
 
 final class LiveEndOperation extends LiveAction {
-  LiveEndOperation._(ConvoHopClient client, this.receipt)
+  LiveEndOperation._(RelayClient client, this.receipt)
     : super._(
         client,
         receipt.result.operationId,
@@ -325,15 +325,15 @@ final class LiveSessionHandle {
 
   static Iterable<String?> _held(LiveSessionHandle handle) => [handle._endRequest];
 
-  static Future<LiveSessionHandle> _load(ConvoHopClient client, String liveSessionId) async =>
+  static Future<LiveSessionHandle> _load(RelayClient client, String liveSessionId) async =>
       LiveSessionHandle._(client, await _fetch(client, liveSessionId));
 
-  static Future<LiveSession> _fetch(ConvoHopClient client, String liveSessionId) async =>
+  static Future<LiveSession> _fetch(RelayClient client, String liveSessionId) async =>
       (await client.transport.execute(Operations.communicationLiveSession, client.projectId, {
         'liveSessionId': parseId(liveSessionId),
       })).result;
 
-  final ConvoHopClient client;
+  final RelayClient client;
   final LiveSession snapshot;
   final String liveSessionId;
   final String generation;
@@ -448,7 +448,7 @@ final class LiveParticipationHandle {
   Future<LiveParticipation> get() async {
     final current = (await live.get()).myParticipation;
     if (current == null || current.participationId != participationId) {
-      throw ConvoHopProblem(
+      throw RelayProblem(
         'PARTICIPATION_MISMATCH',
         newRequestId(),
         'rejected',
@@ -462,7 +462,7 @@ final class LiveParticipationHandle {
   /// Connects the call's media with new single-use credentials. Connecting
   /// never starts the microphone or camera.
   ///
-  /// [createRoom] makes the LiveKit room; see `package:convohop/calls.dart`.
+  /// [createRoom] makes the LiveKit room; see `package:instantrelay/calls.dart`.
   /// [onDisconnected] runs when the room disconnects on its own; call
   /// [LiveMediaConnection.reconnect] to continue with new credentials.
   Future<LiveMediaConnection<R>> connect<R extends LiveMediaRoom>(
@@ -539,7 +539,7 @@ final class LiveParticipationHandle {
         if (issuance == null ||
             issuance.participationId != participationId ||
             issuance.liveSessionId != live.liveSessionId) {
-          throw ConvoHopProblem(
+          throw RelayProblem(
             'RESOLUTION_REQUIRED',
             old.requestId,
             'unknown',
@@ -551,7 +551,7 @@ final class LiveParticipationHandle {
             current.nativeConnectionId == null ||
             (old.mode == LiveConnectionMode.reconnect && current.nativeConnectionId == old.replacementOfConnectionId);
         if (unobserved && timestampMillis(issuance.admissionExpiresAt) > timestampMillis(resolution.checkedAt)) {
-          throw ConvoHopProblem(
+          throw RelayProblem(
             'RESOLUTION_REQUIRED',
             old.requestId,
             'committed',
@@ -560,7 +560,7 @@ final class LiveParticipationHandle {
           );
         }
         if (requestId == old.requestId) {
-          throw ConvoHopProblem(
+          throw RelayProblem(
             'CREDENTIAL_REFRESH_REQUIRED',
             old.requestId,
             'committed',
@@ -675,7 +675,7 @@ final class LiveMediaConnection<R extends LiveMediaRoom> {
       } on Object {
         // The connection failure is the caller's error; the room is already unusable.
       }
-      throw ConvoHopProblem(
+      throw RelayProblem(
         'MEDIA_CONNECT_FAILED',
         requestId,
         'unknown',

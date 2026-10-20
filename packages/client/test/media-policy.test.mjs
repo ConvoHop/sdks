@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
 import { Room, RoomEvent } from "livekit-client";
-import { MediaConnection, ConvoHopTransport } from "@convohop/client";
+import { MediaConnection, RelayTransport } from "@instantrelay/client";
 import { reply, resolution } from "../../../test/graphql-fixtures.mjs";
 import { asyncStorage } from "../../../test/recovery-fixtures.mjs";
 
@@ -46,7 +46,7 @@ for (const fail of [false, true]) {
       transportExpiresAt: expires, admissionExpiresAt: expires, leaseExpiresAt: expires, leasePolicyId: "fixture",
       connectToken: "fixture-private-connect-token" };
     const transportOptions = { baseUrl: "http://localhost:18080", namespace: "native-async", incarnation, asyncRecoveryStorage: saved };
-    const transport = new ConvoHopTransport({ ...transportOptions, fetch: async (_url, init) =>
+    const transport = new RelayTransport({ ...transportOptions, fetch: async (_url, init) =>
       reply(JSON.parse(init.body), { result: grant }) });
     await transport.execute("communication.liveSessionCredentials", projectId,
       { liveSessionId, participationId, expectedGeneration: "1", mode: "INITIAL" }, requestId);
@@ -88,7 +88,7 @@ for (const fail of [false, true]) {
     }
     assert.ok(saved.writes.every(({ value }) => !value.includes("fixture-private")));
     if (!fail) {
-      const restarted = new ConvoHopTransport({ ...transportOptions, fetch: async (_url, init) => {
+      const restarted = new RelayTransport({ ...transportOptions, fetch: async (_url, init) => {
         const request = JSON.parse(init.body);
         assert.equal(request.operationName, "CommunicationResolveRequest");
         return reply(request, { result: resolution(requestId, "notObservedYet") });

@@ -1,4 +1,4 @@
-# `package:convohop/push.dart`
+# `package:instantrelay/push.dart`
 
 Push registration, notification payloads and the system incoming-call UI, through the package's own platform code.
 
@@ -214,7 +214,7 @@ final String eventId
 
 Deduplicate on this: delivery is at least once.
 
-Inherited from `ConvoHopNotification`.
+Inherited from `RelayNotification`.
 
 #### `CallCancelledNotification.occurredAt` property
 
@@ -222,7 +222,7 @@ Inherited from `ConvoHopNotification`.
 final String occurredAt
 ```
 
-Inherited from `ConvoHopNotification`.
+Inherited from `RelayNotification`.
 
 #### `CallCancelledNotification.projectId` property
 
@@ -230,7 +230,7 @@ Inherited from `ConvoHopNotification`.
 final String projectId
 ```
 
-Inherited from `ConvoHopNotification`.
+Inherited from `RelayNotification`.
 
 #### `CallCancelledNotification.recipientId` property
 
@@ -240,7 +240,7 @@ final String recipientId
 
 The principal the notification is for.
 
-Inherited from `ConvoHopNotification`.
+Inherited from `RelayNotification`.
 
 #### `CallCancelledNotification.conversationId` property
 
@@ -248,7 +248,7 @@ Inherited from `ConvoHopNotification`.
 final String conversationId
 ```
 
-Inherited from `ConvoHopNotification`.
+Inherited from `RelayNotification`.
 
 #### `CallCancelledNotification.senderId` property
 
@@ -258,7 +258,7 @@ final String senderId
 
 Who sent the message or started the ringing.
 
-Inherited from `ConvoHopNotification`.
+Inherited from `RelayNotification`.
 
 #### `CallCancelledNotification.title` property
 
@@ -268,7 +268,7 @@ final String? title
 
 Visible title, when the push had one.
 
-Inherited from `ConvoHopNotification`.
+Inherited from `RelayNotification`.
 
 #### `CallCancelledNotification.body` property
 
@@ -279,17 +279,17 @@ final String? body
 Visible body, when the push had one. With previews off, a message
 notification has none.
 
-Inherited from `ConvoHopNotification`.
+Inherited from `RelayNotification`.
 
 #### `CallCancelledNotification.isFor` method
 
 ```dart
-bool isFor(ConvoHopClient client)
+bool isFor(RelayClient client)
 ```
 
 Whether this notification is for `client`'s user and project.
 
-Inherited from `ConvoHopNotification`.
+Inherited from `RelayNotification`.
 
 ### `CallNotification` class
 
@@ -380,7 +380,7 @@ final String eventId
 
 Deduplicate on this: delivery is at least once.
 
-Inherited from `ConvoHopNotification`.
+Inherited from `RelayNotification`.
 
 #### `CallNotification.occurredAt` property
 
@@ -388,7 +388,7 @@ Inherited from `ConvoHopNotification`.
 final String occurredAt
 ```
 
-Inherited from `ConvoHopNotification`.
+Inherited from `RelayNotification`.
 
 #### `CallNotification.projectId` property
 
@@ -396,7 +396,7 @@ Inherited from `ConvoHopNotification`.
 final String projectId
 ```
 
-Inherited from `ConvoHopNotification`.
+Inherited from `RelayNotification`.
 
 #### `CallNotification.recipientId` property
 
@@ -406,7 +406,7 @@ final String recipientId
 
 The principal the notification is for.
 
-Inherited from `ConvoHopNotification`.
+Inherited from `RelayNotification`.
 
 #### `CallNotification.conversationId` property
 
@@ -414,7 +414,7 @@ Inherited from `ConvoHopNotification`.
 final String conversationId
 ```
 
-Inherited from `ConvoHopNotification`.
+Inherited from `RelayNotification`.
 
 #### `CallNotification.senderId` property
 
@@ -424,7 +424,7 @@ final String senderId
 
 Who sent the message or started the ringing.
 
-Inherited from `ConvoHopNotification`.
+Inherited from `RelayNotification`.
 
 #### `CallNotification.title` property
 
@@ -434,7 +434,7 @@ final String? title
 
 Visible title, when the push had one.
 
-Inherited from `ConvoHopNotification`.
+Inherited from `RelayNotification`.
 
 #### `CallNotification.body` property
 
@@ -445,439 +445,17 @@ final String? body
 Visible body, when the push had one. With previews off, a message
 notification has none.
 
-Inherited from `ConvoHopNotification`.
+Inherited from `RelayNotification`.
 
 #### `CallNotification.isFor` method
 
 ```dart
-bool isFor(ConvoHopClient client)
+bool isFor(RelayClient client)
 ```
 
 Whether this notification is for `client`'s user and project.
 
-Inherited from `ConvoHopNotification`.
-
-### `ConvoHopNotification` class
-
-```dart
-sealed class ConvoHopNotification
-```
-
-A ConvoHop notification, parsed from a push payload's `convohop` object.
-
-Notifications carry identifiers. They carry message text only when the
-project opted in to message previews (off by default) or your backend
-added its own text, so `title` and `body` are often null: show your own
-generic text and fetch content with the user's session.
-
-#### `ConvoHopNotification.eventId` property
-
-```dart
-final String eventId
-```
-
-Deduplicate on this: delivery is at least once.
-
-#### `ConvoHopNotification.eventType` property
-
-```dart
-String get eventType
-```
-
-`notification.message`, `notification.call` or
-`notification.callCancelled`.
-
-#### `ConvoHopNotification.occurredAt` property
-
-```dart
-final String occurredAt
-```
-
-#### `ConvoHopNotification.projectId` property
-
-```dart
-final String projectId
-```
-
-#### `ConvoHopNotification.recipientId` property
-
-```dart
-final String recipientId
-```
-
-The principal the notification is for.
-
-#### `ConvoHopNotification.conversationId` property
-
-```dart
-final String conversationId
-```
-
-#### `ConvoHopNotification.senderId` property
-
-```dart
-final String senderId
-```
-
-Who sent the message or started the ringing.
-
-#### `ConvoHopNotification.title` property
-
-```dart
-final String? title
-```
-
-Visible title, when the push had one.
-
-#### `ConvoHopNotification.body` property
-
-```dart
-final String? body
-```
-
-Visible body, when the push had one. With previews off, a message
-notification has none.
-
-#### `ConvoHopNotification.isFor` method
-
-```dart
-bool isFor(ConvoHopClient client)
-```
-
-Whether this notification is for `client`'s user and project.
-
-#### `ConvoHopNotification.toJson` method
-
-```dart
-Map<String, Object?> toJson()
-```
-
-The `convohop` object, for handing the notification to native code.
-
-### `ConvoHopNotifications` class
-
-```dart
-final class ConvoHopNotifications
-```
-
-Handles ConvoHop push payloads on the device: parses and validates them,
-deduplicates on `eventId`, and tracks which calls are ringing.
-
-Delivery is at least once and unordered, so a cancellation can arrive
-before its call. A call stops ringing once a cancellation with its
-`alertId` was seen or its `expiresAt` passed.
-
-#### `ConvoHopNotifications` constructor
-
-```dart
-ConvoHopNotifications({Clock? clock, int capacity = 1024})
-```
-
-`capacity` bounds how many event IDs are remembered for deduplication.
-
-#### `ConvoHopNotifications.rings` property
-
-```dart
-Stream<RingUpdate> get rings
-```
-
-Ring changes: a call starts or stops ringing.
-
-#### `ConvoHopNotifications.ringing` property
-
-```dart
-List<CallNotification> get ringing
-```
-
-Calls that are ringing now.
-
-#### `ConvoHopNotifications.isRinging` method
-
-```dart
-bool isRinging(String alertId)
-```
-
-Whether the ring `alertId` is on.
-
-#### `ConvoHopNotifications.handleNotification` method
-
-```dart
-HandledNotification? handleNotification(Map<Object?, Object?> payload)
-```
-
-Parses and records `payload`. Returns null when it isn't a ConvoHop
-payload, and throws a `FormatException` when it breaks the contract.
-
-#### `ConvoHopNotifications.record` method
-
-```dart
-HandledNotification record(ConvoHopNotification notification)
-```
-
-Records an already parsed `notification`.
-
-#### `ConvoHopNotifications.stopRinging` method
-
-```dart
-bool stopRinging(String alertId, {String reason = 'declined'})
-```
-
-Stops the ring `alertId` locally, for example after the user declined
-it in the call UI. Returns whether it was ringing.
-
-#### `ConvoHopNotifications.stopCall` method
-
-```dart
-bool stopCall(String liveSessionId, {String reason = 'ended'})
-```
-
-Stops every ring of the call `liveSessionId`, for example when the
-call ended. Returns whether any was ringing.
-
-#### `ConvoHopNotifications.applyEvent` method
-
-```dart
-bool applyEvent(Event event)
-```
-
-Applies a conversation event from the user's realtime connection: a
-`live.ended` event stops the call's rings. Pass every event of the
-conversations the user can be called in, for example from
-`ConversationStore.events`, because pushes don't always report that a
-ring stopped. Returns whether a ring stopped.
-
-#### `ConvoHopNotifications.close` method
-
-```dart
-void close()
-```
-
-Cancels ring timers and stops reporting on `rings`. Payloads are still
-parsed, deduplicated and tracked.
-
-### `ConvoHopPush` class
-
-```dart
-final class ConvoHopPush
-```
-
-Push notifications and the system incoming-call UI on Android and iOS.
-
-The plugin's native code shows ConvoHop pushes even while Dart isn't
-running. On Android, its Firebase messaging service builds a notification
-for each FCM data message and rings with a full-screen call-style
-notification. On iOS, the system shows APNs alerts, and VoIP pushes ring
-through CallKit once you `registerVoip`. Without `title` or `body` in the
-push, which is the default because message previews are off,
-notifications show generic text: see the package README to localize it.
-
-Listen to the streams, then call `start`. Send each registration from
-`registrations` to your backend.
-
-#### `ConvoHopPush` constructor
-
-```dart
-ConvoHopPush({
-  ConvoHopNotifications? notifications,
-  ErrorListener? onError,
-  @visibleForTesting MethodChannel methods = const MethodChannel('convohop/push'),
-  @visibleForTesting EventChannel events = const EventChannel('convohop/push/events'),
-})
-```
-
-#### `ConvoHopPush.notifications` property
-
-```dart
-final ConvoHopNotifications notifications
-```
-
-Deduplicates notifications and tracks rings.
-
-#### `ConvoHopPush.registrations` property
-
-```dart
-Stream<PushRegistration> get registrations
-```
-
-This device's push registrations, after `register` and `registerVoip`
-and whenever the platform changes one. The same registration can
-arrive more than once: store them idempotently.
-
-#### `ConvoHopPush.received` property
-
-```dart
-Stream<HandledNotification> get received
-```
-
-ConvoHop pushes that reached the device while Dart was running, after
-native code showed them. Check `HandledNotification.duplicate`. On iOS,
-alert pushes reach the app only while it's in the foreground.
-
-#### `ConvoHopPush.opened` property
-
-```dart
-Stream<ConvoHopNotification> get opened
-```
-
-Notifications the user opened: open the conversation or the call.
-
-#### `ConvoHopPush.callActions` property
-
-```dart
-Stream<CallAction> get callActions
-```
-
-What the user did in the system call UI, including actions taken
-shortly before Dart started.
-
-#### `ConvoHopPush.start` method
-
-```dart
-Future<void> start()
-```
-
-Starts delivering native events, including the notification that
-launched the app and earlier call actions. Listen to the streams first.
-
-#### `ConvoHopPush.requestPermission` method
-
-```dart
-Future<bool> requestPermission()
-```
-
-Asks the user to allow notifications. Resolves whether they're allowed.
-
-#### `ConvoHopPush.register` method
-
-```dart
-Future<void> register()
-```
-
-Registers this device for alert pushes, and reports the registration on
-`registrations`: an `FcmRegistration` on Android and an
-`ApnsRegistration` on iOS. Call it at each launch, after `start`.
-
-On iOS the registration can arrive after this returns, once APNs issued
-a token. On Android it throws a `PlatformException` with code
-`FIREBASE_UNAVAILABLE` when Firebase isn't configured or registration
-failed, for example while offline.
-
-#### `ConvoHopPush.registerVoip` method
-
-```dart
-Future<void> registerVoip()
-```
-
-Registers for VoIP pushes with PushKit, on iOS only, and keeps doing so
-at each launch. The registration arrives on `registrations`. Call it
-only if your app rings through CallKit: iOS terminates an app that
-receives a VoIP push without reporting a call.
-
-#### `ConvoHopPush.canUseFullScreenIntent` method
-
-```dart
-Future<bool> canUseFullScreenIntent()
-```
-
-Whether Android lets the app show full-screen incoming calls. From
-Android 14, users and app stores can turn it off; incoming calls then
-show as heads-up notifications. Always true on iOS.
-
-#### `ConvoHopPush.handleNotification` method
-
-```dart
-HandledNotification? handleNotification(Map<Object?, Object?> payload)
-```
-
-Records a push payload that reached Dart another way, for example
-through another push plugin, and reports it on `received`. Returns
-null when the payload isn't ConvoHop's; throws a `FormatException`
-when it breaks the push payload contract.
-
-#### `ConvoHopPush.showNotification` method
-
-```dart
-Future<bool> showNotification(Map<Object?, Object?> payload)
-```
-
-Shows a ConvoHop FCM data message with the plugin's notifications, on
-Android, when another plugin's messaging service received it: call it
-with the message's data from that plugin's foreground and background
-handlers, instead of `handleNotification`. While a started
-`ConvoHopPush` runs, `received` reports it. Resolves false when
-`payload` isn't ConvoHop's, and on iOS, where the system shows APNs
-alerts.
-
-#### `ConvoHopPush.showIncomingCall` method
-
-```dart
-Future<void> showIncomingCall(CallNotification call)
-```
-
-Rings for `call` in the system call UI, for example when another push
-plugin delivered the call's push to Dart. Does nothing once the ring
-stopped. Throws a `PlatformException` with code `CALL_FAILED` when the
-system refused the call, for example when iOS Do Not Disturb or call
-blocking rejects it in CallKit.
-
-#### `ConvoHopPush.answerCall` method
-
-```dart
-Future<bool> answerCall(String alertId)
-```
-
-Answers the ring `alertId` in the system call UI, for example from the
-app's own incoming-call screen, and reports it on `callActions`.
-Resolves false when the ring had stopped.
-
-#### `ConvoHopPush.declineCall` method
-
-```dart
-Future<bool> declineCall(String alertId)
-```
-
-Declines the ring `alertId` on this device and reports it on
-`callActions`. Resolves false when the ring had stopped. Other devices
-keep ringing: the decline is local.
-
-#### `ConvoHopPush.endCall` method
-
-```dart
-Future<void> endCall(String alertId, {String reason = 'ended'})
-```
-
-Ends the ring or call `alertId` in the system call UI without a call
-action: the call ended, or the ring stopped elsewhere. `reason` is a
-cancellation reason: `answered`, `declined`, `ended` or `expired`.
-Rings that `notifications` sees stop end by themselves.
-
-#### `ConvoHopPush.removeDeliveredNotifications` method
-
-```dart
-Future<void> removeDeliveredNotifications({String? conversationId})
-```
-
-Removes ConvoHop's delivered message notifications, only
-`conversationId`'s when given, for example when the user opens the
-conversation. The app's own notifications stay.
-
-#### `ConvoHopPush.setActiveConversation` method
-
-```dart
-Future<void> setActiveConversation(String? conversationId)
-```
-
-Sets the conversation the user is looking at, or null for none. While
-the app is in the foreground, its message pushes show no notification;
-they still arrive on `received`.
-
-#### `ConvoHopPush.close` method
-
-```dart
-Future<void> close()
-```
-
-Stops delivering events. Native code keeps showing pushes.
+Inherited from `RelayNotification`.
 
 ### `FcmRegistration` class
 
@@ -964,12 +542,12 @@ String toString()
 final class HandledNotification
 ```
 
-What `ConvoHopNotifications.handleNotification` found.
+What `RelayNotifications.handleNotification` found.
 
 #### `HandledNotification.notification` property
 
 ```dart
-final ConvoHopNotification notification
+final RelayNotification notification
 ```
 
 #### `HandledNotification.duplicate` property
@@ -993,7 +571,7 @@ cancellation for its alert seen and its `expiresAt` in the future.
 ### `MessageNotification` class
 
 ```dart
-final class MessageNotification extends ConvoHopNotification
+final class MessageNotification extends RelayNotification
 ```
 
 A new message for the user.
@@ -1016,7 +594,7 @@ String get eventType
 #### `MessageNotification.fetchMessage` method
 
 ```dart
-Future<Message> fetchMessage(ConvoHopClient client)
+Future<Message> fetchMessage(RelayClient client)
 ```
 
 Fetches the message with the user's own session, for example when
@@ -1038,7 +616,7 @@ final String eventId
 
 Deduplicate on this: delivery is at least once.
 
-Inherited from `ConvoHopNotification`.
+Inherited from `RelayNotification`.
 
 #### `MessageNotification.occurredAt` property
 
@@ -1046,7 +624,7 @@ Inherited from `ConvoHopNotification`.
 final String occurredAt
 ```
 
-Inherited from `ConvoHopNotification`.
+Inherited from `RelayNotification`.
 
 #### `MessageNotification.projectId` property
 
@@ -1054,7 +632,7 @@ Inherited from `ConvoHopNotification`.
 final String projectId
 ```
 
-Inherited from `ConvoHopNotification`.
+Inherited from `RelayNotification`.
 
 #### `MessageNotification.recipientId` property
 
@@ -1064,7 +642,7 @@ final String recipientId
 
 The principal the notification is for.
 
-Inherited from `ConvoHopNotification`.
+Inherited from `RelayNotification`.
 
 #### `MessageNotification.conversationId` property
 
@@ -1072,7 +650,7 @@ Inherited from `ConvoHopNotification`.
 final String conversationId
 ```
 
-Inherited from `ConvoHopNotification`.
+Inherited from `RelayNotification`.
 
 #### `MessageNotification.senderId` property
 
@@ -1082,7 +660,7 @@ final String senderId
 
 Who sent the message or started the ringing.
 
-Inherited from `ConvoHopNotification`.
+Inherited from `RelayNotification`.
 
 #### `MessageNotification.title` property
 
@@ -1092,7 +670,7 @@ final String? title
 
 Visible title, when the push had one.
 
-Inherited from `ConvoHopNotification`.
+Inherited from `RelayNotification`.
 
 #### `MessageNotification.body` property
 
@@ -1103,17 +681,17 @@ final String? body
 Visible body, when the push had one. With previews off, a message
 notification has none.
 
-Inherited from `ConvoHopNotification`.
+Inherited from `RelayNotification`.
 
 #### `MessageNotification.isFor` method
 
 ```dart
-bool isFor(ConvoHopClient client)
+bool isFor(RelayClient client)
 ```
 
 Whether this notification is for `client`'s user and project.
 
-Inherited from `ConvoHopNotification`.
+Inherited from `RelayNotification`.
 
 ### `PushRegistration` class
 
@@ -1122,8 +700,8 @@ sealed class PushRegistration
 ```
 
 Where your backend sends this device's pushes. Send each one to your
-backend, which delivers ConvoHop's notification events to it; ConvoHop
-never sees them. Every ConvoHop client hands its app the same JSON shape,
+backend, which delivers Relay's notification events to it; Relay
+never sees them. Every Relay client hands its app the same JSON shape,
 from `toJson`, so one backend endpoint can store registrations from
 browsers and native apps.
 
@@ -1144,10 +722,432 @@ Map<String, String> toJson()
 The registration as JSON: `{"kind": "fcm", "token": …}`,
 `{"kind": "fcm", "fid": …}` or `{"kind": "apns" | "apnsVoip", "token": …}`.
 
+### `RelayNotification` class
+
+```dart
+sealed class RelayNotification
+```
+
+A Relay notification, parsed from a push payload's `convohop` object.
+
+Notifications carry identifiers. They carry message text only when the
+project opted in to message previews (off by default) or your backend
+added its own text, so `title` and `body` are often null: show your own
+generic text and fetch content with the user's session.
+
+#### `RelayNotification.eventId` property
+
+```dart
+final String eventId
+```
+
+Deduplicate on this: delivery is at least once.
+
+#### `RelayNotification.eventType` property
+
+```dart
+String get eventType
+```
+
+`notification.message`, `notification.call` or
+`notification.callCancelled`.
+
+#### `RelayNotification.occurredAt` property
+
+```dart
+final String occurredAt
+```
+
+#### `RelayNotification.projectId` property
+
+```dart
+final String projectId
+```
+
+#### `RelayNotification.recipientId` property
+
+```dart
+final String recipientId
+```
+
+The principal the notification is for.
+
+#### `RelayNotification.conversationId` property
+
+```dart
+final String conversationId
+```
+
+#### `RelayNotification.senderId` property
+
+```dart
+final String senderId
+```
+
+Who sent the message or started the ringing.
+
+#### `RelayNotification.title` property
+
+```dart
+final String? title
+```
+
+Visible title, when the push had one.
+
+#### `RelayNotification.body` property
+
+```dart
+final String? body
+```
+
+Visible body, when the push had one. With previews off, a message
+notification has none.
+
+#### `RelayNotification.isFor` method
+
+```dart
+bool isFor(RelayClient client)
+```
+
+Whether this notification is for `client`'s user and project.
+
+#### `RelayNotification.toJson` method
+
+```dart
+Map<String, Object?> toJson()
+```
+
+The `convohop` object, for handing the notification to native code.
+
+### `RelayNotifications` class
+
+```dart
+final class RelayNotifications
+```
+
+Handles Relay push payloads on the device: parses and validates them,
+deduplicates on `eventId`, and tracks which calls are ringing.
+
+Delivery is at least once and unordered, so a cancellation can arrive
+before its call. A call stops ringing once a cancellation with its
+`alertId` was seen or its `expiresAt` passed.
+
+#### `RelayNotifications` constructor
+
+```dart
+RelayNotifications({Clock? clock, int capacity = 1024})
+```
+
+`capacity` bounds how many event IDs are remembered for deduplication.
+
+#### `RelayNotifications.rings` property
+
+```dart
+Stream<RingUpdate> get rings
+```
+
+Ring changes: a call starts or stops ringing.
+
+#### `RelayNotifications.ringing` property
+
+```dart
+List<CallNotification> get ringing
+```
+
+Calls that are ringing now.
+
+#### `RelayNotifications.isRinging` method
+
+```dart
+bool isRinging(String alertId)
+```
+
+Whether the ring `alertId` is on.
+
+#### `RelayNotifications.handleNotification` method
+
+```dart
+HandledNotification? handleNotification(Map<Object?, Object?> payload)
+```
+
+Parses and records `payload`. Returns null when it isn't a Relay
+payload, and throws a `FormatException` when it breaks the contract.
+
+#### `RelayNotifications.record` method
+
+```dart
+HandledNotification record(RelayNotification notification)
+```
+
+Records an already parsed `notification`.
+
+#### `RelayNotifications.stopRinging` method
+
+```dart
+bool stopRinging(String alertId, {String reason = 'declined'})
+```
+
+Stops the ring `alertId` locally, for example after the user declined
+it in the call UI. Returns whether it was ringing.
+
+#### `RelayNotifications.stopCall` method
+
+```dart
+bool stopCall(String liveSessionId, {String reason = 'ended'})
+```
+
+Stops every ring of the call `liveSessionId`, for example when the
+call ended. Returns whether any was ringing.
+
+#### `RelayNotifications.applyEvent` method
+
+```dart
+bool applyEvent(Event event)
+```
+
+Applies a conversation event from the user's realtime connection: a
+`live.ended` event stops the call's rings. Pass every event of the
+conversations the user can be called in, for example from
+`ConversationStore.events`, because pushes don't always report that a
+ring stopped. Returns whether a ring stopped.
+
+#### `RelayNotifications.close` method
+
+```dart
+void close()
+```
+
+Cancels ring timers and stops reporting on `rings`. Payloads are still
+parsed, deduplicated and tracked.
+
+### `RelayPush` class
+
+```dart
+final class RelayPush
+```
+
+Push notifications and the system incoming-call UI on Android and iOS.
+
+The plugin's native code shows Relay pushes even while Dart isn't
+running. On Android, its Firebase messaging service builds a notification
+for each FCM data message and rings with a full-screen call-style
+notification. On iOS, the system shows APNs alerts, and VoIP pushes ring
+through CallKit once you `registerVoip`. Without `title` or `body` in the
+push, which is the default because message previews are off,
+notifications show generic text: see the package README to localize it.
+
+Listen to the streams, then call `start`. Send each registration from
+`registrations` to your backend.
+
+#### `RelayPush` constructor
+
+```dart
+RelayPush({
+  RelayNotifications? notifications,
+  ErrorListener? onError,
+  @visibleForTesting MethodChannel methods = const MethodChannel('convohop/push'),
+  @visibleForTesting EventChannel events = const EventChannel('convohop/push/events'),
+})
+```
+
+#### `RelayPush.notifications` property
+
+```dart
+final RelayNotifications notifications
+```
+
+Deduplicates notifications and tracks rings.
+
+#### `RelayPush.registrations` property
+
+```dart
+Stream<PushRegistration> get registrations
+```
+
+This device's push registrations, after `register` and `registerVoip`
+and whenever the platform changes one. The same registration can
+arrive more than once: store them idempotently.
+
+#### `RelayPush.received` property
+
+```dart
+Stream<HandledNotification> get received
+```
+
+Relay pushes that reached the device while Dart was running, after
+native code showed them. Check `HandledNotification.duplicate`. On iOS,
+alert pushes reach the app only while it's in the foreground.
+
+#### `RelayPush.opened` property
+
+```dart
+Stream<RelayNotification> get opened
+```
+
+Notifications the user opened: open the conversation or the call.
+
+#### `RelayPush.callActions` property
+
+```dart
+Stream<CallAction> get callActions
+```
+
+What the user did in the system call UI, including actions taken
+shortly before Dart started.
+
+#### `RelayPush.start` method
+
+```dart
+Future<void> start()
+```
+
+Starts delivering native events, including the notification that
+launched the app and earlier call actions. Listen to the streams first.
+
+#### `RelayPush.requestPermission` method
+
+```dart
+Future<bool> requestPermission()
+```
+
+Asks the user to allow notifications. Resolves whether they're allowed.
+
+#### `RelayPush.register` method
+
+```dart
+Future<void> register()
+```
+
+Registers this device for alert pushes, and reports the registration on
+`registrations`: an `FcmRegistration` on Android and an
+`ApnsRegistration` on iOS. Call it at each launch, after `start`.
+
+On iOS the registration can arrive after this returns, once APNs issued
+a token. On Android it throws a `PlatformException` with code
+`FIREBASE_UNAVAILABLE` when Firebase isn't configured or registration
+failed, for example while offline.
+
+#### `RelayPush.registerVoip` method
+
+```dart
+Future<void> registerVoip()
+```
+
+Registers for VoIP pushes with PushKit, on iOS only, and keeps doing so
+at each launch. The registration arrives on `registrations`. Call it
+only if your app rings through CallKit: iOS terminates an app that
+receives a VoIP push without reporting a call.
+
+#### `RelayPush.canUseFullScreenIntent` method
+
+```dart
+Future<bool> canUseFullScreenIntent()
+```
+
+Whether Android lets the app show full-screen incoming calls. From
+Android 14, users and app stores can turn it off; incoming calls then
+show as heads-up notifications. Always true on iOS.
+
+#### `RelayPush.handleNotification` method
+
+```dart
+HandledNotification? handleNotification(Map<Object?, Object?> payload)
+```
+
+Records a push payload that reached Dart another way, for example
+through another push plugin, and reports it on `received`. Returns
+null when the payload isn't Relay's; throws a `FormatException`
+when it breaks the push payload contract.
+
+#### `RelayPush.showNotification` method
+
+```dart
+Future<bool> showNotification(Map<Object?, Object?> payload)
+```
+
+Shows a Relay FCM data message with the plugin's notifications, on
+Android, when another plugin's messaging service received it: call it
+with the message's data from that plugin's foreground and background
+handlers, instead of `handleNotification`. While a started
+`RelayPush` runs, `received` reports it. Resolves false when
+`payload` isn't Relay's, and on iOS, where the system shows APNs
+alerts.
+
+#### `RelayPush.showIncomingCall` method
+
+```dart
+Future<void> showIncomingCall(CallNotification call)
+```
+
+Rings for `call` in the system call UI, for example when another push
+plugin delivered the call's push to Dart. Does nothing once the ring
+stopped. Throws a `PlatformException` with code `CALL_FAILED` when the
+system refused the call, for example when iOS Do Not Disturb or call
+blocking rejects it in CallKit.
+
+#### `RelayPush.answerCall` method
+
+```dart
+Future<bool> answerCall(String alertId)
+```
+
+Answers the ring `alertId` in the system call UI, for example from the
+app's own incoming-call screen, and reports it on `callActions`.
+Resolves false when the ring had stopped.
+
+#### `RelayPush.declineCall` method
+
+```dart
+Future<bool> declineCall(String alertId)
+```
+
+Declines the ring `alertId` on this device and reports it on
+`callActions`. Resolves false when the ring had stopped. Other devices
+keep ringing: the decline is local.
+
+#### `RelayPush.endCall` method
+
+```dart
+Future<void> endCall(String alertId, {String reason = 'ended'})
+```
+
+Ends the ring or call `alertId` in the system call UI without a call
+action: the call ended, or the ring stopped elsewhere. `reason` is a
+cancellation reason: `answered`, `declined`, `ended` or `expired`.
+Rings that `notifications` sees stop end by themselves.
+
+#### `RelayPush.removeDeliveredNotifications` method
+
+```dart
+Future<void> removeDeliveredNotifications({String? conversationId})
+```
+
+Removes Relay's delivered message notifications, only
+`conversationId`'s when given, for example when the user opens the
+conversation. The app's own notifications stay.
+
+#### `RelayPush.setActiveConversation` method
+
+```dart
+Future<void> setActiveConversation(String? conversationId)
+```
+
+Sets the conversation the user is looking at, or null for none. While
+the app is in the foreground, its message pushes show no notification;
+they still arrive on `received`.
+
+#### `RelayPush.close` method
+
+```dart
+Future<void> close()
+```
+
+Stops delivering events. Native code keeps showing pushes.
+
 ### `RingNotification` class
 
 ```dart
-sealed class RingNotification extends ConvoHopNotification
+sealed class RingNotification extends RelayNotification
 ```
 
 A notification about one ring of a call.
@@ -1204,7 +1204,7 @@ final String eventId
 
 Deduplicate on this: delivery is at least once.
 
-Inherited from `ConvoHopNotification`.
+Inherited from `RelayNotification`.
 
 #### `RingNotification.eventType` property
 
@@ -1215,7 +1215,7 @@ String get eventType
 `notification.message`, `notification.call` or
 `notification.callCancelled`.
 
-Inherited from `ConvoHopNotification`.
+Inherited from `RelayNotification`.
 
 #### `RingNotification.occurredAt` property
 
@@ -1223,7 +1223,7 @@ Inherited from `ConvoHopNotification`.
 final String occurredAt
 ```
 
-Inherited from `ConvoHopNotification`.
+Inherited from `RelayNotification`.
 
 #### `RingNotification.projectId` property
 
@@ -1231,7 +1231,7 @@ Inherited from `ConvoHopNotification`.
 final String projectId
 ```
 
-Inherited from `ConvoHopNotification`.
+Inherited from `RelayNotification`.
 
 #### `RingNotification.recipientId` property
 
@@ -1241,7 +1241,7 @@ final String recipientId
 
 The principal the notification is for.
 
-Inherited from `ConvoHopNotification`.
+Inherited from `RelayNotification`.
 
 #### `RingNotification.conversationId` property
 
@@ -1249,7 +1249,7 @@ Inherited from `ConvoHopNotification`.
 final String conversationId
 ```
 
-Inherited from `ConvoHopNotification`.
+Inherited from `RelayNotification`.
 
 #### `RingNotification.senderId` property
 
@@ -1259,7 +1259,7 @@ final String senderId
 
 Who sent the message or started the ringing.
 
-Inherited from `ConvoHopNotification`.
+Inherited from `RelayNotification`.
 
 #### `RingNotification.title` property
 
@@ -1269,7 +1269,7 @@ final String? title
 
 Visible title, when the push had one.
 
-Inherited from `ConvoHopNotification`.
+Inherited from `RelayNotification`.
 
 #### `RingNotification.body` property
 
@@ -1280,17 +1280,17 @@ final String? body
 Visible body, when the push had one. With previews off, a message
 notification has none.
 
-Inherited from `ConvoHopNotification`.
+Inherited from `RelayNotification`.
 
 #### `RingNotification.isFor` method
 
 ```dart
-bool isFor(ConvoHopClient client)
+bool isFor(RelayClient client)
 ```
 
 Whether this notification is for `client`'s user and project.
 
-Inherited from `ConvoHopNotification`.
+Inherited from `RelayNotification`.
 
 #### `RingNotification.toJson` method
 
@@ -1300,7 +1300,7 @@ Map<String, Object?> toJson()
 
 The `convohop` object, for handing the notification to native code.
 
-Inherited from `ConvoHopNotification`.
+Inherited from `RelayNotification`.
 
 ### `RingUpdate` class
 
@@ -1396,13 +1396,13 @@ must exist, and second 60 isn't accepted.
 ### `parseNotificationPayload` function
 
 ```dart
-ConvoHopNotification? parseNotificationPayload(Map<Object?, Object?> payload)
+RelayNotification? parseNotificationPayload(Map<Object?, Object?> payload)
 ```
 
 Parses a push payload: an APNs `userInfo` (`{aps, convohop: {...}}`), FCM
 data (`{convohop: "<JSON>"}`) or a Web Push payload.
 
-Returns null when the payload isn't ConvoHop's, and throws a
+Returns null when the payload isn't Relay's, and throws a
 `FormatException` naming the first invalid field when it breaks the push
 payload contract. Fields it doesn't know are ignored, as the contract
 requires of consumers.

@@ -1,7 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:convohop/convohop.dart';
+import 'package:instantrelay/instantrelay.dart';
 import 'package:fake_async/fake_async.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -32,7 +32,7 @@ Map<String, Object?> _cancellation(String reason) => <String, Object?>{
   'reason': reason,
 };
 
-ConvoHopClient _recordingClient(List<Map<String, Object?>> bodies, List<String?> authorizations) => clientWith(
+RelayClient _recordingClient(List<Map<String, Object?>> bodies, List<String?> authorizations) => clientWith(
   mockGraphQL((request, body) {
     authorizations.add(request.headers['authorization']);
     final variables = body['variables']! as Map<String, Object?>;
@@ -168,8 +168,8 @@ void main() {
   });
 
   group('handleNotification', () {
-    test('returns null for payloads that are not ConvoHop\'s', () {
-      final notifications = ConvoHopNotifications(clock: fixedClock);
+    test('returns null for payloads that are not Relay\'s', () {
+      final notifications = RelayNotifications(clock: fixedClock);
       expect(
         notifications.handleNotification(<Object?, Object?>{
           'aps': <String, Object?>{'alert': 'Other app'},
@@ -181,7 +181,7 @@ void main() {
     });
 
     test('preview-off messages carry no text and fetch it with the user session', () async {
-      final notifications = ConvoHopNotifications(clock: fixedClock);
+      final notifications = RelayNotifications(clock: fixedClock);
       final handled = notifications.handleNotification(_convohop(notification()))!;
       expect(handled.duplicate, isFalse);
       expect(handled.ringing, isFalse);
@@ -210,7 +210,7 @@ void main() {
     });
 
     test('preview-on messages carry their text', () {
-      final notifications = ConvoHopNotifications(clock: fixedClock);
+      final notifications = RelayNotifications(clock: fixedClock);
       final handled = notifications.handleNotification(<Object?, Object?>{
         'convohop': jsonEncode(notification(preview: true)),
       })!;
@@ -236,7 +236,7 @@ void main() {
     });
 
     test('a cancellation that arrives first keeps its call from ringing', () {
-      final notifications = ConvoHopNotifications(clock: fixedClock);
+      final notifications = RelayNotifications(clock: fixedClock);
       final updates = <RingUpdate>[];
       notifications.rings.listen(updates.add);
       final cancelled = notifications.handleNotification(_convohop(_cancellation('answered')))!;
@@ -252,7 +252,7 @@ void main() {
     });
 
     test('a ring stops when cancelled and a second copy of it does not ring again', () {
-      final notifications = ConvoHopNotifications(clock: fixedClock);
+      final notifications = RelayNotifications(clock: fixedClock);
       final updates = <RingUpdate>[];
       notifications.rings.listen(updates.add);
       final call = notifications.handleNotification(_convohop(notification(type: 'notification.call')))!;
@@ -281,7 +281,7 @@ void main() {
     test('a ring expires at its expiresAt', () {
       fakeAsync((async) {
         final start = fixedClock();
-        final notifications = ConvoHopNotifications(clock: () => start + async.elapsed.inMilliseconds);
+        final notifications = RelayNotifications(clock: () => start + async.elapsed.inMilliseconds);
         final updates = <RingUpdate>[];
         notifications.rings.listen(updates.add);
         final call = notifications.handleNotification(_convohop(notification(type: 'notification.call')))!;
@@ -298,7 +298,7 @@ void main() {
     });
 
     test('an expired call never rings', () {
-      final notifications = ConvoHopNotifications(
+      final notifications = RelayNotifications(
         clock: () => DateTime.utc(2026, 10, 10, 12, 5).millisecondsSinceEpoch,
       );
       final call = notifications.handleNotification(_convohop(notification(type: 'notification.call')))!;
@@ -310,7 +310,7 @@ void main() {
     test('after close, still parses and deduplicates payloads without ringing or reporting', () {
       fakeAsync((async) {
         final start = fixedClock();
-        final notifications = ConvoHopNotifications(clock: () => start + async.elapsed.inMilliseconds);
+        final notifications = RelayNotifications(clock: () => start + async.elapsed.inMilliseconds);
         final updates = <RingUpdate>[];
         notifications.rings.listen(updates.add);
         notifications.close();
@@ -327,7 +327,7 @@ void main() {
     });
 
     test('deduplicates events, tracks rings and applies only live-ended events', () async {
-      final notifications = ConvoHopNotifications(clock: fixedClock);
+      final notifications = RelayNotifications(clock: fixedClock);
       final updates = <RingUpdate>[];
       final subscription = notifications.rings.listen(updates.add);
       final call = parseNotificationPayload(_convohop(notification(type: 'notification.call')))!;

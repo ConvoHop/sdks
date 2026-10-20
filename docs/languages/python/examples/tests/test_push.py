@@ -9,8 +9,8 @@ from typing import Any
 import http_ece
 import pytest
 import requests
-from convohop import push, webhooks
-from convohop.webhooks import WebhookNotificationEvent
+from instantrelay import push, webhooks
+from instantrelay.webhooks import WebhookNotificationEvent
 from cryptography.hazmat.primitives import serialization
 from cryptography.hazmat.primitives.asymmetric import ec
 from firebase_admin import messaging

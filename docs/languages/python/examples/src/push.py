@@ -6,8 +6,8 @@ from dataclasses import dataclass
 from datetime import datetime
 from typing import Protocol, TypedDict, Unpack
 
-from convohop import push
-from convohop.webhooks import WebhookNotificationEvent
+from instantrelay import push
+from instantrelay.webhooks import WebhookNotificationEvent
 
 
 class WebSubscriptionKeys(TypedDict):

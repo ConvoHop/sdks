@@ -1,6 +1,6 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <!-- @convohop/react-native's push SDK declares the notification and call permissions, and LiveKit's SDK the
+    <!-- @instantrelay/react-native's push SDK declares the notification and call permissions, and LiveKit's SDK the
          camera, microphone and network ones. -->
     <uses-permission android:name="android.permission.INTERNET" />
 
@@ -25,9 +25,9 @@
             <category android:name="android.intent.category.LAUNCHER" />
         </intent-filter>
       </activity>
-      <!-- Hands ConvoHop's pushes and FCM registrations to the push SDK. -->
+      <!-- Hands Relay's pushes and FCM registrations to the push SDK. -->
       <service
-        android:name="com.convohop.android.push.ConvoHopMessagingService"
+        android:name="dev.instantrelay.android.push.RelayMessagingService"
         android:exported="false">
         <intent-filter>
             <action android:name="com.google.firebase.MESSAGING_EVENT" />

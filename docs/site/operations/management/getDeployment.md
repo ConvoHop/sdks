@@ -88,7 +88,7 @@ query ManagementGetDeployment($context: RequestContextInput!, $input: GetDeploym
 | Language | Members |
 | --- | --- |
 | [TypeScript](../../typescript/reference/operations.md) | Not wrapped by a method |
-| [Python](../../python/reference/operations.md) | [`ConvoHopManagement.get_deployment`](../../python/reference/convohop.md#convohopmanagementget_deployment-method), [`AsyncConvoHopManagement.get_deployment`](../../python/reference/convohop.md#asyncconvohopmanagementget_deployment-method) |
+| [Python](../../python/reference/operations.md) | [`RelayManagement.get_deployment`](../../python/reference/instantrelay.md#relaymanagementget_deployment-method), [`AsyncRelayManagement.get_deployment`](../../python/reference/instantrelay.md#asyncrelaymanagementget_deployment-method) |
 | [.NET](../../dotnet/reference/operations.md) | [`ManagementApi.GetDeploymentAsync`](../../dotnet/reference/api.md#managementapigetdeploymentasync-method) |
 | [Java and Kotlin](../../jvm/reference/operations.md) | [`ManagementApi.getDeployment`](../../jvm/reference/server.md#managementapigetdeployment-method), [`ManagementSuspendApi.getDeployment`](../../jvm/reference/server-kotlin.md#managementsuspendapigetdeployment-method) |
-| [Go](../../go/reference/operations.md) | [`ManagementClient.GetDeployment`](../../go/reference/convohop.md#managementclientgetdeployment-method) |
+| [Go](../../go/reference/operations.md) | [`ManagementClient.GetDeployment`](../../go/reference/relay.md#managementclientgetdeployment-method) |

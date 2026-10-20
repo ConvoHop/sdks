@@ -15,9 +15,9 @@ from typing import Any
 import httpx
 import pytest
 
-from convohop import AsyncConvoHop, AsyncConvoHopManagement, RecoveryState
-from convohop import _engine as engine
-from convohop._engine import BODY_CAP
+from instantrelay import AsyncRelay, AsyncRelayManagement, RecoveryState
+from instantrelay import _engine as engine
+from instantrelay._engine import BODY_CAP
 
 from .graphql import (
     ACCESS_TOKEN,
@@ -61,7 +61,7 @@ STORAGE = "Recovery storage did not confirm durability; retain the original requ
 CONFLICT = "Preserve the original request and payload"
 UNLOADED = "Await initialize_recovery() before inspecting asynchronous recovery state"
 ORIGINAL = {"conversationId": CONVERSATION, "text": "Original", "props": {}}
-CLIENTS = [AsyncConvoHop, AsyncConvoHopManagement]
+CLIENTS = [AsyncRelay, AsyncRelayManagement]
 KINDS = ["project", "management"]
 
 
@@ -137,32 +137,32 @@ class Reported:
         self._loop.set_exception_handler(self._previous)
 
 
-def options(client_type: type[AsyncConvoHop | AsyncConvoHopManagement], **overrides: Any) -> dict[str, Any]:
+def options(client_type: type[AsyncRelay | AsyncRelayManagement], **overrides: Any) -> dict[str, Any]:
     """Valid constructor options for ``client_type`` with ``overrides`` applied."""
-    if client_type is AsyncConvoHop:
+    if client_type is AsyncRelay:
         return {"base_url": BASE_URL, "backend_key": BACKEND_KEY, "project_id": PROJECT, "incarnation": INCARNATION} | (
             overrides
         )
     return {"base_url": BASE_URL, "access_token": ACCESS_TOKEN, "actor_id": ACTOR} | overrides
 
 
-def management(authority: Authority, storage: AsyncStorage, **settings: Any) -> AsyncConvoHopManagement:
+def management(authority: Authority, storage: AsyncStorage, **settings: Any) -> AsyncRelayManagement:
     """A management client for :data:`ACTOR` that keeps its records in ``storage``."""
     return authority.async_management(actor_id=ACTOR, async_recovery_storage=storage, **settings)
 
 
-def project(authority: Authority, storage: AsyncStorage, **settings: Any) -> AsyncConvoHop:
+def project(authority: Authority, storage: AsyncStorage, **settings: Any) -> AsyncRelay:
     """A client for :data:`PROJECT` under :data:`INCARNATION` that keeps its records in ``storage``."""
     return authority.async_project(
         project_id=PROJECT, incarnation=INCARNATION, async_recovery_storage=storage, **settings
     )
 
 
-async def create_organization(client: AsyncConvoHopManagement, request_id: str, name: str = "Original") -> object:
+async def create_organization(client: AsyncRelayManagement, request_id: str, name: str = "Original") -> object:
     return await client.create_organization(name=name, terms_ref="fixture", request_id=request_id)
 
 
-async def create_deployment(client: AsyncConvoHopManagement, request_id: str) -> object:
+async def create_deployment(client: AsyncRelayManagement, request_id: str) -> object:
     return await client.create_deployment(
         org_id=ORG,
         offering="managedShared",
@@ -173,13 +173,13 @@ async def create_deployment(client: AsyncConvoHopManagement, request_id: str) ->
     )
 
 
-MUTATIONS: dict[str, tuple[str, Callable[[AsyncConvoHopManagement, str], Awaitable[object]]]] = {
+MUTATIONS: dict[str, tuple[str, Callable[[AsyncRelayManagement, str], Awaitable[object]]]] = {
     "committed": ("management.createOrganization", create_organization),
     "accepted": ("management.createDeployment", create_deployment),
 }
 
 
-async def send(client: AsyncConvoHop, request_id: str, props: dict[str, Any] | None = None) -> object:
+async def send(client: AsyncRelay, request_id: str, props: dict[str, Any] | None = None) -> object:
     return await client.send_message(
         conversation_id=CONVERSATION, text="Original", props={} if props is None else props, request_id=request_id
     )
@@ -802,7 +802,7 @@ POSITIVE = "timeout must be a positive, finite number of seconds"
     ],
 )
 async def test_async_options_are_checked_at_construction(
-    client_type: type[AsyncConvoHop | AsyncConvoHopManagement],
+    client_type: type[AsyncRelay | AsyncRelayManagement],
     overrides: dict[str, Any],
     error: type[Exception],
     message: str,
@@ -813,7 +813,7 @@ async def test_async_options_are_checked_at_construction(
 
 @pytest.mark.parametrize("client_type", CLIENTS, ids=KINDS)
 async def test_a_client_takes_one_kind_of_recovery_storage(
-    client_type: type[AsyncConvoHop | AsyncConvoHopManagement],
+    client_type: type[AsyncRelay | AsyncRelayManagement],
 ) -> None:
     storage, async_storage = Storage(), AsyncStorage()
     both = options(client_type, recovery_storage=storage, async_recovery_storage=async_storage)
@@ -823,7 +823,7 @@ async def test_a_client_takes_one_kind_of_recovery_storage(
 
 
 @pytest.mark.parametrize("client_type", CLIENTS, ids=KINDS)
-async def test_a_synchronous_http_client_is_refused(client_type: type[AsyncConvoHop | AsyncConvoHopManagement]) -> None:
+async def test_a_synchronous_http_client_is_refused(client_type: type[AsyncRelay | AsyncRelayManagement]) -> None:
     with httpx.Client() as http, pytest.raises(TypeError, match=r"^http_client must be an httpx\.AsyncClient$"):
         client_type(**options(client_type, http_client=http))
 
@@ -851,8 +851,8 @@ async def test_async_clients_keep_credentials_out_of_reprs_pickles_and_problems(
     authority = Authority(refuse)
     client = authority.async_project(project_id=PROJECT, incarnation=INCARNATION)
     operator = authority.async_management(actor_id=ACTOR)
-    assert repr(client) == f"AsyncConvoHop(project_id='{PROJECT}', incarnation='{INCARNATION}')"
-    assert repr(operator) == f"AsyncConvoHopManagement(actor_id='{ACTOR}')"
+    assert repr(client) == f"AsyncRelay(project_id='{PROJECT}', incarnation='{INCARNATION}')"
+    assert repr(operator) == f"AsyncRelayManagement(actor_id='{ACTOR}')"
     for value in (client, operator):
         with pytest.raises(TypeError) as pickled:
             pickle.dumps(value)

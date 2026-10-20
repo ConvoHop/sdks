@@ -6,8 +6,8 @@ using System.Linq;
 using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
-using ConvoHop;
-using ConvoHop.Models;
+using Relay;
+using Relay.Models;
 #endregion usings
 
 namespace Examples;
@@ -104,7 +104,7 @@ public static class ServerExamples
         {
             return await SendAsAsync(server, conversationId, authorId, text, requestId, cancellationToken);
         }
-        catch (ConvoHopException exception) when (exception.Outcome == "unknown")
+        catch (RelayException exception) when (exception.Outcome == "unknown")
         {
             // Resolves the request first, and resends the original only if the authority never saw it.
             RequestResolution resolution = await server.Requests.RetryAsync(requestId, cancellationToken);

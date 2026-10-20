@@ -41,7 +41,7 @@ export interface CliOperation {
   /** The input type, a key of cliTypes; absent when the operation takes no input. */
   readonly input?: string;
 }
-/** Operations `convohop call` never runs, because their results are credentials or they record a person's consent. */
+/** Operations `relay call` never runs, because their results are credentials or they record a person's consent. */
 export const withheldOperations: Readonly<Record<string, string>> = {
   "communication.issueSession": "returns a user session token",
   "communication.renewSession": "returns a user session token",

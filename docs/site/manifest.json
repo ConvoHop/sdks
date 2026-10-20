@@ -1,12 +1,12 @@
 {
   "$schema": "../../spec/docs/manifest.schema.json",
-  "title": "ConvoHop SDK documentation",
-  "description": "Reference documentation, quickstarts and tested examples for the ConvoHop SDKs.",
+  "title": "Relay SDK documentation",
+  "description": "Reference documentation, quickstarts and tested examples for the Relay SDKs.",
   "topics": [
     {
       "id": "server",
       "title": "Server",
-      "summary": "Call ConvoHop from your backend with a backend key: principals, sessions, conversations and messages."
+      "summary": "Call Relay from your backend with a backend key: principals, sessions, conversations and messages."
     },
     {
       "id": "client",
@@ -37,7 +37,7 @@
       "llmsFull": "typescript/llms-full.txt",
       "packages": [
         {
-          "name": "@convohop/server",
+          "name": "@instantrelay/server",
           "slug": "server",
           "layer": "server",
           "summary": "Server SDK for trusted Node.js runtimes: backend-key data-plane calls, management, webhook verification and push requests.",
@@ -47,7 +47,7 @@
           "data": "typescript/reference/server.json"
         },
         {
-          "name": "@convohop/client",
+          "name": "@instantrelay/client",
           "slug": "client",
           "layer": "client",
           "summary": "Client SDK for apps on end-user devices: one signed-in user's conversations, realtime events and calls.",
@@ -57,7 +57,7 @@
           "data": "typescript/reference/client.json"
         },
         {
-          "name": "@convohop/client/push",
+          "name": "@instantrelay/client/push",
           "slug": "client-push",
           "layer": "client",
           "summary": "Web Push for browsers and service workers: subscribe a browser, then show and open the notifications your backend sends. It ships with the client SDK.",
@@ -67,7 +67,7 @@
           "data": "typescript/reference/client-push.json"
         },
         {
-          "name": "@convohop/react",
+          "name": "@instantrelay/react",
           "slug": "react",
           "layer": "client",
           "summary": "React hooks over the client SDK: conversations with offline-safe sends, typing, session renewal, calls and browser media.",
@@ -96,42 +96,42 @@
       "llmsFull": "python/llms-full.txt",
       "packages": [
         {
-          "name": "convohop",
-          "slug": "convohop",
+          "name": "instantrelay",
+          "slug": "instantrelay",
           "layer": "server",
           "summary": "Server SDK for trusted Python backends: sync and async clients for backend-key data-plane calls and management, with typed problems and recovery storage.",
           "runtime": "Python 3.11 or later",
-          "source": "python/src/convohop",
-          "reference": "python/reference/convohop.md",
-          "data": "python/reference/convohop.json"
+          "source": "python/src/instantrelay",
+          "reference": "python/reference/instantrelay.md",
+          "data": "python/reference/instantrelay.json"
         },
         {
-          "name": "convohop.webhooks",
+          "name": "instantrelay.webhooks",
           "slug": "webhooks",
           "layer": "server",
-          "summary": "Verifies Standard Webhooks signatures and parses ConvoHop webhook deliveries into typed events.",
+          "summary": "Verifies Standard Webhooks signatures and parses Relay webhook deliveries into typed events.",
           "runtime": "Python 3.11 or later",
-          "source": "python/src/convohop",
+          "source": "python/src/instantrelay",
           "reference": "python/reference/webhooks.md",
           "data": "python/reference/webhooks.json"
         },
         {
-          "name": "convohop.push",
+          "name": "instantrelay.push",
           "slug": "push",
           "layer": "server",
-          "summary": "Builds APNs, FCM and Web Push requests from ConvoHop push notification events.",
+          "summary": "Builds APNs, FCM and Web Push requests from Relay push notification events.",
           "runtime": "Python 3.11 or later",
-          "source": "python/src/convohop",
+          "source": "python/src/instantrelay",
           "reference": "python/reference/push.md",
           "data": "python/reference/push.json"
         },
         {
-          "name": "convohop.types",
+          "name": "instantrelay.types",
           "slug": "types",
           "layer": "server",
-          "summary": "Generated request and response models of the ConvoHop GraphQL API, as frozen dataclasses.",
+          "summary": "Generated request and response models of the Relay GraphQL API, as frozen dataclasses.",
           "runtime": "Python 3.11 or later",
-          "source": "python/src/convohop",
+          "source": "python/src/instantrelay",
           "reference": "python/reference/types.md",
           "data": "python/reference/types.json"
         }
@@ -153,32 +153,32 @@
       "llmsFull": "dotnet/llms-full.txt",
       "packages": [
         {
-          "name": "ConvoHop",
-          "slug": "convohop",
+          "name": "Relay",
+          "slug": "relay",
           "layer": "server",
           "summary": "Server SDK for trusted .NET backends: project and management clients for backend-key calls, typed errors, recovery storage, webhook verification and push payload builders.",
           "runtime": ".NET 8 or later. The netstandard2.0 build also targets .NET Framework 4.7.2 or later, which isn't tested yet.",
-          "source": "dotnet/src/ConvoHop",
-          "reference": "dotnet/reference/convohop.md",
-          "data": "dotnet/reference/convohop.json"
+          "source": "dotnet/src/Relay",
+          "reference": "dotnet/reference/relay.md",
+          "data": "dotnet/reference/relay.json"
         },
         {
-          "name": "ConvoHop.Api",
+          "name": "Relay.Api",
           "slug": "api",
           "layer": "server",
           "summary": "Generated APIs with a method for every communication and management operation a backend can send, and async page streams for paginated ones.",
           "runtime": ".NET 8 or later. The netstandard2.0 build also targets .NET Framework 4.7.2 or later, which isn't tested yet.",
-          "source": "dotnet/src/ConvoHop",
+          "source": "dotnet/src/Relay",
           "reference": "dotnet/reference/api.md",
           "data": "dotnet/reference/api.json"
         },
         {
-          "name": "ConvoHop.Models",
+          "name": "Relay.Models",
           "slug": "models",
           "layer": "server",
-          "summary": "Generated input and result models of the ConvoHop GraphQL API.",
+          "summary": "Generated input and result models of the Relay GraphQL API.",
           "runtime": ".NET 8 or later. The netstandard2.0 build also targets .NET Framework 4.7.2 or later, which isn't tested yet.",
-          "source": "dotnet/src/ConvoHop",
+          "source": "dotnet/src/Relay",
           "reference": "dotnet/reference/models.md",
           "data": "dotnet/reference/models.json"
         }
@@ -200,22 +200,22 @@
       "llmsFull": "jvm/llms-full.txt",
       "packages": [
         {
-          "name": "com.convohop:convohop-server",
+          "name": "dev.instantrelay:relay-server",
           "slug": "server",
           "layer": "server",
           "summary": "Java server SDK for trusted JVM backends: backend-key data-plane calls, management, webhook verification and push requests.",
           "runtime": "Java 11 or later",
-          "source": "jvm/convohop-server",
+          "source": "jvm/relay-server",
           "reference": "jvm/reference/server.md",
           "data": "jvm/reference/server.json"
         },
         {
-          "name": "com.convohop:convohop-server-kotlin",
+          "name": "dev.instantrelay:relay-server-kotlin",
           "slug": "server-kotlin",
           "layer": "server",
           "summary": "Kotlin coroutine extensions for the Java server SDK: suspending APIs, page flows and interruptible blocking calls.",
           "runtime": "Kotlin 2.2 or later, on Java 11 or later",
-          "source": "jvm/convohop-server-kotlin",
+          "source": "jvm/relay-server-kotlin",
           "reference": "jvm/reference/server-kotlin.md",
           "data": "jvm/reference/server-kotlin.json"
         }
@@ -238,19 +238,19 @@
       "packages": [
         {
           "name": "github.com/ConvoHop/sdks/go",
-          "slug": "convohop",
+          "slug": "relay",
           "layer": "server",
           "summary": "Server SDK for trusted Go backends: backend-key data-plane calls and operator management calls, with typed problems, request retries and recovery storage.",
           "runtime": "Go 1.26 or later",
           "source": "go",
-          "reference": "go/reference/convohop.md",
-          "data": "go/reference/convohop.json"
+          "reference": "go/reference/relay.md",
+          "data": "go/reference/relay.json"
         },
         {
           "name": "github.com/ConvoHop/sdks/go/webhooks",
           "slug": "webhooks",
           "layer": "server",
-          "summary": "Verifies Standard Webhooks signatures and parses ConvoHop webhook deliveries into typed events.",
+          "summary": "Verifies Standard Webhooks signatures and parses Relay webhook deliveries into typed events.",
           "runtime": "Go 1.26 or later",
           "source": "go/webhooks",
           "reference": "go/reference/webhooks.md",
@@ -260,7 +260,7 @@
           "name": "github.com/ConvoHop/sdks/go/push",
           "slug": "push",
           "layer": "server",
-          "summary": "Builds APNs, FCM and Web Push requests from ConvoHop push notification events.",
+          "summary": "Builds APNs, FCM and Web Push requests from Relay push notification events.",
           "runtime": "Go 1.26 or later",
           "source": "go/push",
           "reference": "go/reference/push.md",
@@ -284,52 +284,52 @@
       "llmsFull": "swift/llms-full.txt",
       "packages": [
         {
-          "name": "ConvoHop",
-          "slug": "convohop",
+          "name": "Relay",
+          "slug": "relay",
           "layer": "client",
-          "summary": "Client SDK for apps on end-user devices: one signed-in user's conversations, realtime events with replay, the local store, the offline outbox, read receipts, typing, recent activity, call control and push routing. It re-exports ConvoHopPush.",
+          "summary": "Client SDK for apps on end-user devices: one signed-in user's conversations, realtime events with replay, the local store, the offline outbox, read receipts, typing, recent activity, call control and push routing. It re-exports RelayPush.",
           "runtime": "iOS 15 or later, or macOS 12 or later, with Swift 6.1 or later (Xcode 16.4 or later).",
-          "source": "swift/Sources/ConvoHop",
-          "reference": "swift/reference/convohop.md",
-          "data": "swift/reference/convohop.json"
+          "source": "swift/Sources/Relay",
+          "reference": "swift/reference/relay.md",
+          "data": "swift/reference/relay.json"
         },
         {
-          "name": "ConvoHopLiveKit",
+          "name": "RelayLiveKit",
           "slug": "livekit",
           "layer": "client",
           "summary": "Call media through the official LiveKit Swift SDK, and CallKit audio session handling on iOS.",
           "runtime": "iOS 15 or later, or macOS 12 or later, with LiveKit's client-sdk-swift 2.17.0 or later.",
-          "source": "swift/Sources/ConvoHopLiveKit",
+          "source": "swift/Sources/RelayLiveKit",
           "reference": "swift/reference/livekit.md",
           "data": "swift/reference/livekit.json"
         },
         {
-          "name": "ConvoHopPush",
+          "name": "RelayPush",
           "slug": "push",
           "layer": "client",
           "summary": "Push payload parsing, deduplication, the ring ledger and the push recipient, with Foundation only so app extensions can use it.",
           "runtime": "iOS 15 or later, or macOS 12 or later, in an app or an app extension.",
-          "source": "swift/Sources/ConvoHopPush",
+          "source": "swift/Sources/RelayPush",
           "reference": "swift/reference/push.md",
           "data": "swift/reference/push.json"
         },
         {
-          "name": "ConvoHopCalls",
+          "name": "RelayCalls",
           "slug": "calls",
           "layer": "client",
           "summary": "Incoming calls from PushKit VoIP pushes to CallKit, and outgoing calls through CallKit.",
           "runtime": "iOS 15 or later. On macOS it has only the call model.",
-          "source": "swift/Sources/ConvoHopCalls",
+          "source": "swift/Sources/RelayCalls",
           "reference": "swift/reference/calls.md",
           "data": "swift/reference/calls.json"
         },
         {
-          "name": "ConvoHopNotificationService",
+          "name": "RelayNotificationService",
           "slug": "notification-service",
           "layer": "client",
           "summary": "A Notification Service Extension helper that fetches message text on the device when a push has none, and hides the text of other users' pushes.",
           "runtime": "iOS 15 or later, or macOS 12 or later, in a Notification Service Extension.",
-          "source": "swift/Sources/ConvoHopNotificationService",
+          "source": "swift/Sources/RelayNotificationService",
           "reference": "swift/reference/notification-service.md",
           "data": "swift/reference/notification-service.json"
         }
@@ -351,27 +351,27 @@
       "llmsFull": "android/llms-full.txt",
       "packages": [
         {
-          "name": "com.convohop:convohop-android",
+          "name": "dev.instantrelay:relay-android",
           "slug": "android",
           "layer": "client",
           "summary": "The SDK an Android app depends on: SQLite and SharedPreferences storage, network monitoring, LiveKit calls and message text for notifications. It brings in the other two packages.",
           "runtime": "Android 7.0 (API 24) or later. Apps compile against API 36. Tested with Kotlin 2.2.21.",
-          "source": "android/convohop",
+          "source": "android/relay",
           "reference": "android/reference/android.md",
           "data": "android/reference/android.json"
         },
         {
-          "name": "com.convohop:convohop-android-core",
+          "name": "dev.instantrelay:relay-android-core",
           "slug": "android-core",
           "layer": "client",
-          "summary": "The platform-free client that convohop-android brings in: sessions and their renewal, conversations, the store, the offline outbox, timelines, recovery, live sessions and the generated protocol types.",
-          "runtime": "Android 7.0 (API 24) or later, through convohop-android. It isn't a supported entry point on its own.",
+          "summary": "The platform-free client that relay-android brings in: sessions and their renewal, conversations, the store, the offline outbox, timelines, recovery, live sessions and the generated protocol types.",
+          "runtime": "Android 7.0 (API 24) or later, through relay-android. It isn't a supported entry point on its own.",
           "source": "android/core",
           "reference": "android/reference/android-core.md",
           "data": "android/reference/android-core.json"
         },
         {
-          "name": "com.convohop:convohop-android-push",
+          "name": "dev.instantrelay:relay-android-push",
           "slug": "android-push",
           "layer": "client",
           "summary": "FCM registration, notifications and Telecom incoming calls, with no networking, LiveKit or coroutines, so a React Native or Flutter wrapper can ship it alone.",
@@ -398,17 +398,17 @@
       "llmsFull": "flutter/llms-full.txt",
       "packages": [
         {
-          "name": "package:convohop/convohop.dart",
-          "slug": "convohop",
+          "name": "package:instantrelay/instantrelay.dart",
+          "slug": "instantrelay",
           "layer": "client",
           "summary": "Client SDK for Flutter apps on end-user devices: one signed-in user's conversations, realtime events, conversation store, offline outbox, read receipts, typing, recent activity and call control.",
           "runtime": "Flutter 3.38 or later (Dart 3.10 or later) on Android 7.0 (API level 24) or later and iOS 13 or later.",
           "source": "flutter",
-          "reference": "flutter/reference/convohop.md",
-          "data": "flutter/reference/convohop.json"
+          "reference": "flutter/reference/instantrelay.md",
+          "data": "flutter/reference/instantrelay.json"
         },
         {
-          "name": "package:convohop/calls.dart",
+          "name": "package:instantrelay/calls.dart",
           "slug": "calls",
           "layer": "client",
           "summary": "Call media through the official livekit_client package.",
@@ -418,7 +418,7 @@
           "data": "flutter/reference/calls.json"
         },
         {
-          "name": "package:convohop/push.dart",
+          "name": "package:instantrelay/push.dart",
           "slug": "push",
           "layer": "client",
           "summary": "Push registration, notification payloads and the system incoming-call UI, through the package's own platform code.",
@@ -428,7 +428,7 @@
           "data": "flutter/reference/push.json"
         },
         {
-          "name": "package:convohop/io.dart",
+          "name": "package:instantrelay/io.dart",
           "slug": "io",
           "layer": "client",
           "summary": "File-backed recovery storage for the conversation store and the outbox.",
@@ -455,7 +455,7 @@
       "llmsFull": "react-native/llms-full.txt",
       "packages": [
         {
-          "name": "@convohop/react-native",
+          "name": "@instantrelay/react-native",
           "slug": "react-native",
           "layer": "client",
           "summary": "React Native support for the client SDK: the platform it needs on Hermes, push registration and notifications through APNs, PushKit and FCM, and calls in CallKit and Android's Telecom.",
@@ -465,30 +465,30 @@
           "data": "react-native/reference/react-native.json"
         },
         {
-          "name": "@convohop/react-native/media",
+          "name": "@instantrelay/react-native/media",
           "slug": "media",
           "layer": "client",
-          "summary": "Call media through LiveKit's React Native SDK: set LiveKit up, then connect each admitted participation to a LiveKit room. It ships with @convohop/react-native.",
-          "runtime": "As @convohop/react-native, with @livekit/react-native 3, @livekit/react-native-webrtc 144.2 or later and livekit-client 2.22.3 or later.",
+          "summary": "Call media through LiveKit's React Native SDK: set LiveKit up, then connect each admitted participation to a LiveKit room. It ships with @instantrelay/react-native.",
+          "runtime": "As @instantrelay/react-native, with @livekit/react-native 3, @livekit/react-native-webrtc 144.2 or later and livekit-client 2.22.3 or later.",
           "source": "packages/react-native",
           "reference": "react-native/reference/media.md",
           "data": "react-native/reference/media.json"
         },
         {
-          "name": "@convohop/client",
+          "name": "@instantrelay/client",
           "slug": "client",
           "layer": "client",
-          "summary": "Client SDK for apps on end-user devices: one signed-in user's conversations, realtime events and calls. In React Native, it runs on the platform from @convohop/react-native.",
-          "runtime": "React Native 0.76 or later, with the platform from @convohop/react-native.",
+          "summary": "Client SDK for apps on end-user devices: one signed-in user's conversations, realtime events and calls. In React Native, it runs on the platform from @instantrelay/react-native.",
+          "runtime": "React Native 0.76 or later, with the platform from @instantrelay/react-native.",
           "source": "packages/client",
           "reference": "react-native/reference/client.md",
           "data": "react-native/reference/client.json"
         },
         {
-          "name": "@convohop/react",
+          "name": "@instantrelay/react",
           "slug": "react",
           "layer": "client",
-          "summary": "React hooks over the client SDK: conversations with offline-safe sends, typing, session renewal and calls. In React Native, connect call media with @convohop/react-native/media: useMediaConnection needs a browser.",
+          "summary": "React hooks over the client SDK: conversations with offline-safe sends, typing, session renewal and calls. In React Native, connect call media with @instantrelay/react-native/media: useMediaConnection needs a browser.",
           "runtime": "React 18 or later, in React Native 0.76 or later.",
           "source": "packages/react",
           "reference": "react-native/reference/react.md",
@@ -508,21 +508,21 @@
     {
       "path": "index.md",
       "kind": "home",
-      "title": "ConvoHop SDK documentation",
-      "description": "Reference documentation, quickstarts and tested examples for the ConvoHop SDKs."
+      "title": "Relay SDK documentation",
+      "description": "Reference documentation, quickstarts and tested examples for the Relay SDKs."
     },
     {
       "path": "typescript/index.md",
       "kind": "language",
       "title": "TypeScript SDKs",
-      "description": "@convohop/server and @convohop/client wrap the ConvoHop API for TypeScript and JavaScript. The server SDK runs in your backend with a secret backend key, and the client SDK runs in your users' apps with a short-lived session for one user. @convohop/react adds React hooks over the client SDK, and @convohop/client/push subscribes browsers to Web Push and shows the notifications.",
+      "description": "@instantrelay/server and @instantrelay/client wrap the Relay API for TypeScript and JavaScript. The server SDK runs in your backend with a secret backend key, and the client SDK runs in your users' apps with a short-lived session for one user. @instantrelay/react adds React hooks over the client SDK, and @instantrelay/client/push subscribes browsers to Web Push and shows the notifications.",
       "language": "typescript"
     },
     {
       "path": "typescript/quickstarts/server.md",
       "kind": "quickstart",
       "title": "TypeScript server quickstart",
-      "description": "Call ConvoHop from your Node.js backend with @convohop/server: connect with a backend key, sign in your users, create a conversation, send and read messages as a member, and recover a send whose response was lost.",
+      "description": "Call Relay from your Node.js backend with @instantrelay/server: connect with a backend key, sign in your users, create a conversation, send and read messages as a member, and recover a send whose response was lost.",
       "language": "typescript",
       "topic": "server"
     },
@@ -530,7 +530,7 @@
       "path": "typescript/quickstarts/client.md",
       "kind": "quickstart",
       "title": "TypeScript client quickstart",
-      "description": "Use ConvoHop in your users' browsers with @convohop/client: connect with the session your backend issued, show a conversation and keep it current, and send messages that survive dropped connections and page reloads. @convohop/react offers the same as React hooks.",
+      "description": "Use Relay in your users' browsers with @instantrelay/client: connect with the session your backend issued, show a conversation and keep it current, and send messages that survive dropped connections and page reloads. @instantrelay/react offers the same as React hooks.",
       "language": "typescript",
       "topic": "client"
     },
@@ -538,7 +538,7 @@
       "path": "typescript/quickstarts/webhooks.md",
       "kind": "quickstart",
       "title": "TypeScript webhooks quickstart",
-      "description": "Receive ConvoHop events in your backend with @convohop/server: verify each signed delivery, acknowledge it quickly, and handle its event in a queue worker.",
+      "description": "Receive Relay events in your backend with @instantrelay/server: verify each signed delivery, acknowledge it quickly, and handle its event in a queue worker.",
       "language": "typescript",
       "topic": "webhooks"
     },
@@ -546,7 +546,7 @@
       "path": "typescript/quickstarts/push.md",
       "kind": "quickstart",
       "title": "TypeScript push notifications quickstart",
-      "description": "Send push notifications for ConvoHop messages and calls: @convohop/server turns notification events into APNs, FCM and Web Push requests, and you send them with your own push credentials and libraries. In browsers, @convohop/client/push subscribes to Web Push and shows the notifications.",
+      "description": "Send push notifications for Relay messages and calls: @instantrelay/server turns notification events into APNs, FCM and Web Push requests, and you send them with your own push credentials and libraries. In browsers, @instantrelay/client/push subscribes to Web Push and shows the notifications.",
       "language": "typescript",
       "topic": "push"
     },
@@ -554,7 +554,7 @@
       "path": "typescript/quickstarts/calling.md",
       "kind": "quickstart",
       "title": "TypeScript calling quickstart",
-      "description": "Add voice and video calls to a conversation with @convohop/client: start a call and ring other members, join the current call, and leave or end it.",
+      "description": "Add voice and video calls to a conversation with @instantrelay/client: start a call and ring other members, join the current call, and leave or end it.",
       "language": "typescript",
       "topic": "calling"
     },
@@ -568,34 +568,34 @@
     {
       "path": "typescript/reference/server.md",
       "kind": "reference",
-      "title": "@convohop/server",
+      "title": "@instantrelay/server",
       "description": "Server SDK for trusted Node.js runtimes: backend-key data-plane calls, management, webhook verification and push requests.",
       "language": "typescript",
-      "package": "@convohop/server"
+      "package": "@instantrelay/server"
     },
     {
       "path": "typescript/reference/client.md",
       "kind": "reference",
-      "title": "@convohop/client",
+      "title": "@instantrelay/client",
       "description": "Client SDK for apps on end-user devices: one signed-in user's conversations, realtime events and calls.",
       "language": "typescript",
-      "package": "@convohop/client"
+      "package": "@instantrelay/client"
     },
     {
       "path": "typescript/reference/client-push.md",
       "kind": "reference",
-      "title": "@convohop/client/push",
+      "title": "@instantrelay/client/push",
       "description": "Web Push for browsers and service workers: subscribe a browser, then show and open the notifications your backend sends. It ships with the client SDK.",
       "language": "typescript",
-      "package": "@convohop/client/push"
+      "package": "@instantrelay/client/push"
     },
     {
       "path": "typescript/reference/react.md",
       "kind": "reference",
-      "title": "@convohop/react",
+      "title": "@instantrelay/react",
       "description": "React hooks over the client SDK: conversations with offline-safe sends, typing, session renewal, calls and browser media.",
       "language": "typescript",
-      "package": "@convohop/react"
+      "package": "@instantrelay/react"
     },
     {
       "path": "typescript/reference/operations.md",
@@ -608,14 +608,14 @@
       "path": "python/index.md",
       "kind": "language",
       "title": "Python SDK",
-      "description": "convohop wraps the ConvoHop API for Python backends, with synchronous and asyncio clients. It runs on your servers with a secret backend key, verifies the webhooks that ConvoHop sends, and builds push requests from notification events.",
+      "description": "instantrelay wraps the Relay API for Python backends, with synchronous and asyncio clients. It runs on your servers with a secret backend key, verifies the webhooks that Relay sends, and builds push requests from notification events.",
       "language": "python"
     },
     {
       "path": "python/quickstarts/server.md",
       "kind": "quickstart",
       "title": "Python server quickstart",
-      "description": "Call ConvoHop from your Python backend with convohop: connect with a backend key, sign in your users, create a conversation, send and read messages as a member, recover a send whose response was lost, and do the same from asyncio code.",
+      "description": "Call Relay from your Python backend with instantrelay: connect with a backend key, sign in your users, create a conversation, send and read messages as a member, recover a send whose response was lost, and do the same from asyncio code.",
       "language": "python",
       "topic": "server"
     },
@@ -623,7 +623,7 @@
       "path": "python/quickstarts/webhooks.md",
       "kind": "quickstart",
       "title": "Python webhooks quickstart",
-      "description": "Receive ConvoHop events in your Python backend with convohop.webhooks: verify each signed delivery, acknowledge it quickly, and handle its event in a queue worker.",
+      "description": "Receive Relay events in your Python backend with instantrelay.webhooks: verify each signed delivery, acknowledge it quickly, and handle its event in a queue worker.",
       "language": "python",
       "topic": "webhooks"
     },
@@ -631,7 +631,7 @@
       "path": "python/quickstarts/push.md",
       "kind": "quickstart",
       "title": "Python push notifications quickstart",
-      "description": "Send push notifications for ConvoHop messages and calls: convohop.push turns notification events into APNs, FCM and Web Push requests, and you send them with your own push credentials and libraries.",
+      "description": "Send push notifications for Relay messages and calls: instantrelay.push turns notification events into APNs, FCM and Web Push requests, and you send them with your own push credentials and libraries.",
       "language": "python",
       "topic": "push"
     },
@@ -643,36 +643,36 @@
       "language": "python"
     },
     {
-      "path": "python/reference/convohop.md",
+      "path": "python/reference/instantrelay.md",
       "kind": "reference",
-      "title": "convohop",
+      "title": "instantrelay",
       "description": "Server SDK for trusted Python backends: sync and async clients for backend-key data-plane calls and management, with typed problems and recovery storage.",
       "language": "python",
-      "package": "convohop"
+      "package": "instantrelay"
     },
     {
       "path": "python/reference/webhooks.md",
       "kind": "reference",
-      "title": "convohop.webhooks",
-      "description": "Verifies Standard Webhooks signatures and parses ConvoHop webhook deliveries into typed events.",
+      "title": "instantrelay.webhooks",
+      "description": "Verifies Standard Webhooks signatures and parses Relay webhook deliveries into typed events.",
       "language": "python",
-      "package": "convohop.webhooks"
+      "package": "instantrelay.webhooks"
     },
     {
       "path": "python/reference/push.md",
       "kind": "reference",
-      "title": "convohop.push",
-      "description": "Builds APNs, FCM and Web Push requests from ConvoHop push notification events.",
+      "title": "instantrelay.push",
+      "description": "Builds APNs, FCM and Web Push requests from Relay push notification events.",
       "language": "python",
-      "package": "convohop.push"
+      "package": "instantrelay.push"
     },
     {
       "path": "python/reference/types.md",
       "kind": "reference",
-      "title": "convohop.types",
-      "description": "Generated request and response models of the ConvoHop GraphQL API, as frozen dataclasses.",
+      "title": "instantrelay.types",
+      "description": "Generated request and response models of the Relay GraphQL API, as frozen dataclasses.",
       "language": "python",
-      "package": "convohop.types"
+      "package": "instantrelay.types"
     },
     {
       "path": "python/reference/operations.md",
@@ -685,14 +685,14 @@
       "path": "dotnet/index.md",
       "kind": "language",
       "title": ".NET SDK",
-      "description": "The ConvoHop package wraps the ConvoHop API for .NET backends. It runs on your servers with a secret backend key, verifies the webhooks that ConvoHop sends, and builds push requests from notification events.",
+      "description": "The Relay package wraps the Relay API for .NET backends. It runs on your servers with a secret backend key, verifies the webhooks that Relay sends, and builds push requests from notification events.",
       "language": "dotnet"
     },
     {
       "path": "dotnet/quickstarts/server.md",
       "kind": "quickstart",
       "title": ".NET server quickstart",
-      "description": "Call ConvoHop from your .NET backend with the ConvoHop package: connect with a backend key, sign in your users, create a conversation, send and read messages as a member, and recover a send whose response was lost.",
+      "description": "Call Relay from your .NET backend with the Relay package: connect with a backend key, sign in your users, create a conversation, send and read messages as a member, and recover a send whose response was lost.",
       "language": "dotnet",
       "topic": "server"
     },
@@ -700,7 +700,7 @@
       "path": "dotnet/quickstarts/webhooks.md",
       "kind": "quickstart",
       "title": ".NET webhooks quickstart",
-      "description": "Receive ConvoHop events in your .NET backend: verify each signed delivery with Webhooks.Verify, acknowledge it quickly, and handle its event in a queue worker.",
+      "description": "Receive Relay events in your .NET backend: verify each signed delivery with Webhooks.Verify, acknowledge it quickly, and handle its event in a queue worker.",
       "language": "dotnet",
       "topic": "webhooks"
     },
@@ -708,7 +708,7 @@
       "path": "dotnet/quickstarts/push.md",
       "kind": "quickstart",
       "title": ".NET push notifications quickstart",
-      "description": "Send push notifications for ConvoHop messages and calls: PushPayloads turns notification events into APNs, FCM and Web Push requests, and you send them with your own push credentials and libraries.",
+      "description": "Send push notifications for Relay messages and calls: PushPayloads turns notification events into APNs, FCM and Web Push requests, and you send them with your own push credentials and libraries.",
       "language": "dotnet",
       "topic": "push"
     },
@@ -720,28 +720,28 @@
       "language": "dotnet"
     },
     {
-      "path": "dotnet/reference/convohop.md",
+      "path": "dotnet/reference/relay.md",
       "kind": "reference",
-      "title": "ConvoHop",
+      "title": "Relay",
       "description": "Server SDK for trusted .NET backends: project and management clients for backend-key calls, typed errors, recovery storage, webhook verification and push payload builders.",
       "language": "dotnet",
-      "package": "ConvoHop"
+      "package": "Relay"
     },
     {
       "path": "dotnet/reference/api.md",
       "kind": "reference",
-      "title": "ConvoHop.Api",
+      "title": "Relay.Api",
       "description": "Generated APIs with a method for every communication and management operation a backend can send, and async page streams for paginated ones.",
       "language": "dotnet",
-      "package": "ConvoHop.Api"
+      "package": "Relay.Api"
     },
     {
       "path": "dotnet/reference/models.md",
       "kind": "reference",
-      "title": "ConvoHop.Models",
-      "description": "Generated input and result models of the ConvoHop GraphQL API.",
+      "title": "Relay.Models",
+      "description": "Generated input and result models of the Relay GraphQL API.",
       "language": "dotnet",
-      "package": "ConvoHop.Models"
+      "package": "Relay.Models"
     },
     {
       "path": "dotnet/reference/operations.md",
@@ -754,14 +754,14 @@
       "path": "jvm/index.md",
       "kind": "language",
       "title": "Java and Kotlin SDKs",
-      "description": "com.convohop:convohop-server wraps the ConvoHop API for Java backends, and com.convohop:convohop-server-kotlin adds coroutine extensions to it. Both run only in your backend, with a secret backend key. Never put them, or the key, in an Android app or any other client.",
+      "description": "dev.instantrelay:relay-server wraps the Relay API for Java backends, and dev.instantrelay:relay-server-kotlin adds coroutine extensions to it. Both run only in your backend, with a secret backend key. Never put them, or the key, in an Android app or any other client.",
       "language": "jvm"
     },
     {
       "path": "jvm/quickstarts/server.md",
       "kind": "quickstart",
       "title": "Java and Kotlin server quickstart",
-      "description": "Call ConvoHop from your Java or Kotlin backend with convohop-server: connect with a backend key, sign in your users, create a conversation, send and read messages as a member, recover a send whose response was lost, and make the calls from coroutines.",
+      "description": "Call Relay from your Java or Kotlin backend with relay-server: connect with a backend key, sign in your users, create a conversation, send and read messages as a member, recover a send whose response was lost, and make the calls from coroutines.",
       "language": "jvm",
       "topic": "server"
     },
@@ -769,7 +769,7 @@
       "path": "jvm/quickstarts/webhooks.md",
       "kind": "quickstart",
       "title": "Java and Kotlin webhooks quickstart",
-      "description": "Receive ConvoHop events in your Java or Kotlin backend with convohop-server: verify each signed delivery, acknowledge it quickly, and handle its event in a queue worker.",
+      "description": "Receive Relay events in your Java or Kotlin backend with relay-server: verify each signed delivery, acknowledge it quickly, and handle its event in a queue worker.",
       "language": "jvm",
       "topic": "webhooks"
     },
@@ -777,7 +777,7 @@
       "path": "jvm/quickstarts/push.md",
       "kind": "quickstart",
       "title": "Java and Kotlin push notifications quickstart",
-      "description": "Send push notifications for ConvoHop messages and calls: convohop-server turns notification events into APNs, FCM and Web Push requests, and you send them with your own push credentials and libraries.",
+      "description": "Send push notifications for Relay messages and calls: relay-server turns notification events into APNs, FCM and Web Push requests, and you send them with your own push credentials and libraries.",
       "language": "jvm",
       "topic": "push"
     },
@@ -791,18 +791,18 @@
     {
       "path": "jvm/reference/server.md",
       "kind": "reference",
-      "title": "com.convohop:convohop-server",
+      "title": "dev.instantrelay:relay-server",
       "description": "Java server SDK for trusted JVM backends: backend-key data-plane calls, management, webhook verification and push requests.",
       "language": "jvm",
-      "package": "com.convohop:convohop-server"
+      "package": "dev.instantrelay:relay-server"
     },
     {
       "path": "jvm/reference/server-kotlin.md",
       "kind": "reference",
-      "title": "com.convohop:convohop-server-kotlin",
+      "title": "dev.instantrelay:relay-server-kotlin",
       "description": "Kotlin coroutine extensions for the Java server SDK: suspending APIs, page flows and interruptible blocking calls.",
       "language": "jvm",
-      "package": "com.convohop:convohop-server-kotlin"
+      "package": "dev.instantrelay:relay-server-kotlin"
     },
     {
       "path": "jvm/reference/operations.md",
@@ -815,14 +815,14 @@
       "path": "go/index.md",
       "kind": "language",
       "title": "Go SDK",
-      "description": "github.com/ConvoHop/sdks/go wraps the ConvoHop API for Go backends. It runs only in your backend, with a secret backend key, verifies the webhooks that ConvoHop sends, and builds push requests from notification events.",
+      "description": "github.com/ConvoHop/sdks/go wraps the Relay API for Go backends. It runs only in your backend, with a secret backend key, verifies the webhooks that Relay sends, and builds push requests from notification events.",
       "language": "go"
     },
     {
       "path": "go/quickstarts/server.md",
       "kind": "quickstart",
       "title": "Go server quickstart",
-      "description": "Call ConvoHop from your Go backend with github.com/ConvoHop/sdks/go: connect with a backend key, sign in your users, create a conversation, send and read messages as a member, and recover a send whose response was lost.",
+      "description": "Call Relay from your Go backend with github.com/ConvoHop/sdks/go: connect with a backend key, sign in your users, create a conversation, send and read messages as a member, and recover a send whose response was lost.",
       "language": "go",
       "topic": "server"
     },
@@ -830,7 +830,7 @@
       "path": "go/quickstarts/webhooks.md",
       "kind": "quickstart",
       "title": "Go webhooks quickstart",
-      "description": "Receive ConvoHop events in your Go backend with the webhooks package: verify each signed delivery, acknowledge it quickly, and handle its event in a queue worker.",
+      "description": "Receive Relay events in your Go backend with the webhooks package: verify each signed delivery, acknowledge it quickly, and handle its event in a queue worker.",
       "language": "go",
       "topic": "webhooks"
     },
@@ -838,7 +838,7 @@
       "path": "go/quickstarts/push.md",
       "kind": "quickstart",
       "title": "Go push notifications quickstart",
-      "description": "Send push notifications for ConvoHop messages and calls: the push package turns notification events into APNs, FCM and Web Push requests, and you send them with your own push credentials and clients.",
+      "description": "Send push notifications for Relay messages and calls: the push package turns notification events into APNs, FCM and Web Push requests, and you send them with your own push credentials and clients.",
       "language": "go",
       "topic": "push"
     },
@@ -850,7 +850,7 @@
       "language": "go"
     },
     {
-      "path": "go/reference/convohop.md",
+      "path": "go/reference/relay.md",
       "kind": "reference",
       "title": "github.com/ConvoHop/sdks/go",
       "description": "Server SDK for trusted Go backends: backend-key data-plane calls and operator management calls, with typed problems, request retries and recovery storage.",
@@ -861,7 +861,7 @@
       "path": "go/reference/webhooks.md",
       "kind": "reference",
       "title": "github.com/ConvoHop/sdks/go/webhooks",
-      "description": "Verifies Standard Webhooks signatures and parses ConvoHop webhook deliveries into typed events.",
+      "description": "Verifies Standard Webhooks signatures and parses Relay webhook deliveries into typed events.",
       "language": "go",
       "package": "github.com/ConvoHop/sdks/go/webhooks"
     },
@@ -869,7 +869,7 @@
       "path": "go/reference/push.md",
       "kind": "reference",
       "title": "github.com/ConvoHop/sdks/go/push",
-      "description": "Builds APNs, FCM and Web Push requests from ConvoHop push notification events.",
+      "description": "Builds APNs, FCM and Web Push requests from Relay push notification events.",
       "language": "go",
       "package": "github.com/ConvoHop/sdks/go/push"
     },
@@ -884,14 +884,14 @@
       "path": "swift/index.md",
       "kind": "language",
       "title": "Swift SDK",
-      "description": "ConvoHop is the Swift SDK for iOS and macOS apps. It acts as one user, with a short-lived session that your backend issues, and covers chat with a local store, an offline outbox and optimistic sends, typing signals and read receipts, calls through the LiveKit Swift SDK, and APNs push notifications, with incoming calls that ring through PushKit and CallKit on iOS. It never holds a backend key.",
+      "description": "Relay is the Swift SDK for iOS and macOS apps. It acts as one user, with a short-lived session that your backend issues, and covers chat with a local store, an offline outbox and optimistic sends, typing signals and read receipts, calls through the LiveKit Swift SDK, and APNs push notifications, with incoming calls that ring through PushKit and CallKit on iOS. It never holds a backend key.",
       "language": "swift"
     },
     {
       "path": "swift/quickstarts/client.md",
       "kind": "quickstart",
       "title": "Swift client quickstart",
-      "description": "Use ConvoHop in your iOS or macOS app with the ConvoHop Swift package: connect with the session your backend issued and keep it renewed, show a conversation from a local store and keep it current, and send messages optimistically through an outbox that survives dropped connections and restarts.",
+      "description": "Use Relay in your iOS or macOS app with the Relay Swift package: connect with the session your backend issued and keep it renewed, show a conversation from a local store and keep it current, and send messages optimistically through an outbox that survives dropped connections and restarts.",
       "language": "swift",
       "topic": "client"
     },
@@ -899,7 +899,7 @@
       "path": "swift/quickstarts/push.md",
       "kind": "quickstart",
       "title": "Swift push notifications quickstart",
-      "description": "Show ConvoHop's push notifications in your iOS or macOS app with the ConvoHop Swift package: register the device with APNs, open the conversation or call that a notification is about, and show message text from a Notification Service Extension whether or not the project sends message previews.",
+      "description": "Show Relay's push notifications in your iOS or macOS app with the Relay Swift package: register the device with APNs, open the conversation or call that a notification is about, and show message text from a Notification Service Extension whether or not the project sends message previews.",
       "language": "swift",
       "topic": "push"
     },
@@ -907,7 +907,7 @@
       "path": "swift/quickstarts/calling.md",
       "kind": "quickstart",
       "title": "Swift calling quickstart",
-      "description": "Add voice and video calls to a conversation with the ConvoHop Swift package and the official LiveKit Swift SDK: start a call and ring other members, join the current call, answer incoming calls through CallKit, and leave or end a call.",
+      "description": "Add voice and video calls to a conversation with the Relay Swift package and the official LiveKit Swift SDK: start a call and ring other members, join the current call, answer incoming calls through CallKit, and leave or end a call.",
       "language": "swift",
       "topic": "calling"
     },
@@ -919,44 +919,44 @@
       "language": "swift"
     },
     {
-      "path": "swift/reference/convohop.md",
+      "path": "swift/reference/relay.md",
       "kind": "reference",
-      "title": "ConvoHop",
-      "description": "Client SDK for apps on end-user devices: one signed-in user's conversations, realtime events with replay, the local store, the offline outbox, read receipts, typing, recent activity, call control and push routing. It re-exports ConvoHopPush.",
+      "title": "Relay",
+      "description": "Client SDK for apps on end-user devices: one signed-in user's conversations, realtime events with replay, the local store, the offline outbox, read receipts, typing, recent activity, call control and push routing. It re-exports RelayPush.",
       "language": "swift",
-      "package": "ConvoHop"
+      "package": "Relay"
     },
     {
       "path": "swift/reference/livekit.md",
       "kind": "reference",
-      "title": "ConvoHopLiveKit",
+      "title": "RelayLiveKit",
       "description": "Call media through the official LiveKit Swift SDK, and CallKit audio session handling on iOS.",
       "language": "swift",
-      "package": "ConvoHopLiveKit"
+      "package": "RelayLiveKit"
     },
     {
       "path": "swift/reference/push.md",
       "kind": "reference",
-      "title": "ConvoHopPush",
+      "title": "RelayPush",
       "description": "Push payload parsing, deduplication, the ring ledger and the push recipient, with Foundation only so app extensions can use it.",
       "language": "swift",
-      "package": "ConvoHopPush"
+      "package": "RelayPush"
     },
     {
       "path": "swift/reference/calls.md",
       "kind": "reference",
-      "title": "ConvoHopCalls",
+      "title": "RelayCalls",
       "description": "Incoming calls from PushKit VoIP pushes to CallKit, and outgoing calls through CallKit.",
       "language": "swift",
-      "package": "ConvoHopCalls"
+      "package": "RelayCalls"
     },
     {
       "path": "swift/reference/notification-service.md",
       "kind": "reference",
-      "title": "ConvoHopNotificationService",
+      "title": "RelayNotificationService",
       "description": "A Notification Service Extension helper that fetches message text on the device when a push has none, and hides the text of other users' pushes.",
       "language": "swift",
-      "package": "ConvoHopNotificationService"
+      "package": "RelayNotificationService"
     },
     {
       "path": "swift/reference/operations.md",
@@ -969,14 +969,14 @@
       "path": "android/index.md",
       "kind": "language",
       "title": "Android SDK",
-      "description": "com.convohop:convohop-android is the Kotlin SDK for Android apps. It acts as one user, with a short-lived session that your backend issues, and covers chat with a local store, an offline outbox and optimistic sends, typing signals and read receipts, calls through the LiveKit Android SDK, and FCM push notifications that ring incoming calls through Telecom. It never holds a backend key.",
+      "description": "dev.instantrelay:relay-android is the Kotlin SDK for Android apps. It acts as one user, with a short-lived session that your backend issues, and covers chat with a local store, an offline outbox and optimistic sends, typing signals and read receipts, calls through the LiveKit Android SDK, and FCM push notifications that ring incoming calls through Telecom. It never holds a backend key.",
       "language": "android"
     },
     {
       "path": "android/quickstarts/client.md",
       "kind": "quickstart",
       "title": "Android client quickstart",
-      "description": "Use ConvoHop in your Android app with com.convohop:convohop-android: connect with the session your backend issued and keep it renewed, show a conversation from a local store and keep it current, and send messages optimistically through an outbox that survives dropped connections and restarts.",
+      "description": "Use Relay in your Android app with dev.instantrelay:relay-android: connect with the session your backend issued and keep it renewed, show a conversation from a local store and keep it current, and send messages optimistically through an outbox that survives dropped connections and restarts.",
       "language": "android",
       "topic": "client"
     },
@@ -984,7 +984,7 @@
       "path": "android/quickstarts/push.md",
       "kind": "quickstart",
       "title": "Android push notifications quickstart",
-      "description": "Show ConvoHop's push notifications in your Android app with com.convohop:convohop-android: register the device with Firebase Cloud Messaging, show message notifications whether or not the project sends message previews, and ring incoming calls.",
+      "description": "Show Relay's push notifications in your Android app with dev.instantrelay:relay-android: register the device with Firebase Cloud Messaging, show message notifications whether or not the project sends message previews, and ring incoming calls.",
       "language": "android",
       "topic": "push"
     },
@@ -992,7 +992,7 @@
       "path": "android/quickstarts/calling.md",
       "kind": "quickstart",
       "title": "Android calling quickstart",
-      "description": "Add voice and video calls to a conversation with com.convohop:convohop-android: start a call and ring other members, join the current call, answer incoming calls from a push, and leave or end a call.",
+      "description": "Add voice and video calls to a conversation with dev.instantrelay:relay-android: start a call and ring other members, join the current call, answer incoming calls from a push, and leave or end a call.",
       "language": "android",
       "topic": "calling"
     },
@@ -1006,26 +1006,26 @@
     {
       "path": "android/reference/android.md",
       "kind": "reference",
-      "title": "com.convohop:convohop-android",
+      "title": "dev.instantrelay:relay-android",
       "description": "The SDK an Android app depends on: SQLite and SharedPreferences storage, network monitoring, LiveKit calls and message text for notifications. It brings in the other two packages.",
       "language": "android",
-      "package": "com.convohop:convohop-android"
+      "package": "dev.instantrelay:relay-android"
     },
     {
       "path": "android/reference/android-core.md",
       "kind": "reference",
-      "title": "com.convohop:convohop-android-core",
-      "description": "The platform-free client that convohop-android brings in: sessions and their renewal, conversations, the store, the offline outbox, timelines, recovery, live sessions and the generated protocol types.",
+      "title": "dev.instantrelay:relay-android-core",
+      "description": "The platform-free client that relay-android brings in: sessions and their renewal, conversations, the store, the offline outbox, timelines, recovery, live sessions and the generated protocol types.",
       "language": "android",
-      "package": "com.convohop:convohop-android-core"
+      "package": "dev.instantrelay:relay-android-core"
     },
     {
       "path": "android/reference/android-push.md",
       "kind": "reference",
-      "title": "com.convohop:convohop-android-push",
+      "title": "dev.instantrelay:relay-android-push",
       "description": "FCM registration, notifications and Telecom incoming calls, with no networking, LiveKit or coroutines, so a React Native or Flutter wrapper can ship it alone.",
       "language": "android",
-      "package": "com.convohop:convohop-android-push"
+      "package": "dev.instantrelay:relay-android-push"
     },
     {
       "path": "android/reference/operations.md",
@@ -1038,14 +1038,14 @@
       "path": "flutter/index.md",
       "kind": "language",
       "title": "Flutter SDK",
-      "description": "convohop is the ConvoHop client SDK for Flutter apps on Android and iOS. It runs one signed-in user's session in your app: conversations and their realtime events, a local conversation store, an offline outbox with optimistic sends, read receipts, typing, recent activity, calls through the official livekit_client package, push registration and the system incoming-call UI.",
+      "description": "instantrelay is the Relay client SDK for Flutter apps on Android and iOS. It runs one signed-in user's session in your app: conversations and their realtime events, a local conversation store, an offline outbox with optimistic sends, read receipts, typing, recent activity, calls through the official livekit_client package, push registration and the system incoming-call UI.",
       "language": "flutter"
     },
     {
       "path": "flutter/quickstarts/client.md",
       "kind": "quickstart",
       "title": "Flutter client quickstart",
-      "description": "Use ConvoHop in your users' Flutter apps with package:convohop: connect with the session your backend issued, show a conversation and keep it current, and send messages that survive dropped connections and app restarts.",
+      "description": "Use Relay in your users' Flutter apps with package:instantrelay: connect with the session your backend issued, show a conversation and keep it current, and send messages that survive dropped connections and app restarts.",
       "language": "flutter",
       "topic": "client"
     },
@@ -1053,7 +1053,7 @@
       "path": "flutter/quickstarts/push.md",
       "kind": "quickstart",
       "title": "Flutter push notifications quickstart",
-      "description": "Show ConvoHop push notifications in your users' Flutter apps with package:convohop/push.dart: register the device for FCM or APNs, open conversations from notifications, and ring for calls with the system call UI.",
+      "description": "Show Relay push notifications in your users' Flutter apps with package:instantrelay/push.dart: register the device for FCM or APNs, open conversations from notifications, and ring for calls with the system call UI.",
       "language": "flutter",
       "topic": "push"
     },
@@ -1061,7 +1061,7 @@
       "path": "flutter/quickstarts/calling.md",
       "kind": "quickstart",
       "title": "Flutter calling quickstart",
-      "description": "Add voice and video calls to a conversation with package:convohop: start a call and ring other members, join the current call, and leave or end it.",
+      "description": "Add voice and video calls to a conversation with package:instantrelay: start a call and ring other members, join the current call, and leave or end it.",
       "language": "flutter",
       "topic": "calling"
     },
@@ -1073,36 +1073,36 @@
       "language": "flutter"
     },
     {
-      "path": "flutter/reference/convohop.md",
+      "path": "flutter/reference/instantrelay.md",
       "kind": "reference",
-      "title": "package:convohop/convohop.dart",
+      "title": "package:instantrelay/instantrelay.dart",
       "description": "Client SDK for Flutter apps on end-user devices: one signed-in user's conversations, realtime events, conversation store, offline outbox, read receipts, typing, recent activity and call control.",
       "language": "flutter",
-      "package": "package:convohop/convohop.dart"
+      "package": "package:instantrelay/instantrelay.dart"
     },
     {
       "path": "flutter/reference/calls.md",
       "kind": "reference",
-      "title": "package:convohop/calls.dart",
+      "title": "package:instantrelay/calls.dart",
       "description": "Call media through the official livekit_client package.",
       "language": "flutter",
-      "package": "package:convohop/calls.dart"
+      "package": "package:instantrelay/calls.dart"
     },
     {
       "path": "flutter/reference/push.md",
       "kind": "reference",
-      "title": "package:convohop/push.dart",
+      "title": "package:instantrelay/push.dart",
       "description": "Push registration, notification payloads and the system incoming-call UI, through the package's own platform code.",
       "language": "flutter",
-      "package": "package:convohop/push.dart"
+      "package": "package:instantrelay/push.dart"
     },
     {
       "path": "flutter/reference/io.md",
       "kind": "reference",
-      "title": "package:convohop/io.dart",
+      "title": "package:instantrelay/io.dart",
       "description": "File-backed recovery storage for the conversation store and the outbox.",
       "language": "flutter",
-      "package": "package:convohop/io.dart"
+      "package": "package:instantrelay/io.dart"
     },
     {
       "path": "flutter/reference/operations.md",
@@ -1115,14 +1115,14 @@
       "path": "react-native/index.md",
       "kind": "language",
       "title": "React Native SDK",
-      "description": "@convohop/react-native runs the ConvoHop client SDK, @convohop/client, in React Native apps on Android and iOS. The client runs one signed-in user's session in your app: conversations and their realtime events, a local conversation store, an offline outbox with optimistic sends, read receipts, typing and calls. The package adds what React Native needs around it: the platform that the client runs on in Hermes, push registration and notifications through APNs, PushKit and FCM, calls in CallKit and Android's Telecom, and call media through LiveKit's React Native SDK.",
+      "description": "@instantrelay/react-native runs the Relay client SDK, @instantrelay/client, in React Native apps on Android and iOS. The client runs one signed-in user's session in your app: conversations and their realtime events, a local conversation store, an offline outbox with optimistic sends, read receipts, typing and calls. The package adds what React Native needs around it: the platform that the client runs on in Hermes, push registration and notifications through APNs, PushKit and FCM, calls in CallKit and Android's Telecom, and call media through LiveKit's React Native SDK.",
       "language": "react-native"
     },
     {
       "path": "react-native/quickstarts/client.md",
       "kind": "quickstart",
       "title": "React Native client quickstart",
-      "description": "Use ConvoHop in your users' React Native apps with @convohop/client and @convohop/react-native: connect with the session your backend issued, show a conversation and keep it current, and send messages that survive dropped connections and the app's restarts. @convohop/react offers the same as React hooks.",
+      "description": "Use Relay in your users' React Native apps with @instantrelay/client and @instantrelay/react-native: connect with the session your backend issued, show a conversation and keep it current, and send messages that survive dropped connections and the app's restarts. @instantrelay/react offers the same as React hooks.",
       "language": "react-native",
       "topic": "client"
     },
@@ -1130,7 +1130,7 @@
       "path": "react-native/quickstarts/push.md",
       "kind": "quickstart",
       "title": "React Native push notifications quickstart",
-      "description": "Show ConvoHop's push notifications in your React Native app with @convohop/react-native: register the device with APNs or FCM, open the conversation that a notification is about, and show message text whether or not the project sends message previews.",
+      "description": "Show Relay's push notifications in your React Native app with @instantrelay/react-native: register the device with APNs or FCM, open the conversation that a notification is about, and show message text whether or not the project sends message previews.",
       "language": "react-native",
       "topic": "push"
     },
@@ -1138,7 +1138,7 @@
       "path": "react-native/quickstarts/calling.md",
       "kind": "quickstart",
       "title": "React Native calling quickstart",
-      "description": "Add voice and video calls to a conversation with @convohop/react-native: start a call and ring other members, join it with LiveKit's React Native SDK, answer incoming calls from CallKit or Android's Telecom, and leave or end a call.",
+      "description": "Add voice and video calls to a conversation with @instantrelay/react-native: start a call and ring other members, join it with LiveKit's React Native SDK, answer incoming calls from CallKit or Android's Telecom, and leave or end a call.",
       "language": "react-native",
       "topic": "calling"
     },
@@ -1152,34 +1152,34 @@
     {
       "path": "react-native/reference/react-native.md",
       "kind": "reference",
-      "title": "@convohop/react-native",
+      "title": "@instantrelay/react-native",
       "description": "React Native support for the client SDK: the platform it needs on Hermes, push registration and notifications through APNs, PushKit and FCM, and calls in CallKit and Android's Telecom.",
       "language": "react-native",
-      "package": "@convohop/react-native"
+      "package": "@instantrelay/react-native"
     },
     {
       "path": "react-native/reference/media.md",
       "kind": "reference",
-      "title": "@convohop/react-native/media",
-      "description": "Call media through LiveKit's React Native SDK: set LiveKit up, then connect each admitted participation to a LiveKit room. It ships with @convohop/react-native.",
+      "title": "@instantrelay/react-native/media",
+      "description": "Call media through LiveKit's React Native SDK: set LiveKit up, then connect each admitted participation to a LiveKit room. It ships with @instantrelay/react-native.",
       "language": "react-native",
-      "package": "@convohop/react-native/media"
+      "package": "@instantrelay/react-native/media"
     },
     {
       "path": "react-native/reference/client.md",
       "kind": "reference",
-      "title": "@convohop/client",
-      "description": "Client SDK for apps on end-user devices: one signed-in user's conversations, realtime events and calls. In React Native, it runs on the platform from @convohop/react-native.",
+      "title": "@instantrelay/client",
+      "description": "Client SDK for apps on end-user devices: one signed-in user's conversations, realtime events and calls. In React Native, it runs on the platform from @instantrelay/react-native.",
       "language": "react-native",
-      "package": "@convohop/client"
+      "package": "@instantrelay/client"
     },
     {
       "path": "react-native/reference/react.md",
       "kind": "reference",
-      "title": "@convohop/react",
-      "description": "React hooks over the client SDK: conversations with offline-safe sends, typing, session renewal and calls. In React Native, connect call media with @convohop/react-native/media: useMediaConnection needs a browser.",
+      "title": "@instantrelay/react",
+      "description": "React hooks over the client SDK: conversations with offline-safe sends, typing, session renewal and calls. In React Native, connect call media with @instantrelay/react-native/media: useMediaConnection needs a browser.",
       "language": "react-native",
-      "package": "@convohop/react"
+      "package": "@instantrelay/react"
     },
     {
       "path": "react-native/reference/operations.md",
@@ -1192,7 +1192,7 @@
       "path": "operations/index.md",
       "kind": "operation-index",
       "title": "API operations",
-      "description": "Every operation in the ConvoHop GraphQL API, with its authorization, idempotency, input, result and errors, and the SDK members that send it."
+      "description": "Every operation in the Relay GraphQL API, with its authorization, idempotency, input, result and errors, and the SDK members that send it."
     },
     {
       "path": "operations/communication/capabilities.md",
@@ -1604,7 +1604,7 @@
       "path": "operations/management/organizationBilling.md",
       "kind": "operation",
       "title": "management.organizationBilling",
-      "description": "Read the billing state of an organization in any status: the plan whose limits apply, whether ConvoHop bills the organization and, when it does, its standing and subscription.",
+      "description": "Read the billing state of an organization in any status: the plan whose limits apply, whether Relay bills the organization and, when it does, its standing and subscription.",
       "operation": "management.organizationBilling"
     },
     {

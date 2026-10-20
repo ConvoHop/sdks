@@ -85,7 +85,7 @@ jobs:
           python3 - "build/m2/${group//.//}" "$version" <<'EOF'
           import pathlib, sys, zipfile
           root, version = pathlib.Path(sys.argv[1]), sys.argv[2]
-          for module in ("convohop-server", "convohop-server-kotlin"):
+          for module in ("relay-server", "relay-server-kotlin"):
               base = root / module / version / f"{module}-{version}"
               for suffix in (".pom", ".module", ".jar", "-sources.jar", "-javadoc.jar"):
                   if not pathlib.Path(f"{base}{suffix}").is_file():
@@ -236,7 +236,7 @@ jobs:
             console.log(`::error::${scenario.id} ${scenario.status}: ${scenario.reason ?? "no reason"}`);
           }
           console.log(`${summary.driver.name}: ${passed.length} of ${scenarios.length} passed`);
-          if (summary.driver.name !== "convohop-jvm" || passed.length === 0 || other.length > 0) process.exit(1);
+          if (summary.driver.name !== "relay-jvm" || passed.length === 0 || other.length > 0) process.exit(1);
           EOF
       - name: Upload JUnit and summary reports
         if: always()
@@ -248,7 +248,7 @@ jobs:
           retention-days: 14
 
   # Like the dev-stack job in conformance.yml, runs the scenarios against the
-  # ConvoHop dev stack: the private, development-only linux/arm64 image that
+  # Relay dev stack: the private, development-only linux/arm64 image that
   # runs the whole platform in one container (see spec/conformance/targets.md),
   # which conformance/dev-stack.mjs starts. The job runs only when the
   # CONVOHOP_DEV_STACK_IMAGE repository variable names the image, and never for

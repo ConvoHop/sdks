@@ -1,5 +1,5 @@
 // Runs renewal(from:) against a stand-in for your backend's renewal endpoint.
-import ConvoHop
+import Relay
 import Foundation
 import XCTest
 

@@ -1,5 +1,5 @@
-import { ConvoHopProblem, parseObject, type CommandOptions, type ConvoHopPlatform } from "@convohop/core";
-import { parseURL } from "@convohop/core/internal";
+import { RelayProblem, parseObject, type CommandOptions, type RelayPlatform } from "@instantrelay/core";
+import { parseURL } from "@instantrelay/core/internal";
 import type { LiveConnection, LiveConnectionAttempt, LiveConnectionGrant, LiveConnector } from "./live.js";
 
 /** The parts of a participation that admit one native connection. */
@@ -12,9 +12,9 @@ export interface AdmissionSource {
 const loopback = ["127.0.0.1", "localhost", "[::1]"];
 /**
  * Checks where the single-use `connectToken` may be sent before anything is sent. Returns the media server URL.
- * Only the ConvoHop media server accepts the token; it admits at most one new connection with it.
+ * Only the Relay media server accepts the token; it admits at most one new connection with it.
  */
-function nativeTarget(grant: LiveConnectionGrant, platform: ConvoHopPlatform | undefined): { url: string; token: string } {
+function nativeTarget(grant: LiveConnectionGrant, platform: RelayPlatform | undefined): { url: string; token: string } {
   const url = parseURL(typeof grant.livekitUrl === "string" ? grant.livekitUrl : "", platform, "Invalid media origin");
   if (url.search || url.hash || url.username || url.password ||
       (url.protocol !== "wss:" && !(url.protocol === "ws:" && loopback.includes(url.hostname))))
@@ -29,7 +29,7 @@ function nativeTarget(grant: LiveConnectionGrant, platform: ConvoHopPlatform | u
  * attempt durably, and only then calls `connector`, once. A failed connector leaves the admission's outcome unknown.
  */
 export async function admitConnection<C extends LiveConnection>(source: AdmissionSource, options: CommandOptions,
-  connector: LiveConnector<C>, platform: ConvoHopPlatform | undefined): Promise<C> {
+  connector: LiveConnector<C>, platform: RelayPlatform | undefined): Promise<C> {
   const { requestId, mode, grant } = await source.connectionGrant(options);
   if (mode !== "INITIAL" && mode !== "RECONNECT") throw new TypeError("Unknown credential mode");
   const ticket = parseObject(grant.admissionTicket), lease = parseObject(grant.forwardingLease);
@@ -43,7 +43,7 @@ export async function admitConnection<C extends LiveConnection>(source: Admissio
     connection = await connector(Object.freeze({ requestId, mode, url: target.url, token: target.token, leaseExpiresAt: grant.leaseExpiresAt }));
   } catch {
     // The failure is not attached: native SDK errors can carry the token-bearing signaling URL.
-    throw new ConvoHopProblem("MEDIA_CONNECT_FAILED", requestId, "unknown", 0,
+    throw new RelayProblem("MEDIA_CONNECT_FAILED", requestId, "unknown", 0,
       "Native connection failed. The participation reservation remains; resolve and retry connect, or explicitly leave.");
   }
   const invalid = new TypeError("connector must resolve to a connection with connected and disconnect()");

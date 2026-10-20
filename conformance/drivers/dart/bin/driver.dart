@@ -1,12 +1,12 @@
-// ConvoHop conformance driver for the Dart SDK: NDJSON over stdio (spec/conformance/driver-protocol.md).
+// Relay conformance driver for the Dart SDK: NDJSON over stdio (spec/conformance/driver-protocol.md).
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:convohop_conformance_driver/params.dart';
-import 'package:convohop_conformance_driver/sdk.dart';
+import 'package:relay_conformance_driver/params.dart';
+import 'package:relay_conformance_driver/sdk.dart';
 
-const _driver = <String, Object?>{'name': 'convohop-dart', 'version': '0.1.0', 'language': 'dart'};
+const _driver = <String, Object?>{'name': 'relay-dart', 'version': '0.1.0', 'language': 'dart'};
 const _roles = <String>['user', 'backend', 'management'];
 const _empty = <String, Object?>{};
 

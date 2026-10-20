@@ -1,7 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
-import { ConvoHopManagementClient, ProjectServerClient, ConvoHopProblem, operationCatalog } from "@convohop/server";
+import { RelayManagementClient, ProjectServerClient, RelayProblem, operationCatalog } from "@instantrelay/server";
 import { full, reply, resolution } from "../../../test/graphql-fixtures.mjs";
 import { asyncStorage } from "../../../test/recovery-fixtures.mjs";
 
@@ -59,7 +59,7 @@ test("backend data-plane calls carry generated actAsPrincipalId and surface SCOP
   assert.equal(requests.length, 1);
 
   await assert.rejects(server.http.execute("communication.inbox", projectId, { limit: 10, actAsPrincipalId }), error => {
-    assert.ok(error instanceof ConvoHopProblem);
+    assert.ok(error instanceof RelayProblem);
     assert.equal(error.code, "SCOPE_REQUIRED");
     assert.equal(error.outcome, "rejected");
     assert.equal(error.status, 403);
@@ -141,7 +141,7 @@ test("backend onboarding uses current generated operations and returns the typed
 test("management key issuance and permits retain generated inputs, not result secrets", async () => {
   const projectId = crypto.randomUUID(), deliveryId = crypto.randomUUID(), redemptionRequestId = crypto.randomUUID();
   const expiresAt = new Date(Date.now() + 60000).toISOString(), requests = [];
-  const client = new ConvoHopManagementClient({ baseUrl: "http://localhost:18081", actorId: crypto.randomUUID(),
+  const client = new RelayManagementClient({ baseUrl: "http://localhost:18081", actorId: crypto.randomUUID(),
     accessToken: "fixture-operator", fetch: async (_url, options) => {
       assert.equal(options.headers.authorization, "Bearer fixture-operator");
       const request = JSON.parse(options.body); requests.push(request);
@@ -167,7 +167,7 @@ test("usage queries use generated management operations and keep meter quantitie
   const scopes = { ManagementDeploymentUsage: ["DeploymentUsage", { deploymentId }],
     ManagementProjectUsage: ["ProjectUsage", { projectId }], ManagementOrganizationUsage: ["OrganizationUsage", { orgId }] };
   let quantity = "9223372036854775807";
-  const client = new ConvoHopManagementClient({ baseUrl: "http://localhost:18081", actorId: crypto.randomUUID(),
+  const client = new RelayManagementClient({ baseUrl: "http://localhost:18081", actorId: crypto.randomUUID(),
     accessToken: "fixture-operator", fetch: async (_url, options) => {
       const request = JSON.parse(options.body); requests.push(request);
       if (!Object.hasOwn(scopes, request.operationName)) throw new Error("Unexpected operation");
@@ -196,7 +196,7 @@ test("usage queries use generated management operations and keep meter quantitie
   for (const malformed of [5, "-1", "1.5", "01", "9223372036854775808"]) {
     quantity = malformed;
     await assert.rejects(client.http.execute("management.projectUsage", undefined, { projectId }),
-      { name: "ConvoHopProblem", code: "INVALID_RESPONSE" }, String(malformed));
+      { name: "RelayProblem", code: "INVALID_RESPONSE" }, String(malformed));
   }
   assert.equal(requests.length, 8);
 });
@@ -225,7 +225,7 @@ test("membership batches use generated GraphQL and preserve original identity an
 
 test("hosted management requires explicit deployment and project inputs without local fallback", async () => {
   const calls = [];
-  const client = new ConvoHopManagementClient({ baseUrl: "https://management.example.test", actorId: crypto.randomUUID(),
+  const client = new RelayManagementClient({ baseUrl: "https://management.example.test", actorId: crypto.randomUUID(),
     accessToken: "fixture-only", fetch: async (url, options) => {
       const request = JSON.parse(options.body); calls.push({ url, request });
       const field = request.operationName === "ManagementCreateProject" ? "createProject" : "createDeployment";
@@ -326,7 +326,7 @@ test("project async write failure prevents authority effects and retains the sup
 
 test("management forwards async storage and scopes the journal to the actor rather than credentials", async () => {
   const actorId = crypto.randomUUID(), saved = asyncStorage();
-  const client = new ConvoHopManagementClient({ baseUrl: "http://localhost:18081", actorId,
+  const client = new RelayManagementClient({ baseUrl: "http://localhost:18081", actorId,
     accessToken: "fixture-operator", asyncRecoveryStorage: saved, fetch: async (_url, init) => {
       return reply(JSON.parse(init.body), { result: {
         orgId: crypto.randomUUID(), name: "original", status: "active", revision: "1",
@@ -346,7 +346,7 @@ test("both Server SDK constructors reject conflicting storage before loading eit
   const common = { baseUrl: "http://localhost:18080", recoveryStorage, asyncRecoveryStorage: saved };
   assert.throws(() => new ProjectServerClient({ ...common, projectId: crypto.randomUUID(), incarnation: crypto.randomUUID(),
     backendKey: "fixture-backend" }), /recoveryStorage.*asyncRecoveryStorage/);
-  assert.throws(() => new ConvoHopManagementClient({ ...common, actorId: crypto.randomUUID(),
+  assert.throws(() => new RelayManagementClient({ ...common, actorId: crypto.randomUUID(),
     accessToken: "fixture-operator" }), /recoveryStorage.*asyncRecoveryStorage/);
   assert.equal(reads, 0);
   assert.equal(saved.reads.length, 0);

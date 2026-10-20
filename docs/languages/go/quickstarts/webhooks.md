@@ -1,6 +1,6 @@
 # Go webhooks quickstart
 
-Receive ConvoHop events in your Go backend with the `webhooks` package: verify each signed delivery, acknowledge it quickly, and handle its event in a queue worker.
+Receive Relay events in your Go backend with the `webhooks` package: verify each signed delivery, acknowledge it quickly, and handle its event in a queue worker.
 
 ## Before you start
 
@@ -13,12 +13,12 @@ The samples on this page use these imports:
 
 ## Verify deliveries
 
-ConvoHop signs each delivery with the [Standard Webhooks](https://www.standardwebhooks.com) scheme. `webhooks.Verify` checks the signature and timestamp against the raw body, and returns the delivery's webhook ID and event. It takes the request's `http.Header`, so it works in any `net/http` handler.
+Relay signs each delivery with the [Standard Webhooks](https://www.standardwebhooks.com) scheme. `webhooks.Verify` checks the signature and timestamp against the raw body, and returns the delivery's webhook ID and event. It takes the request's `http.Header`, so it works in any `net/http` handler.
 
 ```go include=examples/webhooks.go#receive
 ```
 
-- Pass every secret you hold. While a rotation is pending, ConvoHop signs with both the current and the next secret, and it signs with the replaced secret for 24 hours after the rotation.
+- Pass every secret you hold. While a rotation is pending, Relay signs with both the current and the next secret, and it signs with the replaced secret for 24 hours after the rotation.
 - Verify the exact bytes you received, never re-encoded JSON. A body over 4096 bytes fails.
 - Answer within 5 seconds, and process the event afterwards.
 - Delivery is at least once, and retries keep the webhook ID, so deduplicate on it.

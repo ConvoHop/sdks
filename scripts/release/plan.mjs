@@ -6,7 +6,46 @@
 import { pathToFileURL } from 'node:url';
 
 import { createGitHub } from './github.mjs';
-import { isSemver, loadReleaseConfig, main, releaseTypeOf, REPO_ROOT, setOutput, tagName } from './lib.mjs';
+import { isSemver, loadReleaseConfig, main, releaseTypeOf, REPO_ROOT, REPOSITORY, run, setOutput, tagName } from './lib.mjs';
+
+export function planNpmPublication({
+  repository, eventName, ref, sha, headSha, onMain, releases,
+  publish = false, enabled = false, confirmation = '',
+}) {
+  if (typeof publish !== 'boolean' || typeof enabled !== 'boolean') throw new Error('Publication switches must be booleans');
+  if (!publish) return false;
+  if (repository !== REPOSITORY) throw new Error(`npm releases must run in ${REPOSITORY}`);
+  if (eventName !== 'workflow_dispatch') throw new Error('npm publication requires a manual dispatch');
+  const tag = typeof ref === 'string' && ref.startsWith('refs/tags/') ? ref.slice('refs/tags/'.length) : '';
+  if (!tag || !releases.some((release) => release.tag === tag)) throw new Error('npm publication requires an exact planned release tag');
+  if (!/^[0-9a-f]{40}$/.test(String(sha)) || sha !== headSha || onMain !== true) {
+    throw new Error('npm publication requires the triggering release commit in origin/main');
+  }
+  if (!enabled) throw new Error('Configure npm ownership, trusted publishers and the protected npm environment before setting NPM_PUBLISH_ENABLED=true');
+  if (confirmation !== `publish npm ${tag}`) throw new Error(`Explicit publication confirmation must be: publish npm ${tag}`);
+  return true;
+}
+
+export async function npmPublicationFromGit({ root = REPO_ROOT, env = process.env, releases, publish = false }) {
+  const request = {
+    repository: env.GITHUB_REPOSITORY, eventName: env.GITHUB_EVENT_NAME, ref: env.GITHUB_REF,
+    releases, publish, enabled: env.NPM_PUBLISH_ENABLED === 'true', confirmation: env.PUBLISH_CONFIRMATION ?? '',
+  };
+  if (publish !== true) return planNpmPublication(request);
+  if (!/^[0-9a-f]{40}$/.test(String(env.GITHUB_SHA))) throw new Error('Expected a full triggering source SHA');
+  const options = { cwd: root };
+  const source = await run('git', ['rev-parse', '--verify', `${env.GITHUB_SHA}^{commit}`], options);
+  const head = await run('git', ['rev-parse', 'HEAD'], options);
+  if (source.code !== 0 || head.code !== 0) throw new Error('Cannot resolve the npm release source commit');
+  const sha = source.stdout.trim();
+  const headSha = head.stdout.trim();
+  const ancestor = await run('git', ['merge-base', '--is-ancestor', headSha, 'origin/main'], options);
+  if (![0, 1].includes(ancestor.code)) throw new Error('Cannot verify npm release ancestry in origin/main');
+  const approved = planNpmPublication({ ...request, sha, headSha, onMain: ancestor.code === 0 });
+  const tag = await run('git', ['rev-parse', '--verify', `${env.GITHUB_REF}^{commit}`], options);
+  if (tag.code !== 0 || tag.stdout.trim() !== sha) throw new Error('The npm release tag no longer identifies the triggering commit');
+  return approved;
+}
 
 function fromReleasePlease(json) {
   let outputs;
@@ -97,7 +136,11 @@ if (import.meta.url === pathToFileURL(process.argv[1] ?? '').href) {
       github: createGitHub(),
     });
     console.log(`Release commit ${plan.sha}: ${plan.releases.map((release) => release.tag).join(', ')}`);
+    const requested = process.env.REQUEST_PUBLISH ?? 'false';
+    if (!['true', 'false'].includes(requested)) throw new Error('REQUEST_PUBLISH must be true or false');
+    const publish = await npmPublicationFromGit({ releases: plan.releases, publish: requested === 'true' });
     setOutput('sha', plan.sha);
     setOutput('releases', JSON.stringify(plan.releases));
+    setOutput('publish', String(publish));
   });
 }

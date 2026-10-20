@@ -1,6 +1,6 @@
 import { createReadStream } from "node:fs";
 import { readFile } from "node:fs/promises";
-import { ConvoHopTransport, ProjectServerClient } from "@convohop/server";
+import { RelayTransport, ProjectServerClient } from "@instantrelay/server";
 import type { Args } from "./args.js";
 import { authorityOrigin, selectedProfile, type ConfigFiles, type Environment, type Profile } from "./config.js";
 import { loadToken, vault, type CommandRunner } from "./credentials.js";
@@ -81,7 +81,7 @@ export async function environmentSecret(env: Environment, name: string): Promise
 /** A plane's transport. Management requests carry the portal token; communication requests carry a backend key. */
 export interface Plane {
   readonly name: "management" | "communication";
-  readonly transport: ConvoHopTransport;
+  readonly transport: RelayTransport;
   /** The project of communication requests. Management operations name projects in their input. */
   readonly projectId: string | undefined;
 }
@@ -92,32 +92,32 @@ async function savedProfile(context: Context, args: Args): Promise<{ name: strin
   return { name, profile: Object.hasOwn(profiles, name) ? profiles[name] : undefined };
 }
 
-/** The management plane: the portal token from CONVOHOP_PORTAL_TOKEN(_FILE) or the profile's login. */
+/** The management plane: the portal token from RELAY_PORTAL_TOKEN(_FILE) or the profile's login. */
 export async function managementPlane(context: Context, args: Args): Promise<Plane> {
   const { name, profile } = await savedProfile(context, args);
-  const token = await environmentSecret(context.env, "CONVOHOP_PORTAL_TOKEN") ??
+  const token = await environmentSecret(context.env, "RELAY_PORTAL_TOKEN") ??
     (profile ? await loadToken(vault(profile.credentialStore, context.files, context.runCommand), profile.credentialRef) : undefined);
   if (!token) {
-    const login = name === "default" ? "convohop login" : `convohop login --profile ${name}`;
+    const login = name === "default" ? "relay login" : `relay login --profile ${name}`;
     throw new CliError(profile ? `The ${name} profile's token is missing from its credential store. Run ${login}`
-      : `Not logged in. Run ${login}, or set CONVOHOP_PORTAL_TOKEN or CONVOHOP_PORTAL_TOKEN_FILE`);
+      : `Not logged in. Run ${login}, or set RELAY_PORTAL_TOKEN or RELAY_PORTAL_TOKEN_FILE`);
   }
   context.printer.secret(token);
-  const flag = args.string("management-url"), env = variable(context.env, "CONVOHOP_MANAGEMENT_URL");
-  const url = flag !== undefined ? authorityOrigin(flag, "--management-url") : env !== undefined ? authorityOrigin(env, "CONVOHOP_MANAGEMENT_URL")
+  const flag = args.string("management-url"), env = variable(context.env, "RELAY_MANAGEMENT_URL");
+  const url = flag !== undefined ? authorityOrigin(flag, "--management-url") : env !== undefined ? authorityOrigin(env, "RELAY_MANAGEMENT_URL")
     : profile?.managementUrl;
-  if (url === undefined) throw new UsageError("Set --management-url or CONVOHOP_MANAGEMENT_URL, or run convohop login");
+  if (url === undefined) throw new UsageError("Set --management-url or RELAY_MANAGEMENT_URL, or run relay login");
   return {
     name: "management", projectId: undefined,
-    transport: new ConvoHopTransport({ baseUrl: url, credential: token, namespace: "cli:management", fetch: context.fetch }),
+    transport: new RelayTransport({ baseUrl: url, credential: token, namespace: "cli:management", fetch: context.fetch }),
   };
 }
 
-/** The communication authority origin: --communication-url, else CONVOHOP_COMMUNICATION_URL, else the profile's. */
+/** The communication authority origin: --communication-url, else RELAY_COMMUNICATION_URL, else the profile's. */
 export async function communicationUrl(context: Context, args: Args): Promise<string | undefined> {
-  const flag = args.string("communication-url"), env = variable(context.env, "CONVOHOP_COMMUNICATION_URL");
+  const flag = args.string("communication-url"), env = variable(context.env, "RELAY_COMMUNICATION_URL");
   if (flag !== undefined) return authorityOrigin(flag, "--communication-url");
-  if (env !== undefined) return authorityOrigin(env, "CONVOHOP_COMMUNICATION_URL");
+  if (env !== undefined) return authorityOrigin(env, "RELAY_COMMUNICATION_URL");
   return (await savedProfile(context, args)).profile?.communicationUrl;
 }
 
@@ -130,23 +130,23 @@ export function uuidOption(args: Args, name: string, fallback?: string): string 
 }
 
 /**
- * The communication plane of one project: a backend key from CONVOHOP_BACKEND_KEY(_FILE), the project from --project or
- * CONVOHOP_PROJECT_ID and its incarnation from --incarnation or CONVOHOP_INCARNATION. Routes to the project first.
+ * The communication plane of one project: a backend key from RELAY_BACKEND_KEY(_FILE), the project from --project or
+ * RELAY_PROJECT_ID and its incarnation from --incarnation or RELAY_INCARNATION. Routes to the project first.
  */
 export async function communicationPlane(context: Context, args: Args,
   route: (client: ProjectServerClient) => Promise<void>): Promise<Plane> {
-  const backendKey = await environmentSecret(context.env, "CONVOHOP_BACKEND_KEY");
+  const backendKey = await environmentSecret(context.env, "RELAY_BACKEND_KEY");
   if (!backendKey)
-    throw new UsageError("Communication operations need a backend key: set CONVOHOP_BACKEND_KEY or CONVOHOP_BACKEND_KEY_FILE");
+    throw new UsageError("Communication operations need a backend key: set RELAY_BACKEND_KEY or RELAY_BACKEND_KEY_FILE");
   context.printer.secret(backendKey);
-  const projectId = uuidOption(args, "project", variable(context.env, "CONVOHOP_PROJECT_ID"));
-  if (projectId === undefined) throw new UsageError("Set --project or CONVOHOP_PROJECT_ID", args.command);
-  const incarnation = uuidOption(args, "incarnation", variable(context.env, "CONVOHOP_INCARNATION"));
+  const projectId = uuidOption(args, "project", variable(context.env, "RELAY_PROJECT_ID"));
+  if (projectId === undefined) throw new UsageError("Set --project or RELAY_PROJECT_ID", args.command);
+  const incarnation = uuidOption(args, "incarnation", variable(context.env, "RELAY_INCARNATION"));
   if (incarnation === undefined)
-    throw new UsageError("Set --incarnation or CONVOHOP_INCARNATION. convohop projects get --project ID shows it", args.command);
+    throw new UsageError("Set --incarnation or RELAY_INCARNATION. relay projects get --project ID shows it", args.command);
   const baseUrl = await communicationUrl(context, args);
   if (baseUrl === undefined)
-    throw new UsageError("Set --communication-url or CONVOHOP_COMMUNICATION_URL, or log in with --communication-url", args.command);
+    throw new UsageError("Set --communication-url or RELAY_COMMUNICATION_URL, or log in with --communication-url", args.command);
   const client = new ProjectServerClient({ baseUrl, projectId, incarnation, backendKey, fetch: context.fetch });
   await route(client);
   return { name: "communication", transport: client.http, projectId: client.projectId };

@@ -92,7 +92,7 @@ String? _textField(Map<Object?, Object?> source, String field) {
   return value;
 }
 
-// Platform text from an APNs alert. It isn't part of the ConvoHop contract,
+// Platform text from an APNs alert. It isn't part of the Relay contract,
 // so anything other than usable text counts as none.
 String? _alertText(Object? aps, String field) {
   if (aps is! Map) return null;
@@ -101,14 +101,14 @@ String? _alertText(Object? aps, String field) {
   return value is String && value.isNotEmpty && _wellFormed(value) ? value : null;
 }
 
-/// A ConvoHop notification, parsed from a push payload's `convohop` object.
+/// A Relay notification, parsed from a push payload's `convohop` object.
 ///
 /// Notifications carry identifiers. They carry message text only when the
 /// project opted in to message previews (off by default) or your backend
 /// added its own text, so [title] and [body] are often null: show your own
 /// generic text and fetch content with the user's session.
-sealed class ConvoHopNotification {
-  ConvoHopNotification._(Map<Object?, Object?> data, this.title, this.body)
+sealed class RelayNotification {
+  RelayNotification._(Map<Object?, Object?> data, this.title, this.body)
     : eventId = _uuidField(data, 'eventId'),
       occurredAt = _timestampField(data, 'occurredAt'),
       projectId = _uuidField(data, 'projectId'),
@@ -140,7 +140,7 @@ sealed class ConvoHopNotification {
   final String? body;
 
   /// Whether this notification is for [client]'s user and project.
-  bool isFor(ConvoHopClient client) => projectId == client.projectId && recipientId == client.principalId;
+  bool isFor(RelayClient client) => projectId == client.projectId && recipientId == client.principalId;
 
   /// The `convohop` object, for handing the notification to native code.
   Map<String, Object?> toJson();
@@ -159,7 +159,7 @@ sealed class ConvoHopNotification {
 }
 
 /// A new message for the user.
-final class MessageNotification extends ConvoHopNotification {
+final class MessageNotification extends RelayNotification {
   MessageNotification._(super.data, super.title, super.body) : messageId = _uuidField(data, 'messageId'), super._();
 
   final String messageId;
@@ -169,7 +169,7 @@ final class MessageNotification extends ConvoHopNotification {
 
   /// Fetches the message with the user's own session, for example when
   /// [body] is null because previews are off.
-  Future<Message> fetchMessage(ConvoHopClient client) {
+  Future<Message> fetchMessage(RelayClient client) {
     if (!isFor(client)) {
       return Future<Message>.error(StateError('The notification is for another user or project'));
     }
@@ -181,7 +181,7 @@ final class MessageNotification extends ConvoHopNotification {
 }
 
 /// A notification about one ring of a call.
-sealed class RingNotification extends ConvoHopNotification {
+sealed class RingNotification extends RelayNotification {
   RingNotification._(super.data, super.title, super.body)
     : liveSessionId = _uuidField(data, 'liveSessionId'),
       alertId = _uuidField(data, 'alertId'),
@@ -249,11 +249,11 @@ final class CallCancelledNotification extends RingNotification {
 /// Parses a push payload: an APNs `userInfo` (`{aps, convohop: {...}}`), FCM
 /// data (`{convohop: "<JSON>"}`) or a Web Push payload.
 ///
-/// Returns null when the payload isn't ConvoHop's, and throws a
+/// Returns null when the payload isn't Relay's, and throws a
 /// [FormatException] naming the first invalid field when it breaks the push
 /// payload contract. Fields it doesn't know are ignored, as the contract
 /// requires of consumers.
-ConvoHopNotification? parseNotificationPayload(Map<Object?, Object?> payload) {
+RelayNotification? parseNotificationPayload(Map<Object?, Object?> payload) {
   if (!payload.containsKey('convohop')) return null;
   var data = payload['convohop'];
   if (data is String) {
@@ -276,11 +276,11 @@ ConvoHopNotification? parseNotificationPayload(Map<Object?, Object?> payload) {
   };
 }
 
-/// What [ConvoHopNotifications.handleNotification] found.
+/// What [RelayNotifications.handleNotification] found.
 final class HandledNotification {
   const HandledNotification._(this.notification, {required this.duplicate, required this.ringing});
 
-  final ConvoHopNotification notification;
+  final RelayNotification notification;
 
   /// Whether an earlier payload had the same event ID. Act on a notification
   /// once.
@@ -312,15 +312,15 @@ final class _Ring {
   Timer? timer;
 }
 
-/// Handles ConvoHop push payloads on the device: parses and validates them,
+/// Handles Relay push payloads on the device: parses and validates them,
 /// deduplicates on `eventId`, and tracks which calls are ringing.
 ///
 /// Delivery is at least once and unordered, so a cancellation can arrive
 /// before its call. A call stops ringing once a cancellation with its
 /// `alertId` was seen or its `expiresAt` passed.
-final class ConvoHopNotifications {
+final class RelayNotifications {
   /// [capacity] bounds how many event IDs are remembered for deduplication.
-  ConvoHopNotifications({Clock? clock, int capacity = 1024})
+  RelayNotifications({Clock? clock, int capacity = 1024})
     : _clock = clock ?? systemClock,
       _capacity = capacity > 0 ? capacity : throw RangeError.value(capacity, 'capacity', 'Must be positive');
 
@@ -345,7 +345,7 @@ final class ConvoHopNotifications {
     return ring != null && ring.call != null && ring.stopped == null && ring.expiresAt > _clock();
   }
 
-  /// Parses and records [payload]. Returns null when it isn't a ConvoHop
+  /// Parses and records [payload]. Returns null when it isn't a Relay
   /// payload, and throws a [FormatException] when it breaks the contract.
   HandledNotification? handleNotification(Map<Object?, Object?> payload) {
     final notification = parseNotificationPayload(payload);
@@ -353,7 +353,7 @@ final class ConvoHopNotifications {
   }
 
   /// Records an already parsed [notification].
-  HandledNotification record(ConvoHopNotification notification) {
+  HandledNotification record(RelayNotification notification) {
     final duplicate = !_remember(notification.eventId);
     _prune();
     switch (notification) {

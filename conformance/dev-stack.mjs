@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// Starts the ConvoHop dev-stack image for a CI job that runs the conformance scenarios against it, and
+// Starts the Relay dev-stack image for a CI job that runs the conformance scenarios against it, and
 // shows why the stack stopped. Every dev-stack job uses it (spec/conformance/targets.md#dev-stack-target):
 //
 //   node conformance/dev-stack.mjs start  Pulls and starts CONVOHOP_DEV_STACK_IMAGE, waits until it is ready
@@ -15,7 +15,7 @@ import { resolve } from "node:path";
 import { createInterface } from "node:readline";
 import { fileURLToPath } from "node:url";
 
-export const CONTAINER = "convohop-dev-stack";
+export const CONTAINER = "relay-dev-stack";
 export const SEED_FILE = "/run/convohop/dev-stack/seed.env";
 export const DESCRIPTOR = fileURLToPath(new URL("./targets/dev-stack.json", import.meta.url));
 export const LOG_LINES = 40;
@@ -30,8 +30,8 @@ const SEED_VALUE = /^[A-Za-z0-9_.:\/-]{1,256}$/;
 const ENV_REFERENCE = /\$\{env:([A-Za-z_][A-Za-z0-9_]*)\}/g;
 const SECRET_NAME = /(?:^|_)(?:KEY|TOKEN|SECRET|PASSWORD)(?:_|$)/;
 // `docker logs --timestamps` starts each line with an RFC 3339 time. The supervisor starts its own lines with
-// "[dev-stack] " and the CLI its errors with "convohop-dev-stack: "; it starts platform lines with "[<process>] ".
-const SUPERVISOR_LINE = /^(?:\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d+)?Z )?(?:\[dev-stack\] |convohop-dev-stack: )/;
+// "[dev-stack] " and the CLI its errors with "relay-dev-stack: "; it starts platform lines with "[<process>] ".
+const SUPERVISOR_LINE = /^(?:\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d+)?Z )?(?:\[dev-stack\] |relay-dev-stack: )/;
 
 export class DevStackError extends Error {
   constructor(message) { super(message); this.name = "DevStackError"; }
@@ -143,7 +143,7 @@ async function start(env) {
   await pull(image, env);
   // The stack listens only on the container's loopback, which the host network makes the runner's.
   await docker(["run", "--detach", "--name", CONTAINER, "--network", "host", image], "starting the dev stack");
-  await docker(["exec", CONTAINER, "convohop-dev-stack", "wait", "--timeout", String(READY_TIMEOUT_SECONDS)],
+  await docker(["exec", CONTAINER, "relay-dev-stack", "wait", "--timeout", String(READY_TIMEOUT_SECONDS)],
     "waiting for the dev stack");
   const seed = parseSeed(await docker(["exec", CONTAINER, "cat", SEED_FILE], "reading seed.env", { capture: true }));
   const plan = planExports(seed, descriptor);

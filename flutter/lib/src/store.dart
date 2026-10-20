@@ -115,31 +115,31 @@ const _storedFields = {'conversation', 'messages', 'receipts', 'hasOlder', 'thro
 /// member's receipts and this user's optimistic sends.
 ///
 /// The store loads the conversation's newest messages and receipts, then
-/// follows its events with [ConvoHopClient.watch] from that point, fetching
+/// follows its events with [RelayClient.watch] from that point, fetching
 /// each new or changed message. After a transient failure it reconnects with
 /// backoff and resumes after the last event it applied. It never skips
 /// history on its own: when the authority can't continue from its position,
 /// the status becomes [ConversationStoreStatus.resyncRequired] until you call
 /// [resync].
 ///
-/// Pass the app's [ConvoHopOutbox] to [send] through it: queued, failed and
+/// Pass the app's [RelayOutbox] to [send] through it: queued, failed and
 /// unknown messages show in [ConversationSnapshot.pending] until their
 /// committed message arrives.
 ///
-/// With [persist] on and [ConvoHopClient.storage] set, the store keeps up to
+/// With [persist] on and [RelayClient.storage] set, the store keeps up to
 /// 200 of the newest messages, including their text, with its receipts and
 /// position under `convohop.store:<project>:<principal>:<conversation>`, and
 /// shows them at once next time while it catches up. A stored conversation
 /// from another incarnation is discarded.
 ///
 /// Use one store per conversation and client. Don't call
-/// [ConvoHopClient.resyncAuthorizedHistory] for a conversation a store
+/// [RelayClient.resyncAuthorizedHistory] for a conversation a store
 /// follows; call [resync].
 final class ConversationStore {
   ConversationStore(
     this.client,
     this.conversationId, {
-    ConvoHopOutbox? outbox,
+    RelayOutbox? outbox,
     bool persist = false,
     int maxMessages = 1000,
     ErrorListener? onError,
@@ -165,9 +165,9 @@ final class ConversationStore {
   static const int _fetchConcurrency = 4;
   static const int _receiptPages = 10;
 
-  final ConvoHopClient client;
+  final RelayClient client;
   final String conversationId;
-  final ConvoHopOutbox? _outbox;
+  final RelayOutbox? _outbox;
   final RecoveryStorage? _storage;
   final ErrorListener? _onError;
   final Random _random;
@@ -283,7 +283,7 @@ final class ConversationStore {
     ReadReceipt receipt;
     try {
       receipt = await client.reportRead(conversationId, membership, target);
-    } on ConvoHopProblem catch (problem) {
+    } on RelayProblem catch (problem) {
       // The membership changed since the store read it.
       if (problem.code != 'REVISION_CONFLICT') rethrow;
       final conversation = await client.getConversation(conversationId);
@@ -455,7 +455,7 @@ final class ConversationStore {
   void _stopped(int generation, Object error) {
     _connected = false;
     _error = error;
-    if (error is HistoryResyncRequired || (error is ConvoHopProblem && _resyncCodes.contains(error.code))) {
+    if (error is HistoryResyncRequired || (error is RelayProblem && _resyncCodes.contains(error.code))) {
       _requireResync(error);
       return;
     }
@@ -463,11 +463,11 @@ final class ConversationStore {
     // clears once the session is renewed, try again after backoff, and never
     // sooner than the problem's retryAfter.
     final action = reconnectAction(error);
-    if (action != ReconnectAction.stop || (error is ConvoHopProblem && sessionCodes.contains(error.code))) {
+    if (action != ReconnectAction.stop || (error is RelayProblem && sessionCodes.contains(error.code))) {
       _status = _loaded ? ConversationStoreStatus.ready : ConversationStoreStatus.loading;
       _failures++;
       _retry?.cancel();
-      final retryAfter = error is ConvoHopProblem ? error.retryAfter ?? 0 : 0;
+      final retryAfter = error is RelayProblem ? error.retryAfter ?? 0 : 0;
       final delay = min(max(backoffDelay(_failures, _random.nextInt(1 << 30)), retryAfter * 1000), maxTimerDelayMs);
       final hold = min(retryAfter * 1000, maxTimerDelayMs);
       _hold?.cancel();
@@ -587,7 +587,7 @@ final class ConversationStore {
       final ReceiptPage result;
       try {
         result = await client.receipts(conversationId, cursor: cursor);
-      } on ConvoHopProblem catch (problem) {
+      } on RelayProblem catch (problem) {
         if (problem.code == 'FEATURE_UNSUPPORTED') return receipts;
         rethrow;
       }
@@ -699,7 +699,7 @@ final class ConversationStore {
     final Message message;
     try {
       message = await client.getMessage(conversationId, messageId);
-    } on ConvoHopProblem catch (problem) {
+    } on RelayProblem catch (problem) {
       if (generation != _generation) return false;
       if (problem.code == 'MESSAGE_DELETED') {
         _tombstone(messageId, revision);

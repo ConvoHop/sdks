@@ -3,7 +3,7 @@ import { byName, namedTypeRef, printTypeRef, requireType } from "../lib/ir-model
 import { camelCase, codeUnitCompare, pascalCase } from "../lib/naming.mjs";
 
 /**
- * Dart models, operation specs and catalogs for the Flutter package `convohop`.
+ * Dart models, operation specs and catalogs for the Flutter package `instantrelay`.
  *
  * The output is one self-contained library (dart:core only) split into parts,
  * so the runtime in flutter/lib/src imports a single file and the golden
@@ -641,7 +641,7 @@ final class ErrorCodeSpec {
   final bool retryable;
 }
 
-/// Error codes, for comparing with \`ConvoHopProblem.code\`.
+/// Error codes, for comparing with \`RelayProblem.code\`.
 abstract final class ErrorCodes {
 ${codeConstants.join("\n\n")}
 }
@@ -917,7 +917,7 @@ export function renderDart(ir, directory = DEFAULT_DIRECTORY) {
 
 export default defineEmitter({
   name: "dart",
-  description: "Dart models, operation specs and catalogs for the Flutter package convohop",
+  description: "Dart models, operation specs and catalogs for the Flutter package relay",
   owns: [DEFAULT_DIRECTORY],
   emit(ir, { directory = DEFAULT_DIRECTORY } = {}) {
     return renderDart(ir, directory);

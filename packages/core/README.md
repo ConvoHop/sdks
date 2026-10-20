@@ -1,20 +1,20 @@
-# ConvoHop SDK core
+# Relay SDK core
 
-`@convohop/core` holds the protocol types, generated GraphQL operations and
-HTTP transport that the ConvoHop client and server SDKs share. It's an ESM
+`@instantrelay/core` holds the protocol types, generated GraphQL operations and
+HTTP transport that the Relay client and server SDKs share. It's an ESM
 package with TypeScript declarations. It isn't on a package registry yet:
 [install it from a GitHub Release](https://github.com/ConvoHop/sdks#install-a-release)
 together with the client or server SDK. License: [Apache-2.0](LICENSE).
 
-**Don't import `@convohop/core` directly.** It's installed as a dependency of
-[`@convohop/client`](../client/README.md) and
-[`@convohop/server`](../server/README.md), and both re-export its public API.
+**Don't import `@instantrelay/core` directly.** It's installed as a dependency of
+[`@instantrelay/client`](../client/README.md) and
+[`@instantrelay/server`](../server/README.md), and both re-export its public API.
 
 ## Entry points
 
 | Subpath | Contents | Stability |
 | --- | --- | --- |
-| `.` | `ConvoHopProblem`, `ConvoHopTransport`, protocol validators and types, `operationCatalog` and the generated `GraphqlTypes` types. | Public only through `@convohop/client` and `@convohop/server`. |
+| `.` | `RelayProblem`, `RelayTransport`, protocol validators and types, `operationCatalog` and the generated `GraphqlTypes` types. | Public only through `@instantrelay/client` and `@instantrelay/server`. |
 | `./internal` | Helpers shared by the client and server packages. | Internal. Can change in any release. |
 | `./internal/generated` | Generated operation types, without the `GraphqlTypes` namespace. | Internal. Can change in any release. |
 

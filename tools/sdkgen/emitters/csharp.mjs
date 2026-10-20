@@ -3,7 +3,7 @@ import { byName, namedTypeRef, printTypeRef, requireType } from "../lib/ir-model
 import { pascalCase } from "../lib/naming.mjs";
 
 /**
- * C# models, operation descriptors and schema metadata for the ConvoHop .NET
+ * C# models, operation descriptors and schema metadata for the Relay .NET
  * SDK in dotnet/. Only the operations of the requested layers (server and both
  * by default) are emitted, with the input, output and enum types they reach.
  * Subscriptions are skipped: the .NET SDK has no realtime transport.
@@ -19,7 +19,7 @@ import { pascalCase } from "../lib/naming.mjs";
  * - Apis.cs: one class per plane with a method per operation, and an
  *   IAsyncEnumerable pages method per cursor-paginated query.
  */
-export const DEFAULT_DIRECTORY = "dotnet/src/ConvoHop/Generated";
+export const DEFAULT_DIRECTORY = "dotnet/src/Relay/Generated";
 export const DEFAULT_LAYERS = Object.freeze(["server", "both"]);
 
 const LAYERS = new Set(["client", "server", "both"]);
@@ -152,7 +152,7 @@ function modelName(name) {
   return escapeIdentifier(name);
 }
 
-/** The C# type of an IR type reference. Model types are named relative to the ConvoHop.Models namespace unless `qualified`. */
+/** The C# type of an IR type reference. Model types are named relative to the Relay.Models namespace unless `qualified`. */
 export function csType(ref, types, where, qualified = false) {
   if (ref.kind === "list") {
     const list = `${READ_ONLY_LIST}<${csType(ref.ofType, types, where, qualified)}>`;
@@ -163,7 +163,7 @@ export function csType(ref, types, where, qualified = false) {
   if (type.kind === "scalar") {
     name = scalarType(type).type;
   } else if (["enum", "object", "input"].includes(type.kind)) {
-    name = qualified ? `global::ConvoHop.Models.${modelName(type.name)}` : modelName(type.name);
+    name = qualified ? `global::Relay.Models.${modelName(type.name)}` : modelName(type.name);
   } else {
     throw new EmitterError(`csharp: ${where}: unsupported type kind ${JSON.stringify(type.kind)}`);
   }
@@ -205,7 +205,7 @@ function renderEnums(enums) {
     uniqueMembers(members, type.name, type.name);
     const name = modelName(type.name);
     let text = docComment(type.description ?? `The ${type.name} enum.`, "    ");
-    text += `    [${SERIALIZATION}.JsonConverter(typeof(global::ConvoHop.Generated.EnumConverters.${type.name}Converter))]\n`;
+    text += `    [${SERIALIZATION}.JsonConverter(typeof(global::Relay.Generated.EnumConverters.${type.name}Converter))]\n`;
     text += `    public enum ${name}\n    {\n`;
     text += type.values.map((value, index) => (value.description ? docComment(value.description, "        ") : docXml(`The <c>${value.name}</c> value.`, "        "))
       + obsolete(value.deprecated, "        ") + `        ${members[index][1]},\n`).join("");
@@ -216,7 +216,7 @@ function renderEnums(enums) {
 
 function renderEnumConverters(enums) {
   const converters = enums.map(type => {
-    const name = `global::ConvoHop.Models.${modelName(type.name)}`;
+    const name = `global::Relay.Models.${modelName(type.name)}`;
     const members = type.values.map(value => [value.name, memberName(value.name, `${type.name}.${value.name}`)]);
     return `        internal sealed class ${type.name}Converter : ${SERIALIZATION}.JsonConverter<${name}>
         {
@@ -310,7 +310,7 @@ function renderOutputs(outputs, types) {
 function descriptorTypes(operation, types) {
   const input = operation.input
     ? csType({ kind: "input", name: operation.input.type, nullable: !operation.input.required }, types, operation.id, true)
-    : "global::ConvoHop.NoInput";
+    : "global::Relay.NoInput";
   return { input, result: csType(operation.result.type, types, operation.id, true) };
 }
 
@@ -330,11 +330,11 @@ function renderOperations(ir, operations, types) {
       all.push(`${planeClass}.${member}`);
       return docComment(operation.summary ?? operation.id, "            ")
         + obsolete(operation.deprecated, "            ")
-        + `            public static readonly global::ConvoHop.OperationDescriptor<${input}, ${result}> ${member} = new global::ConvoHop.OperationDescriptor<${input}, ${result}>(\n`
+        + `            public static readonly global::Relay.OperationDescriptor<${input}, ${result}> ${member} = new global::Relay.OperationDescriptor<${input}, ${result}>(\n`
         + [
           `id: ${csString(operation.id)}`,
           `plane: ${csString(operation.plane)}`,
-          `kind: global::ConvoHop.OperationKind.${KINDS[operation.kind]}`,
+          `kind: global::Relay.OperationKind.${KINDS[operation.kind]}`,
           `field: ${csString(operation.field)}`,
           `operationName: ${csString(operation.operationName)}`,
           `document: ${csString(operation.document.text)}`,
@@ -343,8 +343,8 @@ function renderOperations(ir, operations, types) {
           `inputArgument: ${operation.input ? csString(operation.input.argument) : "null"}`,
           `inputRequired: ${operation.input ? String(operation.input.required) : "false"}`,
           `inputFields: ${inputFields.length ? `new string[] { ${inputFields.map(csString).join(", ")} }` : "global::System.Array.Empty<string>()"}`,
-          `contextFields: new global::ConvoHop.ContextField[]\n                {\n${operation.context.fields.map(field =>
-            `                    new global::ConvoHop.ContextField(${csString(field.name)}, global::ConvoHop.ContextFieldUse.${memberName(field.use, `${operation.id} context use`)}),\n`).join("")}                }`,
+          `contextFields: new global::Relay.ContextField[]\n                {\n${operation.context.fields.map(field =>
+            `                    new global::Relay.ContextField(${csString(field.name)}, global::Relay.ContextFieldUse.${memberName(field.use, `${operation.id} context use`)}),\n`).join("")}                }`,
           `idempotency: ${csString(operation.idempotency)}`,
           `layer: ${csString(operation.layer)}`,
           `pagination: ${csString(operation.pagination?.style ?? "none")}`,
@@ -359,13 +359,13 @@ function renderOperations(ir, operations, types) {
     return `                case ${csString(plane.name)}: return ${memberName(plane.name, plane.name)}.${memberName(operation.field, operation.id)};\n`;
   });
   lines.push(`        /// <summary>Every operation descriptor, in schema order.</summary>
-        public static readonly ${READ_ONLY_LIST}<global::ConvoHop.OperationDescriptor> All = new global::ConvoHop.OperationDescriptor[]
+        public static readonly ${READ_ONLY_LIST}<global::Relay.OperationDescriptor> All = new global::Relay.OperationDescriptor[]
         {
 ${all.map(entry => `            ${entry},\n`).join("")}        };
 
         /// <summary>The operation that resolves a request ID on a plane, or null when the plane has none.</summary>
         /// <param name="plane">The plane name.</param>
-        public static global::ConvoHop.OperationDescriptor? ResolveOperation(string plane)
+        public static global::Relay.OperationDescriptor? ResolveOperation(string plane)
         {
             switch (plane)
             {
@@ -414,17 +414,17 @@ function scalarShape(type) {
     args.push(`maxCanonicalJsonBytes: ${bytes}`);
   }
   if (constraints.requiredStringProperties !== undefined) args.push(`requiredStringProperties: ${strings(constraints.requiredStringProperties)}`);
-  return `global::ConvoHop.Internal.TypeShape.Scalar(${args.join(", ")})`;
+  return `global::Relay.Internal.TypeShape.Scalar(${args.join(", ")})`;
 }
 
 function renderSchema(reached) {
   const shapes = reached.filter(type => type.kind !== "input").map(type => {
     let shape;
     if (type.kind === "object") {
-      shape = `global::ConvoHop.Internal.TypeShape.Object(new global::ConvoHop.Internal.FieldShape[]\n                {\n${type.fields.map(field =>
-        `                    new global::ConvoHop.Internal.FieldShape(${csString(field.name)}, ${csString(printTypeRef(field.type))}),\n`).join("")}                })`;
+      shape = `global::Relay.Internal.TypeShape.Object(new global::Relay.Internal.FieldShape[]\n                {\n${type.fields.map(field =>
+        `                    new global::Relay.Internal.FieldShape(${csString(field.name)}, ${csString(printTypeRef(field.type))}),\n`).join("")}                })`;
     } else if (type.kind === "enum") {
-      shape = `global::ConvoHop.Internal.TypeShape.Enum(new string[] { ${type.values.map(value => csString(value.name)).join(", ")} })`;
+      shape = `global::Relay.Internal.TypeShape.Enum(new string[] { ${type.values.map(value => csString(value.name)).join(", ")} })`;
     } else {
       shape = scalarShape(type);
     }
@@ -433,8 +433,8 @@ function renderSchema(reached) {
   return [`    internal static class GeneratedSchema
     {
         /// <summary>Output shapes keyed by GraphQL type name: objects, enums and scalars.</summary>
-        internal static readonly global::System.Collections.Generic.IReadOnlyDictionary<string, global::ConvoHop.Internal.TypeShape> Types =
-            new global::System.Collections.Generic.Dictionary<string, global::ConvoHop.Internal.TypeShape>(global::System.StringComparer.Ordinal)
+        internal static readonly global::System.Collections.Generic.IReadOnlyDictionary<string, global::Relay.Internal.TypeShape> Types =
+            new global::System.Collections.Generic.Dictionary<string, global::Relay.Internal.TypeShape>(global::System.StringComparer.Ordinal)
         {
 ${shapes.join("")}        };
     }
@@ -457,11 +457,11 @@ function isValueType(ref, types, where) {
 function renderJsonContext(operations, reached, types) {
   const serializable = new Set();
   for (const type of reached) {
-    if (type.kind === "object" || type.kind === "input") serializable.add(`global::ConvoHop.Models.${modelName(type.name)}`);
+    if (type.kind === "object" || type.kind === "input") serializable.add(`global::Relay.Models.${modelName(type.name)}`);
   }
   for (const operation of operations) serializable.add(serializableType(operation.result.type, types, operation.id));
   return [`    [${SERIALIZATION}.JsonSourceGenerationOptions(GenerationMode = ${SERIALIZATION}.JsonSourceGenerationMode.Metadata)]
-${[...serializable].map(cs => `    [${SERIALIZATION}.JsonSerializable(typeof(${cs}))]\n`).join("")}    internal sealed partial class ConvoHopJsonContext : ${SERIALIZATION}.JsonSerializerContext
+${[...serializable].map(cs => `    [${SERIALIZATION}.JsonSerializable(typeof(${cs}))]\n`).join("")}    internal sealed partial class RelayJsonContext : ${SERIALIZATION}.JsonSerializerContext
     {
     }
 `];
@@ -474,8 +474,8 @@ const PAGE_ORDER = { server: "Opaque", ascending: "Ascending", descending: "Desc
 const PAGE_FIELDS = ["complete", "refreshRequired", "nextCursor"];
 // The parameter names a plane API method may declare besides a context credential.
 const API_PARAMETERS = new Set(["input", "requestId", "cancellationToken"]);
-// A documentation ID: the compiler copies it unchecked, so the edge compile check needs no ConvoHopException.
-const EXCEPTION_CREF = "T:ConvoHop.ConvoHopException";
+// A documentation ID: the compiler copies it unchecked, so the edge compile check needs no RelayException.
+const EXCEPTION_CREF = "T:Relay.RelayException";
 const TASK = "global::System.Threading.Tasks.Task";
 const CANCELLATION_TOKEN = "global::System.Threading.CancellationToken";
 
@@ -630,7 +630,7 @@ function renderApiMethod(entry, types) {
     + (permit?.check === "null" ? `${pad}    if (${permit.parameter} is null) throw new global::System.ArgumentNullException(nameof(${permit.parameter}));\n` : "")
     + (permit?.check === "default" ? `${pad}    if (${permit.parameter}.ValueKind == global::System.Text.Json.JsonValueKind.Undefined) `
       + `throw new global::System.ArgumentException("Expected a credential, not a default JsonElement", nameof(${permit.parameter}));\n` : "");
-  const call = `_executor.ExecuteAsync(global::ConvoHop.Operations.${planeClass}.${member}, ${input ? "input" : "global::ConvoHop.NoInput.Value"}, `
+  const call = `_executor.ExecuteAsync(global::Relay.Operations.${planeClass}.${member}, ${input ? "input" : "global::Relay.NoInput.Value"}, `
     + `${requestId ? "requestId" : "null"}, ${permit ? permit.parameter : "null"}, cancellationToken)`;
   return `${text}${pad}public ${TASK}<${result}> ${member}Async(${parameters.join(", ")})\n${pad}{\n${check}${pad}    return ${call};\n${pad}}\n`;
 }
@@ -638,7 +638,7 @@ function renderApiMethod(entry, types) {
 function renderPagesMethod(entry, types) {
   const { operation, inputRequired, planeClass, member, pages } = entry;
   const { input: inputType, result } = descriptorTypes(operation, types);
-  const page = `global::ConvoHop.Models.${modelName(pages.page.name)}`;
+  const page = `global::Relay.Models.${modelName(pages.page.name)}`;
   const pad = "        ";
   const remarks = paragraphs([
     `Each page is requested when enumeration reaches it. Later requests set <c>${pages.cursorField}</c> to the previous page's <c>nextCursor</c>, and enumeration ends after the page whose <c>complete</c> is true. Each enumeration starts again from the input as it was when this method was called, and every request has a new request ID.`,
@@ -657,9 +657,9 @@ function renderPagesMethod(entry, types) {
   const pageMember = name => `page => page.${field(name)}`;
   return `${text}${pad}public global::System.Collections.Generic.IAsyncEnumerable<${page}> ${pages.method}(${inputType} input${inputRequired ? "" : " = null"}, ${CANCELLATION_TOKEN} cancellationToken = default)
 ${pad}{
-${pad}    return global::ConvoHop.Internal.PageSequence.Create<${inputType}, ${result}, ${page}>(
-${pad}        _executor, global::ConvoHop.Operations.${planeClass}.${member}, input, ${csString(pages.cursorField)},
-${pad}        global::ConvoHop.Generated.GeneratedSchema.Types[${csString(pages.cursorScalar)}], global::ConvoHop.Internal.PageOrder.${pages.order},
+${pad}    return global::Relay.Internal.PageSequence.Create<${inputType}, ${result}, ${page}>(
+${pad}        _executor, global::Relay.Operations.${planeClass}.${member}, input, ${csString(pages.cursorField)},
+${pad}        global::Relay.Generated.GeneratedSchema.Types[${csString(pages.cursorScalar)}], global::Relay.Internal.PageOrder.${pages.order},
 ${pad}        ${pages.accessor}, ${pageMember("complete")}, ${pageMember("refreshRequired")}, ${pageMember("nextCursor")},
 ${pad}        cancellationToken);
 ${pad}}
@@ -680,8 +680,8 @@ function renderApis(ir, described, types) {
     return docXml(`The <c>${xmlText(name)}</c> plane: ${xmlText(plane.summary ?? `the ${name} operations.`)}`, "    ")
       + "    /// <remarks>Obtain an instance from a client. Instances are thread-safe.</remarks>\n"
       + `    public sealed class ${className}\n    {\n`
-      + "        private readonly global::ConvoHop.Internal.IOperationExecutor _executor;\n\n"
-      + `        internal ${className}(global::ConvoHop.Internal.IOperationExecutor executor)\n        {\n`
+      + "        private readonly global::Relay.Internal.IOperationExecutor _executor;\n\n"
+      + `        internal ${className}(global::Relay.Internal.IOperationExecutor executor)\n        {\n`
       + "            _executor = executor ?? throw new global::System.ArgumentNullException(nameof(executor));\n        }\n"
       + methods.map(method => `\n${method}`).join("")
       + "    }\n";
@@ -690,7 +690,7 @@ function renderApis(ir, described, types) {
 
 export default defineEmitter({
   name: "csharp",
-  description: "C# models, operation descriptors and schema metadata for the ConvoHop .NET SDK",
+  description: "C# models, operation descriptors and schema metadata for the Relay .NET SDK",
   owns: [DEFAULT_DIRECTORY],
   emit(ir, { directory = DEFAULT_DIRECTORY, layers = DEFAULT_LAYERS } = {}) {
     if (!Array.isArray(layers) || layers.length === 0 || !layers.every(layer => LAYERS.has(layer))) {
@@ -703,15 +703,15 @@ export default defineEmitter({
     const apisHeader = "#pragma warning disable CS0618 // Deprecated operations stay callable.\n";
     const apis = renderApis(ir, describeApis(ir, operations, types), types);
     return [
-      file(directory, "Enums.cs", "ConvoHop.Models", renderEnums(enums)),
-      file(directory, "EnumConverters.cs", "ConvoHop.Generated", renderEnumConverters(enums), enumHeader),
-      file(directory, "Inputs.cs", "ConvoHop.Models", renderInputs(reached.filter(type => type.kind === "input"), types)),
-      file(directory, "Outputs.cs", "ConvoHop.Models", renderOutputs(reached.filter(type => type.kind === "object"), types)),
-      file(directory, "Operations.cs", "ConvoHop", renderOperations(ir, operations, types), operationsHeader),
-      file(directory, "ErrorCodes.cs", "ConvoHop", renderErrorCodes(ir)),
-      file(directory, "Schema.cs", "ConvoHop.Generated", renderSchema(reached)),
-      file(directory, "JsonContext.cs", "ConvoHop.Generated", renderJsonContext(operations, reached, types)),
-      file(directory, "Apis.cs", "ConvoHop.Api", apis, apisHeader),
+      file(directory, "Enums.cs", "Relay.Models", renderEnums(enums)),
+      file(directory, "EnumConverters.cs", "Relay.Generated", renderEnumConverters(enums), enumHeader),
+      file(directory, "Inputs.cs", "Relay.Models", renderInputs(reached.filter(type => type.kind === "input"), types)),
+      file(directory, "Outputs.cs", "Relay.Models", renderOutputs(reached.filter(type => type.kind === "object"), types)),
+      file(directory, "Operations.cs", "Relay", renderOperations(ir, operations, types), operationsHeader),
+      file(directory, "ErrorCodes.cs", "Relay", renderErrorCodes(ir)),
+      file(directory, "Schema.cs", "Relay.Generated", renderSchema(reached)),
+      file(directory, "JsonContext.cs", "Relay.Generated", renderJsonContext(operations, reached, types)),
+      file(directory, "Apis.cs", "Relay.Api", apis, apisHeader),
     ];
   },
 });

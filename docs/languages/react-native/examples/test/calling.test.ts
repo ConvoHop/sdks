@@ -1,13 +1,13 @@
 import assert from "node:assert/strict";
 import { randomUUID } from "node:crypto";
 import { beforeEach, test } from "node:test";
-import type { ConvoHopClient, LiveParticipationHandle } from "@convohop/client";
-import { setupMedia } from "@convohop/react-native/media";
+import type { RelayClient, LiveParticipationHandle } from "@instantrelay/client";
+import { setupMedia } from "@instantrelay/react-native/media";
 import { answerCalls, joinCall, leaveCall, type JoinedCall } from "../src/calling.ts";
 import { audioSession } from "./livekit.ts";
 import { native, onAndroid, type FakeModule } from "./native.ts";
 
-// A real call needs CallKit or Android's Telecom, LiveKit's native WebRTC and a ConvoHop project with calls. These
+// A real call needs CallKit or Android's Telecom, LiveKit's native WebRTC and a Relay project with calls. These
 // tests run joinCall, answerCalls and leaveCall with stand-ins for the native modules, the client and LiveKit's audio
 // session, mostly to check how they clean up when a step fails or the user signs out. The rooms never connect, so the
 // samples leave the microphone alone.
@@ -40,7 +40,7 @@ function participation({ connect = async () => {}, onLeave = () => {} } = {}) {
 }
 
 // A client whose live sessions join with join. opened lists the live sessions that the samples opened.
-function client(join: () => Promise<LiveParticipationHandle>, opened: string[] = []): ConvoHopClient {
+function client(join: () => Promise<LiveParticipationHandle>, opened: string[] = []): RelayClient {
   const fake = {
     async liveSession(liveSessionId: string) {
       opened.push(liveSessionId);
@@ -48,7 +48,7 @@ function client(join: () => Promise<LiveParticipationHandle>, opened: string[] =
     },
     liveAlerts: { list: async () => ({ items: [], nextCursor: null }) }, // watchRingingCalls needs it.
   };
-  return fake as unknown as ConvoHopClient;
+  return fake as unknown as RelayClient;
 }
 
 // A call that the user answered in the system's call UI.
@@ -59,7 +59,7 @@ const hungUp = (calls: FakeModule) => calls.log.filter(([method]) => method === 
 test("leaveCall leaves the call and stops its audio even when the system call won't hang up, and a retry hangs up", t =>
   onAndroid(async () => {
     const warn = t.mock.method(console, "warn", () => {});
-    const refused = new Error("ConvoHopCalls couldn't end the call");
+    const refused = new Error("RelayCalls couldn't end the call");
     const calls = native.linkCalls({ endCall: rejecting(refused) });
     const { handle, log } = participation();
     const system = answeredCall();
@@ -86,7 +86,7 @@ test("joinCall leaves a call that can't connect, and throws why even when hangin
   onAndroid(async () => {
     const warn = t.mock.method(console, "warn", () => {});
     const failed = new Error("LiveKit couldn't connect");
-    const refused = new Error("ConvoHopCalls couldn't end the call");
+    const refused = new Error("RelayCalls couldn't end the call");
     const calls = native.linkCalls({ endCall: rejecting(refused) });
     const { handle, log } = participation({ connect: rejecting(failed) });
     const system = answeredCall();
@@ -106,7 +106,7 @@ test("joinCall leaves a call that can't connect, and throws why even when hangin
 test("joinCall hangs up a call it can't join, and throws why even when hanging up fails", async t => {
   const warn = t.mock.method(console, "warn", () => {});
   const denied = new Error("Couldn't join the live session");
-  const refused = new Error("ConvoHopCalls couldn't end the call");
+  const refused = new Error("RelayCalls couldn't end the call");
   const calls = native.linkCalls({ endCall: rejecting(refused) });
   const system = answeredCall();
 

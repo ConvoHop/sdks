@@ -1,13 +1,13 @@
 // The only driver module that imports SDK packages: retarget the reference driver here.
 import { createRequire } from "node:module";
-import { ConvoHopClient, ConvoHopProblem, parseCursor, parseMessage } from "@convohop/client";
-import type { ConversationCursor, GraphqlTypes, ConversationMessage, ProtocolObject, RecoveryStorage } from "@convohop/client";
-import { ConvoHopManagementClient, ProjectServerClient, WebhookVerificationError, webhooks } from "@convohop/server";
-import type { WebhookVerificationCode } from "@convohop/server";
+import { RelayClient, RelayProblem, parseCursor, parseMessage } from "@instantrelay/client";
+import type { ConversationCursor, GraphqlTypes, ConversationMessage, ProtocolObject, RecoveryStorage } from "@instantrelay/client";
+import { RelayManagementClient, ProjectServerClient, WebhookVerificationError, webhooks } from "@instantrelay/server";
+import type { WebhookVerificationCode } from "@instantrelay/server";
 import { ParamsError, entries, integer, isRecord, optionalText, record, strings, text, type Args } from "./params.mjs";
 
 /** The driver's name in `hello`, which reports show. A driver that replaces this module names its own SDK. */
-export const DRIVER = { name: "convohop-typescript-reference", version: "0.1.0", language: "typescript" } as const;
+export const DRIVER = { name: "relay-typescript-reference", version: "0.1.0", language: "typescript" } as const;
 
 export type Role = "user" | "backend" | "management";
 export const ROLES: readonly Role[] = ["user", "backend", "management"];
@@ -23,7 +23,7 @@ export const FEATURES: readonly string[] = ["realtime", "realtime.reconnectPolic
 
 export function driverError(error: unknown): DriverError {
   // The SDK reports transport failures with status 0; the protocol uses null for "no authority HTTP status".
-  if (error instanceof ConvoHopProblem) return { code: error.code, status: error.status === 0 ? null : error.status,
+  if (error instanceof RelayProblem) return { code: error.code, status: error.status === 0 ? null : error.status,
     outcome: error.outcome, requestId: error.requestId,
     retryAfterMs: error.retryAfter === undefined ? null : error.retryAfter * 1000, message: error.message };
   return { code: "SDK_ERROR", status: null, outcome: null, requestId: null, retryAfterMs: null,
@@ -45,9 +45,9 @@ export interface ClientSpec {
 }
 
 export type SdkClient =
-  | { role: "user"; sdk: ConvoHopClient }
+  | { role: "user"; sdk: RelayClient }
   | { role: "backend"; sdk: ProjectServerClient }
-  | { role: "management"; sdk: ConvoHopManagementClient };
+  | { role: "management"; sdk: RelayManagementClient };
 
 function required(value: string | undefined, name: string): string {
   if (value === undefined) throw new ParamsError(`${name} is required for this role`);
@@ -59,13 +59,13 @@ export function createClient(spec: ClientSpec): SdkClient {
   const storage = spec.storage === undefined ? {} : { recoveryStorage: spec.storage };
   try {
     switch (spec.role) {
-      case "user": return { role: "user", sdk: new ConvoHopClient({ baseUrl: spec.baseUrl,
+      case "user": return { role: "user", sdk: new RelayClient({ baseUrl: spec.baseUrl,
         projectId: required(spec.projectId, "projectId"), incarnation: required(spec.incarnation, "incarnation"),
         principalId: required(spec.principalId, "principalId"), sessionToken: spec.credential, ...storage }) };
       case "backend": return { role: "backend", sdk: new ProjectServerClient({ baseUrl: spec.baseUrl,
         projectId: required(spec.projectId, "projectId"), incarnation: required(spec.incarnation, "incarnation"),
         backendKey: spec.credential, ...storage }) };
-      case "management": return { role: "management", sdk: new ConvoHopManagementClient({ baseUrl: spec.baseUrl,
+      case "management": return { role: "management", sdk: new RelayManagementClient({ baseUrl: spec.baseUrl,
         accessToken: spec.credential, actorId: required(spec.actorId, "actorId"), ...storage }) };
     }
   } catch (error) {
@@ -116,7 +116,7 @@ function own(args: Args): Args {
   return args;
 }
 
-const user = new Map<string, Operation<ConvoHopClient>>(Object.entries({
+const user = new Map<string, Operation<RelayClient>>(Object.entries({
   "route.initialize": client => client.initialize(),
   "conversations.get": (client, args) => client.getConversation(text(args, "conversationId")),
   "messages.list": (client, args) => client.messages(text(own(args), "conversationId"), optionalText(args, "beforeSequence")),
@@ -127,7 +127,7 @@ const user = new Map<string, Operation<ConvoHopClient>>(Object.entries({
   "events.list": (client, args) => client.events(text(args, "conversationId"), cursor(args)),
   "requests.resolve": (client, args) => client.requests.resolve(text(args, "requestId")),
   "requests.retry": (client, args) => client.requests.retry(text(args, "requestId")),
-} satisfies Record<string, Operation<ConvoHopClient>>));
+} satisfies Record<string, Operation<RelayClient>>));
 
 const backend = new Map<string, Operation<ProjectServerClient>>(Object.entries({
   "route.initialize": async client => { await client.initialize(); return null; },
@@ -157,10 +157,10 @@ const backend = new Map<string, Operation<ProjectServerClient>>(Object.entries({
   },
 } satisfies Record<string, Operation<ProjectServerClient>>));
 
-const management = new Map<string, Operation<ConvoHopManagementClient>>(Object.entries({
+const management = new Map<string, Operation<RelayManagementClient>>(Object.entries({
   "backendKeys.issue": (client, args) =>
     client.issueBackendKey(text(args, "projectId"), text(args, "name"), strings(args, "scopes"), text(args, "expiresAt")),
-} satisfies Record<string, Operation<ConvoHopManagementClient>>));
+} satisfies Record<string, Operation<RelayManagementClient>>));
 
 export const OPERATIONS: Readonly<Record<Role, readonly string[]>> = {
   user: [...user.keys()], backend: [...backend.keys()], management: [...management.keys()],
@@ -231,4 +231,4 @@ function version(name: string): string {
 }
 
 export const PACKAGES: Readonly<Record<string, string>> = Object.fromEntries(
-  ["@convohop/core", "@convohop/client", "@convohop/server"].map(name => [name, version(name)]));
+  ["@instantrelay/core", "@instantrelay/client", "@instantrelay/server"].map(name => [name, version(name)]));

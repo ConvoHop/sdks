@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "title": "ConvoHop SDK public surface",
+  "title": "Relay SDK public surface",
   "description": "The public API of one language's documented packages, as the language's extractor prints it. docgen extract adds $schema and stores it as docs/languages/<id>/surface.json. Extractors map their language's declarations onto these kinds. See docs/docs-pipeline.md.",
   "type": "object",
   "additionalProperties": false,

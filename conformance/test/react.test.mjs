@@ -6,9 +6,9 @@ import { randomUUID } from "node:crypto";
 import { after, afterEach, before, beforeEach, describe, test } from "node:test";
 import { StrictMode, createElement, version } from "react";
 import { act, create } from "react-test-renderer";
-import { ConvoHopClient, Outbox } from "@convohop/client";
-import { ConvoHopProvider, useConversation, useOutbox } from "@convohop/react";
-import { ProjectServerClient } from "@convohop/server";
+import { RelayClient, Outbox } from "@instantrelay/client";
+import { RelayProvider, useConversation, useOutbox } from "@instantrelay/react";
+import { ProjectServerClient } from "@instantrelay/server";
 import { ControlClient } from "../lib/control.mjs";
 import { startMockTarget } from "../mock/server.mjs";
 
@@ -47,7 +47,7 @@ async function principals(names) {
   for (const name of names) {
     const principalId = await backend.createPrincipal(`${name}-${randomUUID()}`);
     const { sessionToken } = await backend.issueSession(principalId, randomUUID());
-    users.push({ principalId, client: new ConvoHopClient({ baseUrl, projectId, incarnation, principalId, sessionToken }) });
+    users.push({ principalId, client: new RelayClient({ baseUrl, projectId, incarnation, principalId, sessionToken }) });
   }
   return { backend, users };
 }
@@ -58,7 +58,7 @@ async function mount(hook, client, outbox) {
   function Probe() { result.current = hook(); return null; }
   let renderer;
   await act(async () => {
-    renderer = create(createElement(StrictMode, null, createElement(ConvoHopProvider, { client, outbox }, createElement(Probe))),
+    renderer = create(createElement(StrictMode, null, createElement(RelayProvider, { client, outbox }, createElement(Probe))),
       { unstable_isConcurrent: true });
   });
   cleanup.push(() => act(async () => { renderer.unmount(); }));
@@ -80,8 +80,8 @@ const texts = view => view.messages.map(message => message.text);
 const receiptOf = (view, principalId) => view.receipts.find(receipt => receipt.principalId === principalId);
 
 // The Web workflow's oldest-react job installs another React line and sets this to its major.
-test("runs on the React line CI installed", { skip: process.env.CONVOHOP_REACT_MAJOR === undefined }, () => {
-  assert.equal(version.split(".")[0], process.env.CONVOHOP_REACT_MAJOR);
+test("runs on the React line CI installed", { skip: process.env.RELAY_REACT_MAJOR === undefined }, () => {
+  assert.equal(version.split(".")[0], process.env.RELAY_REACT_MAJOR);
 });
 
 describe("React hooks over the wire", () => {

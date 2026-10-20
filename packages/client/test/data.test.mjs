@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { ConvoHopClient, operationCatalog } from "@convohop/client";
+import { RelayClient, operationCatalog } from "@instantrelay/client";
 import { full, reply } from "../../../test/graphql-fixtures.mjs";
 
 const id = () => crypto.randomUUID();
@@ -17,7 +17,7 @@ const page = (type, items, fields = {}) => full(type, { items, complete: true, r
 function authority(handlers) {
   const values = new Map(), requests = [];
   const setup = { projectId: id(), incarnation: id(), principalId: id(), conversationId: id(), requests, values };
-  setup.client = new ConvoHopClient({ baseUrl: "http://localhost:18080", projectId: setup.projectId,
+  setup.client = new RelayClient({ baseUrl: "http://localhost:18080", projectId: setup.projectId,
     incarnation: setup.incarnation, principalId: setup.principalId, sessionToken: "data-test-session-secret",
     recoveryStorage: { getItem: key => values.get(key) ?? null, setItem: (key, value) => values.set(key, value),
       removeItem: key => values.delete(key) },

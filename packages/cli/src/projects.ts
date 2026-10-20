@@ -24,7 +24,7 @@ const projectsCreate: Command = {
   name: "projects create",
   summary: "Create a project in a deployment.",
   usage: "--deployment ID --name NAME --environment ENVIRONMENT --backend-principal-name NAME",
-  details: "Prints the request's reply. The project is ready when its operation succeeds: convohop operation get.",
+  details: "Prints the request's reply. The project is ready when its operation succeeds: relay operation get.",
   options: {
     deployment: text("ID", "The deployment that hosts the project."),
     name: text("NAME", "The project's name."),
@@ -77,13 +77,13 @@ const resolve: Command = {
   name: "resolve",
   summary: "Look up a request whose outcome is unknown, without sending it again.",
   usage: "--request ID [--plane management|communication] [--project ID] [--incarnation ID]",
-  details: "state is committed, accepted or notObservedYet. convohop doesn't keep requests after it exits, so it can't " +
+  details: "state is committed, accepted or notObservedYet. relay doesn't keep requests after it exits, so it can't " +
     "resend one; run the command again only when the authority hasn't seen the request.",
   options: {
     request: text("ID", "The request ID that an error reported."),
     plane: text("PLANE", "management (default) or communication."),
-    project: text("ID", "Communication requests: the project. Default: CONVOHOP_PROJECT_ID."),
-    incarnation: text("ID", "Communication requests: the project's incarnation. Default: CONVOHOP_INCARNATION."),
+    project: text("ID", "Communication requests: the project. Default: RELAY_PROJECT_ID."),
+    incarnation: text("ID", "Communication requests: the project's incarnation. Default: RELAY_INCARNATION."),
   },
   async run(context, args) {
     const requestId = requiredId(args, "request"), plane = args.string("plane") ?? "management";

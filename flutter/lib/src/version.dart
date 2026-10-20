@@ -1,2 +1,2 @@
 /// This package's version, the `version` in its pubspec.
-const convoHopPackageVersion = '0.0.0';
+const relayPackageVersion = '0.0.0';

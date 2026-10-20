@@ -1,4 +1,4 @@
-// Command conformance-driver adapts the ConvoHop Go server SDK to the
+// Command conformance-driver adapts the Relay Go server SDK to the
 // conformance runner. It speaks the driver protocol in
 // spec/conformance/driver-protocol.md: one JSON request per line on stdin and
 // one JSON response per line on stdout, which carries nothing else.
@@ -20,7 +20,7 @@ import (
 )
 
 const (
-	driverName    = "convohop-go"
+	driverName    = "relay-go"
 	driverVersion = "0.1.0"
 )
 

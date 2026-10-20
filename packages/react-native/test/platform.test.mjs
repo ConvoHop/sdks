@@ -1,8 +1,8 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { ConvoHopClient, Outbox } from "@convohop/client";
-import { validatePlatform } from "@convohop/core/internal";
-import { createPlatform } from "@convohop/react-native";
+import { RelayClient, Outbox } from "@instantrelay/client";
+import { validatePlatform } from "@instantrelay/core/internal";
+import { createPlatform } from "@instantrelay/react-native";
 import { AppState, appStateListenerCount, changeAppState, reported } from "react-native";
 import { reply } from "../../../test/graphql-fixtures.mjs";
 import { randomUUID } from "../dist/random.js";
@@ -28,7 +28,7 @@ function platformFor(t, options, status = "active") {
   return platform;
 }
 
-test("createPlatform gives @convohop/client each runtime service Hermes lacks", t => {
+test("createPlatform gives @instantrelay/client each runtime service Hermes lacks", t => {
   const platform = platformFor(t);
   assert.ok(Object.isFrozen(platform) && Object.isFrozen(platform.connectivity) && Object.isFrozen(platform.lifecycle));
   assert.deepEqual(Object.keys(platform).sort(), ["URL", "connectivity", "dispose", "lifecycle", "randomUUID", "sha256"]);
@@ -137,7 +137,7 @@ test("an outbox on the platform waits while NetInfo reports offline, and sends w
   const native = linkPlatform(), source = netInfo(), platform = platformFor(t, { netInfo: source }), incarnation = uuid();
   const requests = [];
   let sequence = 0;
-  const client = new ConvoHopClient({ baseUrl: "https://API.Example.test", projectId: uuid(), incarnation, principalId: uuid(),
+  const client = new RelayClient({ baseUrl: "https://API.Example.test", projectId: uuid(), incarnation, principalId: uuid(),
     sessionToken: "react-native-test-session", platform,
     fetch: async (url, options) => {
       const request = JSON.parse(options.body), conversationId = request.variables.input.conversationId, at = String(++sequence);

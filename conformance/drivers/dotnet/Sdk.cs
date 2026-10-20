@@ -6,9 +6,9 @@ using System.Text.Json;
 using System.Text.Json.Nodes;
 using System.Text.Json.Serialization.Metadata;
 using System.Threading.Tasks;
-using ConvoHop.Models;
+using Relay.Models;
 
-namespace ConvoHop.Conformance
+namespace Relay.Conformance
 {
     /// <summary>A protocol-level failure with its own code (spec/conformance/driver-protocol.md, Errors).</summary>
     internal sealed class ProtocolException : Exception
@@ -21,7 +21,7 @@ namespace ConvoHop.Conformance
     /// <summary>A constructed SDK client with the role it was created for.</summary>
     internal sealed class SdkClient
     {
-        private SdkClient(string role, ProjectServerClient? backend, ConvoHopManagementClient? management)
+        private SdkClient(string role, ProjectServerClient? backend, RelayManagementClient? management)
         {
             Role = role;
             Backend = backend;
@@ -32,11 +32,11 @@ namespace ConvoHop.Conformance
 
         public ProjectServerClient? Backend { get; }
 
-        public ConvoHopManagementClient? Management { get; }
+        public RelayManagementClient? Management { get; }
 
         public static SdkClient For(ProjectServerClient client) => new SdkClient(Sdk.BackendRole, client, null);
 
-        public static SdkClient For(ConvoHopManagementClient client) => new SdkClient(Sdk.ManagementRole, null, client);
+        public static SdkClient For(RelayManagementClient client) => new SdkClient(Sdk.ManagementRole, null, client);
     }
 
     /// <summary>The only driver file that calls the SDK: retarget the driver here.</summary>
@@ -134,7 +134,7 @@ namespace ConvoHop.Conformance
             }),
         };
 
-        private static readonly (string Name, Func<ConvoHopManagementClient, JsonElement, Task<object?>> Run)[] ManagementOperations =
+        private static readonly (string Name, Func<RelayManagementClient, JsonElement, Task<object?>> Run)[] ManagementOperations =
         {
             ("backendKeys.issue", async (client, args) =>
             {
@@ -159,7 +159,7 @@ namespace ConvoHop.Conformance
                 ?.InformationalVersion;
             // SourceLink appends "+<commit>"; reports show the package version.
             int metadata = version?.IndexOf('+') ?? -1;
-            return new Dictionary<string, string> { ["ConvoHop"] = metadata < 0 ? version ?? "unknown" : version!.Substring(0, metadata) };
+            return new Dictionary<string, string> { ["Relay"] = metadata < 0 ? version ?? "unknown" : version!.Substring(0, metadata) };
         }
 
         /// <summary>Constructs an SDK client without network I/O; constructor validation failures are INVALID_PARAMS.</summary>
@@ -180,7 +180,7 @@ namespace ConvoHop.Conformance
                             RecoveryStorage = storage,
                         }));
                     case ManagementRole:
-                        return SdkClient.For(new ConvoHopManagementClient(new ConvoHopManagementClientOptions
+                        return SdkClient.For(new RelayManagementClient(new RelayManagementClientOptions
                         {
                             BaseUrl = baseUrl,
                             AccessToken = credential,
@@ -207,7 +207,7 @@ namespace ConvoHop.Conformance
             }
             else if (client.Management != null)
             {
-                foreach ((string operation, Func<ConvoHopManagementClient, JsonElement, Task<object?>> run) in ManagementOperations)
+                foreach ((string operation, Func<RelayManagementClient, JsonElement, Task<object?>> run) in ManagementOperations)
                     if (operation == name) return run(client.Management, args);
             }
 
@@ -221,7 +221,7 @@ namespace ConvoHop.Conformance
         /// <summary>Language-neutral projection of an SDK failure (driver-protocol.md, sdkError).</summary>
         public static JsonObject Error(Exception error)
         {
-            if (error is ConvoHopException problem)
+            if (error is RelayException problem)
             {
                 return new JsonObject
                 {

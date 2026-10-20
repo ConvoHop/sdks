@@ -20,8 +20,8 @@ publication.apply {
             }
             developers {
                 developer {
-                    id.set("convohop")
-                    name.set("ConvoHop")
+                    id.set("instantrelay")
+                    name.set("Relay")
                 }
             }
             scm {

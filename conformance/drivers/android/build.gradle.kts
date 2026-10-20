@@ -8,7 +8,7 @@ plugins {
     application
 }
 
-version = providers.gradleProperty("convohopVersion").get()
+version = providers.gradleProperty("relayVersion").get()
 
 kotlin {
     compilerOptions {
@@ -23,12 +23,12 @@ java {
 }
 
 application {
-    applicationName = "convohop-conformance-android"
-    mainClass.set("com.convohop.conformance.DriverKt")
-    // hello reports the artifact under test: the runtime that convohop-android wraps, since an Android library can't
+    applicationName = "relay-conformance-android"
+    mainClass.set("dev.instantrelay.conformance.DriverKt")
+    // hello reports the artifact under test: the runtime that relay-android wraps, since an Android library can't
     // load on a host JVM. A stdio driver that mostly waits on the network needs only a small heap and a quick-starting JIT.
     applicationDefaultJvmArgs = listOf(
-        "-Dconvohop.conformance.package=com.convohop:convohop-android-core",
+        "-Dconvohop.conformance.package=dev.instantrelay:relay-android-core",
         "-Dconvohop.conformance.version=$version",
         "-Xmx256m",
         "-XX:+UseSerialGC",

@@ -1,7 +1,7 @@
 // The push quickstart's browser snippets. They need a browser with a push service, so the tests only typecheck them.
 
 // #region subscribe
-import { subscribePush, unsubscribePush, type PushRegistration } from "@convohop/client/push";
+import { subscribePush, unsubscribePush, type PushRegistration } from "@instantrelay/client/push";
 
 // Run it from a click, such as on a "Turn on notifications" button: subscribing asks for permission, and some
 // browsers only ask from a click. Once the user has allowed notifications, also run it when your app starts: it

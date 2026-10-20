@@ -1,14 +1,14 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { createHash } from "node:crypto";
-import { ConvoHopProblem, ConvoHopTransport } from "@convohop/core";
-import { jsonClone, parseURL, randomUUID, validatePlatform } from "@convohop/core/internal";
+import { RelayProblem, RelayTransport } from "@instantrelay/core";
+import { jsonClone, parseURL, randomUUID, validatePlatform } from "@instantrelay/core/internal";
 import { reply } from "../../../test/graphql-fixtures.mjs";
 
 const projectId = crypto.randomUUID(), baseUrl = "http://127.0.0.1:18080";
 function transport(respond, options = {}) {
   const values = new Map(), requests = [];
-  const client = new ConvoHopTransport({ baseUrl, credential: "fixture-private-session", namespace: crypto.randomUUID(),
+  const client = new RelayTransport({ baseUrl, credential: "fixture-private-session", namespace: crypto.randomUUID(),
     incarnation: crypto.randomUUID(),
     recoveryStorage: { getItem: key => values.get(key) ?? null, setItem: (key, value) => values.set(key, value), removeItem: key => values.delete(key) },
     fetch: async (_url, init) => { const request = JSON.parse(init.body); requests.push(request); return respond(request); }, ...options });
@@ -100,7 +100,7 @@ test("a redirected response is an unknown outcome, not the authority's answer", 
     const { client } = transport(request => Object.defineProperties(unproven(request), redirect));
     const requestId = crypto.randomUUID();
     await assert.rejects(client.execute("communication.sendMessage", projectId, send(), requestId), error =>
-      error instanceof ConvoHopProblem && error.code === "TRANSPORT_UNKNOWN" && error.outcome === "unknown" && error.status === 0 &&
+      error instanceof RelayProblem && error.code === "TRANSPORT_UNKNOWN" && error.outcome === "unknown" && error.status === 0 &&
       error.requestId === requestId && error.message === "Authority response was redirected; resolve the original request");
     assert.equal(client.recoveryStates[0].resolutionState, "unknown", "the original request stays resolvable");
   }

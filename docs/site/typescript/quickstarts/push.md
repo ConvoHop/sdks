@@ -1,10 +1,10 @@
 # TypeScript push notifications quickstart
 
-Send push notifications for ConvoHop messages and calls: `@convohop/server` turns notification events into APNs, FCM and Web Push requests, and you send them with your own push credentials and libraries. In browsers, `@convohop/client/push` subscribes to Web Push and shows the notifications.
+Send push notifications for Relay messages and calls: `@instantrelay/server` turns notification events into APNs, FCM and Web Push requests, and you send them with your own push credentials and libraries. In browsers, `@instantrelay/client/push` subscribes to Web Push and shows the notifications.
 
 ## Before you start
 
-ConvoHop doesn't send push notifications itself. You need:
+Relay doesn't send push notifications itself. You need:
 
 - A webhook endpoint that receives `notification.message`, `notification.call` and `notification.callCancelled` events, as the [webhooks quickstart](webhooks.md) shows. Each of these events is addressed to one recipient. Events arrive at least once and in any order, so deduplicate on `eventId` before you send.
 - The devices that your app registered for each user, in your own database.
@@ -22,7 +22,7 @@ import {
   type FcmRequest,
   type WebhookNotificationEvent,
   type WebPushRequest,
-} from "@convohop/server";
+} from "@instantrelay/server";
 
 // The devices your app registered for a user, from your own database.
 export type Device =
@@ -155,10 +155,10 @@ iOS requires an app to report every VoIP push to CallKit as an incoming call, so
 
 ## Subscribe a browser
 
-`@convohop/client/push` subscribes the browser with your VAPID public key and gives you the registration to store:
+`@instantrelay/client/push` subscribes the browser with your VAPID public key and gives you the registration to store:
 
 ```ts snippet=docs/languages/typescript/examples/src/browser-push.ts#subscribe
-import { subscribePush, unsubscribePush, type PushRegistration } from "@convohop/client/push";
+import { subscribePush, unsubscribePush, type PushRegistration } from "@instantrelay/client/push";
 
 // Run it from a click, such as on a "Turn on notifications" button: subscribing asks for permission, and some
 // browsers only ask from a click. Once the user has allowed notifications, also run it when your app starts: it
@@ -194,13 +194,13 @@ Your endpoint stores the registration's `subscription` as one of the signed-in u
 The service worker shows each push, and opens its conversation when the user clicks it:
 
 ```ts snippet=docs/languages/typescript/examples/src/service-worker.ts#service-worker
-import { handleNotificationClick, handlePushEvent } from "@convohop/client/push";
+import { handleNotificationClick, handlePushEvent } from "@instantrelay/client/push";
 
 declare const self: ServiceWorkerGlobalScope;
 
 self.addEventListener("push", event =>
   handlePushEvent(self.registration, event, {
-    // Pushes that aren't ConvoHop notifications end here, including your app's own. Browsers expect every push to
+    // Pushes that aren't Relay notifications end here, including your app's own. Browsers expect every push to
     // show a notification, so show one.
     onError: () => self.registration.showNotification("New activity", { tag: "app-activity" }),
   }),
@@ -214,11 +214,11 @@ self.addEventListener("notificationclick", event => {
 });
 ```
 
-`handlePushEvent` checks each push against the push payload contract and shows its notification. Each notification is tagged with its message or call, so a later one for the same message or call replaces it. A repeated event, or a call that was answered or declined, replaces it silently, and a missed call replaces the ring with a missed-call notification. Browsers expect a notification for every push, so it shows one even for a repeat, and the sample's `onError` shows one for pushes that aren't ConvoHop notifications. It remembers events and cancelled rings only while the browser keeps the service worker running. The default titles are English. Pass `render` to show your own text.
+`handlePushEvent` checks each push against the push payload contract and shows its notification. Each notification is tagged with its message or call, so a later one for the same message or call replaces it. A repeated event, or a call that was answered or declined, replaces it silently, and a missed call replaces the ring with a missed-call notification. Browsers expect a notification for every push, so it shows one even for a repeat, and the sample's `onError` shows one for pushes that aren't Relay notifications. It remembers events and cancelled rings only while the browser keeps the service worker running. The default titles are English. Pass `render` to show your own text.
 
 `handleNotificationClick` resolves your URL against the service worker's location, then focuses a window that already shows it or opens one. It refuses a URL on another origin.
 
-Build the service worker with your app's bundler, which resolves `@convohop/client/push`. That entry point has no dependencies. In TypeScript, compile the service worker with the `WebWorker` library instead of the DOM's, as the examples' [`tsconfig.worker.json`](https://github.com/ConvoHop/sdks/blob/main/docs/languages/typescript/examples/tsconfig.worker.json) does.
+Build the service worker with your app's bundler, which resolves `@instantrelay/client/push`. That entry point has no dependencies. In TypeScript, compile the service worker with the `WebWorker` library instead of the DOM's, as the examples' [`tsconfig.worker.json`](https://github.com/ConvoHop/sdks/blob/main/docs/languages/typescript/examples/tsconfig.worker.json) does.
 
 ## How the samples are tested
 
@@ -229,5 +229,5 @@ A second test runs the service worker on every Web Push request of the contract:
 ## Next steps
 
 - [`push` reference](../reference/server.md#push-constant): every builder and its options.
-- [`@convohop/client/push` reference](../reference/client-push.md): subscribing, and showing and opening notifications.
+- [`@instantrelay/client/push` reference](../reference/client-push.md): subscribing, and showing and opening notifications.
 - [Calling quickstart](calling.md): start the calls that these notifications ring.

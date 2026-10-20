@@ -73,8 +73,8 @@ query CommunicationLiveSessionAlerts($context: RequestContextInput!, $input: Liv
 
 | Language | Members |
 | --- | --- |
-| [TypeScript](../../typescript/reference/operations.md) | [`ConvoHopClient.liveAlerts.list`](../../typescript/reference/client.md#convohopclientlivealertslist-property) |
-| [Swift](../../swift/reference/operations.md) | [`ConvoHopClient.liveAlerts`](../../swift/reference/convohop.md#convohopclientlivealerts-method) |
-| [Android](../../android/reference/operations.md) | [`ConvoHopClient.liveAlerts.list`](../../android/reference/android-core.md#convohopclientlivealertslist-method) |
-| [Flutter](../../flutter/reference/operations.md) | [`LiveAlerts.list`](../../flutter/reference/convohop.md#livealertslist-method), [`CommunicationOperations.liveSessionAlerts`](../../flutter/reference/convohop.md#communicationoperationslivesessionalerts-method) |
-| [React Native](../../react-native/reference/operations.md) | [`ConvoHopClient.liveAlerts.list`](../../react-native/reference/client.md#convohopclientlivealertslist-property), [`watchRingingCalls`](../../react-native/reference/react-native.md#watchringingcalls-function) |
+| [TypeScript](../../typescript/reference/operations.md) | [`RelayClient.liveAlerts.list`](../../typescript/reference/client.md#relayclientlivealertslist-property) |
+| [Swift](../../swift/reference/operations.md) | [`RelayClient.liveAlerts`](../../swift/reference/relay.md#relayclientlivealerts-method) |
+| [Android](../../android/reference/operations.md) | [`RelayClient.liveAlerts.list`](../../android/reference/android-core.md#relayclientlivealertslist-method) |
+| [Flutter](../../flutter/reference/operations.md) | [`LiveAlerts.list`](../../flutter/reference/instantrelay.md#livealertslist-method), [`CommunicationOperations.liveSessionAlerts`](../../flutter/reference/instantrelay.md#communicationoperationslivesessionalerts-method) |
+| [React Native](../../react-native/reference/operations.md) | [`RelayClient.liveAlerts.list`](../../react-native/reference/client.md#relayclientlivealertslist-property), [`watchRingingCalls`](../../react-native/reference/react-native.md#watchringingcalls-function) |

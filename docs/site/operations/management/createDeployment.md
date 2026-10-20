@@ -134,8 +134,8 @@ mutation ManagementCreateDeployment($context: RequestContextInput!, $input: Crea
 
 | Language | Members |
 | --- | --- |
-| [TypeScript](../../typescript/reference/operations.md) | [`ConvoHopManagementClient.createDeployment`](../../typescript/reference/server.md#convohopmanagementclientcreatedeployment-method) |
-| [Python](../../python/reference/operations.md) | [`ConvoHopManagement.create_deployment`](../../python/reference/convohop.md#convohopmanagementcreate_deployment-method), [`AsyncConvoHopManagement.create_deployment`](../../python/reference/convohop.md#asyncconvohopmanagementcreate_deployment-method) |
-| [.NET](../../dotnet/reference/operations.md) | [`ConvoHopManagementClient.CreateDeploymentAsync`](../../dotnet/reference/convohop.md#convohopmanagementclientcreatedeploymentasync-method), [`ManagementApi.CreateDeploymentAsync`](../../dotnet/reference/api.md#managementapicreatedeploymentasync-method) |
+| [TypeScript](../../typescript/reference/operations.md) | [`RelayManagementClient.createDeployment`](../../typescript/reference/server.md#relaymanagementclientcreatedeployment-method) |
+| [Python](../../python/reference/operations.md) | [`RelayManagement.create_deployment`](../../python/reference/instantrelay.md#relaymanagementcreate_deployment-method), [`AsyncRelayManagement.create_deployment`](../../python/reference/instantrelay.md#asyncrelaymanagementcreate_deployment-method) |
+| [.NET](../../dotnet/reference/operations.md) | [`RelayManagementClient.CreateDeploymentAsync`](../../dotnet/reference/relay.md#relaymanagementclientcreatedeploymentasync-method), [`ManagementApi.CreateDeploymentAsync`](../../dotnet/reference/api.md#managementapicreatedeploymentasync-method) |
 | [Java and Kotlin](../../jvm/reference/operations.md) | [`ManagementApi.createDeployment`](../../jvm/reference/server.md#managementapicreatedeployment-method), [`ManagementSuspendApi.createDeployment`](../../jvm/reference/server-kotlin.md#managementsuspendapicreatedeployment-method) |
-| [Go](../../go/reference/operations.md) | [`ManagementClient.CreateDeployment`](../../go/reference/convohop.md#managementclientcreatedeployment-method) |
+| [Go](../../go/reference/operations.md) | [`ManagementClient.CreateDeployment`](../../go/reference/relay.md#managementclientcreatedeployment-method) |

@@ -1,27 +1,27 @@
 # React Native SDK
 
-`@convohop/react-native` runs the ConvoHop client SDK, `@convohop/client`, in React Native apps on Android and iOS. The client runs one signed-in user's session in your app: conversations and their realtime events, a local conversation store, an offline outbox with optimistic sends, read receipts, typing and calls. The package adds what React Native needs around it: the platform that the client runs on in Hermes, push registration and notifications through APNs, PushKit and FCM, calls in CallKit and Android's Telecom, and call media through LiveKit's React Native SDK.
+`@instantrelay/react-native` runs the Relay client SDK, `@instantrelay/client`, in React Native apps on Android and iOS. The client runs one signed-in user's session in your app: conversations and their realtime events, a local conversation store, an offline outbox with optimistic sends, read receipts, typing and calls. The package adds what React Native needs around it: the platform that the client runs on in Hermes, push registration and notifications through APNs, PushKit and FCM, calls in CallKit and Android's Telecom, and call media through LiveKit's React Native SDK.
 
 ## How it fits in
 
 1. Your users sign in to your app with your own authentication.
-2. Your backend uses a server SDK to map each user to a ConvoHop principal and issue a short-lived session for the user's device, as each [server quickstart](../index.md#quickstarts) shows.
-3. Your app passes the session to `@convohop/client`, on the platform from `@convohop/react-native`. The client sends, watches and calls as that one user, and renews the session through your backend before it expires.
-4. ConvoHop sends signed webhooks to your backend, which builds APNs and FCM requests from notification events with a server SDK and sends them with your own push credentials. `@convohop/react-native` registers the device for them, and its iOS and Android code shows their notifications and rings for calls, even while JavaScript isn't running.
+2. Your backend uses a server SDK to map each user to a Relay principal and issue a short-lived session for the user's device, as each [server quickstart](../index.md#quickstarts) shows.
+3. Your app passes the session to `@instantrelay/client`, on the platform from `@instantrelay/react-native`. The client sends, watches and calls as that one user, and renews the session through your backend before it expires.
+4. Relay sends signed webhooks to your backend, which builds APNs and FCM requests from notification events with a server SDK and sends them with your own push credentials. `@instantrelay/react-native` registers the device for them, and its iOS and Android code shows their notifications and rings for calls, even while JavaScript isn't running.
 
 The app holds only the user's short-lived session. A backend key or an operator credential never belongs in app code, bundles, storage, URLs or logs.
 
 ## Install
 
-The packages aren't on a package registry yet. [Build them from source](https://github.com/ConvoHop/sdks#build-from-source), or [install a GitHub release](https://github.com/ConvoHop/sdks#install-a-release) once one is published. `@convohop/react-native` needs React Native 0.76 or later with the New Architecture, and Android 7.0 or later. On iOS, it needs React Native 0.84 or later and iOS 15.1 or later. `react-native` and `@convohop/client` are its peer dependencies. Push and calls also need the [iOS setup](https://github.com/ConvoHop/sdks/blob/main/packages/react-native/README.md#ios) and the [Android setup](https://github.com/ConvoHop/sdks/blob/main/packages/react-native/README.md#android) that its README describes.
+The packages aren't on a package registry yet. [Build them from source](https://github.com/ConvoHop/sdks#build-from-source), or [install a GitHub release](https://github.com/ConvoHop/sdks#install-a-release) once one is published. `@instantrelay/react-native` needs React Native 0.76 or later with the New Architecture, and Android 7.0 or later. On iOS, it needs React Native 0.84 or later and iOS 15.1 or later. `react-native` and `@instantrelay/client` are its peer dependencies. Push and calls also need the [iOS setup](https://github.com/ConvoHop/sdks/blob/main/packages/react-native/README.md#ios) and the [Android setup](https://github.com/ConvoHop/sdks/blob/main/packages/react-native/README.md#android) that its README describes.
 
-`@convohop/react-native/media` ships with `@convohop/react-native`, and connects call media through LiveKit's React Native SDK: `@livekit/react-native` 3, `@livekit/react-native-webrtc` 144.2 or later and `livekit-client` 2.22.3 or later. Apps without calls don't install them. `@convohop/react`'s hooks work in React Native too, except `useMediaConnection`, which needs a browser. Import types and errors, such as `ConvoHopProblem`, from `@convohop/client`, never from `@convohop/core`.
+`@instantrelay/react-native/media` ships with `@instantrelay/react-native`, and connects call media through LiveKit's React Native SDK: `@livekit/react-native` 3, `@livekit/react-native-webrtc` 144.2 or later and `livekit-client` 2.22.3 or later. Apps without calls don't install them. `@instantrelay/react`'s hooks work in React Native too, except `useMediaConnection`, which needs a browser. Import types and errors, such as `RelayProblem`, from `@instantrelay/client`, never from `@instantrelay/core`.
 
 ## Tested examples
 
 Every React Native sample in these docs is a region of a file in [the examples package](https://github.com/ConvoHop/sdks/tree/main/docs/languages/react-native/examples), which CI typechecks and tests on every change:
 
-- The client samples run against the conformance mock, a local stand-in for the ConvoHop API, including dropped connections, with stand-ins for React Native, AsyncStorage and NetInfo. Session renewal runs against a local stand-in for your backend.
+- The client samples run against the conformance mock, a local stand-in for the Relay API, including dropped connections, with stand-ins for React Native, AsyncStorage and NetInfo. Session renewal runs against a local stand-in for your backend.
 - The push samples run against stand-ins for the package's native modules, which answer the way its iOS and Android code does, with your backend's endpoints on a local HTTP server. Reading a message push's text runs against the conformance mock.
 - Joining, answering and leaving a call run against stand-ins for the package's native modules, the client and LiveKit's audio session, including when a step fails or the user signs out while a call joins. A real call needs CallKit or Android's Telecom and LiveKit's native WebRTC, so CI only typechecks the other calling samples.
 - The React samples need React Native's renderer, so CI only typechecks them.
@@ -32,10 +32,10 @@ The tests run on Node.js, not Hermes. They don't cover push delivery through APN
 
 | Package | Layer | Runtime | Summary |
 | --- | --- | --- | --- |
-| [`@convohop/react-native`](reference/react-native.md) | Client | React Native 0.76 or later with the New Architecture: Android 7.0 or later, and iOS 15.1 or later with React Native 0.84 or later. | React Native support for the client SDK: the platform it needs on Hermes, push registration and notifications through APNs, PushKit and FCM, and calls in CallKit and Android's Telecom. |
-| [`@convohop/react-native/media`](reference/media.md) | Client | As @convohop/react-native, with @livekit/react-native 3, @livekit/react-native-webrtc 144.2 or later and livekit-client 2.22.3 or later. | Call media through LiveKit's React Native SDK: set LiveKit up, then connect each admitted participation to a LiveKit room. It ships with @convohop/react-native. |
-| [`@convohop/client`](reference/client.md) | Client | React Native 0.76 or later, with the platform from @convohop/react-native. | Client SDK for apps on end-user devices: one signed-in user's conversations, realtime events and calls. In React Native, it runs on the platform from @convohop/react-native. |
-| [`@convohop/react`](reference/react.md) | Client | React 18 or later, in React Native 0.76 or later. | React hooks over the client SDK: conversations with offline-safe sends, typing, session renewal and calls. In React Native, connect call media with @convohop/react-native/media: useMediaConnection needs a browser. |
+| [`@instantrelay/react-native`](reference/react-native.md) | Client | React Native 0.76 or later with the New Architecture: Android 7.0 or later, and iOS 15.1 or later with React Native 0.84 or later. | React Native support for the client SDK: the platform it needs on Hermes, push registration and notifications through APNs, PushKit and FCM, and calls in CallKit and Android's Telecom. |
+| [`@instantrelay/react-native/media`](reference/media.md) | Client | As @instantrelay/react-native, with @livekit/react-native 3, @livekit/react-native-webrtc 144.2 or later and livekit-client 2.22.3 or later. | Call media through LiveKit's React Native SDK: set LiveKit up, then connect each admitted participation to a LiveKit room. It ships with @instantrelay/react-native. |
+| [`@instantrelay/client`](reference/client.md) | Client | React Native 0.76 or later, with the platform from @instantrelay/react-native. | Client SDK for apps on end-user devices: one signed-in user's conversations, realtime events and calls. In React Native, it runs on the platform from @instantrelay/react-native. |
+| [`@instantrelay/react`](reference/react.md) | Client | React 18 or later, in React Native 0.76 or later. | React hooks over the client SDK: conversations with offline-safe sends, typing, session renewal and calls. In React Native, connect call media with @instantrelay/react-native/media: useMediaConnection needs a browser. |
 
 ## Quickstarts
 
@@ -53,19 +53,19 @@ The tests run on Node.js, not Hermes. They don't cover push delivery through APN
 
 # React Native client quickstart
 
-Use ConvoHop in your users' React Native apps with `@convohop/client` and `@convohop/react-native`: connect with the session your backend issued, show a conversation and keep it current, and send messages that survive dropped connections and the app's restarts. `@convohop/react` offers the same as React hooks.
+Use Relay in your users' React Native apps with `@instantrelay/client` and `@instantrelay/react-native`: connect with the session your backend issued, show a conversation and keep it current, and send messages that survive dropped connections and the app's restarts. `@instantrelay/react` offers the same as React hooks.
 
 ## Before you start
 
-Your backend signs the user in and returns a session, as each [server quickstart](../index.md#quickstarts) shows. The app never holds a backend key. Install `@convohop/client` and `@convohop/react-native` as the [overview](index.md#install) describes. The samples also use AsyncStorage 3, `@react-native-async-storage/async-storage`, and NetInfo, `@react-native-community/netinfo`. `@convohop/react` needs React 18 or later.
+Your backend signs the user in and returns a session, as each [server quickstart](../index.md#quickstarts) shows. The app never holds a backend key. Install `@instantrelay/client` and `@instantrelay/react-native` as the [overview](index.md#install) describes. The samples also use AsyncStorage 3, `@react-native-async-storage/async-storage`, and NetInfo, `@react-native-community/netinfo`. `@instantrelay/react` needs React 18 or later.
 
 ## Connect
 
 ```ts snippet=docs/languages/react-native/examples/src/client.ts#connect
 import type { AsyncStorage } from "@react-native-async-storage/async-storage";
 import NetInfo from "@react-native-community/netinfo";
-import { ConvoHopClient, type SessionBootstrap, type SessionRefresh } from "@convohop/client";
-import { createPlatform } from "@convohop/react-native";
+import { RelayClient, type SessionBootstrap, type SessionRefresh } from "@instantrelay/client";
+import { createPlatform } from "@instantrelay/react-native";
 
 // One for the app, shared by its clients: crypto and URL for Hermes, NetInfo's connectivity and AppState's lifecycle.
 export const platform = createPlatform({ netInfo: NetInfo });
@@ -77,9 +77,9 @@ export async function connectUser(
   bootstrap: UserBootstrap,
   storage: AsyncStorage, // One createAsyncStorage("convohop") for the app. It keeps unsent messages, never tokens.
   sessionRefresh?: SessionRefresh, // Optional: renews the session before it expires.
-): Promise<ConvoHopClient> {
+): Promise<RelayClient> {
   await claimStorage(storage, bootstrap);
-  const client = new ConvoHopClient({
+  const client = new RelayClient({
     baseUrl: bootstrap.baseUrl,
     projectId: bootstrap.projectId,
     incarnation: bootstrap.session.incarnation,
@@ -112,9 +112,9 @@ async function claimStorage(storage: AsyncStorage, { projectId, session }: UserB
 Sessions expire, after 15 minutes by default. To renew the user's session before it does, pass `renewSession` to `connectUser` as `sessionRefresh`, then call `keepSessionAlive`:
 
 ```ts snippet=docs/languages/react-native/examples/src/client.ts#renew
-import type { SessionMetadata } from "@convohop/client";
+import type { SessionMetadata } from "@instantrelay/client";
 
-// Your backend, and the user's credential for it from your app's own sign-in. Never a ConvoHop backend key.
+// Your backend, and the user's credential for it from your app's own sign-in. Never a Relay backend key.
 export interface Backend {
   url: string;
   appToken: string;
@@ -126,7 +126,7 @@ export async function renewSession(backend: Backend, current: Readonly<SessionMe
   const timeout = new AbortController();
   const timer = setTimeout(() => timeout.abort(), 10_000); // The client pauses its streams until this settles.
   try {
-    // Your backend's endpoint. It renews the session with @convohop/server.
+    // Your backend's endpoint. It renews the session with @instantrelay/server.
     const response = await fetch(`${backend.url}/convohop/session/renew`, {
       method: "POST",
       headers: { "content-type": "application/json", authorization: `Bearer ${backend.appToken}` },
@@ -134,30 +134,30 @@ export async function renewSession(backend: Backend, current: Readonly<SessionMe
       signal: timeout.signal,
     });
     if (!response.ok) throw new Error(`Session renewal failed with HTTP ${response.status}`);
-    return await response.json(); // The client checks the renewed session with ConvoHop before it uses it.
+    return await response.json(); // The client checks the renewed session with Relay before it uses it.
   } finally {
     clearTimeout(timer);
   }
 }
 
 // Renews the session a minute before it expires, and after each renewal, until you call the returned function.
-export function keepSessionAlive(client: ConvoHopClient): () => void {
+export function keepSessionAlive(client: RelayClient): () => void {
   return client.scheduleSessionRefresh({ onError: error => console.warn("Couldn't renew the session", error) });
 }
 ```
 
 The renewal endpoint is your backend's, behind your app's own sign-in. It renews the session with the server SDK, as with [`sessions.renew`](../typescript/reference/server.md#projectserverclientsessionsrenew-property) in TypeScript, taking the principal and device from that sign-in rather than from the request, and returns the `SessionBootstrap` that the renewal resolves with.
 
-The client pauses its streams and lets its requests finish before it calls `sessionRefresh`, and checks the renewed session with ConvoHop before it uses it. Don't call the client from `sessionRefresh`: the call would wait for the renewal. While the app is in the background, a renewal can come due without running, so the client checks for one when the app returns to the foreground. [Session credential lifetime](https://github.com/ConvoHop/sdks/blob/main/packages/client/README.md#session-credential-lifetime) covers what your endpoint must check, and what happens when a renewal fails.
+The client pauses its streams and lets its requests finish before it calls `sessionRefresh`, and checks the renewed session with Relay before it uses it. Don't call the client from `sessionRefresh`: the call would wait for the renewal. While the app is in the background, a renewal can come due without running, so the client checks for one when the app returns to the foreground. [Session credential lifetime](https://github.com/ConvoHop/sdks/blob/main/packages/client/README.md#session-credential-lifetime) covers what your endpoint must check, and what happens when a renewal fails.
 
 ## Show a conversation
 
 ```ts snippet=docs/languages/react-native/examples/src/client.ts#store
-import { ConversationStore, Outbox, type ConversationSnapshot } from "@convohop/client";
+import { ConversationStore, Outbox, type ConversationSnapshot } from "@instantrelay/client";
 
 // One outbox for the signed-in user. With persist, unsent messages survive the app's restarts in the client's
 // asyncRecoveryStorage. It waits while the device is offline. Close it when the user signs out.
-export function openOutbox(client: ConvoHopClient): Outbox {
+export function openOutbox(client: RelayClient): Outbox {
   return new Outbox(client, {
     persist: true,
     onError: error => console.warn("A message wasn't sent", error),
@@ -166,7 +166,7 @@ export function openOutbox(client: ConvoHopClient): Outbox {
 
 // Loads a conversation, keeps it current and renders every change. Close the store when the screen goes away.
 export async function showConversation(
-  client: ConvoHopClient,
+  client: RelayClient,
   outbox: Outbox,
   conversationId: string,
   render: (snapshot: ConversationSnapshot) => void,
@@ -191,9 +191,9 @@ export async function showConversation(
 ## Send a message
 
 ```ts snippet=docs/languages/react-native/examples/src/client.ts#outbox
-import type { OutboxEntry } from "@convohop/client";
+import type { OutboxEntry } from "@instantrelay/client";
 
-// The message shows in snapshot.pending at once, and moves to snapshot.messages once ConvoHop commits it.
+// The message shows in snapshot.pending at once, and moves to snapshot.messages once Relay commits it.
 export function sendDraft(store: ConversationStore, draft: string): OutboxEntry | null {
   const text = draft.trim();
   return text ? store.send(text) : null;
@@ -234,21 +234,21 @@ With push notifications or calls, stop them before you call `signOut`, as the [p
 
 ## Use React
 
-`@convohop/react` imports only `react` and `@convohop/client`, so its hooks work in React Native. Give its provider the user's client and outbox:
+`@instantrelay/react` imports only `react` and `@instantrelay/client`, so its hooks work in React Native. Give its provider the user's client and outbox:
 
 ```tsx snippet=docs/languages/react-native/examples/src/react.tsx#provider
 import type { ReactNode } from "react";
-import type { ConvoHopClient, Outbox } from "@convohop/client";
-import { ConvoHopProvider, useSessionRefresh } from "@convohop/react";
+import type { RelayClient, Outbox } from "@instantrelay/client";
+import { RelayProvider, useSessionRefresh } from "@instantrelay/react";
 
 // Wrap the signed-in screens. When the user signs in, create the client with connectUser, passing renewSession as
 // sessionRefresh, and the outbox with openOutbox. When they sign out, unmount this, then call signOut.
-export function SignedIn({ client, outbox, children }: { client: ConvoHopClient; outbox: Outbox; children: ReactNode }) {
+export function SignedIn({ client, outbox, children }: { client: RelayClient; outbox: Outbox; children: ReactNode }) {
   return (
-    <ConvoHopProvider client={client} outbox={outbox}>
+    <RelayProvider client={client} outbox={outbox}>
       <KeepSessionAlive />
       {children}
-    </ConvoHopProvider>
+    </RelayProvider>
   );
 }
 
@@ -266,7 +266,7 @@ The provider doesn't own the client or the outbox. `useSessionRefresh` renews th
 ```tsx snippet=docs/languages/react-native/examples/src/react.tsx#conversation
 import { useState } from "react";
 import { Button, FlatList, Text, TextInput, View } from "react-native";
-import { useConversation, useTyping } from "@convohop/react";
+import { useConversation, useTyping } from "@instantrelay/react";
 import { pendingLabel } from "./client.ts";
 
 // typing: whether the project has typing indicators, from (await client.capabilities()).features?.typing.
@@ -326,11 +326,11 @@ The view's `status` is `idle` until the component's first effect creates the sto
 `watch` replays the conversation's events from the cursor it saved last time, or from the start, and then delivers new events as they happen. Events say what changed, so read the current messages when one did.
 
 ```ts snippet=docs/languages/react-native/examples/src/client.ts#watch
-import type { ConversationMessage, ConversationStream } from "@convohop/client";
+import type { ConversationMessage, ConversationStream } from "@instantrelay/client";
 
 // Renders the latest messages and keeps them current. Close the stream when the screen goes away.
 export async function watchConversation(
-  client: ConvoHopClient,
+  client: RelayClient,
   conversationId: string,
   render: (messages: ConversationMessage[]) => void,
 ): Promise<ConversationStream> {
@@ -354,7 +354,7 @@ Close the stream when the screen goes away. If the saved cursor can't be used an
 ```ts snippet=docs/languages/react-native/examples/src/client.ts#send
 // Keep requestId with the draft until the send succeeds, and reuse it if you send the draft again.
 export async function sendMessage(
-  client: ConvoHopClient,
+  client: RelayClient,
   conversationId: string,
   text: string,
   requestId: string,
@@ -365,18 +365,18 @@ export async function sendMessage(
 
 // Finishes the sends that an earlier launch left unconfirmed, with their request IDs. Call it after connectUser if you
 // send with client.send. The outbox finishes its own sends, so don't call it beside one.
-export async function recoverSends(client: ConvoHopClient): Promise<void> {
+export async function recoverSends(client: RelayClient): Promise<void> {
   await client.recoverPending(error => console.warn("Couldn't recover an earlier send", error));
 }
 ```
 
-Create the request ID when the user writes the message, for example with `platform.randomUUID()`, and keep it with the draft. If the connection drops during a send, `client.send` throws a `ConvoHopProblem` whose `outcome` is `unknown`. Sending the same text again with the same request ID posts it once, whether or not the first attempt reached the authority. The SDK sends a request at most three times, within 60 seconds of the first attempt. Reusing a request ID with different text throws `IDEMPOTENCY_CONFLICT`.
+Create the request ID when the user writes the message, for example with `platform.randomUUID()`, and keep it with the draft. If the connection drops during a send, `client.send` throws a `RelayProblem` whose `outcome` is `unknown`. Sending the same text again with the same request ID posts it once, whether or not the first attempt reached the authority. The SDK sends a request at most three times, within 60 seconds of the first attempt. Reusing a request ID with different text throws `IDEMPOTENCY_CONFLICT`.
 
 ## How the samples are tested
 
-The samples run on Node.js against the conformance mock, a local stand-in for the ConvoHop API, with stand-ins for React Native, AsyncStorage's native module and NetInfo. The tests check:
+The samples run on Node.js against the conformance mock, a local stand-in for the Relay API, with stand-ins for React Native, AsyncStorage's native module and NetInfo. The tests check:
 
-- that a watching user sees another user's message, and that a conversation store shows a draft at once, then the message that ConvoHop committed;
+- that a watching user sees another user's message, and that a conversation store shows a draft at once, then the message that Relay committed;
 - that a draft sent again with its request ID, or through the outbox while the connection drops, posts once, and that `recoverSends` finishes a send that an earlier launch left unconfirmed;
 - that the outbox waits while the device is offline, and sends what it saved before the app stopped;
 - that another user's sign-in deletes what the previous user left, and that signing out during a send leaves the storage empty;
@@ -388,33 +388,33 @@ The React samples need React Native's renderer, so CI only typechecks them. The 
 
 - [Push notifications quickstart](quickstarts/push.md): register the device and open conversations from notifications.
 - [Calling quickstart](quickstarts/calling.md): start, answer and join calls in a conversation.
-- [`ConvoHopClient` reference](reference/client.md#convohopclient-class): every method, with the operation it sends.
+- [`RelayClient` reference](reference/client.md#relayclient-class): every method, with the operation it sends.
 - [`createPlatform` reference](reference/react-native.md#createplatform-function): the platform that the client runs on.
-- [`@convohop/react` reference](reference/react.md): every hook.
+- [`@instantrelay/react` reference](reference/react.md): every hook.
 
 # React Native push notifications quickstart
 
-Show ConvoHop's push notifications in your React Native app with `@convohop/react-native`: register the device with APNs or FCM, open the conversation that a notification is about, and show message text whether or not the project sends message previews.
+Show Relay's push notifications in your React Native app with `@instantrelay/react-native`: register the device with APNs or FCM, open the conversation that a notification is about, and show message text whether or not the project sends message previews.
 
 ## Before you start
 
-ConvoHop doesn't send push notifications itself. Your backend receives its notification events and sends APNs and FCM requests with your own push credentials, as the [TypeScript push notifications quickstart](../typescript/quickstarts/push.md#build-and-send-the-requests) shows. Your push credentials stay on your backend, never in your app. In your app, you need:
+Relay doesn't send push notifications itself. Your backend receives its notification events and sends APNs and FCM requests with your own push credentials, as the [TypeScript push notifications quickstart](../typescript/quickstarts/push.md#build-and-send-the-requests) shows. Your push credentials stay on your backend, never in your app. In your app, you need:
 
 - A client connected with the user's session, as the [client quickstart](quickstarts/client.md#connect) shows.
-- The native setup that the package's README describes for [iOS](https://github.com/ConvoHop/sdks/blob/main/packages/react-native/README.md#ios) and [Android](https://github.com/ConvoHop/sdks/blob/main/packages/react-native/README.md#android): `ConvoHopReactNative.configure` at launch, the Push Notifications capability on iOS, and Firebase on Android.
+- The native setup that the package's README describes for [iOS](https://github.com/ConvoHop/sdks/blob/main/packages/react-native/README.md#ios) and [Android](https://github.com/ConvoHop/sdks/blob/main/packages/react-native/README.md#android): `RelayReactNative.configure` at launch, the Push Notifications capability on iOS, and Firebase on Android.
 - `CONVOHOP_MESSAGE`, `CONVOHOP_CALL` and `CONVOHOP_MISSED_CALL` in your iOS app's `Localizable.strings`. Alerts without text show them.
-- An endpoint on your backend that stores each device's registration for the signed-in user. ConvoHop never stores registrations, as [bring your own push](https://github.com/ConvoHop/sdks/blob/main/docs/sdk-strategy.md#push-notifications-bring-your-own) explains.
+- An endpoint on your backend that stores each device's registration for the signed-in user. Relay never stores registrations, as [bring your own push](https://github.com/ConvoHop/sdks/blob/main/docs/sdk-strategy.md#push-notifications-bring-your-own) explains.
 
 ## Register the device
 
 ```ts snippet=docs/languages/react-native/examples/src/push.ts#register
-import type { ConvoHopClient } from "@convohop/client";
+import type { RelayClient } from "@instantrelay/client";
 import {
   registerForPush,
   requestPushPermission,
   setPushRecipient,
   type NativePushRegistration,
-} from "@convohop/react-native";
+} from "@instantrelay/react-native";
 import type { Backend } from "./client.ts";
 
 export interface Push {
@@ -426,7 +426,7 @@ export interface Push {
 }
 
 // After connectUser, at every launch. The app works without pushes, so this registers in the background.
-export function startPush(client: ConvoHopClient, backend: Backend): Push {
+export function startPush(client: RelayClient, backend: Backend): Push {
   const registering = new AbortController();
   const registered = (async () => {
     // From now on, the device shows and rings only this user's pushes, even one that starts the app before
@@ -475,7 +475,7 @@ export async function allowNotifications(): Promise<boolean> {
 }
 ```
 
-`setPushRecipient` tells the native code whose pushes to show and ring. It drops ConvoHop pushes for anyone else, even one that starts the app before JavaScript runs, and keeps only the two IDs, never a credential. Until you first set a recipient, and after you set `null` at sign-out, it drops every ConvoHop push.
+`setPushRecipient` tells the native code whose pushes to show and ring. It drops Relay pushes for anyone else, even one that starts the app before JavaScript runs, and keeps only the two IDs, never a credential. Until you first set a recipient, and after you set `null` at sign-out, it drops every Relay push.
 
 `registerForPush` passes each of the device's registrations to `register`, which sends it to your backend for the signed-in user. It resolves once your backend stored the APNs token on iOS, or the FCM registration on Android, and keeps passing new ones until you abort its signal. The same registration arrives again on later launches, so store it idempotently, keyed by its token or FID. Tokens and FIDs address the device, so don't log them.
 
@@ -487,16 +487,16 @@ export async function allowNotifications(): Promise<boolean> {
 ## Open notifications
 
 ```ts snippet=docs/languages/react-native/examples/src/push.ts#open
-import type { PushNotification } from "@convohop/client/push";
-import { onNotification, takeInitialNotification, type NotificationResponse } from "@convohop/react-native";
+import type { PushNotification } from "@instantrelay/client/push";
+import { onNotification, takeInitialNotification, type NotificationResponse } from "@instantrelay/react-native";
 
 // A device keeps its registrations across sign-ins, so a push for an earlier user can still arrive.
-export const isFor = (client: ConvoHopClient, { projectId, recipientId }: PushNotification): boolean =>
+export const isFor = (client: RelayClient, { projectId, recipientId }: PushNotification): boolean =>
   projectId === client.projectId && recipientId === client.principalId;
 
 // Opens the conversation of each notification that the user taps, including the one that launched the app. Call it
 // once the user is signed in, and the function it returns at sign-out.
-export function openNotifications(client: ConvoHopClient, open: (conversationId: string) => void): () => void {
+export function openNotifications(client: RelayClient, open: (conversationId: string) => void): () => void {
   let listening = true;
   const handle = ({ action, notification }: NotificationResponse) => {
     if (!listening || !isFor(client, notification)) return;
@@ -527,12 +527,12 @@ A device keeps its registrations across sign-ins, and until `setPushRecipient` r
 Message previews are off unless the project turns them on, so a message push usually carries no message text, only the title that your backend gave it, such as the sender's name. In your app, `messageText` reads the message with the user's session when the push has none:
 
 ```ts snippet=docs/languages/react-native/examples/src/push.ts#message-text
-import type { MessagePushNotification } from "@convohop/client/push";
+import type { MessagePushNotification } from "@instantrelay/client/push";
 
 // A message push's text, for example for a banner in the app. Message previews are off by default, so a push carries
 // no text unless the project turned them on or your backend set a body. Then this reads the message.
 export async function messageText(
-  client: ConvoHopClient,
+  client: RelayClient,
   notification: MessagePushNotification,
 ): Promise<string | undefined> {
   const { body, conversationId, messageId } = notification;
@@ -543,22 +543,22 @@ export async function messageText(
 The notifications that the native code shows can't use your app's session:
 
 - On Android, a message notification without text shows "New message", the `convohop_message_fallback` string resource, which your app can override.
-- On iOS, the system shows a message push that arrives while your app isn't in the foreground before your app sees it, with `CONVOHOP_MESSAGE` as its text. To show the message's text, add a Notification Service Extension. React Native doesn't run in an extension, so the extension is native code that uses the Swift SDK's `ConvoHopNotificationService`, with a short-lived session of its own for the push's recipient, as the [Swift push notifications quickstart](../swift/quickstarts/push.md#message-previews) shows.
+- On iOS, the system shows a message push that arrives while your app isn't in the foreground before your app sees it, with `CONVOHOP_MESSAGE` as its text. To show the message's text, add a Notification Service Extension. React Native doesn't run in an extension, so the extension is native code that uses the Swift SDK's `RelayNotificationService`, with a short-lived session of its own for the push's recipient, as the [Swift push notifications quickstart](../swift/quickstarts/push.md#message-previews) shows.
 
-Give the extension a `ConvoHopNotificationLedger` on the App Group that you pass to `configure` as `appGroup`. It then hides the text of a push for anyone but the recipient that `setPushRecipient` set: no title, and a `CONVOHOP_*` string as its body.
+Give the extension a `RelayNotificationLedger` on the App Group that you pass to `configure` as `appGroup`. It then hides the text of a push for anyone but the recipient that `setPushRecipient` set: no title, and a `RELAY_*` string as its body.
 
 ## Sign out
 
 ```ts snippet=docs/languages/react-native/examples/src/push.ts#sign-out
 import { Platform } from "react-native";
-import { unregisterFromPush } from "@convohop/react-native";
+import { unregisterFromPush } from "@instantrelay/react-native";
 
 // When the user signs out, before you sign out with your backend, which deletes the push registrations that it stored
 // for this sign-in. Then sign out as the client quickstart shows.
 export async function stopPush(push: Push): Promise<void> {
   await push.stop();
   const warn = (error: unknown) => console.warn("Couldn't stop push notifications", error); // Sign out anyway.
-  // The device drops every ConvoHop push from now on, including those your backend sends before it deletes the
+  // The device drops every Relay push from now on, including those your backend sends before it deletes the
   // registrations.
   await setPushRecipient(null).catch(warn);
   // Android: FCM stops sending to this device, even if your backend can't be reached. iOS can't unregister: Apple
@@ -567,7 +567,7 @@ export async function stopPush(push: Push): Promise<void> {
 }
 ```
 
-When the user signs out, call `stopPush` before you sign out with your backend, which deletes the registrations that it stored for the user's sign-in. With no recipient, the device drops every ConvoHop push that still arrives, and rings for none.
+When the user signs out, call `stopPush` before you sign out with your backend, which deletes the registrations that it stored for the user's sign-in. With no recipient, the device drops every Relay push that still arrives, and rings for none.
 
 - On Android, `unregisterFromPush` also stops FCM from sending to the device, even if your backend can't be reached. It deletes your app's FCM token, which every library in your app shares, or unregisters the installation ID.
 - On iOS, the system shows a message push that arrives while your app isn't in the foreground, so until your backend deletes the registration, such a push still shows. A Notification Service Extension with the ledger hides its title and text.
@@ -596,7 +596,7 @@ No test reaches APNs or FCM, shows a notification or rings a call, because those
 
 # React Native calling quickstart
 
-Add voice and video calls to a conversation with `@convohop/react-native`: start a call and ring other members, join it with LiveKit's React Native SDK, answer incoming calls from CallKit or Android's Telecom, and leave or end a call.
+Add voice and video calls to a conversation with `@instantrelay/react-native`: start a call and ring other members, join it with LiveKit's React Native SDK, answer incoming calls from CallKit or Android's Telecom, and leave or end a call.
 
 ## Before you start
 
@@ -610,7 +610,7 @@ The samples on this page use these imports:
 import { AudioSession } from "@livekit/react-native";
 import { ConnectionState, type Room } from "livekit-client";
 import { AppState, Platform } from "react-native";
-import { ConvoHopProblem, type ConvoHopClient, type LiveConnector, type LiveParticipationHandle } from "@convohop/client";
+import { RelayProblem, type RelayClient, type LiveConnector, type LiveParticipationHandle } from "@instantrelay/client";
 import {
   canUseFullScreenIntent,
   endCall,
@@ -624,15 +624,15 @@ import {
   subscribeAnsweredCalls,
   watchRingingCalls,
   type Call,
-} from "@convohop/react-native";
-import { createRoom, createRoomConnector, type RoomConnection } from "@convohop/react-native/media";
+} from "@instantrelay/react-native";
+import { createRoom, createRoomConnector, type RoomConnection } from "@instantrelay/react-native/media";
 ```
 
 ## Set up media
 
 ```ts snippet=docs/languages/react-native/examples/src/setup.ts#setup
 // src/setup.ts. Import it first in index.js, before any module that imports LiveKit: import "./src/setup";
-import { setupMedia } from "@convohop/react-native/media";
+import { setupMedia } from "@instantrelay/react-native/media";
 
 // Registers LiveKit's WebRTC globals. On iOS, CallKit activates each call's audio session, and LiveKit's audio follows.
 setupMedia({ callKit: true });
@@ -646,7 +646,7 @@ setupMedia({ callKit: true });
 // Starts a voice call in a conversation, joins it and rings other members. If the conversation already has a call, it
 // joins that one instead. title is what CallKit shows for the call, such as the conversation's name.
 export async function startCall(
-  client: ConvoHopClient,
+  client: RelayClient,
   conversationId: string,
   title: string,
   ring: string[],
@@ -662,14 +662,14 @@ export async function startCall(
   return call;
 }
 
-async function startOrFindCall(client: ConvoHopClient, conversationId: string) {
+async function startOrFindCall(client: RelayClient, conversationId: string) {
   const live = client.conversation(conversationId).live;
   try {
     const start = await live.startVoice(); // startVideo() for video.
     await start.completed(); // Waits until the call can be joined.
     return { liveSessionId: start.liveSessionId, started: true };
   } catch (error) {
-    if (!(error instanceof ConvoHopProblem) || error.code !== "LIVE_SESSION_EXISTS") throw error;
+    if (!(error instanceof RelayProblem) || error.code !== "LIVE_SESSION_EXISTS") throw error;
     const current = await live.current(); // Someone else started a call here first.
     if (!current) throw error;
     return { liveSessionId: current.liveSessionId, started: false };
@@ -707,7 +707,7 @@ export interface JoinedCall {
 
 // Joins a call and connects its media. systemCall is the call in the system's call UI, if it has one.
 export async function joinCall(
-  client: ConvoHopClient,
+  client: RelayClient,
   liveSessionId: string,
   systemCall?: Pick<Call, "id" | "muted" | "state">,
 ): Promise<JoinedCall> {
@@ -832,7 +832,7 @@ export async function setMuted(call: JoinedCall, muted: boolean): Promise<void> 
 ```
 
 - The user can mute, hold or end a call in the system's call UI, or from a headset or a car. The sample follows the system call's `changed` and `ended` events, and turns the microphone off while the call is muted or held.
-- `setMuted` mutes the system call, and its `changed` event then turns the microphone off, so your app and the system agree. `setHeld` works the same way, and on iOS needs the `supportsHolding` option of `ConvoHopReactNative.configure`. A call that the user starts on Android has no system call, so the sample keeps that mute in the app.
+- `setMuted` mutes the system call, and its `changed` event then turns the microphone off, so your app and the system agree. `setHeld` works the same way, and on iOS needs the `supportsHolding` option of `RelayReactNative.configure`. A call that the user starts on Android has no system call, so the sample keeps that mute in the app.
 - To move the call's audio, for example to the speaker, call `setAudioRoute` with one of the call's `availableAudioRoutes` on Android. On iOS, show the system route picker, such as LiveKit's `AudioSession.showAudioRoutePicker()`.
 
 ## Answer incoming calls
@@ -842,7 +842,7 @@ A call's push rings on the device, even while JavaScript isn't running: through 
 ```ts snippet=docs/languages/react-native/examples/src/calling.ts#answer-call
 // Joins each call the user answers, and stops rings that ended elsewhere. Start it after sign-in, and call the
 // function it returns when the user signs out.
-export function answerCalls(client: ConvoHopClient, onJoined: (call: JoinedCall) => void): () => void {
+export function answerCalls(client: RelayClient, onJoined: (call: JoinedCall) => void): () => void {
   let answering = true;
   // Replays the calls answered before it started, such as one answered on the lock screen as the app launched.
   const stopAnswering = subscribeAnsweredCalls(answered => {
@@ -869,7 +869,7 @@ export function answerCalls(client: ConvoHopClient, onJoined: (call: JoinedCall)
 - Start `answerCalls` once the user's client is connected. `subscribeAnsweredCalls` first replays the answered calls that are still current, so a call that the user answered before JavaScript started isn't lost. It calls back once for each call, and never for a call that the user starts.
 - When the user signs out, call the function that `answerCalls` returned. A call that is still joining then is left as soon as it joins, and never reaches `onJoined`.
 - iOS gets no push when a ring stops, because iOS would make the app report it as a new call. While a call rings, `watchRingingCalls` lists the user's live alerts, and stops the ring once another of the user's devices answered it, the caller hung up or it expired. On Android, it also stops a ring whose cancellation push arrives late.
-- `endCall` on a ringing call declines it on this device only. ConvoHop has no decline operation, so nobody else is told and the call goes on.
+- `endCall` on a ringing call declines it on this device only. Relay has no decline operation, so nobody else is told and the call goes on.
 
 On Android 14 and later, incoming calls ring full screen only while the app may use full-screen intents:
 
@@ -903,7 +903,7 @@ export function allowFullScreenCalls(): Promise<void> {
 ```
 
 - Android 14 grants `USE_FULL_SCREEN_INTENT` only to calling and alarm apps, and users can revoke it. Without it, incoming calls ring as a heads-up notification. Show a banner while `watchFullScreenCalls` reports `false`, with a button that calls `allowFullScreenCalls`. iOS always resolves `true`.
-- The full-screen intent opens your launch activity, or the `incomingCallIntent` of the options that you pass to `ConvoHopReactNative.configure`. Give that activity `showWhenLocked` and `turnScreenOn`, and answer there with `answerCall`. On a device locked with a PIN or another secure lock, the notification's Answer button asks the user to unlock first, so to answer without unlocking, the user answers on your full-screen screen.
+- The full-screen intent opens your launch activity, or the `incomingCallIntent` of the options that you pass to `RelayReactNative.configure`. Give that activity `showWhenLocked` and `turnScreenOn`, and answer there with `answerCall`. On a device locked with a PIN or another secure lock, the notification's Answer button asks the user to unlock first, so to answer without unlocking, the user answers on your full-screen screen.
 - The SDK starts no foreground service. To keep a call going while your app is in the background on Android, start your own [foreground service](https://developer.android.com/develop/background-work/services/fgs/service-types#phone-call) of type `phoneCall`, which needs the `FOREGROUND_SERVICE_PHONE_CALL` permission.
 
 ## Leave or end a call
@@ -929,13 +929,13 @@ export async function leaveCall(call: JoinedCall): Promise<void> {
 export async function endCallForEveryone(call: JoinedCall): Promise<void> {
   await leaveCall(call);
   const ending = await call.participation.live.end();
-  await ending.completed(); // Resolves once ConvoHop has cut off everyone's media.
+  await ending.completed(); // Resolves once Relay has cut off everyone's media.
 }
 ```
 
 Leaving hangs up the system call, ends this device's participation and, on Android, stops LiveKit's audio session. The call goes on for everyone else. `leaveCall` takes every step even when one fails, so the media disconnects even if the system call won't hang up. It then throws the first failure and logs the others: call `leaveCall` again, and `leave()` reuses the original request.
 
-Ending stops the call for everyone, and only the call's creator or a moderator can end it. `completed()` returns once ConvoHop has cut off everyone's media. If it times out, it throws `ConvoHopProblem` with the code `RESOLUTION_REQUIRED`, and the end may still complete: call `end()` on the same live session again, which reuses the original request, and wait again. `REVISION_CONFLICT` means the call changed since `end()` read it: call `end` with a new `requestId`, which reads the call again. `LIVE_SESSION_CLOSED` means the call has already ended.
+Ending stops the call for everyone, and only the call's creator or a moderator can end it. `completed()` returns once Relay has cut off everyone's media. If it times out, it throws `RelayProblem` with the code `RESOLUTION_REQUIRED`, and the end may still complete: call `end()` on the same live session again, which reuses the original request, and wait again. `REVISION_CONFLICT` means the call changed since `end()` read it: call `end` with a new `requestId`, which reads the call again. `LIVE_SESSION_CLOSED` means the call has already ended.
 
 ## Sign out
 
@@ -959,7 +959,7 @@ When the user signs out, in this order:
 
 ## How the samples are tested
 
-CI typechecks every calling sample. A real call needs CallKit or Android's Telecom, LiveKit's native WebRTC and a ConvoHop project with calls, so the tests run only `joinCall`, `answerCalls` and `leaveCall`, on Node.js with stand-ins for the package's native modules, the client and LiveKit's audio session. The tests check:
+CI typechecks every calling sample. A real call needs CallKit or Android's Telecom, LiveKit's native WebRTC and a Relay project with calls, so the tests run only `joinCall`, `answerCalls` and `leaveCall`, on Node.js with stand-ins for the package's native modules, the client and LiveKit's audio session. The tests check:
 
 - that `leaveCall` leaves the call and stops its audio when the system call won't hang up, throws that failure, and hangs up when called again;
 - that `joinCall` gives this device's place back and hangs up when the join or the first connection fails, and throws the error that stopped it even when hanging up fails too;
@@ -981,14 +981,14 @@ The public API of each React Native package, generated from its declarations.
 
 | Package | Layer | Summary |
 | --- | --- | --- |
-| [`@convohop/react-native`](reference/react-native.md) | Client | React Native support for the client SDK: the platform it needs on Hermes, push registration and notifications through APNs, PushKit and FCM, and calls in CallKit and Android's Telecom. |
-| [`@convohop/react-native/media`](reference/media.md) | Client | Call media through LiveKit's React Native SDK: set LiveKit up, then connect each admitted participation to a LiveKit room. It ships with @convohop/react-native. |
-| [`@convohop/client`](reference/client.md) | Client | Client SDK for apps on end-user devices: one signed-in user's conversations, realtime events and calls. In React Native, it runs on the platform from @convohop/react-native. |
-| [`@convohop/react`](reference/react.md) | Client | React hooks over the client SDK: conversations with offline-safe sends, typing, session renewal and calls. In React Native, connect call media with @convohop/react-native/media: useMediaConnection needs a browser. |
+| [`@instantrelay/react-native`](reference/react-native.md) | Client | React Native support for the client SDK: the platform it needs on Hermes, push registration and notifications through APNs, PushKit and FCM, and calls in CallKit and Android's Telecom. |
+| [`@instantrelay/react-native/media`](reference/media.md) | Client | Call media through LiveKit's React Native SDK: set LiveKit up, then connect each admitted participation to a LiveKit room. It ships with @instantrelay/react-native. |
+| [`@instantrelay/client`](reference/client.md) | Client | Client SDK for apps on end-user devices: one signed-in user's conversations, realtime events and calls. In React Native, it runs on the platform from @instantrelay/react-native. |
+| [`@instantrelay/react`](reference/react.md) | Client | React hooks over the client SDK: conversations with offline-safe sends, typing, session renewal and calls. In React Native, connect call media with @instantrelay/react-native/media: useMediaConnection needs a browser. |
 
 [Operation coverage](reference/operations.md) lists the members that send each API operation.
 
-# `@convohop/react-native`
+# `@instantrelay/react-native`
 
 React Native support for the client SDK: the platform it needs on Hermes, push registration and notifications through APNs, PushKit and FCM, and calls in CallKit and Android's Telecom.
 
@@ -1200,7 +1200,7 @@ addEventListener(listener: (state: {
 interface NotificationResponse
 ```
 
-A ConvoHop push the app received while running (`received`) or that the user opened (`opened`).
+A Relay push the app received while running (`received`) or that the user opened (`opened`).
 
 #### `NotificationResponse.action` property
 
@@ -1307,7 +1307,7 @@ iOS 12+: deliver quietly without asking. The user can promote or turn off notifi
 interface PushRecipient
 ```
 
-The user whose ConvoHop pushes this device accepts: the signed-in user.
+The user whose Relay pushes this device accepts: the signed-in user.
 
 #### `PushRecipient.projectId` property
 
@@ -1328,10 +1328,10 @@ The user's principal ID: the client's `principalId`.
 ### `ReactNativePlatform` interface
 
 ```ts
-interface ReactNativePlatform extends ConvoHopPlatform
+interface ReactNativePlatform extends RelayPlatform
 ```
 
-A `ConvoHopPlatform` for React Native: pass it as `ConvoHopClient`'s `platform` option.
+A `RelayPlatform` for React Native: pass it as `RelayClient`'s `platform` option.
 
 #### `ReactNativePlatform.randomUUID` property
 
@@ -1387,7 +1387,7 @@ WebSocket?: PlatformWebSocketConstructor
 
 Opens the realtime connection. Default: the global `WebSocket`.
 
-Inherited from `ConvoHopPlatform`.
+Inherited from `RelayPlatform`.
 
 ### `RegisterForPushOptions` interface
 
@@ -1532,12 +1532,12 @@ Whether the app may show notifications. `provisional` is iOS's quiet delivery to
 ### `RemoteMessageResult` type
 
 ```ts
-type RemoteMessageResult = "notConvoHop" | "invalid" | "ignored" | "message" | "ringing" | "stopped" | "missed"
+type RemoteMessageResult = "notRelay" | "invalid" | "ignored" | "message" | "ringing" | "stopped" | "missed"
 ```
 
 What the native handler did with an Android data message:
-- `notConvoHop`: the message isn't a ConvoHop push. Handle it yourself.
-- `invalid`: it is a ConvoHop push that doesn't match the push payload contract. It was dropped.
+- `notRelay`: the message isn't a Relay push. Handle it yourself.
+- `invalid`: it is a Relay push that doesn't match the push payload contract. It was dropped.
 - `ignored`: a duplicate, or a ring for a call that already stopped.
 - `message`: it showed a message notification.
 - `ringing`: it started ringing an incoming call.
@@ -1547,7 +1547,7 @@ What the native handler did with an Android data message:
 ### `RingingClient` type
 
 ```ts
-type RingingClient = Pick<ConvoHopClient, "liveAlerts" | "liveSession">
+type RingingClient = Pick<RelayClient, "liveAlerts" | "liveSession">
 ```
 
 The client methods `watchRingingCalls` uses.
@@ -1577,7 +1577,7 @@ and alarm apps, and users can revoke it; without it, a call rings as a heads-up 
 function createPlatform(options?: PlatformOptions): ReactNativePlatform
 ```
 
-Creates the React Native platform for `@convohop/client`. It listens to `AppState`, and to NetInfo when you pass
+Creates the React Native platform for `@instantrelay/client`. It listens to `AppState`, and to NetInfo when you pass
 it, from creation until `ReactNativePlatform.dispose`. Create one for the app and share it between clients.
 
 ### `endCall` function
@@ -1626,9 +1626,9 @@ The push registrations this process has seen: the APNs and PushKit tokens on iOS
 function handleRemoteMessage(data: Readonly<Record<string, string>>): Promise<RemoteMessageResult>
 ```
 
-Android: hands an FCM data message to the native ConvoHop handler, which shows message notifications and rings
+Android: hands an FCM data message to the native Relay handler, which shows message notifications and rings
 calls. Use it when another library, such as React Native Firebase, owns your `FirebaseMessagingService`. Without
-one, the ConvoHop service receives pushes itself and you don't need this.
+one, the Relay service receives pushes itself and you don't need this.
 
 ### `onCallEvent` function
 
@@ -1644,7 +1644,7 @@ Calls `listener` for each change to a call. Returns a function that stops listen
 function onNotification(listener: (response: NotificationResponse) => void): () => void
 ```
 
-Calls `listener` for each ConvoHop push the app receives while running and each one the user opens. The native
+Calls `listener` for each Relay push the app receives while running and each one the user opens. The native
 modules present pushes and ring calls themselves; use this to update your UI or navigate.
 
 ### `openFullScreenIntentSettings` function
@@ -1661,7 +1661,7 @@ Android 14 and later: opens the setting that lets this app ring full screen.
 function registerForPush(options: RegisterForPushOptions): Promise<() => void>
 ```
 
-Registers this device for ConvoHop pushes. It starts the platform's registration and passes each registration to
+Registers this device for Relay pushes. It starts the platform's registration and passes each registration to
 your `register` callback, which stores it with your backend. It resolves once the APNs token (iOS) or the FCM
 registration (Android) is stored, and keeps passing new registrations until you call the function it resolves or
 abort `signal`. It rejects when the platform can't register, `register` fails for that registration, `timeoutMs`
@@ -1727,13 +1727,13 @@ Mutes or unmutes the call in the system UI. Mute your LiveKit microphone track f
 function setPushRecipient(recipient: PushRecipient | null): Promise<void>
 ```
 
-Sets the user whose ConvoHop pushes this device shows and rings, or `null` for nobody. Call it with the client's
+Sets the user whose Relay pushes this device shows and rings, or `null` for nobody. Call it with the client's
 `projectId` and `principalId` after sign-in, before `registerForPush`, and with `null` when sign-out starts. The
 device keeps the two IDs, never a credential, so the filter also applies to a push that starts the app before
 JavaScript runs.
 
-The native handlers drop every ConvoHop push for anyone else, and `onNotification` and `takeInitialNotification`
-never see it. Until the first call, and after `null`, they drop every ConvoHop push, so a registration your backend
+The native handlers drop every Relay push for anyone else, and `onNotification` and `takeInitialNotification`
+never see it. Until the first call, and after `null`, they drop every Relay push, so a registration your backend
 failed to delete reaches nobody. iOS still reports a dropped VoIP push to CallKit, which ends it at once. On iOS, a
 message push that arrives while the app isn't in the foreground is shown by iOS itself: see the README.
 
@@ -1774,7 +1774,7 @@ joined. Returns a function that stops listening.
 function takeInitialNotification(): Promise<NotificationResponse | null>
 ```
 
-The ConvoHop notification the user opened to launch the app. Resolves it once, then `null`.
+The Relay notification the user opened to launch the app. Resolves it once, then `null`.
 
 ### `unregisterFromPush` function
 
@@ -1818,11 +1818,11 @@ request already in flight finishes, and its result is ignored.
 
 Sends [`communication.liveSession`](../operations/communication/liveSession.md) and [`communication.liveSessionAlerts`](../operations/communication/liveSessionAlerts.md).
 
-# `@convohop/react-native/media`
+# `@instantrelay/react-native/media`
 
-Call media through LiveKit's React Native SDK: set LiveKit up, then connect each admitted participation to a LiveKit room. It ships with @convohop/react-native.
+Call media through LiveKit's React Native SDK: set LiveKit up, then connect each admitted participation to a LiveKit room. It ships with @instantrelay/react-native.
 
-**Layer:** Client. **Runtime:** As @convohop/react-native, with @livekit/react-native 3, @livekit/react-native-webrtc 144.2 or later and livekit-client 2.22.3 or later. **Source:** `packages/react-native`.
+**Layer:** Client. **Runtime:** As @instantrelay/react-native, with @livekit/react-native 3, @livekit/react-native-webrtc 144.2 or later and livekit-client 2.22.3 or later. **Source:** `packages/react-native`.
 
 ## Interfaces
 
@@ -1839,7 +1839,7 @@ callKit?: boolean
 ```
 
 iOS: CallKit owns the audio session. Set it when calls go through CallKit, as incoming calls rung by
-`@convohop/react-native` do: LiveKit then leaves the session to CallKit, and the SDK tells WebRTC each time CallKit
+`@instantrelay/react-native` do: LiveKit then leaves the session to CallKit, and the SDK tells WebRTC each time CallKit
 activates or deactivates it. Start every call with CallKit, including outgoing calls with `startOutgoingCall`,
 or it has no audio. Ignored on Android. Default `false`.
 
@@ -1937,7 +1937,7 @@ Connect again with `participation.connectWith`, which obtains fresh credentials.
 function createRoom(): Room
 ```
 
-A LiveKit room with ConvoHop's media policy, the same as the Web SDK's: one peer connection per direction, no
+A LiveKit room with Relay's media policy, the same as the Web SDK's: one peer connection per direction, no
 simulcast, adaptive stream or dynacast, and VP8 video at up to 320x240, 15 frames per second and 350 kbit/s.
 
 ### `createRoomConnector` function
@@ -1961,11 +1961,11 @@ Prepares LiveKit's React Native SDK. Call it once at the top of `index.js`, befo
 installs a secure `crypto.getRandomValues` and `crypto.randomUUID` where the runtime lacks them, then LiveKit's
 globals.
 
-# `@convohop/client`
+# `@instantrelay/client`
 
-Client SDK for apps on end-user devices: one signed-in user's conversations, realtime events and calls. In React Native, it runs on the platform from @convohop/react-native.
+Client SDK for apps on end-user devices: one signed-in user's conversations, realtime events and calls. In React Native, it runs on the platform from @instantrelay/react-native.
 
-**Layer:** Client. **Runtime:** React Native 0.76 or later, with the platform from @convohop/react-native. **Source:** `packages/client`.
+**Layer:** Client. **Runtime:** React Native 0.76 or later, with the platform from @instantrelay/react-native. **Source:** `packages/client`.
 
 ## Classes
 
@@ -1978,7 +1978,7 @@ class ConversationHandle
 #### `ConversationHandle.client` property
 
 ```ts
-readonly client: ConvoHopClient
+readonly client: RelayClient
 ```
 
 #### `ConversationHandle.conversationId` property
@@ -1996,7 +1996,7 @@ readonly live: ConversationLive
 #### `ConversationHandle` constructor
 
 ```ts
-constructor(client: ConvoHopClient, conversationId: string)
+constructor(client: RelayClient, conversationId: string)
 ```
 
 #### `ConversationHandle.get` method
@@ -2055,7 +2055,7 @@ Sends [`communication.sendMessage`](../operations/communication/sendMessage.md).
 ##### `ConversationHandle.messages.list` property
 
 ```ts
-list: (beforeSequence?: string) => Promise<import("@convohop/core").ItemPage<{
+list: (beforeSequence?: string) => Promise<import("@instantrelay/core").ItemPage<{
     messageId: string;
     conversationId: string;
     authorId: string;
@@ -2235,7 +2235,7 @@ Keep one store per conversation and client: stores of the same conversation shar
 #### `ConversationStore.client` property
 
 ```ts
-readonly client: ConvoHopClient
+readonly client: RelayClient
 ```
 
 #### `ConversationStore.conversationId` property
@@ -2253,7 +2253,7 @@ readonly outbox: Outbox
 #### `ConversationStore` constructor
 
 ```ts
-constructor(client: ConvoHopClient, conversationId: string, options?: ConversationStoreOptions)
+constructor(client: RelayClient, conversationId: string, options?: ConversationStoreOptions)
 ```
 
 #### `ConversationStore.snapshot` property
@@ -2350,7 +2350,7 @@ class ConversationStream
 #### `ConversationStream.client` property
 
 ```ts
-readonly client: ConvoHopClient
+readonly client: RelayClient
 ```
 
 #### `ConversationStream.conversationId` property
@@ -2386,7 +2386,7 @@ readonly onClose?: (() => void) | undefined
 #### `ConversationStream` constructor
 
 ```ts
-constructor(client: ConvoHopClient, conversationId: string, route: ProjectRoute, token: string, apply: (events: ProtocolObject[]) => Promise<void>, onError: (error: Error) => void, onClose?: (() => void) | undefined)
+constructor(client: RelayClient, conversationId: string, route: ProjectRoute, token: string, apply: (events: ProtocolObject[]) => Promise<void>, onError: (error: Error) => void, onClose?: (() => void) | undefined)
 ```
 
 #### `ConversationStream.cursor` property
@@ -2431,418 +2431,6 @@ reconcile(): Promise<void>
 close(): void
 ```
 
-### `ConvoHopClient` class
-
-```ts
-class ConvoHopClient
-```
-
-#### `ConvoHopClient.projectId` property
-
-```ts
-readonly projectId: string
-```
-
-#### `ConvoHopClient.principalId` property
-
-```ts
-readonly principalId: string
-```
-
-#### `ConvoHopClient.http` property
-
-```ts
-readonly http: ConvoHopTransport
-```
-
-#### `ConvoHopClient.storage` property
-
-```ts
-readonly storage: RecoveryStorage | undefined
-```
-
-#### `ConvoHopClient.asyncStorage` property
-
-```ts
-readonly asyncStorage: AsyncRecoveryStorage | undefined
-```
-
-The configured `asyncRecoveryStorage`, if any.
-
-#### `ConvoHopClient.platform` property
-
-```ts
-readonly platform: Readonly<ConvoHopPlatform>
-```
-
-The validated `platform` option, frozen. Empty when every service comes from globals.
-
-#### `ConvoHopClient` constructor
-
-```ts
-constructor(options: ConvoHopClientOptions)
-```
-
-#### `ConvoHopClient.sessionBinding` property
-
-```ts
-get sessionBinding(): Readonly<SessionMetadata> | undefined
-```
-
-#### `ConvoHopClient.sessionRefreshState` property
-
-```ts
-get sessionRefreshState(): SessionRefreshState
-```
-
-#### `ConvoHopClient.initialize` method
-
-```ts
-initialize(): Promise<ProjectRoute>
-```
-
-Sends [`communication.route`](../operations/communication/route.md) and [`communication.currentSession`](../operations/communication/currentSession.md).
-
-#### `ConvoHopClient.refreshSession` method
-
-```ts
-refreshSession(): Promise<SessionMetadata>
-```
-
-Sends [`communication.route`](../operations/communication/route.md) and [`communication.currentSession`](../operations/communication/currentSession.md).
-
-#### `ConvoHopClient.scheduleSessionRefresh` method
-
-```ts
-scheduleSessionRefresh(options?: SessionRefreshSchedule): () => void
-```
-
-Renews the session `leadMs` before it expires, and again after each renewal, until the returned function is
-called. A failed renewal that leaves the current session verified is retried with backoff before expiry, so the
-`sessionRefresh` hook can run again; any other failure stops the schedule. Every failure goes to `onError`.
-Returning to the foreground (`platform.lifecycle`) re-checks a waiting renewal at once, since suspended apps'
-timers can fire late.
-
-Sends [`communication.route`](../operations/communication/route.md) and [`communication.currentSession`](../operations/communication/currentSession.md).
-
-#### `ConvoHopClient.conversation` method
-
-```ts
-conversation(id: string): ConversationHandle
-```
-
-#### `ConvoHopClient.getConversation` method
-
-```ts
-getConversation(id: string): Promise<Conversation>
-```
-
-Sends [`communication.getConversation`](../operations/communication/getConversation.md).
-
-#### `ConvoHopClient.requests` property
-
-```ts
-readonly requests: { … }
-```
-
-##### `ConvoHopClient.requests.resolve` property
-
-```ts
-resolve: (requestId: string) => Promise<NonNullable<OperationPayload<"communication.resolveRequest">["result"]>>
-```
-
-Sends [`communication.resolveRequest`](../operations/communication/resolveRequest.md).
-
-##### `ConvoHopClient.requests.retry` property
-
-```ts
-retry: (requestId: string) => Promise<NonNullable<OperationPayload<"communication.resolveRequest">["result"]>>
-```
-
-Sends [`communication.resolveRequest`](../operations/communication/resolveRequest.md).
-
-#### `ConvoHopClient.liveSession` method
-
-```ts
-liveSession(id: string): Promise<LiveSessionHandle>
-```
-
-Sends [`communication.liveSession`](../operations/communication/liveSession.md).
-
-#### `ConvoHopClient.liveAlerts` property
-
-```ts
-readonly liveAlerts: { … }
-```
-
-##### `ConvoHopClient.liveAlerts.list` property
-
-```ts
-list: (options?: PageOptions) => Promise<OperationPayload<"communication.liveSessionAlerts">["result"]>
-```
-
-Sends [`communication.liveSessionAlerts`](../operations/communication/liveSessionAlerts.md).
-
-#### `ConvoHopClient.messages` method
-
-```ts
-messages(id: string, beforeSequence?: string, limit?: number): Promise<ItemPage<ConversationMessage>>
-```
-
-Up to `limit` (1..100, default 100) messages before `beforeSequence` or the newest, newest first. Pages can hold fewer.
-
-Sends [`communication.messages`](../operations/communication/messages.md).
-
-#### `ConvoHopClient.send` method
-
-```ts
-send(id: string, text: string, requestId?: string, props?: ProtocolObject): Promise<SendReceipt>
-```
-
-Sends [`communication.sendMessage`](../operations/communication/sendMessage.md).
-
-#### `ConvoHopClient.edit` method
-
-```ts
-edit(message: ConversationMessage, text: string, requestId?: string): Promise<ConversationMessage>
-```
-
-Sends [`communication.editMessage`](../operations/communication/editMessage.md).
-
-#### `ConvoHopClient.delete` method
-
-```ts
-delete(message: ConversationMessage, requestId?: string): Promise<ConversationMessage>
-```
-
-Sends [`communication.deleteMessage`](../operations/communication/deleteMessage.md).
-
-#### `ConvoHopClient.events` method
-
-```ts
-events(id: string, after?: ConversationCursor): Promise<ItemPage<ProtocolObject> & {
-    nextCursor: ConversationCursor;
-}>
-```
-
-Sends [`communication.events`](../operations/communication/events.md).
-
-#### `ConvoHopClient.reportRead` method
-
-```ts
-reportRead(id: string, membership: Membership, throughSequence: string): Promise<ReadReceipt>
-```
-
-Reports reading through a message's sequence, which also covers its delivery. Returns the user's current receipt.
-
-Sends [`communication.reportReceipt`](../operations/communication/reportReceipt.md).
-
-#### `ConvoHopClient.reportDelivered` method
-
-```ts
-reportDelivered(id: string, membership: Membership, throughSequence: string): Promise<ReadReceipt>
-```
-
-Reports delivery through a message's sequence. Returns the user's current receipt.
-
-Sends [`communication.reportReceipt`](../operations/communication/reportReceipt.md).
-
-#### `ConvoHopClient.receipts` method
-
-```ts
-receipts(id: string, cursor?: string): Promise<ItemPage<ReadReceipt>>
-```
-
-Sends [`communication.receipts`](../operations/communication/receipts.md).
-
-#### `ConvoHopClient.getMessage` method
-
-```ts
-getMessage(id: string, messageId: string): Promise<ConversationMessage>
-```
-
-Sends [`communication.getMessage`](../operations/communication/getMessage.md).
-
-#### `ConvoHopClient.members` method
-
-```ts
-members(id: string, options?: PageOptions): Promise<ItemPage<Membership>>
-```
-
-Sends [`communication.members`](../operations/communication/members.md).
-
-#### `ConvoHopClient.inbox` method
-
-```ts
-inbox(options?: PageOptions): Promise<InboxPage>
-```
-
-Sends [`communication.inbox`](../operations/communication/inbox.md).
-
-#### `ConvoHopClient.capabilities` method
-
-```ts
-capabilities(): Promise<ProjectCapabilities>
-```
-
-Sends [`communication.capabilities`](../operations/communication/capabilities.md).
-
-#### `ConvoHopClient.typing` method
-
-```ts
-typing(id: string, isTyping: boolean): Promise<boolean>
-```
-
-Sends one ephemeral typing signal and returns whether the authority accepted it. Signals are never recorded,
-retried or resolved. Check `features?.typing` in `capabilities` first.
-
-Sends [`communication.typing`](../operations/communication/typing.md).
-
-#### `ConvoHopClient.search` method
-
-```ts
-search(query: string, conversationIds?: string[]): Promise<ItemPage<SearchHit>>
-```
-
-Sends [`communication.search`](../operations/communication/search.md).
-
-#### `ConvoHopClient.recoverPending` method
-
-```ts
-recoverPending(onError: (error: Error) => void): Promise<void>
-```
-
-Sends [`communication.resolveRequest`](../operations/communication/resolveRequest.md).
-
-#### `ConvoHopClient.watch` method
-
-```ts
-watch(conversationId: string, apply: (events: ProtocolObject[]) => Promise<void>, onError: (error: Error) => void): Promise<ConversationStream>
-```
-
-Sends [`communication.events`](../operations/communication/events.md) and [`communication.conversationEvents`](../operations/communication/conversationEvents.md).
-
-#### `ConvoHopClient.resyncAuthorizedHistory` method
-
-```ts
-resyncAuthorizedHistory(conversationId: string, apply: (events: ProtocolObject[]) => Promise<void>, onError: (error: Error) => void): Promise<ConversationStream>
-```
-
-Sends [`communication.events`](../operations/communication/events.md) and [`communication.conversationEvents`](../operations/communication/conversationEvents.md).
-
-### `ConvoHopProblem` class
-
-```ts
-class ConvoHopProblem extends Error
-```
-
-Re-exported from `@convohop/core`.
-
-#### `ConvoHopProblem.code` property
-
-```ts
-readonly code: string
-```
-
-#### `ConvoHopProblem.requestId` property
-
-```ts
-readonly requestId: string
-```
-
-#### `ConvoHopProblem.outcome` property
-
-```ts
-readonly outcome: string
-```
-
-#### `ConvoHopProblem.status` property
-
-```ts
-readonly status: number
-```
-
-#### `ConvoHopProblem.retryAfter` property
-
-```ts
-readonly retryAfter?: number
-```
-
-Whole seconds to wait before resending the same request, when the authority sent a delay (for example with
-`RATE_LIMITED`). Read from the error's `extensions.retryAfter`, else from an HTTP `Retry-After` delay in seconds,
-or from a realtime close reason's `retryAfter=`. A request the caller sends is never resent on its own; when
-`@convohop/client` reconnects its stream or resends a queued message, it waits at least this long first.
-
-#### `ConvoHopProblem` constructor
-
-```ts
-constructor(code: string, requestId: string, outcome: string, status: number, message: string, options?: ErrorOptions & {
-    retryAfter?: number;
-})
-```
-
-### `ConvoHopTransport` class
-
-```ts
-class ConvoHopTransport
-```
-
-Re-exported from `@convohop/core`.
-
-#### `ConvoHopTransport.baseUrl` property
-
-```ts
-readonly baseUrl: string
-```
-
-#### `ConvoHopTransport.durableRecovery` property
-
-```ts
-readonly durableRecovery: boolean
-```
-
-#### `ConvoHopTransport.incarnation` property
-
-```ts
-incarnation: string
-```
-
-#### `ConvoHopTransport.servingEpoch` property
-
-```ts
-servingEpoch: string | undefined
-```
-
-#### `ConvoHopTransport` constructor
-
-```ts
-constructor(options: ConvoHopTransportOptions)
-```
-
-#### `ConvoHopTransport.initializeRecovery` method
-
-```ts
-initializeRecovery(): Promise<void>
-```
-
-#### `ConvoHopTransport.recoveryStates` property
-
-```ts
-get recoveryStates(): readonly RecoveryState[]
-```
-
-#### `ConvoHopTransport.execute` method
-
-```ts
-execute<K extends OperationKey>(key: K, projectId: string | undefined, input: OperationInput<K>, requestId?: string, credentialDeliveryPermit?: ProtocolObject): Promise<OperationPayload<K>>
-```
-
-#### `ConvoHopTransport.retry` method
-
-```ts
-retry(requestId: string): Promise<NonNullable<OperationPayload<"communication.resolveRequest">["result"]>>
-```
-
 ### `LiveEndOperation` class
 
 ```ts
@@ -2858,13 +2446,13 @@ readonly receipt: OperationPayload<"communication.endLiveSession">
 #### `LiveEndOperation` constructor
 
 ```ts
-constructor(client: ConvoHopClient, receipt: OperationPayload<"communication.endLiveSession">)
+constructor(client: RelayClient, receipt: OperationPayload<"communication.endLiveSession">)
 ```
 
 #### `LiveEndOperation.client` property
 
 ```ts
-readonly client: ConvoHopClient
+readonly client: RelayClient
 ```
 
 Inherited from `LiveAction`.
@@ -3011,7 +2599,7 @@ class LiveSessionHandle
 #### `LiveSessionHandle.client` property
 
 ```ts
-readonly client: ConvoHopClient
+readonly client: RelayClient
 ```
 
 #### `LiveSessionHandle.snapshot` property
@@ -3041,13 +2629,13 @@ readonly conversationId: string
 #### `LiveSessionHandle` constructor
 
 ```ts
-constructor(client: ConvoHopClient, snapshot: LiveSession)
+constructor(client: RelayClient, snapshot: LiveSession)
 ```
 
 #### `LiveSessionHandle.get` static method
 
 ```ts
-static get(client: ConvoHopClient, liveSessionId: string): Promise<LiveSessionHandle>
+static get(client: RelayClient, liveSessionId: string): Promise<LiveSessionHandle>
 ```
 
 Sends [`communication.liveSession`](../operations/communication/liveSession.md).
@@ -3148,7 +2736,7 @@ readonly receipt: OperationPayload<"communication.startLiveSession">
 #### `LiveStartOperation` constructor
 
 ```ts
-constructor(client: ConvoHopClient, receipt: OperationPayload<"communication.startLiveSession">)
+constructor(client: RelayClient, receipt: OperationPayload<"communication.startLiveSession">)
 ```
 
 #### `LiveStartOperation.ready` method
@@ -3162,7 +2750,7 @@ Sends [`communication.liveSession`](../operations/communication/liveSession.md) 
 #### `LiveStartOperation.client` property
 
 ```ts
-readonly client: ConvoHopClient
+readonly client: RelayClient
 ```
 
 Inherited from `LiveAction`.
@@ -3304,13 +2892,13 @@ sent or fails. A failed entry is only sent again, as a new message, through `Out
 #### `Outbox.client` property
 
 ```ts
-readonly client: ConvoHopClient
+readonly client: RelayClient
 ```
 
 #### `Outbox` constructor
 
 ```ts
-constructor(client: ConvoHopClient, options?: OutboxOptions)
+constructor(client: RelayClient, options?: OutboxOptions)
 ```
 
 #### `Outbox.entries` property
@@ -3387,16 +2975,428 @@ and its storage is passed on or released. A send in flight is waited for until i
 sign-out, wait for it before clearing the storage. It never rejects; failures go to `onError`. Every call returns
 the same promise.
 
+### `RelayClient` class
+
+```ts
+class RelayClient
+```
+
+#### `RelayClient.projectId` property
+
+```ts
+readonly projectId: string
+```
+
+#### `RelayClient.principalId` property
+
+```ts
+readonly principalId: string
+```
+
+#### `RelayClient.http` property
+
+```ts
+readonly http: RelayTransport
+```
+
+#### `RelayClient.storage` property
+
+```ts
+readonly storage: RecoveryStorage | undefined
+```
+
+#### `RelayClient.asyncStorage` property
+
+```ts
+readonly asyncStorage: AsyncRecoveryStorage | undefined
+```
+
+The configured `asyncRecoveryStorage`, if any.
+
+#### `RelayClient.platform` property
+
+```ts
+readonly platform: Readonly<RelayPlatform>
+```
+
+The validated `platform` option, frozen. Empty when every service comes from globals.
+
+#### `RelayClient` constructor
+
+```ts
+constructor(options: RelayClientOptions)
+```
+
+#### `RelayClient.sessionBinding` property
+
+```ts
+get sessionBinding(): Readonly<SessionMetadata> | undefined
+```
+
+#### `RelayClient.sessionRefreshState` property
+
+```ts
+get sessionRefreshState(): SessionRefreshState
+```
+
+#### `RelayClient.initialize` method
+
+```ts
+initialize(): Promise<ProjectRoute>
+```
+
+Sends [`communication.route`](../operations/communication/route.md) and [`communication.currentSession`](../operations/communication/currentSession.md).
+
+#### `RelayClient.refreshSession` method
+
+```ts
+refreshSession(): Promise<SessionMetadata>
+```
+
+Sends [`communication.route`](../operations/communication/route.md) and [`communication.currentSession`](../operations/communication/currentSession.md).
+
+#### `RelayClient.scheduleSessionRefresh` method
+
+```ts
+scheduleSessionRefresh(options?: SessionRefreshSchedule): () => void
+```
+
+Renews the session `leadMs` before it expires, and again after each renewal, until the returned function is
+called. A failed renewal that leaves the current session verified is retried with backoff before expiry, so the
+`sessionRefresh` hook can run again; any other failure stops the schedule. Every failure goes to `onError`.
+Returning to the foreground (`platform.lifecycle`) re-checks a waiting renewal at once, since suspended apps'
+timers can fire late.
+
+Sends [`communication.route`](../operations/communication/route.md) and [`communication.currentSession`](../operations/communication/currentSession.md).
+
+#### `RelayClient.conversation` method
+
+```ts
+conversation(id: string): ConversationHandle
+```
+
+#### `RelayClient.getConversation` method
+
+```ts
+getConversation(id: string): Promise<Conversation>
+```
+
+Sends [`communication.getConversation`](../operations/communication/getConversation.md).
+
+#### `RelayClient.requests` property
+
+```ts
+readonly requests: { … }
+```
+
+##### `RelayClient.requests.resolve` property
+
+```ts
+resolve: (requestId: string) => Promise<NonNullable<OperationPayload<"communication.resolveRequest">["result"]>>
+```
+
+Sends [`communication.resolveRequest`](../operations/communication/resolveRequest.md).
+
+##### `RelayClient.requests.retry` property
+
+```ts
+retry: (requestId: string) => Promise<NonNullable<OperationPayload<"communication.resolveRequest">["result"]>>
+```
+
+Sends [`communication.resolveRequest`](../operations/communication/resolveRequest.md).
+
+#### `RelayClient.liveSession` method
+
+```ts
+liveSession(id: string): Promise<LiveSessionHandle>
+```
+
+Sends [`communication.liveSession`](../operations/communication/liveSession.md).
+
+#### `RelayClient.liveAlerts` property
+
+```ts
+readonly liveAlerts: { … }
+```
+
+##### `RelayClient.liveAlerts.list` property
+
+```ts
+list: (options?: PageOptions) => Promise<OperationPayload<"communication.liveSessionAlerts">["result"]>
+```
+
+Sends [`communication.liveSessionAlerts`](../operations/communication/liveSessionAlerts.md).
+
+#### `RelayClient.messages` method
+
+```ts
+messages(id: string, beforeSequence?: string, limit?: number): Promise<ItemPage<ConversationMessage>>
+```
+
+Up to `limit` (1..100, default 100) messages before `beforeSequence` or the newest, newest first. Pages can hold fewer.
+
+Sends [`communication.messages`](../operations/communication/messages.md).
+
+#### `RelayClient.send` method
+
+```ts
+send(id: string, text: string, requestId?: string, props?: ProtocolObject): Promise<SendReceipt>
+```
+
+Sends [`communication.sendMessage`](../operations/communication/sendMessage.md).
+
+#### `RelayClient.edit` method
+
+```ts
+edit(message: ConversationMessage, text: string, requestId?: string): Promise<ConversationMessage>
+```
+
+Sends [`communication.editMessage`](../operations/communication/editMessage.md).
+
+#### `RelayClient.delete` method
+
+```ts
+delete(message: ConversationMessage, requestId?: string): Promise<ConversationMessage>
+```
+
+Sends [`communication.deleteMessage`](../operations/communication/deleteMessage.md).
+
+#### `RelayClient.events` method
+
+```ts
+events(id: string, after?: ConversationCursor): Promise<ItemPage<ProtocolObject> & {
+    nextCursor: ConversationCursor;
+}>
+```
+
+Sends [`communication.events`](../operations/communication/events.md).
+
+#### `RelayClient.reportRead` method
+
+```ts
+reportRead(id: string, membership: Membership, throughSequence: string): Promise<ReadReceipt>
+```
+
+Reports reading through a message's sequence, which also covers its delivery. Returns the user's current receipt.
+
+Sends [`communication.reportReceipt`](../operations/communication/reportReceipt.md).
+
+#### `RelayClient.reportDelivered` method
+
+```ts
+reportDelivered(id: string, membership: Membership, throughSequence: string): Promise<ReadReceipt>
+```
+
+Reports delivery through a message's sequence. Returns the user's current receipt.
+
+Sends [`communication.reportReceipt`](../operations/communication/reportReceipt.md).
+
+#### `RelayClient.receipts` method
+
+```ts
+receipts(id: string, cursor?: string): Promise<ItemPage<ReadReceipt>>
+```
+
+Sends [`communication.receipts`](../operations/communication/receipts.md).
+
+#### `RelayClient.getMessage` method
+
+```ts
+getMessage(id: string, messageId: string): Promise<ConversationMessage>
+```
+
+Sends [`communication.getMessage`](../operations/communication/getMessage.md).
+
+#### `RelayClient.members` method
+
+```ts
+members(id: string, options?: PageOptions): Promise<ItemPage<Membership>>
+```
+
+Sends [`communication.members`](../operations/communication/members.md).
+
+#### `RelayClient.inbox` method
+
+```ts
+inbox(options?: PageOptions): Promise<InboxPage>
+```
+
+Sends [`communication.inbox`](../operations/communication/inbox.md).
+
+#### `RelayClient.capabilities` method
+
+```ts
+capabilities(): Promise<ProjectCapabilities>
+```
+
+Sends [`communication.capabilities`](../operations/communication/capabilities.md).
+
+#### `RelayClient.typing` method
+
+```ts
+typing(id: string, isTyping: boolean): Promise<boolean>
+```
+
+Sends one ephemeral typing signal and returns whether the authority accepted it. Signals are never recorded,
+retried or resolved. Check `features?.typing` in `capabilities` first.
+
+Sends [`communication.typing`](../operations/communication/typing.md).
+
+#### `RelayClient.search` method
+
+```ts
+search(query: string, conversationIds?: string[]): Promise<ItemPage<SearchHit>>
+```
+
+Sends [`communication.search`](../operations/communication/search.md).
+
+#### `RelayClient.recoverPending` method
+
+```ts
+recoverPending(onError: (error: Error) => void): Promise<void>
+```
+
+Sends [`communication.resolveRequest`](../operations/communication/resolveRequest.md).
+
+#### `RelayClient.watch` method
+
+```ts
+watch(conversationId: string, apply: (events: ProtocolObject[]) => Promise<void>, onError: (error: Error) => void): Promise<ConversationStream>
+```
+
+Sends [`communication.events`](../operations/communication/events.md) and [`communication.conversationEvents`](../operations/communication/conversationEvents.md).
+
+#### `RelayClient.resyncAuthorizedHistory` method
+
+```ts
+resyncAuthorizedHistory(conversationId: string, apply: (events: ProtocolObject[]) => Promise<void>, onError: (error: Error) => void): Promise<ConversationStream>
+```
+
+Sends [`communication.events`](../operations/communication/events.md) and [`communication.conversationEvents`](../operations/communication/conversationEvents.md).
+
+### `RelayProblem` class
+
+```ts
+class RelayProblem extends Error
+```
+
+Re-exported from `@instantrelay/core`.
+
+#### `RelayProblem.code` property
+
+```ts
+readonly code: string
+```
+
+#### `RelayProblem.requestId` property
+
+```ts
+readonly requestId: string
+```
+
+#### `RelayProblem.outcome` property
+
+```ts
+readonly outcome: string
+```
+
+#### `RelayProblem.status` property
+
+```ts
+readonly status: number
+```
+
+#### `RelayProblem.retryAfter` property
+
+```ts
+readonly retryAfter?: number
+```
+
+Whole seconds to wait before resending the same request, when the authority sent a delay (for example with
+`RATE_LIMITED`). Read from the error's `extensions.retryAfter`, else from an HTTP `Retry-After` delay in seconds,
+or from a realtime close reason's `retryAfter=`. A request the caller sends is never resent on its own; when
+`@instantrelay/client` reconnects its stream or resends a queued message, it waits at least this long first.
+
+#### `RelayProblem` constructor
+
+```ts
+constructor(code: string, requestId: string, outcome: string, status: number, message: string, options?: ErrorOptions & {
+    retryAfter?: number;
+})
+```
+
+### `RelayTransport` class
+
+```ts
+class RelayTransport
+```
+
+Re-exported from `@instantrelay/core`.
+
+#### `RelayTransport.baseUrl` property
+
+```ts
+readonly baseUrl: string
+```
+
+#### `RelayTransport.durableRecovery` property
+
+```ts
+readonly durableRecovery: boolean
+```
+
+#### `RelayTransport.incarnation` property
+
+```ts
+incarnation: string
+```
+
+#### `RelayTransport.servingEpoch` property
+
+```ts
+servingEpoch: string | undefined
+```
+
+#### `RelayTransport` constructor
+
+```ts
+constructor(options: RelayTransportOptions)
+```
+
+#### `RelayTransport.initializeRecovery` method
+
+```ts
+initializeRecovery(): Promise<void>
+```
+
+#### `RelayTransport.recoveryStates` property
+
+```ts
+get recoveryStates(): readonly RecoveryState[]
+```
+
+#### `RelayTransport.execute` method
+
+```ts
+execute<K extends OperationKey>(key: K, projectId: string | undefined, input: OperationInput<K>, requestId?: string, credentialDeliveryPermit?: ProtocolObject): Promise<OperationPayload<K>>
+```
+
+#### `RelayTransport.retry` method
+
+```ts
+retry(requestId: string): Promise<NonNullable<OperationPayload<"communication.resolveRequest">["result"]>>
+```
+
 ### `ScopeRequiredProblem` class
 
 ```ts
-class ScopeRequiredProblem extends ConvoHopProblem
+class ScopeRequiredProblem extends RelayProblem
 ```
 
 `SCOPE_REQUIRED`: the backend key lacks a scope the operation requires (403, rejected, not retryable).
-Classify it by `instanceof ConvoHopProblem` and `code`; `scope` is a diagnostic detail.
+Classify it by `instanceof RelayProblem` and `code`; `scope` is a diagnostic detail.
 
-Re-exported from `@convohop/core`.
+Re-exported from `@instantrelay/core`.
 
 #### `ScopeRequiredProblem.code` property
 
@@ -3428,7 +3428,7 @@ constructor(requestId: string, outcome: string, status: number, message: string,
 readonly requestId: string
 ```
 
-Inherited from `ConvoHopProblem`.
+Inherited from `RelayProblem`.
 
 #### `ScopeRequiredProblem.outcome` property
 
@@ -3436,7 +3436,7 @@ Inherited from `ConvoHopProblem`.
 readonly outcome: string
 ```
 
-Inherited from `ConvoHopProblem`.
+Inherited from `RelayProblem`.
 
 #### `ScopeRequiredProblem.status` property
 
@@ -3444,7 +3444,7 @@ Inherited from `ConvoHopProblem`.
 readonly status: number
 ```
 
-Inherited from `ConvoHopProblem`.
+Inherited from `RelayProblem`.
 
 #### `ScopeRequiredProblem.retryAfter` property
 
@@ -3455,9 +3455,9 @@ readonly retryAfter?: number
 Whole seconds to wait before resending the same request, when the authority sent a delay (for example with
 `RATE_LIMITED`). Read from the error's `extensions.retryAfter`, else from an HTTP `Retry-After` delay in seconds,
 or from a realtime close reason's `retryAfter=`. A request the caller sends is never resent on its own; when
-`@convohop/client` reconnects its stream or resends a queued message, it waits at least this long first.
+`@instantrelay/client` reconnects its stream or resends a queued message, it waits at least this long first.
 
-Inherited from `ConvoHopProblem`.
+Inherited from `RelayProblem`.
 
 ### `TypingIndicator` class
 
@@ -3472,7 +3472,7 @@ project doesn't support typing.
 #### `TypingIndicator.client` property
 
 ```ts
-readonly client: ConvoHopClient
+readonly client: RelayClient
 ```
 
 #### `TypingIndicator.conversationId` property
@@ -3484,7 +3484,7 @@ readonly conversationId: string
 #### `TypingIndicator` constructor
 
 ```ts
-constructor(client: ConvoHopClient, conversationId: string, options?: TypingIndicatorOptions)
+constructor(client: RelayClient, conversationId: string, options?: TypingIndicatorOptions)
 ```
 
 #### `TypingIndicator.enabled` property
@@ -3538,7 +3538,7 @@ Sends [`communication.typing`](../operations/communication/typing.md).
 interface AsyncRecoveryStorage
 ```
 
-Re-exported from `@convohop/core`.
+Re-exported from `@instantrelay/core`.
 
 #### `AsyncRecoveryStorage.getItem` method
 
@@ -3564,7 +3564,7 @@ removeItem(key: string): Promise<void>
 interface CommandOptions
 ```
 
-Re-exported from `@convohop/core`.
+Re-exported from `@instantrelay/core`.
 
 #### `CommandOptions.requestId` property
 
@@ -3580,7 +3580,7 @@ interface Connectivity
 
 Network reachability.
 
-Re-exported from `@convohop/core`.
+Re-exported from `@instantrelay/core`.
 
 #### `Connectivity.online` property
 
@@ -3694,206 +3694,13 @@ onError?: (error: Error) => void
 
 Called for every error, including realtime interruptions the store recovers from on its own.
 
-### `ConvoHopClientOptions` interface
-
-```ts
-interface ConvoHopClientOptions
-```
-
-#### `ConvoHopClientOptions.baseUrl` property
-
-```ts
-baseUrl: string
-```
-
-#### `ConvoHopClientOptions.projectId` property
-
-```ts
-projectId: string
-```
-
-#### `ConvoHopClientOptions.sessionToken` property
-
-```ts
-sessionToken: string
-```
-
-#### `ConvoHopClientOptions.incarnation` property
-
-```ts
-incarnation: string
-```
-
-#### `ConvoHopClientOptions.principalId` property
-
-```ts
-principalId: string
-```
-
-#### `ConvoHopClientOptions.recoveryStorage` property
-
-```ts
-recoveryStorage?: RecoveryStorage
-```
-
-Synchronous storage, such as `localStorage`, for mutation recovery records and replay cursors. Never tokens.
-
-#### `ConvoHopClientOptions.asyncRecoveryStorage` property
-
-```ts
-asyncRecoveryStorage?: AsyncRecoveryStorage
-```
-
-Asynchronous storage, such as React Native's AsyncStorage, used instead of `recoveryStorage`. Recovery records load
-before the first command; replay cursors load when a replay starts.
-
-#### `ConvoHopClientOptions.fetch` property
-
-```ts
-fetch?: typeof fetch
-```
-
-#### `ConvoHopClientOptions.sessionRefresh` property
-
-```ts
-sessionRefresh?: SessionRefresh
-```
-
-#### `ConvoHopClientOptions.platform` property
-
-```ts
-platform?: ConvoHopPlatform
-```
-
-Runtime services that replace missing browser globals, such as in React Native. See `ConvoHopPlatform`.
-
-### `ConvoHopPlatform` interface
-
-```ts
-interface ConvoHopPlatform
-```
-
-Runtime services for runtimes that lack a browser global, such as React Native. Every field is optional and
-falls back to the global of the same name, looked up when it is used. The transport uses `randomUUID`, `sha256`
-and `URL`; `@convohop/client` also uses `WebSocket`, `connectivity` and `lifecycle`.
-
-Re-exported from `@convohop/core`.
-
-#### `ConvoHopPlatform.randomUUID` property
-
-```ts
-randomUUID?: () => string
-```
-
-A new random UUID in canonical lowercase form. Default: `crypto.randomUUID()`.
-
-#### `ConvoHopPlatform.sha256` property
-
-```ts
-sha256?: (data: Uint8Array) => Promise<Uint8Array>
-```
-
-The 32-byte SHA-256 digest of `data`. Default: `crypto.subtle.digest("SHA-256", data)`.
-
-#### `ConvoHopPlatform.URL` property
-
-```ts
-URL?: PlatformURLConstructor
-```
-
-A WHATWG URL constructor. Default: the global `URL`. The SDK checks it before first use and refuses one that doesn't conform.
-
-#### `ConvoHopPlatform.WebSocket` property
-
-```ts
-WebSocket?: PlatformWebSocketConstructor
-```
-
-Opens the realtime connection. Default: the global `WebSocket`.
-
-#### `ConvoHopPlatform.connectivity` property
-
-```ts
-connectivity?: Connectivity
-```
-
-Network reachability. The outbox waits while offline. Coming online starts a waiting outbox entry and realtime
-reconnection at once. Default in browsers: `navigator.onLine` and `online`/`offline` events; elsewhere always online.
-
-#### `ConvoHopPlatform.lifecycle` property
-
-```ts
-lifecycle?: Lifecycle
-```
-
-Foreground state. Returning to `active` starts waiting realtime reconnection, due outbox entries and due session
-renewal at once. It never changes retry budgets, request IDs or payloads. Default in browsers: page visibility.
-
-### `ConvoHopTransportOptions` interface
-
-```ts
-interface ConvoHopTransportOptions
-```
-
-Re-exported from `@convohop/core`.
-
-#### `ConvoHopTransportOptions.baseUrl` property
-
-```ts
-baseUrl: string
-```
-
-#### `ConvoHopTransportOptions.credential` property
-
-```ts
-credential?: string
-```
-
-#### `ConvoHopTransportOptions.namespace` property
-
-```ts
-namespace: string
-```
-
-#### `ConvoHopTransportOptions.incarnation` property
-
-```ts
-incarnation?: string
-```
-
-#### `ConvoHopTransportOptions.recoveryStorage` property
-
-```ts
-recoveryStorage?: RecoveryStorage
-```
-
-#### `ConvoHopTransportOptions.asyncRecoveryStorage` property
-
-```ts
-asyncRecoveryStorage?: AsyncRecoveryStorage
-```
-
-#### `ConvoHopTransportOptions.fetch` property
-
-```ts
-fetch?: typeof fetch
-```
-
-#### `ConvoHopTransportOptions.platform` property
-
-```ts
-platform?: ConvoHopPlatform
-```
-
-Runtime services that replace missing globals, such as in React Native. See `ConvoHopPlatform`.
-
 ### `ItemPage` interface
 
 ```ts
 interface ItemPage<T>
 ```
 
-Re-exported from `@convohop/core`.
+Re-exported from `@instantrelay/core`.
 
 #### `ItemPage.items` property
 
@@ -3927,7 +3734,7 @@ interface Lifecycle
 
 Whether the app is in the foreground.
 
-Re-exported from `@convohop/core`.
+Re-exported from `@instantrelay/core`.
 
 #### `Lifecycle.state` property
 
@@ -4250,7 +4057,7 @@ transports?: {
 interface OperationTypes
 ```
 
-Re-exported from `@convohop/core`.
+Re-exported from `@instantrelay/core`.
 
 ### `OutboxEntry` interface
 
@@ -4374,7 +4181,7 @@ Called when an entry fails and when persistence or a listener throws.
 interface PageOptions
 ```
 
-Re-exported from `@convohop/core`.
+Re-exported from `@instantrelay/core`.
 
 #### `PageOptions.cursor` property
 
@@ -4396,7 +4203,7 @@ interface PlatformURL
 
 The parts of a WHATWG `URL` the SDKs read.
 
-Re-exported from `@convohop/core`.
+Re-exported from `@instantrelay/core`.
 
 #### `PlatformURL.href` property
 
@@ -4472,7 +4279,7 @@ interface PlatformWebSocket
 
 The parts of a `WebSocket` the client uses.
 
-Re-exported from `@convohop/core`.
+Re-exported from `@instantrelay/core`.
 
 #### `PlatformWebSocket.onopen` property
 
@@ -4521,7 +4328,7 @@ close(code?: number, reason?: string): void
 interface ProjectRoute
 ```
 
-Re-exported from `@convohop/core`.
+Re-exported from `@instantrelay/core`.
 
 #### `ProjectRoute.projectId` property
 
@@ -4575,7 +4382,7 @@ A mutation's recovery record. `resolutionState` is how far its request is known 
 first attempt, `unknown` while an attempt's outcome is unknown, `rejected` once the authority has rejected every
 attempt, and `committed` or `accepted` once the authority has the request.
 
-Re-exported from `@convohop/core`.
+Re-exported from `@instantrelay/core`.
 
 #### `RecoveryState.requestId` property
 
@@ -4661,7 +4468,7 @@ mediaAdmissionAttempted?: true
 interface RecoveryStorage
 ```
 
-Re-exported from `@convohop/core`.
+Re-exported from `@instantrelay/core`.
 
 #### `RecoveryStorage.getItem` method
 
@@ -4680,6 +4487,199 @@ setItem(key: string, value: string): void
 ```ts
 removeItem(key: string): void
 ```
+
+### `RelayClientOptions` interface
+
+```ts
+interface RelayClientOptions
+```
+
+#### `RelayClientOptions.baseUrl` property
+
+```ts
+baseUrl: string
+```
+
+#### `RelayClientOptions.projectId` property
+
+```ts
+projectId: string
+```
+
+#### `RelayClientOptions.sessionToken` property
+
+```ts
+sessionToken: string
+```
+
+#### `RelayClientOptions.incarnation` property
+
+```ts
+incarnation: string
+```
+
+#### `RelayClientOptions.principalId` property
+
+```ts
+principalId: string
+```
+
+#### `RelayClientOptions.recoveryStorage` property
+
+```ts
+recoveryStorage?: RecoveryStorage
+```
+
+Synchronous storage, such as `localStorage`, for mutation recovery records and replay cursors. Never tokens.
+
+#### `RelayClientOptions.asyncRecoveryStorage` property
+
+```ts
+asyncRecoveryStorage?: AsyncRecoveryStorage
+```
+
+Asynchronous storage, such as React Native's AsyncStorage, used instead of `recoveryStorage`. Recovery records load
+before the first command; replay cursors load when a replay starts.
+
+#### `RelayClientOptions.fetch` property
+
+```ts
+fetch?: typeof fetch
+```
+
+#### `RelayClientOptions.sessionRefresh` property
+
+```ts
+sessionRefresh?: SessionRefresh
+```
+
+#### `RelayClientOptions.platform` property
+
+```ts
+platform?: RelayPlatform
+```
+
+Runtime services that replace missing browser globals, such as in React Native. See `RelayPlatform`.
+
+### `RelayPlatform` interface
+
+```ts
+interface RelayPlatform
+```
+
+Runtime services for runtimes that lack a browser global, such as React Native. Every field is optional and
+falls back to the global of the same name, looked up when it is used. The transport uses `randomUUID`, `sha256`
+and `URL`; `@instantrelay/client` also uses `WebSocket`, `connectivity` and `lifecycle`.
+
+Re-exported from `@instantrelay/core`.
+
+#### `RelayPlatform.randomUUID` property
+
+```ts
+randomUUID?: () => string
+```
+
+A new random UUID in canonical lowercase form. Default: `crypto.randomUUID()`.
+
+#### `RelayPlatform.sha256` property
+
+```ts
+sha256?: (data: Uint8Array) => Promise<Uint8Array>
+```
+
+The 32-byte SHA-256 digest of `data`. Default: `crypto.subtle.digest("SHA-256", data)`.
+
+#### `RelayPlatform.URL` property
+
+```ts
+URL?: PlatformURLConstructor
+```
+
+A WHATWG URL constructor. Default: the global `URL`. The SDK checks it before first use and refuses one that doesn't conform.
+
+#### `RelayPlatform.WebSocket` property
+
+```ts
+WebSocket?: PlatformWebSocketConstructor
+```
+
+Opens the realtime connection. Default: the global `WebSocket`.
+
+#### `RelayPlatform.connectivity` property
+
+```ts
+connectivity?: Connectivity
+```
+
+Network reachability. The outbox waits while offline. Coming online starts a waiting outbox entry and realtime
+reconnection at once. Default in browsers: `navigator.onLine` and `online`/`offline` events; elsewhere always online.
+
+#### `RelayPlatform.lifecycle` property
+
+```ts
+lifecycle?: Lifecycle
+```
+
+Foreground state. Returning to `active` starts waiting realtime reconnection, due outbox entries and due session
+renewal at once. It never changes retry budgets, request IDs or payloads. Default in browsers: page visibility.
+
+### `RelayTransportOptions` interface
+
+```ts
+interface RelayTransportOptions
+```
+
+Re-exported from `@instantrelay/core`.
+
+#### `RelayTransportOptions.baseUrl` property
+
+```ts
+baseUrl: string
+```
+
+#### `RelayTransportOptions.credential` property
+
+```ts
+credential?: string
+```
+
+#### `RelayTransportOptions.namespace` property
+
+```ts
+namespace: string
+```
+
+#### `RelayTransportOptions.incarnation` property
+
+```ts
+incarnation?: string
+```
+
+#### `RelayTransportOptions.recoveryStorage` property
+
+```ts
+recoveryStorage?: RecoveryStorage
+```
+
+#### `RelayTransportOptions.asyncRecoveryStorage` property
+
+```ts
+asyncRecoveryStorage?: AsyncRecoveryStorage
+```
+
+#### `RelayTransportOptions.fetch` property
+
+```ts
+fetch?: typeof fetch
+```
+
+#### `RelayTransportOptions.platform` property
+
+```ts
+platform?: RelayPlatform
+```
+
+Runtime services that replace missing globals, such as in React Native. See `RelayPlatform`.
 
 ### `RemoteMedia` interface
 
@@ -4808,7 +4808,7 @@ readonly keys?: Readonly<Record<string, string>>
 type Conversation = NonNullable<OperationPayload<"communication.getConversation">["result"]>
 ```
 
-Re-exported from `@convohop/core`.
+Re-exported from `@instantrelay/core`.
 
 ### `ConversationCursor` type
 
@@ -4816,7 +4816,7 @@ Re-exported from `@convohop/core`.
 type ConversationCursor = NonNullable<NonNullable<OperationPayload<"communication.events">["result"]>["nextCursor"]>
 ```
 
-Re-exported from `@convohop/core`.
+Re-exported from `@instantrelay/core`.
 
 ### `ConversationMessage` type
 
@@ -4824,7 +4824,7 @@ Re-exported from `@convohop/core`.
 type ConversationMessage = NonNullable<OperationPayload<"communication.getMessage">["result"]>
 ```
 
-Re-exported from `@convohop/core`.
+Re-exported from `@instantrelay/core`.
 
 ### `ConversationMute` type
 
@@ -4834,7 +4834,7 @@ type ConversationMute = OperationPayload<"communication.conversationMute">["resu
 
 Whether a member muted message push notifications for a conversation, and until when.
 
-Re-exported from `@convohop/core`.
+Re-exported from `@instantrelay/core`.
 
 ### `ConversationStatus` type
 
@@ -4873,7 +4873,7 @@ A page of the inbox. An incomplete page with no cursor carries `partialReason`, 
 type LifecycleState = "active" | "background"
 ```
 
-Re-exported from `@convohop/core`.
+Re-exported from `@instantrelay/core`.
 
 ### `LiveConnectionGrant` type
 
@@ -4914,7 +4914,7 @@ type LiveSession = OperationPayload<"communication.liveSession">["result"]
 type Membership = NonNullable<OperationPayload<"communication.members">["result"]>["items"][number]
 ```
 
-Re-exported from `@convohop/core`.
+Re-exported from `@instantrelay/core`.
 
 ### `OperationInput` type
 
@@ -4924,7 +4924,7 @@ type OperationInput<K extends OperationKey> = OperationTypes[K]["variables"] ext
 } ? NonNullable<I> : Record<string, never>
 ```
 
-Re-exported from `@convohop/core`.
+Re-exported from `@instantrelay/core`.
 
 ### `OperationKey` type
 
@@ -4932,7 +4932,7 @@ Re-exported from `@convohop/core`.
 type OperationKey = keyof OperationTypes
 ```
 
-Re-exported from `@convohop/core`.
+Re-exported from `@instantrelay/core`.
 
 ### `OperationPayload` type
 
@@ -4940,7 +4940,7 @@ Re-exported from `@convohop/core`.
 type OperationPayload<K extends OperationKey> = OperationTypes[K]["result"][FieldName<K> & keyof OperationTypes[K]["result"]]
 ```
 
-Re-exported from `@convohop/core`.
+Re-exported from `@instantrelay/core`.
 
 ### `OutboxStatus` type
 
@@ -4962,7 +4962,7 @@ type PlatformURLConstructor = new (url: string, base?: string) => PlatformURL
 
 A WHATWG URL constructor, such as the global `URL` or a polyfill's.
 
-Re-exported from `@convohop/core`.
+Re-exported from `@instantrelay/core`.
 
 ### `PlatformWebSocketConstructor` type
 
@@ -4970,7 +4970,7 @@ Re-exported from `@convohop/core`.
 type PlatformWebSocketConstructor = new (url: string, protocols?: string | string[]) => PlatformWebSocket
 ```
 
-Re-exported from `@convohop/core`.
+Re-exported from `@instantrelay/core`.
 
 ### `ProjectCapabilities` type
 
@@ -4986,7 +4986,7 @@ The project's features and limits, as `communication.capabilities` reports them.
 type ProtocolObject = Record<string, unknown>
 ```
 
-Re-exported from `@convohop/core`.
+Re-exported from `@instantrelay/core`.
 
 ### `PushRegistration` type
 
@@ -5009,8 +5009,8 @@ type PushRegistration = {
 }
 ```
 
-Where your backend sends one device's pushes. Every ConvoHop client hands your app this shape, so one backend
-endpoint can store registrations from browsers and native apps. ConvoHop never sees them.
+Where your backend sends one device's pushes. Every Relay client hands your app this shape, so one backend
+endpoint can store registrations from browsers and native apps. Relay never sees them.
 
 - `webPush`: a browser subscription; your backend signs pushes with its VAPID private key.
 - `apns`: an iOS device token for alerts. `environment` says which APNs host accepts it, when the app knows.
@@ -5036,7 +5036,7 @@ type SearchHit = NonNullable<OperationPayload<"communication.search">["result"]>
 }
 ```
 
-Re-exported from `@convohop/core`.
+Re-exported from `@instantrelay/core`.
 
 ### `SendReceipt` type
 
@@ -5046,7 +5046,7 @@ type SendReceipt = NonNullable<OperationPayload<"communication.sendMessage">["re
 }
 ```
 
-Re-exported from `@convohop/core`.
+Re-exported from `@instantrelay/core`.
 
 ### `SessionBootstrap` type
 
@@ -5056,7 +5056,7 @@ type SessionBootstrap = SessionResult & {
 }
 ```
 
-Re-exported from `@convohop/core`.
+Re-exported from `@instantrelay/core`.
 
 ### `SessionMetadata` type
 
@@ -5064,7 +5064,7 @@ Re-exported from `@convohop/core`.
 type SessionMetadata = OperationPayload<"communication.currentSession">["result"]
 ```
 
-Re-exported from `@convohop/core`.
+Re-exported from `@instantrelay/core`.
 
 ### `SessionRefresh` type
 
@@ -5072,7 +5072,7 @@ Re-exported from `@convohop/core`.
 type SessionRefresh = (current: Readonly<SessionMetadata>) => Promise<SessionBootstrap>
 ```
 
-Re-exported from `@convohop/core`.
+Re-exported from `@instantrelay/core`.
 
 ### `SessionRefreshState` type
 
@@ -5080,7 +5080,7 @@ Re-exported from `@convohop/core`.
 type SessionRefreshState = "disabled" | "uninitialized" | "ready" | "refreshing" | "blocked"
 ```
 
-Re-exported from `@convohop/core`.
+Re-exported from `@instantrelay/core`.
 
 ## Functions
 
@@ -5090,7 +5090,7 @@ Re-exported from `@convohop/core`.
 function parseConversation(value: unknown): Conversation
 ```
 
-Re-exported from `@convohop/core`.
+Re-exported from `@instantrelay/core`.
 
 ### `parseCounter` function
 
@@ -5098,7 +5098,7 @@ Re-exported from `@convohop/core`.
 function parseCounter(value: unknown): string
 ```
 
-Re-exported from `@convohop/core`.
+Re-exported from `@instantrelay/core`.
 
 ### `parseCursor` function
 
@@ -5106,7 +5106,7 @@ Re-exported from `@convohop/core`.
 function parseCursor(value: unknown): ConversationCursor
 ```
 
-Re-exported from `@convohop/core`.
+Re-exported from `@instantrelay/core`.
 
 ### `parseId` function
 
@@ -5114,7 +5114,7 @@ Re-exported from `@convohop/core`.
 function parseId(value: unknown): string
 ```
 
-Re-exported from `@convohop/core`.
+Re-exported from `@instantrelay/core`.
 
 ### `parseMembership` function
 
@@ -5122,7 +5122,7 @@ Re-exported from `@convohop/core`.
 function parseMembership(value: unknown): Membership
 ```
 
-Re-exported from `@convohop/core`.
+Re-exported from `@instantrelay/core`.
 
 ### `parseMessage` function
 
@@ -5130,7 +5130,7 @@ Re-exported from `@convohop/core`.
 function parseMessage(value: unknown): ConversationMessage
 ```
 
-Re-exported from `@convohop/core`.
+Re-exported from `@instantrelay/core`.
 
 ### `parseObject` function
 
@@ -5138,7 +5138,7 @@ Re-exported from `@convohop/core`.
 function parseObject(value: unknown): ProtocolObject
 ```
 
-Re-exported from `@convohop/core`.
+Re-exported from `@instantrelay/core`.
 
 ### `parsePage` function
 
@@ -5146,7 +5146,7 @@ Re-exported from `@convohop/core`.
 function parsePage<T>(value: unknown, parse: (value: unknown) => T): ItemPage<T>
 ```
 
-Re-exported from `@convohop/core`.
+Re-exported from `@instantrelay/core`.
 
 ### `parseSearchHit` function
 
@@ -5154,7 +5154,7 @@ Re-exported from `@convohop/core`.
 function parseSearchHit(value: unknown): SearchHit
 ```
 
-Re-exported from `@convohop/core`.
+Re-exported from `@instantrelay/core`.
 
 ### `parseString` function
 
@@ -5162,7 +5162,7 @@ Re-exported from `@convohop/core`.
 function parseString(value: unknown): string
 ```
 
-Re-exported from `@convohop/core`.
+Re-exported from `@instantrelay/core`.
 
 ## Constants
 
@@ -5172,7 +5172,7 @@ Re-exported from `@convohop/core`.
 const operationCatalog: Record<OperationKey, OperationCatalogEntry>
 ```
 
-Re-exported from `@convohop/core`.
+Re-exported from `@instantrelay/core`.
 
 ## Namespaces
 
@@ -5182,11 +5182,11 @@ Re-exported from `@convohop/core`.
 namespace GraphqlTypes
 ```
 
-Re-exported from `@convohop/core`.
+Re-exported from `@instantrelay/core`.
 
-# `@convohop/react`
+# `@instantrelay/react`
 
-React hooks over the client SDK: conversations with offline-safe sends, typing, session renewal and calls. In React Native, connect call media with @convohop/react-native/media: useMediaConnection needs a browser.
+React hooks over the client SDK: conversations with offline-safe sends, typing, session renewal and calls. In React Native, connect call media with @instantrelay/react-native/media: useMediaConnection needs a browser.
 
 **Layer:** Client. **Runtime:** React 18 or later, in React Native 0.76 or later. **Source:** `packages/react`.
 
@@ -5365,35 +5365,6 @@ readonly resyncRequired: boolean
 The saved replay position is no longer valid. Only `ConversationStore.resync` recovers.
 
 Inherited from `ConversationSnapshot`.
-
-### `ConvoHopProviderProps` interface
-
-```ts
-interface ConvoHopProviderProps
-```
-
-#### `ConvoHopProviderProps.client` property
-
-```ts
-readonly client: ConvoHopClient
-```
-
-The signed-in user's client. Create it outside the provider, or above it, and close it when the user signs out.
-
-#### `ConvoHopProviderProps.outbox` property
-
-```ts
-readonly outbox?: Outbox | undefined
-```
-
-The outbox every conversation below sends through. Without one, each conversation's store sends through an outbox
-of its own, which stops sending when the component unmounts.
-
-#### `ConvoHopProviderProps.children` property
-
-```ts
-readonly children?: ReactNode
-```
 
 ### `LiveSessionState` interface
 
@@ -5599,6 +5570,35 @@ Why the last connect or reconnect failed.
 
 Inherited from `MediaConnectionState`.
 
+### `RelayProviderProps` interface
+
+```ts
+interface RelayProviderProps
+```
+
+#### `RelayProviderProps.client` property
+
+```ts
+readonly client: RelayClient
+```
+
+The signed-in user's client. Create it outside the provider, or above it, and close it when the user signs out.
+
+#### `RelayProviderProps.outbox` property
+
+```ts
+readonly outbox?: Outbox | undefined
+```
+
+The outbox every conversation below sends through. Without one, each conversation's store sends through an outbox
+of its own, which stops sending when the component unmounts.
+
+#### `RelayProviderProps.children` property
+
+```ts
+readonly children?: ReactNode
+```
+
 ### `SessionRefreshOptions` interface
 
 ```ts
@@ -5711,10 +5711,10 @@ type MediaConnectionStatus = "idle" | "connecting" | "connected" | "resuming" | 
 
 ## Functions
 
-### `ConvoHopProvider` function
+### `RelayProvider` function
 
 ```ts
-function ConvoHopProvider({ client, outbox, children }: ConvoHopProviderProps): ReactElement
+function RelayProvider({ client, outbox, children }: RelayProviderProps): ReactElement
 ```
 
 Makes a client, and optionally a shared outbox, available to the hooks below it. It doesn't own or close either.
@@ -5730,14 +5730,6 @@ reconnects and session refreshes, and sends optimistically through the provider'
 client or outbox closes the old store and opens a new one; `null` closes it.
 
 Sends [`communication.getConversation`](../operations/communication/getConversation.md), [`communication.messages`](../operations/communication/messages.md), [`communication.getMessage`](../operations/communication/getMessage.md), [`communication.events`](../operations/communication/events.md), [`communication.receipts`](../operations/communication/receipts.md) and [`communication.conversationEvents`](../operations/communication/conversationEvents.md).
-
-### `useConvoHopClient` function
-
-```ts
-function useConvoHopClient(): ConvoHopClient
-```
-
-The provider's client.
 
 ### `useLiveSession` function
 
@@ -5767,6 +5759,14 @@ function useOutbox(outbox?: Outbox): readonly OutboxEntry[]
 ```
 
 The entries of `outbox`, or of the provider's outbox, in send order.
+
+### `useRelayClient` function
+
+```ts
+function useRelayClient(): RelayClient
+```
+
+The provider's client.
 
 ### `useSessionRefresh` function
 
@@ -5800,33 +5800,33 @@ Conversations, members, messages, receipts, realtime events and live sessions in
 
 | Operation | Layer | Members |
 | --- | --- | --- |
-| [`communication.capabilities`](../operations/communication/capabilities.md) | both | [`ConvoHopClient.capabilities`](reference/client.md#convohopclientcapabilities-method) |
-| [`communication.route`](../operations/communication/route.md) | both | [`ConvoHopClient.initialize`](reference/client.md#convohopclientinitialize-method), [`ConvoHopClient.refreshSession`](reference/client.md#convohopclientrefreshsession-method), [`ConvoHopClient.scheduleSessionRefresh`](reference/client.md#convohopclientschedulesessionrefresh-method), [`useSessionRefresh`](reference/react.md#usesessionrefresh-function) |
-| [`communication.currentSession`](../operations/communication/currentSession.md) | client | [`ConvoHopClient.initialize`](reference/client.md#convohopclientinitialize-method), [`ConvoHopClient.refreshSession`](reference/client.md#convohopclientrefreshsession-method), [`ConvoHopClient.scheduleSessionRefresh`](reference/client.md#convohopclientschedulesessionrefresh-method), [`useSessionRefresh`](reference/react.md#usesessionrefresh-function) |
-| [`communication.getConversation`](../operations/communication/getConversation.md) | both | [`ConvoHopClient.getConversation`](reference/client.md#convohopclientgetconversation-method), [`ConversationHandle.get`](reference/client.md#conversationhandleget-method), [`ConversationStore.open`](reference/client.md#conversationstoreopen-method), [`ConversationStore.resync`](reference/client.md#conversationstoreresync-method), [`useConversation`](reference/react.md#useconversation-function), [`ConversationView.open`](reference/react.md#conversationviewopen-method), [`ConversationView.resync`](reference/react.md#conversationviewresync-method) |
-| [`communication.members`](../operations/communication/members.md) | both | [`ConvoHopClient.members`](reference/client.md#convohopclientmembers-method) |
-| [`communication.messages`](../operations/communication/messages.md) | both | [`ConvoHopClient.messages`](reference/client.md#convohopclientmessages-method), [`ConversationHandle.messages.list`](reference/client.md#conversationhandlemessageslist-property), [`ConversationStore.open`](reference/client.md#conversationstoreopen-method), [`ConversationStore.resync`](reference/client.md#conversationstoreresync-method), [`ConversationStore.loadOlder`](reference/client.md#conversationstoreloadolder-method), [`useConversation`](reference/react.md#useconversation-function), [`ConversationView.open`](reference/react.md#conversationviewopen-method), [`ConversationView.resync`](reference/react.md#conversationviewresync-method), [`ConversationView.loadOlder`](reference/react.md#conversationviewloadolder-method) |
-| [`communication.getMessage`](../operations/communication/getMessage.md) | both | [`ConvoHopClient.getMessage`](reference/client.md#convohopclientgetmessage-method), [`ConversationStore.open`](reference/client.md#conversationstoreopen-method), [`ConversationStore.resync`](reference/client.md#conversationstoreresync-method), [`useConversation`](reference/react.md#useconversation-function), [`ConversationView.open`](reference/react.md#conversationviewopen-method), [`ConversationView.resync`](reference/react.md#conversationviewresync-method) |
-| [`communication.events`](../operations/communication/events.md) | client | [`ConvoHopClient.events`](reference/client.md#convohopclientevents-method), [`ConvoHopClient.watch`](reference/client.md#convohopclientwatch-method), [`ConvoHopClient.resyncAuthorizedHistory`](reference/client.md#convohopclientresyncauthorizedhistory-method), [`ConversationStore.open`](reference/client.md#conversationstoreopen-method), [`ConversationStore.resync`](reference/client.md#conversationstoreresync-method), [`useConversation`](reference/react.md#useconversation-function), [`ConversationView.open`](reference/react.md#conversationviewopen-method), [`ConversationView.resync`](reference/react.md#conversationviewresync-method) |
-| [`communication.receipts`](../operations/communication/receipts.md) | client | [`ConvoHopClient.receipts`](reference/client.md#convohopclientreceipts-method), [`ConversationStore.open`](reference/client.md#conversationstoreopen-method), [`ConversationStore.resync`](reference/client.md#conversationstoreresync-method), [`useConversation`](reference/react.md#useconversation-function), [`ConversationView.open`](reference/react.md#conversationviewopen-method), [`ConversationView.resync`](reference/react.md#conversationviewresync-method) |
-| [`communication.inbox`](../operations/communication/inbox.md) | both | [`ConvoHopClient.inbox`](reference/client.md#convohopclientinbox-method) |
-| [`communication.search`](../operations/communication/search.md) | both | [`ConvoHopClient.search`](reference/client.md#convohopclientsearch-method) |
-| [`communication.resolveRequest`](../operations/communication/resolveRequest.md) | both | [`ConvoHopClient.requests.resolve`](reference/client.md#convohopclientrequestsresolve-property), [`ConvoHopClient.requests.retry`](reference/client.md#convohopclientrequestsretry-property), [`ConvoHopClient.recoverPending`](reference/client.md#convohopclientrecoverpending-method), [`Outbox.send`](reference/client.md#outboxsend-method), [`Outbox.resend`](reference/client.md#outboxresend-method), [`Outbox.flush`](reference/client.md#outboxflush-method), [`ConversationStore.send`](reference/client.md#conversationstoresend-method), [`ConversationView.send`](reference/react.md#conversationviewsend-method) |
+| [`communication.capabilities`](../operations/communication/capabilities.md) | both | [`RelayClient.capabilities`](reference/client.md#relayclientcapabilities-method) |
+| [`communication.route`](../operations/communication/route.md) | both | [`RelayClient.initialize`](reference/client.md#relayclientinitialize-method), [`RelayClient.refreshSession`](reference/client.md#relayclientrefreshsession-method), [`RelayClient.scheduleSessionRefresh`](reference/client.md#relayclientschedulesessionrefresh-method), [`useSessionRefresh`](reference/react.md#usesessionrefresh-function) |
+| [`communication.currentSession`](../operations/communication/currentSession.md) | client | [`RelayClient.initialize`](reference/client.md#relayclientinitialize-method), [`RelayClient.refreshSession`](reference/client.md#relayclientrefreshsession-method), [`RelayClient.scheduleSessionRefresh`](reference/client.md#relayclientschedulesessionrefresh-method), [`useSessionRefresh`](reference/react.md#usesessionrefresh-function) |
+| [`communication.getConversation`](../operations/communication/getConversation.md) | both | [`RelayClient.getConversation`](reference/client.md#relayclientgetconversation-method), [`ConversationHandle.get`](reference/client.md#conversationhandleget-method), [`ConversationStore.open`](reference/client.md#conversationstoreopen-method), [`ConversationStore.resync`](reference/client.md#conversationstoreresync-method), [`useConversation`](reference/react.md#useconversation-function), [`ConversationView.open`](reference/react.md#conversationviewopen-method), [`ConversationView.resync`](reference/react.md#conversationviewresync-method) |
+| [`communication.members`](../operations/communication/members.md) | both | [`RelayClient.members`](reference/client.md#relayclientmembers-method) |
+| [`communication.messages`](../operations/communication/messages.md) | both | [`RelayClient.messages`](reference/client.md#relayclientmessages-method), [`ConversationHandle.messages.list`](reference/client.md#conversationhandlemessageslist-property), [`ConversationStore.open`](reference/client.md#conversationstoreopen-method), [`ConversationStore.resync`](reference/client.md#conversationstoreresync-method), [`ConversationStore.loadOlder`](reference/client.md#conversationstoreloadolder-method), [`useConversation`](reference/react.md#useconversation-function), [`ConversationView.open`](reference/react.md#conversationviewopen-method), [`ConversationView.resync`](reference/react.md#conversationviewresync-method), [`ConversationView.loadOlder`](reference/react.md#conversationviewloadolder-method) |
+| [`communication.getMessage`](../operations/communication/getMessage.md) | both | [`RelayClient.getMessage`](reference/client.md#relayclientgetmessage-method), [`ConversationStore.open`](reference/client.md#conversationstoreopen-method), [`ConversationStore.resync`](reference/client.md#conversationstoreresync-method), [`useConversation`](reference/react.md#useconversation-function), [`ConversationView.open`](reference/react.md#conversationviewopen-method), [`ConversationView.resync`](reference/react.md#conversationviewresync-method) |
+| [`communication.events`](../operations/communication/events.md) | client | [`RelayClient.events`](reference/client.md#relayclientevents-method), [`RelayClient.watch`](reference/client.md#relayclientwatch-method), [`RelayClient.resyncAuthorizedHistory`](reference/client.md#relayclientresyncauthorizedhistory-method), [`ConversationStore.open`](reference/client.md#conversationstoreopen-method), [`ConversationStore.resync`](reference/client.md#conversationstoreresync-method), [`useConversation`](reference/react.md#useconversation-function), [`ConversationView.open`](reference/react.md#conversationviewopen-method), [`ConversationView.resync`](reference/react.md#conversationviewresync-method) |
+| [`communication.receipts`](../operations/communication/receipts.md) | client | [`RelayClient.receipts`](reference/client.md#relayclientreceipts-method), [`ConversationStore.open`](reference/client.md#conversationstoreopen-method), [`ConversationStore.resync`](reference/client.md#conversationstoreresync-method), [`useConversation`](reference/react.md#useconversation-function), [`ConversationView.open`](reference/react.md#conversationviewopen-method), [`ConversationView.resync`](reference/react.md#conversationviewresync-method) |
+| [`communication.inbox`](../operations/communication/inbox.md) | both | [`RelayClient.inbox`](reference/client.md#relayclientinbox-method) |
+| [`communication.search`](../operations/communication/search.md) | both | [`RelayClient.search`](reference/client.md#relayclientsearch-method) |
+| [`communication.resolveRequest`](../operations/communication/resolveRequest.md) | both | [`RelayClient.requests.resolve`](reference/client.md#relayclientrequestsresolve-property), [`RelayClient.requests.retry`](reference/client.md#relayclientrequestsretry-property), [`RelayClient.recoverPending`](reference/client.md#relayclientrecoverpending-method), [`Outbox.send`](reference/client.md#outboxsend-method), [`Outbox.resend`](reference/client.md#outboxresend-method), [`Outbox.flush`](reference/client.md#outboxflush-method), [`ConversationStore.send`](reference/client.md#conversationstoresend-method), [`ConversationView.send`](reference/react.md#conversationviewsend-method) |
 | [`communication.getOperation`](../operations/communication/getOperation.md) | both | Not wrapped by a method |
 | [`communication.conversationMute`](../operations/communication/conversationMute.md) | both | [`ConversationHandle.mute.get`](reference/client.md#conversationhandlemuteget-property) |
 | [`communication.currentLiveSession`](../operations/communication/currentLiveSession.md) | both | [`ConversationLive.current`](reference/client.md#conversationlivecurrent-method), [`useLiveSession`](reference/react.md#uselivesession-function), [`LiveSessionView.refresh`](reference/react.md#livesessionviewrefresh-method) |
-| [`communication.liveSession`](../operations/communication/liveSession.md) | both | [`ConvoHopClient.liveSession`](reference/client.md#convohopclientlivesession-method), [`LiveSessionHandle.get` (static)](reference/client.md#livesessionhandleget-static-method), [`LiveSessionHandle.get`](reference/client.md#livesessionhandleget-method), [`LiveSessionHandle.participation`](reference/client.md#livesessionhandleparticipation-method), [`LiveStartOperation.ready`](reference/client.md#livestartoperationready-method), [`LiveParticipationHandle.get`](reference/client.md#liveparticipationhandleget-method), [`watchRingingCalls`](reference/react-native.md#watchringingcalls-function) |
+| [`communication.liveSession`](../operations/communication/liveSession.md) | both | [`RelayClient.liveSession`](reference/client.md#relayclientlivesession-method), [`LiveSessionHandle.get` (static)](reference/client.md#livesessionhandleget-static-method), [`LiveSessionHandle.get`](reference/client.md#livesessionhandleget-method), [`LiveSessionHandle.participation`](reference/client.md#livesessionhandleparticipation-method), [`LiveStartOperation.ready`](reference/client.md#livestartoperationready-method), [`LiveParticipationHandle.get`](reference/client.md#liveparticipationhandleget-method), [`watchRingingCalls`](reference/react-native.md#watchringingcalls-function) |
 | [`communication.liveSessions`](../operations/communication/liveSessions.md) | both | [`ConversationLive.history`](reference/client.md#conversationlivehistory-method) |
 | [`communication.liveSessionParticipants`](../operations/communication/liveSessionParticipants.md) | both | [`LiveSessionHandle.participants`](reference/client.md#livesessionhandleparticipants-method) |
-| [`communication.liveSessionAlerts`](../operations/communication/liveSessionAlerts.md) | client | [`ConvoHopClient.liveAlerts.list`](reference/client.md#convohopclientlivealertslist-property), [`watchRingingCalls`](reference/react-native.md#watchringingcalls-function) |
+| [`communication.liveSessionAlerts`](../operations/communication/liveSessionAlerts.md) | client | [`RelayClient.liveAlerts.list`](reference/client.md#relayclientlivealertslist-property), [`watchRingingCalls`](reference/react-native.md#watchringingcalls-function) |
 | [`communication.liveSessionOperation`](../operations/communication/liveSessionOperation.md) | both | [`LiveStartOperation.get`](reference/client.md#livestartoperationget-method), [`LiveStartOperation.completed`](reference/client.md#livestartoperationcompleted-method), [`LiveStartOperation.ready`](reference/client.md#livestartoperationready-method), [`LiveEndOperation.get`](reference/client.md#liveendoperationget-method), [`LiveEndOperation.completed`](reference/client.md#liveendoperationcompleted-method) |
 | [`communication.revokeSession`](../operations/communication/revokeSession.md) | both | Not wrapped by a method |
 | [`communication.updateConversation`](../operations/communication/updateConversation.md) | both | Not wrapped by a method |
-| [`communication.sendMessage`](../operations/communication/sendMessage.md) | both | [`ConvoHopClient.send`](reference/client.md#convohopclientsend-method), [`ConversationHandle.messages.send`](reference/client.md#conversationhandlemessagessend-property), [`Outbox.send`](reference/client.md#outboxsend-method), [`Outbox.resend`](reference/client.md#outboxresend-method), [`Outbox.flush`](reference/client.md#outboxflush-method), [`ConversationStore.send`](reference/client.md#conversationstoresend-method), [`ConversationView.send`](reference/react.md#conversationviewsend-method) |
-| [`communication.editMessage`](../operations/communication/editMessage.md) | both | [`ConvoHopClient.edit`](reference/client.md#convohopclientedit-method), [`ConversationHandle.messages.edit`](reference/client.md#conversationhandlemessagesedit-property) |
-| [`communication.deleteMessage`](../operations/communication/deleteMessage.md) | both | [`ConvoHopClient.delete`](reference/client.md#convohopclientdelete-method), [`ConversationHandle.messages.delete`](reference/client.md#conversationhandlemessagesdelete-property) |
-| [`communication.reportReceipt`](../operations/communication/reportReceipt.md) | client | [`ConvoHopClient.reportRead`](reference/client.md#convohopclientreportread-method), [`ConvoHopClient.reportDelivered`](reference/client.md#convohopclientreportdelivered-method), [`ConversationStore.markRead`](reference/client.md#conversationstoremarkread-method), [`ConversationStore.markDelivered`](reference/client.md#conversationstoremarkdelivered-method), [`ConversationView.markRead`](reference/react.md#conversationviewmarkread-method), [`ConversationView.markDelivered`](reference/react.md#conversationviewmarkdelivered-method) |
-| [`communication.typing`](../operations/communication/typing.md) | client | [`ConvoHopClient.typing`](reference/client.md#convohopclienttyping-method), [`TypingIndicator.input`](reference/client.md#typingindicatorinput-method), [`TypingIndicator.stop`](reference/client.md#typingindicatorstop-method), [`TypingIndicator.dispose`](reference/client.md#typingindicatordispose-method), [`useTyping`](reference/react.md#usetyping-function), [`TypingControls.input`](reference/react.md#typingcontrolsinput-method), [`TypingControls.stop`](reference/react.md#typingcontrolsstop-method) |
+| [`communication.sendMessage`](../operations/communication/sendMessage.md) | both | [`RelayClient.send`](reference/client.md#relayclientsend-method), [`ConversationHandle.messages.send`](reference/client.md#conversationhandlemessagessend-property), [`Outbox.send`](reference/client.md#outboxsend-method), [`Outbox.resend`](reference/client.md#outboxresend-method), [`Outbox.flush`](reference/client.md#outboxflush-method), [`ConversationStore.send`](reference/client.md#conversationstoresend-method), [`ConversationView.send`](reference/react.md#conversationviewsend-method) |
+| [`communication.editMessage`](../operations/communication/editMessage.md) | both | [`RelayClient.edit`](reference/client.md#relayclientedit-method), [`ConversationHandle.messages.edit`](reference/client.md#conversationhandlemessagesedit-property) |
+| [`communication.deleteMessage`](../operations/communication/deleteMessage.md) | both | [`RelayClient.delete`](reference/client.md#relayclientdelete-method), [`ConversationHandle.messages.delete`](reference/client.md#conversationhandlemessagesdelete-property) |
+| [`communication.reportReceipt`](../operations/communication/reportReceipt.md) | client | [`RelayClient.reportRead`](reference/client.md#relayclientreportread-method), [`RelayClient.reportDelivered`](reference/client.md#relayclientreportdelivered-method), [`ConversationStore.markRead`](reference/client.md#conversationstoremarkread-method), [`ConversationStore.markDelivered`](reference/client.md#conversationstoremarkdelivered-method), [`ConversationView.markRead`](reference/react.md#conversationviewmarkread-method), [`ConversationView.markDelivered`](reference/react.md#conversationviewmarkdelivered-method) |
+| [`communication.typing`](../operations/communication/typing.md) | client | [`RelayClient.typing`](reference/client.md#relayclienttyping-method), [`TypingIndicator.input`](reference/client.md#typingindicatorinput-method), [`TypingIndicator.stop`](reference/client.md#typingindicatorstop-method), [`TypingIndicator.dispose`](reference/client.md#typingindicatordispose-method), [`useTyping`](reference/react.md#usetyping-function), [`TypingControls.input`](reference/react.md#typingcontrolsinput-method), [`TypingControls.stop`](reference/react.md#typingcontrolsstop-method) |
 | [`communication.setConversationMute`](../operations/communication/setConversationMute.md) | both | [`ConversationHandle.mute.set`](reference/client.md#conversationhandlemuteset-property) |
 | [`communication.startLiveSession`](../operations/communication/startLiveSession.md) | client | [`ConversationLive.startVoice`](reference/client.md#conversationlivestartvoice-method), [`ConversationLive.startVideo`](reference/client.md#conversationlivestartvideo-method), [`ConversationLive.startBroadcast`](reference/client.md#conversationlivestartbroadcast-method) |
 | [`communication.joinLiveSession`](../operations/communication/joinLiveSession.md) | client | [`LiveSessionHandle.join`](reference/client.md#livesessionhandlejoin-method) |
@@ -5834,4 +5834,4 @@ Conversations, members, messages, receipts, realtime events and live sessions in
 | [`communication.leaveLiveSession`](../operations/communication/leaveLiveSession.md) | client | [`LiveParticipationHandle.leave`](reference/client.md#liveparticipationhandleleave-method) |
 | [`communication.endLiveSession`](../operations/communication/endLiveSession.md) | both | [`LiveSessionHandle.end`](reference/client.md#livesessionhandleend-method) |
 | [`communication.liveSessionCredentials`](../operations/communication/liveSessionCredentials.md) | client | [`LiveParticipationHandle.connectWith`](reference/client.md#liveparticipationhandleconnectwith-method) |
-| [`communication.conversationEvents`](../operations/communication/conversationEvents.md) | client | [`ConvoHopClient.watch`](reference/client.md#convohopclientwatch-method), [`ConvoHopClient.resyncAuthorizedHistory`](reference/client.md#convohopclientresyncauthorizedhistory-method), [`ConversationStore.open`](reference/client.md#conversationstoreopen-method), [`ConversationStore.resync`](reference/client.md#conversationstoreresync-method), [`useConversation`](reference/react.md#useconversation-function), [`ConversationView.open`](reference/react.md#conversationviewopen-method), [`ConversationView.resync`](reference/react.md#conversationviewresync-method) |
+| [`communication.conversationEvents`](../operations/communication/conversationEvents.md) | client | [`RelayClient.watch`](reference/client.md#relayclientwatch-method), [`RelayClient.resyncAuthorizedHistory`](reference/client.md#relayclientresyncauthorizedhistory-method), [`ConversationStore.open`](reference/client.md#conversationstoreopen-method), [`ConversationStore.resync`](reference/client.md#conversationstoreresync-method), [`useConversation`](reference/react.md#useconversation-function), [`ConversationView.open`](reference/react.md#conversationviewopen-method), [`ConversationView.resync`](reference/react.md#conversationviewresync-method) |

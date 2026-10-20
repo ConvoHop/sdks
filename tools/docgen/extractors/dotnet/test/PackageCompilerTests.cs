@@ -4,11 +4,11 @@ using System.Linq;
 using System.Text;
 using Xunit;
 
-namespace ConvoHop.Docgen.Tests;
+namespace Relay.Docgen.Tests;
 
 public sealed class PackageCompilerTests : IDisposable
 {
-    private readonly string root = Directory.CreateTempSubdirectory("convohop-docgen-").FullName;
+    private readonly string root = Directory.CreateTempSubdirectory("relay-docgen-").FullName;
 
     public void Dispose() => Directory.Delete(root, recursive: true);
 

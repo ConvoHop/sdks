@@ -2,14 +2,14 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { createHmac, randomBytes, randomUUID } from "node:crypto";
 import { readFileSync } from "node:fs";
-import { WebhookVerificationError, webhooks } from "@convohop/server";
+import { WebhookVerificationError, webhooks } from "@instantrelay/server";
 
 const shared = JSON.parse(readFileSync(new URL("../../../spec/conformance/vectors/webhooks.json", import.meta.url), "utf8"));
 /** Shared conformance codes, mapped to this verifier's reason codes. */
 const sharedCodes = { WEBHOOK_SIGNATURE_INVALID: "NO_MATCHING_SIGNATURE", WEBHOOK_TIMESTAMP_EXPIRED: "TIMESTAMP_EXPIRED",
   WEBHOOK_TIMESTAMP_FUTURE: "TIMESTAMP_FUTURE", WEBHOOK_TIMESTAMP_INVALID: "INVALID_TIMESTAMP",
   WEBHOOK_HEADERS_MISSING: "MISSING_HEADER" };
-/** The event types in the webhook contract (ConvoHop/ConveHop docs/webhooks.md, "Events"). */
+/** The event types in the webhook contract (Relay/ConveHop docs/webhooks.md, "Events"). */
 const contractEventTypes = [
   "conversation.created", "conversation.updated",
   "member.added", "member.roleChanged", "member.historyExpanded", "member.removed", "member.broadcastPermissionChanged",
@@ -45,7 +45,7 @@ async function rejects(promise, code) {
   }, code);
 }
 
-test("the contract's test vector verifies, and its body is not a ConvoHop event", async () => {
+test("the contract's test vector verifies, and its body is not a Relay event", async () => {
   const vector = { secret: "whsec_MfKQ9r8GKYqrTwjUPD8ILPZIo2LaLaSw", id: "msg_p5jXN8AQM9LWM0D4loKWxJek",
     timestamp: "1614265330", body: '{"test": 2432232314}', signature: "v1,g0hM9SsE+OTPJTGt/tmIKtSyZlE3uFJELVlNIOLJ1OE=" };
   assert.equal(sign(vector.secret, vector.id, vector.timestamp, vector.body), vector.signature);
@@ -283,7 +283,7 @@ test("malformed secrets are configuration errors, reported before the delivery i
     [current, "whsec_"], [current, 7]])
     await rejects(webhooks.verify({ ...delivery(body), secrets }), "INVALID_SECRET");
   await rejects(webhooks.verify({ headers: {}, body, secrets: "whsec_", now }), "INVALID_SECRET");
-  // Standard Webhooks secrets are 24 to 64 bytes; ConvoHop issues 32-byte secrets.
+  // Standard Webhooks secrets are 24 to 64 bytes; Relay issues 32-byte secrets.
   for (const bytes of [24, 32, 64]) {
     const secret = newSecret(bytes);
     assert.ok(await webhooks.verify(delivery(body, { secrets: secret, signers: [secret] })), String(bytes));

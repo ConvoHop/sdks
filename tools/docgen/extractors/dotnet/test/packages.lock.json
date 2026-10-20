@@ -109,7 +109,7 @@
           "xunit.extensibility.core": "[2.9.3]"
         }
       },
-      "convohop.docgen": {
+      "relay.docgen": {
         "type": "Project",
         "dependencies": {
           "Microsoft.CodeAnalysis.CSharp": "[5.9.0, )"

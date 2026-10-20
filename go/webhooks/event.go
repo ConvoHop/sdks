@@ -245,7 +245,7 @@ func parseEvent(body []byte) (Event, error) {
 	event.SubjectRef.ID, ok = textAnd(subject, "id", ok)
 	event.SubjectRef.Kind, ok = textAnd(subject, "kind", ok)
 	if !ok {
-		return Event{}, invalidBody("Webhook body is not a ConvoHop event envelope")
+		return Event{}, invalidBody("Webhook body is not a Relay event envelope")
 	}
 	switch {
 	case resourceEvents[event.EventType]:

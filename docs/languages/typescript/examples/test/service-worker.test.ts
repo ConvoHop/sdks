@@ -74,7 +74,7 @@ test("clicking a notification opens its conversation", async () => {
   });
 });
 
-test("a push that isn't a ConvoHop notification still shows one, which opens the app", async () => {
+test("a push that isn't a Relay notification still shows one, which opens the app", async () => {
   for (const data of [{ json: () => ({ app: "Your own push" }) }, null]) {
     shown.length = 0;
     await dispatch("push", { data });

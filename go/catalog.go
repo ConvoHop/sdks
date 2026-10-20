@@ -1,4 +1,4 @@
-package convohop
+package relay
 
 import (
 	"fmt"
@@ -137,7 +137,7 @@ func buildCatalog() *catalogIndex {
 		if scalar.pattern != "" {
 			pattern, err := regexp.Compile(scalar.pattern)
 			if err != nil {
-				panic(fmt.Sprintf("convohop: generated scalar %s has an unsupported pattern: %v", scalar.name, err))
+				panic(fmt.Sprintf("relay: generated scalar %s has an unsupported pattern: %v", scalar.name, err))
 			}
 			compiled.pattern = pattern
 		}

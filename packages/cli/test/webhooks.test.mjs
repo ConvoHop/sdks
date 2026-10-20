@@ -11,7 +11,7 @@ const delivery = (fields = {}) => full("WebhookDelivery", { effectId: randomUUID
   attempts: "0", nextAttemptAt: "2026-10-08T12:00:05.000Z", eventType: "message.created",
   createdAt: "2026-10-08T12:00:00.000Z", ...fields });
 const page = (items, fields = {}) => full("WebhookDeliveryPage", { items, complete: true, refreshRequired: false, ...fields });
-const endpoint = (fields = {}) => full("WebhookEndpoint", { endpointId: randomUUID(), url: "https://hooks.example.com/convohop",
+const endpoint = (fields = {}) => full("WebhookEndpoint", { endpointId: randomUUID(), url: "https://hooks.example.dev/instantrelay",
   eventTypes: ["message.created"], enabled: true, status: "healthy", revision: "2", secretVersion: "1",
   rotationPending: false, consecutiveFailures: 0, ...fields });
 const lines = text => text.trimEnd().split("\n").map(line => JSON.parse(line));
@@ -93,13 +93,13 @@ test("Ctrl-C ends webhooks tail normally; a failed poll or a missing page ends i
   assert.deepEqual(lines(failed.stdout), [{ change: "new", delivery: shown }]);
   assert.deepEqual(failed.waits, [5000]);
   const { requestId } = authority.requests.at(-1).variables.context;
-  assert.equal(failed.stderr, `convohop: FORBIDDEN: The token can't read this endpoint\n  outcome: rejected\n  requestId: ${requestId}\n`);
+  assert.equal(failed.stderr, `relay: FORBIDDEN: The token can't read this endpoint\n  outcome: rejected\n  requestId: ${requestId}\n`);
 
   answers.push(request => reply(request, { result: null }));
   const empty = await run(cli, tail, authority);
   assert.equal(empty.code, 1);
   assert.equal(empty.stdout, "");
-  assert.equal(empty.stderr, "convohop: The authority returned no deliveries page\n");
+  assert.equal(empty.stderr, "relay: The authority returned no deliveries page\n");
   assert.equal(answers.length, 0);
 });
 
@@ -139,7 +139,7 @@ test("webhooks replay redelivers one delivery or a time range, never every deliv
   assert.equal(output.payload.result.replayedDeliveries, 1);
   const range = await run(cli, [...replay, "--since", since, "--until", until], authority);
   assert.equal(range.code, 0, range.stderr);
-  assert.equal(range.stderr, `Follow it with convohop operation get --operation ${operationId}\n`);
+  assert.equal(range.stderr, `Follow it with relay operation get --operation ${operationId}\n`);
   assert.equal(JSON.parse(range.stdout).payload.status, "accepted");
   assert.equal((await run(cli, [...replay, "--until", until], authority)).code, 0);
 
@@ -169,5 +169,5 @@ test("a rejected replay reports the authority's problem and sends nothing else",
   assert.equal(result.stdout, "");
   assert.deepEqual(authority.names(), ["ManagementReplayWebhookDeliveries"]);
   const { requestId } = authority.requests[0].variables.context;
-  assert.equal(result.stderr, `convohop: NOT_FOUND: The delivery doesn't exist\n  outcome: rejected\n  requestId: ${requestId}\n`);
+  assert.equal(result.stderr, `relay: NOT_FOUND: The delivery doesn't exist\n  outcome: rejected\n  requestId: ${requestId}\n`);
 });

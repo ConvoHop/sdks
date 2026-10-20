@@ -1,7 +1,7 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "urn:convohop:conformance:operations",
-  "title": "ConvoHop conformance operation catalog",
+  "title": "Relay conformance operation catalog",
   "description": "Language-neutral operations that scenarios invoke through a driver. See spec/conformance/README.md#operations.",
   "type": "object",
   "additionalProperties": false,

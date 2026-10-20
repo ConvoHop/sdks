@@ -91,7 +91,7 @@ mutation CommunicationSetBroadcastPermission($context: RequestContextInput!, $in
 | Language | Members |
 | --- | --- |
 | [TypeScript](../../typescript/reference/operations.md) | [`ServerConversation.members.setBroadcastPermission`](../../typescript/reference/server.md#serverconversationmemberssetbroadcastpermission-method) |
-| [Python](../../python/reference/operations.md) | [`ConvoHop.set_broadcast_permission`](../../python/reference/convohop.md#convohopset_broadcast_permission-method), [`AsyncConvoHop.set_broadcast_permission`](../../python/reference/convohop.md#asyncconvohopset_broadcast_permission-method) |
-| [.NET](../../dotnet/reference/operations.md) | [`ServerMembers.SetBroadcastPermissionAsync`](../../dotnet/reference/convohop.md#servermemberssetbroadcastpermissionasync-method), [`CommunicationApi.SetBroadcastPermissionAsync`](../../dotnet/reference/api.md#communicationapisetbroadcastpermissionasync-method) |
+| [Python](../../python/reference/operations.md) | [`Relay.set_broadcast_permission`](../../python/reference/instantrelay.md#relayset_broadcast_permission-method), [`AsyncRelay.set_broadcast_permission`](../../python/reference/instantrelay.md#asyncrelayset_broadcast_permission-method) |
+| [.NET](../../dotnet/reference/operations.md) | [`ServerMembers.SetBroadcastPermissionAsync`](../../dotnet/reference/relay.md#servermemberssetbroadcastpermissionasync-method), [`CommunicationApi.SetBroadcastPermissionAsync`](../../dotnet/reference/api.md#communicationapisetbroadcastpermissionasync-method) |
 | [Java and Kotlin](../../jvm/reference/operations.md) | [`CommunicationApi.setBroadcastPermission`](../../jvm/reference/server.md#communicationapisetbroadcastpermission-method), [`CommunicationSuspendApi.setBroadcastPermission`](../../jvm/reference/server-kotlin.md#communicationsuspendapisetbroadcastpermission-method) |
-| [Go](../../go/reference/operations.md) | [`ProjectClient.SetBroadcastPermission`](../../go/reference/convohop.md#projectclientsetbroadcastpermission-method) |
+| [Go](../../go/reference/operations.md) | [`ProjectClient.SetBroadcastPermission`](../../go/reference/relay.md#projectclientsetbroadcastpermission-method) |

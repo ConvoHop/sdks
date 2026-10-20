@@ -1,4 +1,4 @@
-package convohop
+package relay
 
 import (
 	"encoding"
@@ -298,7 +298,7 @@ func checkInput(value any, typ string, depth int) (any, error) {
 }
 
 // validateOutput checks a decoded response value against a GraphQL output
-// type reference, as every ConvoHop SDK does. A field the selection names must
+// type reference, as every Relay SDK does. A field the selection names must
 // be present, even when it is nullable. It returns the value with integers in
 // canonical form, updating decoded maps and slices in place.
 func validateOutput(value any, typ string, depth int) (any, error) {

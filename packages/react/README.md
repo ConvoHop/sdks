@@ -1,7 +1,7 @@
-# ConvoHop React hooks
+# Relay React hooks
 
-`@convohop/react` is a set of React hooks over
-[`@convohop/client`](../client/README.md): conversations with optimistic,
+`@instantrelay/react` is a set of React hooks over
+[`@instantrelay/client`](../client/README.md): conversations with optimistic,
 offline-safe sends, typing signals, session renewal, live sessions and
 browser media. It isn't published to a package registry yet. License:
 [Apache-2.0](LICENSE).
@@ -11,36 +11,36 @@ Build and test from the repository's root npm workspace with Node.js 22+:
 ```sh
 npm ci
 npm run build
-npm test --workspace @convohop/react
+npm test --workspace @instantrelay/react
 ```
 
 ## Runtimes
 
 - React 18 and later. CI runs the tests with React 18 and 19.
-- `react` and `@convohop/client` are peer dependencies: your app creates the
+- `react` and `@instantrelay/client` are peer dependencies: your app creates the
   client, and the hooks use that same copy.
-- The hooks import only `react` and `@convohop/client`, not `react-dom`, so
+- The hooks import only `react` and `@instantrelay/client`, not `react-dom`, so
   they work with React DOM and React Native. On the server they render their
   idle state, because effects don't run there.
 - `useMediaConnection` is for browsers. On React Native, connect media with
   `participation.connectWith` and a native LiveKit SDK, as
-  [`@convohop/react-native`](../../docs/sdk-strategy.md#calls-with-the-official-livekit-sdks)
+  [`@instantrelay/react-native`](../../docs/sdk-strategy.md#calls-with-the-official-livekit-sdks)
   does.
 
 ## Provider
 
 ```tsx
-import { ConvoHopClient, Outbox } from "@convohop/client";
-import { ConvoHopProvider } from "@convohop/react";
+import { RelayClient, Outbox } from "@instantrelay/client";
+import { RelayProvider } from "@instantrelay/react";
 
-const client = new ConvoHopClient({ /* the user bootstrap from your backend */ recoveryStorage: localStorage });
+const client = new RelayClient({ /* the user bootstrap from your backend */ recoveryStorage: localStorage });
 await client.initialize();
 const outbox = new Outbox(client, { persist: true }); // One per client.
 
 root.render(
-  <ConvoHopProvider client={client} outbox={outbox}>
+  <RelayProvider client={client} outbox={outbox}>
     <App />
-  </ConvoHopProvider>,
+  </RelayProvider>,
 );
 // On sign-out: unmount, then await outbox.close() before clearing storage.
 ```
@@ -53,7 +53,7 @@ own, which stops when the component unmounts.
 ## Conversations
 
 ```tsx
-import { useConversation, useTyping } from "@convohop/react";
+import { useConversation, useTyping } from "@instantrelay/react";
 
 function Thread({ conversationId }: { conversationId: string }) {
   const thread = useConversation(conversationId, { onError: report });
@@ -90,7 +90,7 @@ the nearest error boundary.
 ## Calls
 
 ```tsx
-import { useLiveSession, useMediaConnection } from "@convohop/react";
+import { useLiveSession, useMediaConnection } from "@instantrelay/react";
 
 function Call({ conversationId }: { conversationId: string }) {
   const live = useLiveSession(conversationId);
@@ -132,5 +132,5 @@ live session.
 ## Push notifications
 
 Subscribe from a user gesture, such as a click, with `subscribePush` from
-`@convohop/client/push`; the [client README](../client/README.md#push-notifications)
+`@instantrelay/client/push`; the [client README](../client/README.md#push-notifications)
 shows the service worker.

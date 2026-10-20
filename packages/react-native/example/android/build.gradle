@@ -21,7 +21,7 @@ buildscript {
 
 apply plugin: "com.facebook.react.rootproject"
 
-// ConvoHop's Android push SDK, which @convohop/react-native wraps, isn't published yet. The app takes it from the
+// Relay's Android push SDK, which @instantrelay/react-native wraps, isn't published yet. The app takes it from the
 // repository's android/ build, which publishes it to android/build/repo:
 //   (cd ../../../../android && ./gradlew :push:publishAllPublicationsToBuildRepository)
 allprojects {
@@ -34,7 +34,7 @@ allprojects {
                 }
             }
             filter {
-                includeGroup("com.convohop")
+                includeGroup("dev.instantrelay")
             }
         }
     }

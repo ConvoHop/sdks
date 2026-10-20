@@ -7,9 +7,9 @@ import 'protocol.dart';
 
 /// Refreshes a client's session through its [SessionRefresh] before the
 /// session expires, so the app doesn't schedule
-/// [ConvoHopClient.refreshSession] itself.
+/// [RelayClient.refreshSession] itself.
 ///
-/// Create it once [ConvoHopClient.initialize] verified the session. It
+/// Create it once [RelayClient.initialize] verified the session. It
 /// refreshes when [lead] is left before the session expires, or halfway
 /// through a session that lasts less than twice [lead], and again before
 /// each replacement expires. After a failure that left the client usable,
@@ -24,7 +24,7 @@ import 'protocol.dart';
 /// Timers don't fire while the app is suspended, so call [check] when the
 /// app returns to the foreground. Close the refresher before the client.
 final class SessionRefresher {
-  /// Throws a `SESSION_REFRESH_REQUIRED` [ConvoHopProblem] when the session
+  /// Throws a `SESSION_REFRESH_REQUIRED` [RelayProblem] when the session
   /// expires within a second.
   SessionRefresher(
     this.client, {
@@ -54,7 +54,7 @@ final class SessionRefresher {
   /// Refreshing gives up this close to expiry.
   static const int _margin = 1000;
 
-  final ConvoHopClient client;
+  final RelayClient client;
 
   /// How long before the session expires it refreshes.
   final Duration lead;
@@ -148,7 +148,7 @@ final class SessionRefresher {
     return (_due = min(due, latest), null);
   }
 
-  static ConvoHopProblem _expired() => ConvoHopProblem(
+  static RelayProblem _expired() => RelayProblem(
     'SESSION_REFRESH_REQUIRED',
     newRequestId(),
     'rejected',

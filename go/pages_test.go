@@ -1,4 +1,4 @@
-package convohop
+package relay
 
 import (
 	"context"

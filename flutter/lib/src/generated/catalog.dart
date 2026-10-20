@@ -2578,7 +2578,7 @@ final class ErrorCodeSpec {
   final bool retryable;
 }
 
-/// Error codes, for comparing with `ConvoHopProblem.code`.
+/// Error codes, for comparing with `RelayProblem.code`.
 abstract final class ErrorCodes {
   /// A rate, size or concurrency admission limit was reached. Back off, then retry with the same requestId.
   static const String admissionLimit = 'ADMISSION_LIMIT';

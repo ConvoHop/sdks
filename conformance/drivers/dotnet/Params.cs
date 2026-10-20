@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Text.Json;
 using System.Text.RegularExpressions;
 
-namespace ConvoHop.Conformance
+namespace Relay.Conformance
 {
     /// <summary>Parameters the driver can't decode. The driver answers <c>INVALID_PARAMS</c>, never an SDK result.</summary>
     internal sealed class ParamsException : Exception

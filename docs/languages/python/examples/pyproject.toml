@@ -1,11 +1,11 @@
 [project]
-name = "convohop-docs-python-examples"
+name = "relay-docs-python-examples"
 version = "0"
 description = "Tested snippets for the Python docs. The tests start the conformance mock with Node.js, so run npm ci at the repository root first."
 requires-python = ">=3.11"
 license = "Apache-2.0"
 dependencies = [
-  "convohop",
+  "instantrelay",
   "firebase-admin==7.7.0",
   "pywebpush==2.5.0",
 ]
@@ -21,7 +21,7 @@ dev = [
 package = false
 
 [tool.uv.sources]
-convohop = { path = "../../../../python", editable = true }
+instantrelay = { path = "../../../../python", editable = true }
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

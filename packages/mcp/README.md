@@ -1,11 +1,11 @@
-# ConvoHop MCP server
+# Relay MCP server
 
-`@convohop/mcp` is a [Model Context Protocol](https://modelcontextprotocol.io)
-server whose tools run ConvoHop operations. Each management query and mutation,
+`@instantrelay/mcp` is a [Model Context Protocol](https://modelcontextprotocol.io)
+server whose tools run Relay operations. Each management query and mutation,
 and each backend-key query and mutation, becomes one tool. `tools/sdkgen`
 generates the tool catalog from the shared schema and its annotations, so the
 tools follow the schema. The server is built on the official MCP TypeScript SDK
-(`@modelcontextprotocol/server`) and on `@convohop/server`.
+(`@modelcontextprotocol/server`) and on `@instantrelay/server`.
 
 It runs only in trusted Node.js 22+ runtimes, because it holds a portal
 credential, a backend key or both. Anyone who can talk to the server can act
@@ -30,9 +30,9 @@ For clients that read an `mcpServers` map:
       "command": "node",
       "args": ["/path/to/sdks/packages/mcp/dist/bin.js"],
       "env": {
-        "CONVOHOP_MANAGEMENT_URL": "https://management.example.com",
-        "CONVOHOP_PORTAL_TOKEN_FILE": "/path/to/portal-token",
-        "CONVOHOP_MCP_READ_ONLY": "1"
+        "RELAY_MANAGEMENT_URL": "https://management.example.com",
+        "RELAY_PORTAL_TOKEN_FILE": "/path/to/portal-token",
+        "RELAY_MCP_READ_ONLY": "1"
       }
     }
   }
@@ -44,12 +44,12 @@ project, or both. The server lists only the tools of the planes you configure.
 
 | Variable | Meaning |
 | --- | --- |
-| `CONVOHOP_MANAGEMENT_URL` | Management authority origin. |
-| `CONVOHOP_PORTAL_TOKEN` or `CONVOHOP_PORTAL_TOKEN_FILE` | Portal credential for the management tools, or a file that holds it. |
-| `CONVOHOP_COMMUNICATION_URL` | Communication authority origin of the project. |
-| `CONVOHOP_PROJECT_ID`, `CONVOHOP_INCARNATION` | The project and its current incarnation. |
-| `CONVOHOP_BACKEND_KEY` or `CONVOHOP_BACKEND_KEY_FILE` | Backend key for the communication tools, or a file that holds it. Its scopes decide which tools succeed. |
-| `CONVOHOP_MCP_READ_ONLY` | `1` or `true` lists only the query tools. |
+| `RELAY_MANAGEMENT_URL` | Management authority origin. |
+| `RELAY_PORTAL_TOKEN` or `RELAY_PORTAL_TOKEN_FILE` | Portal credential for the management tools, or a file that holds it. |
+| `RELAY_COMMUNICATION_URL` | Communication authority origin of the project. |
+| `RELAY_PROJECT_ID`, `RELAY_INCARNATION` | The project and its current incarnation. |
+| `RELAY_BACKEND_KEY` or `RELAY_BACKEND_KEY_FILE` | Backend key for the communication tools, or a file that holds it. Its scopes decide which tools succeed. |
+| `RELAY_MCP_READ_ONLY` | `1` or `true` lists only the query tools. |
 
 Prefer the `_FILE` variables, which keep secrets out of client configuration
 files, and a backend key with only the scopes the agent needs. Configuration
@@ -59,9 +59,9 @@ To embed the server, pass options instead and connect any MCP transport:
 
 ```ts
 import { StdioServerTransport } from "@modelcontextprotocol/server/stdio";
-import { createConvoHopMcpServer, serverOptionsFromEnvironment } from "@convohop/mcp";
+import { createRelayMcpServer, serverOptionsFromEnvironment } from "@instantrelay/mcp";
 
-const server = createConvoHopMcpServer(serverOptionsFromEnvironment(process.env));
+const server = createRelayMcpServer(serverOptionsFromEnvironment(process.env));
 await server.connect(new StdioServerTransport());
 ```
 
@@ -101,8 +101,8 @@ Each tool carries the operation's annotations:
   `communication_delete_message` and `communication_end_live_session`;
   `management_update_webhook` can disable an endpoint. Confirm with the user
   before calling them.
-- `openWorldHint` is false: the tools act only on ConvoHop.
-- `_meta["com.convohop/operation"]` carries the operation ID, plane, kind, the
+- `openWorldHint` is false: the tools act only on Relay.
+- `_meta["dev.instantrelay/operation"]` carries the operation ID, plane, kind, the
   credential the server uses, the accepted credentials with their scopes and
   conditions, the idempotency class, destructiveness, pagination and, for
   long-running operations, the tool to poll. The description repeats them.

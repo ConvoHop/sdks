@@ -1,6 +1,6 @@
 # Webhook signatures
 
-ConvoHop signs webhook deliveries with the
+Relay signs webhook deliveries with the
 [Standard Webhooks](https://github.com/standard-webhooks/standard-webhooks/blob/main/spec/standard-webhooks.md)
 v1 scheme (HMAC-SHA256). Every server SDK must verify deliveries in the same
 way, so the conformance suite has a set of shared test vectors,
@@ -22,7 +22,7 @@ A delivery carries three headers:
 
 An endpoint secret is `whsec_` followed by base64. The signing key is the
 base64-decoded part after the prefix: 24 to 64 bytes, the range Standard
-Webhooks allows. ConvoHop issues 32-byte keys. A verifier given a secret
+Webhooks allows. Relay issues 32-byte keys. A verifier given a secret
 outside that range reports a configuration error, not an invalid delivery.
 The signature is the base64 of
 HMAC-SHA256, with that key, over the UTF-8 bytes of
@@ -64,7 +64,7 @@ A failure is `{"valid": false, "code": <failure code>}`.
 - **Constant time.** Compare signatures in constant time, to avoid leaking
   how much of a forged signature is correct.
 
-Verification only proves that ConvoHop sent the delivery recently. Use
+Verification only proves that Relay sent the delivery recently. Use
 `webhook-id` to discard duplicate deliveries.
 
 ## Vectors
@@ -110,12 +110,12 @@ npm run generate:conformance
 
 A driver that declares the `webhooks.verify` feature passes each vector's
 inputs to its SDK's verifier and returns the result. The TypeScript
-reference driver uses `webhooks.verifySignature()` from `@convohop/server`.
+reference driver uses `webhooks.verifySignature()` from `@instantrelay/server`.
 It maps that SDK's finer
 [error codes](../../packages/server/README.md#webhooks) onto the failure
 codes above:
 
-| `@convohop/server` code | Failure code |
+| `@instantrelay/server` code | Failure code |
 | --- | --- |
 | `MISSING_HEADER`, `INVALID_HEADER` (a repeated header) | `WEBHOOK_HEADERS_MISSING` |
 | `INVALID_TIMESTAMP` | `WEBHOOK_TIMESTAMP_INVALID` |
@@ -124,6 +124,6 @@ codes above:
 | `NO_MATCHING_SIGNATURE`, `BODY_TOO_LARGE`, `TOO_MANY_SIGNATURES` | `WEBHOOK_SIGNATURE_INVALID` |
 
 The SDK also rejects bodies over 4096 bytes and headers with more than 8
-signatures, which ConvoHop never sends, so those deliveries cannot carry a
+signatures, which Relay never sends, so those deliveries cannot carry a
 valid signature. An `INVALID_SECRET` is a configuration error, not a
 failed delivery, so the driver reports it as `INVALID_PARAMS`.

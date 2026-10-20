@@ -1,8 +1,8 @@
 {
-  "name": "@convohop/client",
+  "name": "@instantrelay/client",
   "version": "0.1.0",
   "private": false,
-  "description": "ConvoHop client SDK for browsers and React Native. Uses short-lived user session tokens for conversations, realtime and media.",
+  "description": "Relay client SDK for browsers and React Native. Uses short-lived user session tokens for conversations, realtime and media.",
   "license": "Apache-2.0",
   "repository": {
     "type": "git",
@@ -42,7 +42,7 @@
     "check:package": "publint --strict && attw --pack . --profile esm-only"
   },
   "dependencies": {
-    "@convohop/core": "0.1.0",
+    "@instantrelay/core": "0.1.0",
     "livekit-client": "^2.22.3"
   },
   "devDependencies": {

@@ -1,7 +1,7 @@
 using System.Linq;
 using Xunit;
 
-namespace ConvoHop.Docgen.Tests;
+namespace Relay.Docgen.Tests;
 
 public sealed class PackageLayoutTests
 {

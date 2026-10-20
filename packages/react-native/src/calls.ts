@@ -87,7 +87,7 @@ function bool(value: unknown, name: string): boolean {
   if (typeof value !== "boolean") throw new TypeError(name + " must be a boolean");
   return value;
 }
-const malformed = (what: string): TypeError => new TypeError("ConvoHopCalls " + what);
+const malformed = (what: string): TypeError => new TypeError("RelayCalls " + what);
 
 /** Validates a native call snapshot. Returns `undefined` for anything that isn't one. */
 function call(value: unknown): Call | undefined {

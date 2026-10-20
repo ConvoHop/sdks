@@ -62,7 +62,7 @@ jobs:
           REQUESTED_VERSION: ${{ inputs.version }}
           REQUEST_PUBLISH: ${{ inputs.publish }}
           PUBLISH_CONFIRMATION: ${{ inputs.confirmation }}
-          PUBLISH_ENABLED: ${{ (inputs.registry == 'pypi' && vars.PYPI_PUBLISH_ENABLED) || (inputs.registry == 'nuget' && vars.NUGET_PUBLISH_ENABLED) || (inputs.registry == 'pubdev' && vars.PUBDEV_PUBLISH_ENABLED) || 'false' }}
+          PUBLISH_ENABLED: ${{ (inputs.registry == 'pypi' && vars.PYPI_PUBLISH_ENABLED) || (inputs.registry == 'nuget' && vars.NUGET_PUBLISH_ENABLED) || (inputs.registry == 'pubdev' && vars.PUBDEV_PUBLISH_ENABLED) || (startsWith(inputs.registry, 'maven-') && vars.MAVEN_PUBLISH_ENABLED) || 'false' }}
         run: node scripts/release/registry.mjs plan
       - name: Check generated sources at the release commit
         run: |
@@ -109,11 +109,11 @@ jobs:
           VERSION: ${{ steps.plan.outputs.version }}
         run: |
           for framework in net8.0 net10.0; do
-            dotnet test dotnet/test/ConvoHop.Tests/ConvoHop.Tests.csproj -c Release \
+            dotnet test dotnet/test/Relay.Tests/Relay.Tests.csproj -c Release \
               -f "$framework" -maxcpucount:2 -p:Version="$VERSION"
           done
           timestamp="$(git log -1 --format=%ct)"
-          dotnet pack dotnet/src/ConvoHop/ConvoHop.csproj -c Release -maxcpucount:2 \
+          dotnet pack dotnet/src/Relay/Relay.csproj -c Release -maxcpucount:2 \
             -p:Version="$VERSION" -p:PackageVersion="$VERSION" \
             -p:ContinuousIntegrationBuild=true -p:DeterministicTimestamp="$timestamp" \
             -o "$RUNNER_TEMP/registry-assets"
@@ -143,18 +143,18 @@ jobs:
           VERSION: ${{ steps.plan.outputs.version }}
         run: >-
           ./gradlew --no-daemon --console=plain -Pversion="$VERSION"
-          :convohop-server:publishMavenPublicationToBuildRepository
-          :convohop-server-kotlin:publishMavenPublicationToBuildRepository
+          :relay-server:publishMavenPublicationToBuildRepository
+          :relay-server-kotlin:publishMavenPublicationToBuildRepository
       - if: inputs.registry == 'maven-android'
         name: Prepare unsigned Android publications in a build-local repository
         working-directory: android
         env:
           VERSION: ${{ steps.plan.outputs.version }}
         run: >-
-          ./gradlew --no-daemon --console=plain -PconvohopVersion="$VERSION"
+          ./gradlew --no-daemon --console=plain -PrelayVersion="$VERSION"
           :core:publishReleasePublicationToBuildRepository
           :push:publishReleasePublicationToBuildRepository
-          :convohop:publishReleasePublicationToBuildRepository
+          :relay:publishReleasePublicationToBuildRepository
       - if: startsWith(inputs.registry, 'maven-')
         name: Check Central metadata and assemble an explicitly unsigned bundle
         env:

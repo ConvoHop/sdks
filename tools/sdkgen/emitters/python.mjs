@@ -4,7 +4,7 @@ import { pascalCase, snakeCase } from "../lib/naming.mjs";
 
 /**
  * Python models, operation catalog and typed operation methods for the
- * `convohop` server package in python/.
+ * `instantrelay` server package in python/.
  *
  * The emitter covers every query and mutation that a server runtime can
  * authorize with a bearer credential or call without a credential.
@@ -24,7 +24,7 @@ import { pascalCase, snakeCase } from "../lib/naming.mjs";
  * because Python writes __pycache__ directories next to the modules; the
  * emitter tests check for stale modules instead.
  */
-export const DEFAULT_DIRECTORY = "python/src/convohop/_generated";
+export const DEFAULT_DIRECTORY = "python/src/instantrelay/_generated";
 
 const NOTICE = "Generated from the current unversioned GraphQL schemas. Run npm run generate:graphql.";
 // graphql-js prints `@deprecated` without a reason as this default.
@@ -738,7 +738,7 @@ export function renderPythonPlane(ir, planeName) {
 
 export default defineEmitter({
   name: "python",
-  description: "Python models, operation catalog and typed operations for the convohop server package",
+  description: "Python models, operation catalog and typed operations for the instantrelay server package",
   emit(ir, { directory = DEFAULT_DIRECTORY } = {}) {
     const planes = ir.planes.map(plane => ({ plane, contents: renderPythonPlane(ir, plane.name) })).filter(entry => entry.contents);
     const model = createModel(ir);

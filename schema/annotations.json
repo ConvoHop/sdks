@@ -1,8 +1,8 @@
 {
   "$schema": "./annotations.schema.json",
   "api": {
-    "name": "convohop",
-    "summary": "ConvoHop communication plane (conversations, messages, realtime events and live sessions) and management plane (organizations, deployments and projects)."
+    "name": "relay",
+    "summary": "Relay communication plane (conversations, messages, realtime events and live sessions) and management plane (organizations, deployments and projects)."
   },
   "transport": {
     "path": "/graphql",
@@ -2095,7 +2095,7 @@
       "errors": {"sets": ["request", "http"], "codes": ["NOT_FOUND"]}
     },
     "management.organizationBilling": {
-      "summary": "Read the billing state of an organization in any status: the plan whose limits apply, whether ConvoHop bills the organization and, when it does, its standing and subscription.",
+      "summary": "Read the billing state of an organization in any status: the plan whose limits apply, whether Relay bills the organization and, when it does, its standing and subscription.",
       "layer": "server",
       "auth": [{"credential": "portalCredential", "condition": "owner"}],
       "idempotency": "safe",

@@ -1,8 +1,8 @@
-# `com.convohop:convohop-server-kotlin`
+# `dev.instantrelay:relay-server-kotlin`
 
 Kotlin coroutine extensions for the Java server SDK: suspending APIs, page flows and interruptible blocking calls.
 
-**Layer:** Server. **Runtime:** Kotlin 2.2 or later, on Java 11 or later. **Source:** `jvm/convohop-server-kotlin`.
+**Layer:** Server. **Runtime:** Kotlin 2.2 or later, on Java 11 or later. **Source:** `jvm/relay-server-kotlin`.
 
 ## Classes
 
@@ -16,7 +16,7 @@ Suspending view of `CommunicationApi`. Each call runs on `dispatcher`. Cancellin
 coroutine interrupts the blocking request and the call fails with a CancellationException
 whose cause is the lost-request problem; a mutation stays in the client's recovery journal.
 
-Package: `com.convohop.server.kotlin`.
+Package: `dev.instantrelay.server.kotlin`.
 
 #### `CommunicationSuspendApi` constructor
 
@@ -480,7 +480,7 @@ Suspending view of `ManagementApi`. Each call runs on `dispatcher`. Cancelling t
 coroutine interrupts the blocking request and the call fails with a CancellationException
 whose cause is the lost-request problem; a mutation stays in the client's recovery journal.
 
-Package: `com.convohop.server.kotlin`.
+Package: `dev.instantrelay.server.kotlin`.
 
 #### `ManagementSuspendApi` constructor
 
@@ -921,7 +921,7 @@ The transport reports an interrupted request as a lost request whose outcome is 
 and cancel its parent, so a failure that races cancellation becomes a `CancellationException` whose
 cause is the original problem. A mutation stays in the client's recovery journal either way.
 
-Package: `com.convohop.server.kotlin`.
+Package: `dev.instantrelay.server.kotlin`.
 
 ### `suspending` function
 
@@ -932,4 +932,4 @@ public fun ManagementApi.suspending(dispatcher: CoroutineDispatcher = Dispatcher
 
 A suspending view of this plane API whose calls run on `dispatcher`.
 
-Package: `com.convohop.server.kotlin`.
+Package: `dev.instantrelay.server.kotlin`.

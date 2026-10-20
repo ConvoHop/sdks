@@ -238,7 +238,7 @@ async function signature(options: WebhookVerifyOptions): Promise<WebhookSignatur
 
 function text(record: Readonly<Record<string, unknown>>, field: string): string {
   const value = record[field];
-  if (typeof value !== "string" || value === "") throw failure("INVALID_BODY", "Webhook body is not a ConvoHop event envelope");
+  if (typeof value !== "string" || value === "") throw failure("INVALID_BODY", "Webhook body is not a Relay event envelope");
   return value;
 }
 function resourceType(eventType: string): eventType is WebhookResourceEvent["eventType"] {
@@ -246,7 +246,7 @@ function resourceType(eventType: string): eventType is WebhookResourceEvent["eve
 }
 function envelopeRecord(value: unknown): Readonly<Record<string, unknown>> {
   if (typeof value !== "object" || value === null || Array.isArray(value))
-    throw failure("INVALID_BODY", "Webhook body is not a ConvoHop event envelope");
+    throw failure("INVALID_BODY", "Webhook body is not a Relay event envelope");
   return value as Readonly<Record<string, unknown>>;
 }
 function event(body: Uint8Array): WebhookEvent {
@@ -361,7 +361,7 @@ export function notificationEvent(value: unknown): WebhookNotificationEvent | st
 }
 
 /**
- * Verifies ConvoHop webhook deliveries (Standard Webhooks symmetric `v1`) with Web Crypto. Pass the raw body; respond
+ * Verifies Relay webhook deliveries (Standard Webhooks symmetric `v1`) with Web Crypto. Pass the raw body; respond
  * `2xx` within 5 s, then process; de-duplicate on `webhook-id`. Failures throw `WebhookVerificationError`.
  */
 export const webhooks = Object.freeze({

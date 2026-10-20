@@ -1,11 +1,11 @@
 /// The only driver module that imports the SDK: retarget the driver here.
 library;
 
-import 'package:convohop/convohop.dart';
+import 'package:instantrelay/instantrelay.dart';
 
 import 'params.dart';
 
-typedef SdkClient = ConvoHopClient;
+typedef SdkClient = RelayClient;
 typedef RealtimeHandle = ConversationStream;
 
 /// In-memory recovery storage; one named instance is shared by every client created with that name.
@@ -24,11 +24,11 @@ const features = <String>[
   'retryAfter',
 ];
 
-const packages = <String, String>{'convohop': convoHopPackageVersion};
+const packages = <String, String>{'convohop': relayPackageVersion};
 
 /// A failure description without the failing value, request or response data, any of which can carry credentials.
 String describe(Object error) => switch (error) {
-  ConvoHopProblem(:final message) => message,
+  RelayProblem(:final message) => message,
   HistoryResyncRequired(:final message) => message,
   AggregateFailure(:final message) => message,
   StateError(:final message) => message,
@@ -38,7 +38,7 @@ String describe(Object error) => switch (error) {
 };
 
 DriverError driverError(Object error) {
-  if (error is ConvoHopProblem) {
+  if (error is RelayProblem) {
     final retryAfter = error.retryAfter;
     return <String, Object?>{
       'code': error.code,
@@ -75,7 +75,7 @@ SdkClient createClient({
       current = _required(incarnation, 'incarnation'),
       principal = _required(principalId, 'principalId');
   try {
-    return ConvoHopClient(
+    return RelayClient(
       baseUrl: baseUrl,
       projectId: project,
       incarnation: current,

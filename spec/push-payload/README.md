@@ -1,6 +1,6 @@
 # Push payload contract
 
-ConvoHop doesn't send push notifications for you
+Relay doesn't send push notifications for you
 ([bring your own](../../docs/sdk-strategy.md#push-notifications-bring-your-own)).
 It sends your backend a signed webhook with a per-recipient notification
 event. Your backend verifies the webhook, builds a push request from the
@@ -14,12 +14,12 @@ for the requests the server SDKs build from them:
 | [`vectors.json`](vectors.json) | Shared test vectors: builder inputs with every builder's expected request, and invalid events. Generated; don't edit by hand. |
 
 The TypeScript builders are `push` in
-[`@convohop/server`](../../packages/server/README.md#push-payloads). Every
+[`@instantrelay/server`](../../packages/server/README.md#push-payloads). Every
 server SDK's builders must produce the vectors' requests.
 
 ```mermaid
 flowchart LR
-  C["ConvoHop"] -- "signed webhook: notification event" --> B["Your backend"]
+  C["Relay"] -- "signed webhook: notification event" --> B["Your backend"]
   B -- "verify, then build" --> SDK["Server SDK"]
   B -- "request, credentials, device token" --> P["Your push library"]
   P --> A["APNs"] & F["FCM"] & W["Web Push"]
@@ -84,7 +84,7 @@ event type they don't know, and builders reject it.
 
 ### Recipients and delivery
 
-ConvoHop produces notification events only while the project has an active
+Relay produces notification events only while the project has an active
 webhook endpoint subscribed to their type, and delivers them like its other
 webhook events:
 
@@ -259,7 +259,7 @@ lifetimes at their edges, the 28-day cap, stale events, every builder's
 limit exactly and one byte over, truncation between multibyte characters
 and a title too long for any payload.
 [`conformance/lib/push-vectors.mjs`](../../conformance/lib/push-vectors.mjs)
-generates them by running the `@convohop/server` builders, and
+generates them by running the `@instantrelay/server` builders, and
 [`conformance/test/push.test.mjs`](../../conformance/test/push.test.mjs)
 checks them against rules written independently of the builders. To add or
 change a vector, edit the generator, then run:

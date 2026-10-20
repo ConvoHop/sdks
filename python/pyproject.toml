@@ -3,15 +3,15 @@ requires = ["hatchling>=1.27"]
 build-backend = "hatchling.build"
 
 [project]
-name = "convohop"
+name = "instantrelay"
 dynamic = ["version"]
-description = "ConvoHop server SDK for Python: backend-key and management clients, webhook verification and push payloads."
+description = "Relay server SDK for Python: backend-key and management clients, webhook verification and push payloads."
 readme = "README.md"
 requires-python = ">=3.11"
 license = "Apache-2.0"
 license-files = ["LICENSE", "NOTICE"]
 authors = [{ name = "The ConvoHop Authors" }]
-keywords = ["convohop", "chat", "messaging", "graphql", "webhooks", "sdk"]
+keywords = ["relay", "chat", "messaging", "graphql", "webhooks", "sdk"]
 classifiers = [
   # Registry publishing is not approved yet; PyPI rejects uploads that carry this classifier.
   "Private :: Do Not Upload",
@@ -45,10 +45,10 @@ dev = [
 ]
 
 [tool.hatch.version]
-path = "src/convohop/_version.py"
+path = "src/instantrelay/_version.py"
 
 [tool.hatch.build.targets.wheel]
-packages = ["src/convohop"]
+packages = ["src/instantrelay"]
 
 [tool.hatch.build.targets.sdist]
 # The tests read the repository's shared spec/ fixtures, so they run from a checkout, not from the sdist.
@@ -59,7 +59,7 @@ target-version = "py311"
 line-length = 120
 src = ["src", "tests"]
 # Generated code is checked by the sdkgen goldens and drift check, not reformatted by hand.
-extend-exclude = ["src/convohop/_generated"]
+extend-exclude = ["src/instantrelay/_generated"]
 
 [tool.ruff.lint]
 select = ["E", "W", "F", "I", "B", "UP", "SIM", "RUF", "C4", "PIE", "PT", "RET", "S", "BLE", "TRY", "PERF"]
@@ -77,7 +77,7 @@ python_version = "3.11"
 strict = true
 warn_unreachable = true
 mypy_path = "src"
-packages = ["convohop", "tests"]
+packages = ["instantrelay", "tests"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

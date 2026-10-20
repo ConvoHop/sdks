@@ -1,14 +1,14 @@
 {
   "$schema": "../../../../spec/docs/reference.schema.json",
   "language": "python",
-  "package": "convohop.push",
+  "package": "instantrelay.push",
   "layer": "server",
   "page": "push.md",
   "symbols": [
     {
       "name": "PushPayloadError",
       "kind": "class",
-      "ref": "convohop.push#PushPayloadError",
+      "ref": "instantrelay.push#PushPayloadError",
       "anchor": "pushpayloaderror-class",
       "signatures": ["class PushPayloadError(Exception)"],
       "docs": "A push payload that couldn't be built. The message names the field but never contains its value.",
@@ -16,7 +16,7 @@
         {
           "name": "code",
           "kind": "property",
-          "ref": "convohop.push#PushPayloadError.code",
+          "ref": "instantrelay.push#PushPayloadError.code",
           "anchor": "pushpayloaderrorcode-property",
           "signatures": ["code: PushPayloadCode"],
           "docs": ""
@@ -24,7 +24,7 @@
         {
           "name": "__init__",
           "kind": "constructor",
-          "ref": "convohop.push#PushPayloadError.__init__",
+          "ref": "instantrelay.push#PushPayloadError.__init__",
           "anchor": "pushpayloaderror-constructor",
           "signatures": ["def __init__(self, code: PushPayloadCode, message: str) -> None"],
           "docs": ""
@@ -32,7 +32,7 @@
         {
           "name": "message",
           "kind": "property",
-          "ref": "convohop.push#PushPayloadError.message",
+          "ref": "instantrelay.push#PushPayloadError.message",
           "anchor": "pushpayloaderrormessage-property",
           "signatures": ["@property\ndef message(self) -> str"],
           "docs": ""
@@ -42,7 +42,7 @@
     {
       "name": "ApnsAlert",
       "kind": "interface",
-      "ref": "convohop.push#ApnsAlert",
+      "ref": "instantrelay.push#ApnsAlert",
       "anchor": "apnsalert-interface",
       "signatures": ["ApnsAlert = TypedDict(\"ApnsAlert\", {...})"],
       "docs": "The visible alert. Without a body it has a `loc-key`; define those keys in your app's `Localizable.strings`.",
@@ -50,7 +50,7 @@
         {
           "name": "[\"title\"]",
           "kind": "property",
-          "ref": "convohop.push#ApnsAlert.[\"title\"]",
+          "ref": "instantrelay.push#ApnsAlert.[\"title\"]",
           "anchor": "apnsalerttitle-property",
           "signatures": ["\"title\": NotRequired[str]"],
           "docs": ""
@@ -58,7 +58,7 @@
         {
           "name": "[\"body\"]",
           "kind": "property",
-          "ref": "convohop.push#ApnsAlert.[\"body\"]",
+          "ref": "instantrelay.push#ApnsAlert.[\"body\"]",
           "anchor": "apnsalertbody-property",
           "signatures": ["\"body\": NotRequired[str]"],
           "docs": ""
@@ -66,7 +66,7 @@
         {
           "name": "[\"loc-key\"]",
           "kind": "property",
-          "ref": "convohop.push#ApnsAlert.[\"loc-key\"]",
+          "ref": "instantrelay.push#ApnsAlert.[\"loc-key\"]",
           "anchor": "apnsalertloc-key-property",
           "signatures": ["\"loc-key\": NotRequired[str]"],
           "docs": "Present when there is no body: CONVOHOP_MESSAGE, CONVOHOP_CALL or CONVOHOP_MISSED_CALL."
@@ -76,7 +76,7 @@
     {
       "name": "ApnsAlertPayload",
       "kind": "interface",
-      "ref": "convohop.push#ApnsAlertPayload",
+      "ref": "instantrelay.push#ApnsAlertPayload",
       "anchor": "apnsalertpayload-interface",
       "signatures": ["class ApnsAlertPayload(TypedDict)"],
       "docs": "",
@@ -84,7 +84,7 @@
         {
           "name": "[\"aps\"]",
           "kind": "property",
-          "ref": "convohop.push#ApnsAlertPayload.[\"aps\"]",
+          "ref": "instantrelay.push#ApnsAlertPayload.[\"aps\"]",
           "anchor": "apnsalertpayloadaps-property",
           "signatures": ["aps: ApnsAps"],
           "docs": ""
@@ -92,7 +92,7 @@
         {
           "name": "[\"convohop\"]",
           "kind": "property",
-          "ref": "convohop.push#ApnsAlertPayload.[\"convohop\"]",
+          "ref": "instantrelay.push#ApnsAlertPayload.[\"convohop\"]",
           "anchor": "apnsalertpayloadconvohop-property",
           "signatures": ["convohop: PushData"],
           "docs": ""
@@ -102,7 +102,7 @@
     {
       "name": "ApnsAlertRequest",
       "kind": "interface",
-      "ref": "convohop.push#ApnsAlertRequest",
+      "ref": "instantrelay.push#ApnsAlertRequest",
       "anchor": "apnsalertrequest-interface",
       "signatures": ["class ApnsAlertRequest(TypedDict)"],
       "docs": "An APNs alert: send `encode(request[\"payload\"])` with `request[\"headers\"]`.",
@@ -110,7 +110,7 @@
         {
           "name": "[\"headers\"]",
           "kind": "property",
-          "ref": "convohop.push#ApnsAlertRequest.[\"headers\"]",
+          "ref": "instantrelay.push#ApnsAlertRequest.[\"headers\"]",
           "anchor": "apnsalertrequestheaders-property",
           "signatures": ["headers: ApnsHeaders"],
           "docs": ""
@@ -118,7 +118,7 @@
         {
           "name": "[\"payload\"]",
           "kind": "property",
-          "ref": "convohop.push#ApnsAlertRequest.[\"payload\"]",
+          "ref": "instantrelay.push#ApnsAlertRequest.[\"payload\"]",
           "anchor": "apnsalertrequestpayload-property",
           "signatures": ["payload: ApnsAlertPayload"],
           "docs": ""
@@ -128,7 +128,7 @@
     {
       "name": "ApnsAps",
       "kind": "interface",
-      "ref": "convohop.push#ApnsAps",
+      "ref": "instantrelay.push#ApnsAps",
       "anchor": "apnsaps-interface",
       "signatures": ["ApnsAps = TypedDict(\"ApnsAps\", {...})"],
       "docs": "The `aps` dictionary of an APNs alert.",
@@ -136,7 +136,7 @@
         {
           "name": "[\"alert\"]",
           "kind": "property",
-          "ref": "convohop.push#ApnsAps.[\"alert\"]",
+          "ref": "instantrelay.push#ApnsAps.[\"alert\"]",
           "anchor": "apnsapsalert-property",
           "signatures": ["\"alert\": ApnsAlert"],
           "docs": ""
@@ -144,7 +144,7 @@
         {
           "name": "[\"sound\"]",
           "kind": "property",
-          "ref": "convohop.push#ApnsAps.[\"sound\"]",
+          "ref": "instantrelay.push#ApnsAps.[\"sound\"]",
           "anchor": "apnsapssound-property",
           "signatures": ["\"sound\": str"],
           "docs": ""
@@ -152,7 +152,7 @@
         {
           "name": "[\"mutable-content\"]",
           "kind": "property",
-          "ref": "convohop.push#ApnsAps.[\"mutable-content\"]",
+          "ref": "instantrelay.push#ApnsAps.[\"mutable-content\"]",
           "anchor": "apnsapsmutable-content-property",
           "signatures": ["\"mutable-content\": Literal[0, 1]"],
           "docs": ""
@@ -160,7 +160,7 @@
         {
           "name": "[\"thread-id\"]",
           "kind": "property",
-          "ref": "convohop.push#ApnsAps.[\"thread-id\"]",
+          "ref": "instantrelay.push#ApnsAps.[\"thread-id\"]",
           "anchor": "apnsapsthread-id-property",
           "signatures": ["\"thread-id\": str"],
           "docs": ""
@@ -170,7 +170,7 @@
     {
       "name": "ApnsHeaders",
       "kind": "interface",
-      "ref": "convohop.push#ApnsHeaders",
+      "ref": "instantrelay.push#ApnsHeaders",
       "anchor": "apnsheaders-interface",
       "signatures": ["ApnsHeaders = TypedDict(\"ApnsHeaders\", {...})"],
       "docs": "HTTP/2 headers for APNs. Your APNs client adds `authorization` and sends to `/3/device/<token>`.",
@@ -178,7 +178,7 @@
         {
           "name": "[\"apns-push-type\"]",
           "kind": "property",
-          "ref": "convohop.push#ApnsHeaders.[\"apns-push-type\"]",
+          "ref": "instantrelay.push#ApnsHeaders.[\"apns-push-type\"]",
           "anchor": "apnsheadersapns-push-type-property",
           "signatures": ["\"apns-push-type\": Literal[\"alert\", \"voip\"]"],
           "docs": ""
@@ -186,7 +186,7 @@
         {
           "name": "[\"apns-topic\"]",
           "kind": "property",
-          "ref": "convohop.push#ApnsHeaders.[\"apns-topic\"]",
+          "ref": "instantrelay.push#ApnsHeaders.[\"apns-topic\"]",
           "anchor": "apnsheadersapns-topic-property",
           "signatures": ["\"apns-topic\": str"],
           "docs": ""
@@ -194,7 +194,7 @@
         {
           "name": "[\"apns-priority\"]",
           "kind": "property",
-          "ref": "convohop.push#ApnsHeaders.[\"apns-priority\"]",
+          "ref": "instantrelay.push#ApnsHeaders.[\"apns-priority\"]",
           "anchor": "apnsheadersapns-priority-property",
           "signatures": ["\"apns-priority\": Literal[\"5\", \"10\"]"],
           "docs": ""
@@ -202,7 +202,7 @@
         {
           "name": "[\"apns-expiration\"]",
           "kind": "property",
-          "ref": "convohop.push#ApnsHeaders.[\"apns-expiration\"]",
+          "ref": "instantrelay.push#ApnsHeaders.[\"apns-expiration\"]",
           "anchor": "apnsheadersapns-expiration-property",
           "signatures": ["\"apns-expiration\": str"],
           "docs": "Unix seconds after which APNs stops trying to deliver."
@@ -210,7 +210,7 @@
         {
           "name": "[\"apns-collapse-id\"]",
           "kind": "property",
-          "ref": "convohop.push#ApnsHeaders.[\"apns-collapse-id\"]",
+          "ref": "instantrelay.push#ApnsHeaders.[\"apns-collapse-id\"]",
           "anchor": "apnsheadersapns-collapse-id-property",
           "signatures": ["\"apns-collapse-id\": NotRequired[str]"],
           "docs": "Calls and missed calls: the ring's collapse key, so a missed-call alert replaces the incoming-call alert."
@@ -220,7 +220,7 @@
     {
       "name": "ApnsVoipRequest",
       "kind": "interface",
-      "ref": "convohop.push#ApnsVoipRequest",
+      "ref": "instantrelay.push#ApnsVoipRequest",
       "anchor": "apnsvoiprequest-interface",
       "signatures": ["class ApnsVoipRequest(TypedDict)"],
       "docs": "An APNs VoIP push: send `encode(request[\"payload\"])` with `request[\"headers\"]`.",
@@ -228,7 +228,7 @@
         {
           "name": "[\"headers\"]",
           "kind": "property",
-          "ref": "convohop.push#ApnsVoipRequest.[\"headers\"]",
+          "ref": "instantrelay.push#ApnsVoipRequest.[\"headers\"]",
           "anchor": "apnsvoiprequestheaders-property",
           "signatures": ["headers: ApnsHeaders"],
           "docs": ""
@@ -236,7 +236,7 @@
         {
           "name": "[\"payload\"]",
           "kind": "property",
-          "ref": "convohop.push#ApnsVoipRequest.[\"payload\"]",
+          "ref": "instantrelay.push#ApnsVoipRequest.[\"payload\"]",
           "anchor": "apnsvoiprequestpayload-property",
           "signatures": ["payload: PushDataPayload"],
           "docs": ""
@@ -246,7 +246,7 @@
     {
       "name": "FcmAndroid",
       "kind": "interface",
-      "ref": "convohop.push#FcmAndroid",
+      "ref": "instantrelay.push#FcmAndroid",
       "anchor": "fcmandroid-interface",
       "signatures": ["class FcmAndroid(TypedDict)"],
       "docs": "",
@@ -254,7 +254,7 @@
         {
           "name": "[\"priority\"]",
           "kind": "property",
-          "ref": "convohop.push#FcmAndroid.[\"priority\"]",
+          "ref": "instantrelay.push#FcmAndroid.[\"priority\"]",
           "anchor": "fcmandroidpriority-property",
           "signatures": ["priority: Literal[\"NORMAL\", \"HIGH\"]"],
           "docs": ""
@@ -262,7 +262,7 @@
         {
           "name": "[\"ttl\"]",
           "kind": "property",
-          "ref": "convohop.push#FcmAndroid.[\"ttl\"]",
+          "ref": "instantrelay.push#FcmAndroid.[\"ttl\"]",
           "anchor": "fcmandroidttl-property",
           "signatures": ["ttl: str"],
           "docs": ""
@@ -270,7 +270,7 @@
         {
           "name": "[\"collapse_key\"]",
           "kind": "property",
-          "ref": "convohop.push#FcmAndroid.[\"collapse_key\"]",
+          "ref": "instantrelay.push#FcmAndroid.[\"collapse_key\"]",
           "anchor": "fcmandroidcollapse_key-property",
           "signatures": ["collapse_key: NotRequired[str]"],
           "docs": ""
@@ -280,7 +280,7 @@
     {
       "name": "FcmData",
       "kind": "interface",
-      "ref": "convohop.push#FcmData",
+      "ref": "instantrelay.push#FcmData",
       "anchor": "fcmdata-interface",
       "signatures": ["class FcmData(TypedDict)"],
       "docs": "",
@@ -288,7 +288,7 @@
         {
           "name": "[\"convohop\"]",
           "kind": "property",
-          "ref": "convohop.push#FcmData.[\"convohop\"]",
+          "ref": "instantrelay.push#FcmData.[\"convohop\"]",
           "anchor": "fcmdataconvohop-property",
           "signatures": ["convohop: str"],
           "docs": "`PushData` as compact JSON."
@@ -298,7 +298,7 @@
     {
       "name": "FcmMessage",
       "kind": "interface",
-      "ref": "convohop.push#FcmMessage",
+      "ref": "instantrelay.push#FcmMessage",
       "anchor": "fcmmessage-interface",
       "signatures": ["class FcmMessage(TypedDict)"],
       "docs": "",
@@ -306,7 +306,7 @@
         {
           "name": "[\"data\"]",
           "kind": "property",
-          "ref": "convohop.push#FcmMessage.[\"data\"]",
+          "ref": "instantrelay.push#FcmMessage.[\"data\"]",
           "anchor": "fcmmessagedata-property",
           "signatures": ["data: FcmData"],
           "docs": ""
@@ -314,7 +314,7 @@
         {
           "name": "[\"android\"]",
           "kind": "property",
-          "ref": "convohop.push#FcmMessage.[\"android\"]",
+          "ref": "instantrelay.push#FcmMessage.[\"android\"]",
           "anchor": "fcmmessageandroid-property",
           "signatures": ["android: FcmAndroid"],
           "docs": ""
@@ -324,7 +324,7 @@
     {
       "name": "FcmRequest",
       "kind": "interface",
-      "ref": "convohop.push#FcmRequest",
+      "ref": "instantrelay.push#FcmRequest",
       "anchor": "fcmrequest-interface",
       "signatures": ["class FcmRequest(TypedDict)"],
       "docs": "An FCM HTTP v1 REST `messages:send` message without a target: add `token` or `fid` to `message`.\n\nFirebase Admin SDKs take `android` in their own form, such as `firebase_admin.messaging.AndroidConfig` with a\n`ttl` in seconds.",
@@ -332,7 +332,7 @@
         {
           "name": "[\"message\"]",
           "kind": "property",
-          "ref": "convohop.push#FcmRequest.[\"message\"]",
+          "ref": "instantrelay.push#FcmRequest.[\"message\"]",
           "anchor": "fcmrequestmessage-property",
           "signatures": ["message: FcmMessage"],
           "docs": ""
@@ -342,7 +342,7 @@
     {
       "name": "PushData",
       "kind": "interface",
-      "ref": "convohop.push#PushData",
+      "ref": "instantrelay.push#PushData",
       "anchor": "pushdata-interface",
       "signatures": ["class PushData(TypedDict)"],
       "docs": "The `convohop` metadata every payload carries for your app: the event's fields without `subjectRef`,\n`connected` and `preview`. APNs VoIP, FCM and Web Push payloads also carry the visible `title` and `body`\nhere, because they have no visible alert of their own.",
@@ -350,7 +350,7 @@
         {
           "name": "[\"eventId\"]",
           "kind": "property",
-          "ref": "convohop.push#PushData.[\"eventId\"]",
+          "ref": "instantrelay.push#PushData.[\"eventId\"]",
           "anchor": "pushdataeventid-property",
           "signatures": ["eventId: str"],
           "docs": ""
@@ -358,7 +358,7 @@
         {
           "name": "[\"eventType\"]",
           "kind": "property",
-          "ref": "convohop.push#PushData.[\"eventType\"]",
+          "ref": "instantrelay.push#PushData.[\"eventType\"]",
           "anchor": "pushdataeventtype-property",
           "signatures": ["eventType: WebhookNotificationEventType"],
           "docs": ""
@@ -366,7 +366,7 @@
         {
           "name": "[\"occurredAt\"]",
           "kind": "property",
-          "ref": "convohop.push#PushData.[\"occurredAt\"]",
+          "ref": "instantrelay.push#PushData.[\"occurredAt\"]",
           "anchor": "pushdataoccurredat-property",
           "signatures": ["occurredAt: str"],
           "docs": ""
@@ -374,7 +374,7 @@
         {
           "name": "[\"projectId\"]",
           "kind": "property",
-          "ref": "convohop.push#PushData.[\"projectId\"]",
+          "ref": "instantrelay.push#PushData.[\"projectId\"]",
           "anchor": "pushdataprojectid-property",
           "signatures": ["projectId: str"],
           "docs": ""
@@ -382,7 +382,7 @@
         {
           "name": "[\"recipientId\"]",
           "kind": "property",
-          "ref": "convohop.push#PushData.[\"recipientId\"]",
+          "ref": "instantrelay.push#PushData.[\"recipientId\"]",
           "anchor": "pushdatarecipientid-property",
           "signatures": ["recipientId: str"],
           "docs": ""
@@ -390,7 +390,7 @@
         {
           "name": "[\"conversationId\"]",
           "kind": "property",
-          "ref": "convohop.push#PushData.[\"conversationId\"]",
+          "ref": "instantrelay.push#PushData.[\"conversationId\"]",
           "anchor": "pushdataconversationid-property",
           "signatures": ["conversationId: str"],
           "docs": ""
@@ -398,7 +398,7 @@
         {
           "name": "[\"senderId\"]",
           "kind": "property",
-          "ref": "convohop.push#PushData.[\"senderId\"]",
+          "ref": "instantrelay.push#PushData.[\"senderId\"]",
           "anchor": "pushdatasenderid-property",
           "signatures": ["senderId: str"],
           "docs": ""
@@ -406,7 +406,7 @@
         {
           "name": "[\"messageId\"]",
           "kind": "property",
-          "ref": "convohop.push#PushData.[\"messageId\"]",
+          "ref": "instantrelay.push#PushData.[\"messageId\"]",
           "anchor": "pushdatamessageid-property",
           "signatures": ["messageId: NotRequired[str]"],
           "docs": ""
@@ -414,7 +414,7 @@
         {
           "name": "[\"liveSessionId\"]",
           "kind": "property",
-          "ref": "convohop.push#PushData.[\"liveSessionId\"]",
+          "ref": "instantrelay.push#PushData.[\"liveSessionId\"]",
           "anchor": "pushdatalivesessionid-property",
           "signatures": ["liveSessionId: NotRequired[str]"],
           "docs": ""
@@ -422,7 +422,7 @@
         {
           "name": "[\"alertId\"]",
           "kind": "property",
-          "ref": "convohop.push#PushData.[\"alertId\"]",
+          "ref": "instantrelay.push#PushData.[\"alertId\"]",
           "anchor": "pushdataalertid-property",
           "signatures": ["alertId: NotRequired[str]"],
           "docs": ""
@@ -430,7 +430,7 @@
         {
           "name": "[\"expiresAt\"]",
           "kind": "property",
-          "ref": "convohop.push#PushData.[\"expiresAt\"]",
+          "ref": "instantrelay.push#PushData.[\"expiresAt\"]",
           "anchor": "pushdataexpiresat-property",
           "signatures": ["expiresAt: NotRequired[str]"],
           "docs": ""
@@ -438,7 +438,7 @@
         {
           "name": "[\"mediaProfile\"]",
           "kind": "property",
-          "ref": "convohop.push#PushData.[\"mediaProfile\"]",
+          "ref": "instantrelay.push#PushData.[\"mediaProfile\"]",
           "anchor": "pushdatamediaprofile-property",
           "signatures": ["mediaProfile: NotRequired[str]"],
           "docs": ""
@@ -446,7 +446,7 @@
         {
           "name": "[\"reason\"]",
           "kind": "property",
-          "ref": "convohop.push#PushData.[\"reason\"]",
+          "ref": "instantrelay.push#PushData.[\"reason\"]",
           "anchor": "pushdatareason-property",
           "signatures": ["reason: NotRequired[str]"],
           "docs": ""
@@ -454,7 +454,7 @@
         {
           "name": "[\"title\"]",
           "kind": "property",
-          "ref": "convohop.push#PushData.[\"title\"]",
+          "ref": "instantrelay.push#PushData.[\"title\"]",
           "anchor": "pushdatatitle-property",
           "signatures": ["title: NotRequired[str]"],
           "docs": ""
@@ -462,7 +462,7 @@
         {
           "name": "[\"body\"]",
           "kind": "property",
-          "ref": "convohop.push#PushData.[\"body\"]",
+          "ref": "instantrelay.push#PushData.[\"body\"]",
           "anchor": "pushdatabody-property",
           "signatures": ["body: NotRequired[str]"],
           "docs": ""
@@ -472,7 +472,7 @@
     {
       "name": "PushDataPayload",
       "kind": "interface",
-      "ref": "convohop.push#PushDataPayload",
+      "ref": "instantrelay.push#PushDataPayload",
       "anchor": "pushdatapayload-interface",
       "signatures": ["class PushDataPayload(TypedDict)"],
       "docs": "A payload of only the `convohop` metadata: APNs VoIP and Web Push.",
@@ -480,7 +480,7 @@
         {
           "name": "[\"convohop\"]",
           "kind": "property",
-          "ref": "convohop.push#PushDataPayload.[\"convohop\"]",
+          "ref": "instantrelay.push#PushDataPayload.[\"convohop\"]",
           "anchor": "pushdatapayloadconvohop-property",
           "signatures": ["convohop: PushData"],
           "docs": ""
@@ -490,7 +490,7 @@
     {
       "name": "WebPushHeaders",
       "kind": "interface",
-      "ref": "convohop.push#WebPushHeaders",
+      "ref": "instantrelay.push#WebPushHeaders",
       "anchor": "webpushheaders-interface",
       "signatures": ["class WebPushHeaders(TypedDict)"],
       "docs": "RFC 8030 headers for your Web Push library, which encrypts the payload (RFC 8291) and signs (VAPID). Where it\nsets `TTL`, `Urgency` or `Topic` from its own options, pass the values there, or its defaults replace them.",
@@ -498,7 +498,7 @@
         {
           "name": "[\"TTL\"]",
           "kind": "property",
-          "ref": "convohop.push#WebPushHeaders.[\"TTL\"]",
+          "ref": "instantrelay.push#WebPushHeaders.[\"TTL\"]",
           "anchor": "webpushheadersttl-property",
           "signatures": ["TTL: str"],
           "docs": ""
@@ -506,7 +506,7 @@
         {
           "name": "[\"Urgency\"]",
           "kind": "property",
-          "ref": "convohop.push#WebPushHeaders.[\"Urgency\"]",
+          "ref": "instantrelay.push#WebPushHeaders.[\"Urgency\"]",
           "anchor": "webpushheadersurgency-property",
           "signatures": ["Urgency: Literal[\"very-low\", \"low\", \"normal\", \"high\"]"],
           "docs": ""
@@ -514,7 +514,7 @@
         {
           "name": "[\"Topic\"]",
           "kind": "property",
-          "ref": "convohop.push#WebPushHeaders.[\"Topic\"]",
+          "ref": "instantrelay.push#WebPushHeaders.[\"Topic\"]",
           "anchor": "webpushheaderstopic-property",
           "signatures": ["Topic: NotRequired[str]"],
           "docs": ""
@@ -524,7 +524,7 @@
     {
       "name": "WebPushRequest",
       "kind": "interface",
-      "ref": "convohop.push#WebPushRequest",
+      "ref": "instantrelay.push#WebPushRequest",
       "anchor": "webpushrequest-interface",
       "signatures": ["class WebPushRequest(TypedDict)"],
       "docs": "A Web Push message: encrypt `encode(request[\"payload\"])` and send it with `request[\"headers\"]`.",
@@ -532,7 +532,7 @@
         {
           "name": "[\"headers\"]",
           "kind": "property",
-          "ref": "convohop.push#WebPushRequest.[\"headers\"]",
+          "ref": "instantrelay.push#WebPushRequest.[\"headers\"]",
           "anchor": "webpushrequestheaders-property",
           "signatures": ["headers: WebPushHeaders"],
           "docs": ""
@@ -540,7 +540,7 @@
         {
           "name": "[\"payload\"]",
           "kind": "property",
-          "ref": "convohop.push#WebPushRequest.[\"payload\"]",
+          "ref": "instantrelay.push#WebPushRequest.[\"payload\"]",
           "anchor": "webpushrequestpayload-property",
           "signatures": ["payload: PushDataPayload"],
           "docs": ""
@@ -550,7 +550,7 @@
     {
       "name": "PushPayloadCode",
       "kind": "type",
-      "ref": "convohop.push#PushPayloadCode",
+      "ref": "instantrelay.push#PushPayloadCode",
       "anchor": "pushpayloadcode-type",
       "signatures": ["PushPayloadCode: TypeAlias = Literal[\"INVALID_EVENT\", \"INVALID_OPTIONS\"]"],
       "docs": "Why a push payload couldn't be built:\n\n- `INVALID_OPTIONS`: an option has the wrong type, `title` or `body` has a lone surrogate, `now` isn't a\n  timezone-aware datetime, or `bundle_id` isn't an app bundle ID. Options are checked first.\n- `INVALID_EVENT`: the event doesn't match the push payload contract."
@@ -558,7 +558,7 @@
     {
       "name": "apns_alert",
       "kind": "function",
-      "ref": "convohop.push#apns_alert",
+      "ref": "instantrelay.push#apns_alert",
       "anchor": "apns_alert-function",
       "signatures": [
         "def apns_alert(\n    event: WebhookNotificationEvent | Mapping[str, Any],\n    *,\n    bundle_id: str,\n    title: str | None = None,\n    body: str | None = None,\n    preview: bool = True,\n    now: datetime | None = None,\n) -> ApnsAlertRequest | None"
@@ -568,7 +568,7 @@
     {
       "name": "apns_voip",
       "kind": "function",
-      "ref": "convohop.push#apns_voip",
+      "ref": "instantrelay.push#apns_voip",
       "anchor": "apns_voip-function",
       "signatures": [
         "def apns_voip(\n    event: WebhookNotificationEvent | Mapping[str, Any],\n    *,\n    bundle_id: str,\n    title: str | None = None,\n    body: str | None = None,\n    preview: bool = True,\n    now: datetime | None = None,\n) -> ApnsVoipRequest | None"
@@ -578,7 +578,7 @@
     {
       "name": "encode",
       "kind": "function",
-      "ref": "convohop.push#encode",
+      "ref": "instantrelay.push#encode",
       "anchor": "encode-function",
       "signatures": ["def encode(value: object) -> bytes"],
       "docs": "Serializes a request part as compact UTF-8 JSON, the form the builders measure. For example,\n`encode(request[\"payload\"])` is the APNs body and the Web Push plaintext."
@@ -586,7 +586,7 @@
     {
       "name": "fcm",
       "kind": "function",
-      "ref": "convohop.push#fcm",
+      "ref": "instantrelay.push#fcm",
       "anchor": "fcm-function",
       "signatures": [
         "def fcm(\n    event: WebhookNotificationEvent | Mapping[str, Any],\n    *,\n    title: str | None = None,\n    body: str | None = None,\n    preview: bool = True,\n    now: datetime | None = None,\n) -> FcmRequest | None"
@@ -596,7 +596,7 @@
     {
       "name": "web_push",
       "kind": "function",
-      "ref": "convohop.push#web_push",
+      "ref": "instantrelay.push#web_push",
       "anchor": "web_push-function",
       "signatures": [
         "def web_push(\n    event: WebhookNotificationEvent | Mapping[str, Any],\n    *,\n    title: str | None = None,\n    body: str | None = None,\n    preview: bool = True,\n    now: datetime | None = None,\n) -> WebPushRequest | None"

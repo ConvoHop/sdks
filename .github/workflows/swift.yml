@@ -62,7 +62,7 @@ jobs:
       - name: Check the copied push payload schema and vectors
         run: |
           for file in push-payload.schema.json vectors.json; do
-            cmp "spec/push-payload/$file" "swift/Tests/ConvoHopTests/Fixtures/push-payload/$file"
+            cmp "spec/push-payload/$file" "swift/Tests/RelayTests/Fixtures/push-payload/$file"
           done
 
   build:
@@ -94,7 +94,7 @@ jobs:
       - name: Type-check the generator's golden Swift output
         run: >-
           swiftc -typecheck -swift-version 6 -parse-as-library
-          tools/sdkgen/test/golden/edge/swift/Sources/ConvoHop/Generated/*.swift
+          tools/sdkgen/test/golden/edge/swift/Sources/Relay/Generated/*.swift
       - name: Build for macOS
         working-directory: swift
         run: swift build --disable-keychain
@@ -123,21 +123,21 @@ jobs:
           print(best[1]["name"], "with iOS", ".".join(map(str, best[0])), file=sys.stderr)
           print(best[1]["udid"])
           ' "$sdk")"
-          xcodebuild test -quiet -scheme ConvoHop-Package \
+          xcodebuild test -quiet -scheme Relay-Package \
             -destination "platform=iOS Simulator,id=$device" \
             -derivedDataPath "$RUNNER_TEMP/DerivedData"
-      # The tests don't link ConvoHopLiveKit, whose CallKit audio glue is iOS-only.
+      # The tests don't link RelayLiveKit, whose CallKit audio glue is iOS-only.
       - name: Build every product for iOS devices
         working-directory: swift
         run: >-
-          xcodebuild build -quiet -scheme ConvoHop-Package
+          xcodebuild build -quiet -scheme Relay-Package
           -destination generic/platform=iOS
           -derivedDataPath "$RUNNER_TEMP/DerivedData"
-      # A Notification Service Extension links ConvoHopNotificationService, ConvoHop and ConvoHopPush.
+      # A Notification Service Extension links RelayNotificationService, Relay and RelayPush.
       - name: Build the extension products for iOS with app-extension-only APIs
         working-directory: swift
         run: >-
-          xcodebuild build -quiet -scheme ConvoHopNotificationService
+          xcodebuild build -quiet -scheme RelayNotificationService
           -destination generic/platform=iOS
           -derivedDataPath "$RUNNER_TEMP/DerivedData"
           APPLICATION_EXTENSION_API_ONLY=YES
@@ -164,7 +164,7 @@ jobs:
         # webhooks, so the runner skips those scenarios. The next step allows only those.
         run: >-
           npm run conformance --
-          --driver conformance/drivers/swift/Driver/.build/debug/ConvoHopConformanceDriver
+          --driver conformance/drivers/swift/Driver/.build/debug/RelayConformanceDriver
           --reports conformance/reports/swift
       - name: Fail on any other skip
         run: |
@@ -172,7 +172,7 @@ jobs:
           import { readFileSync } from "node:fs";
           const allowed = [
             /^it only uses [a-z, ]+ clients, which the driver under test does not declare$/,
-            /^driver convohop-swift does not declare feature webhooks\.verify$/,
+            /^driver relay-swift does not declare feature webhooks\.verify$/,
           ];
           const summary = JSON.parse(readFileSync("conformance/reports/swift/summary.json", "utf8"));
           const scenarios = summary.suites.flatMap((suite) => suite.scenarios);
@@ -184,7 +184,7 @@ jobs:
             console.log(`::error::${scenario.id} ${scenario.status}: ${scenario.reason ?? "no reason"}`);
           }
           console.log(`${summary.driver.name}: ${passed.length} of ${scenarios.length} passed`);
-          if (summary.driver.name !== "convohop-swift" || passed.length === 0 || other.length > 0) process.exit(1);
+          if (summary.driver.name !== "relay-swift" || passed.length === 0 || other.length > 0) process.exit(1);
           EOF
       - name: Upload JUnit and summary reports
         if: always()
@@ -220,7 +220,7 @@ jobs:
       - name: Run the conformance scenarios against the mock target
         run: >-
           npm run conformance --
-          --driver conformance/drivers/swift/Driver/.build/debug/ConvoHopConformanceDriver
+          --driver conformance/drivers/swift/Driver/.build/debug/RelayConformanceDriver
           --reports conformance/reports/swift-linux
       - name: Fail on any other skip
         run: |
@@ -228,7 +228,7 @@ jobs:
           import { readFileSync } from "node:fs";
           const allowed = [
             /^it only uses [a-z, ]+ clients, which the driver under test does not declare$/,
-            /^driver convohop-swift does not declare feature (webhooks\.verify|realtime|realtime\.reconnectPolicy)$/,
+            /^driver relay-swift does not declare feature (webhooks\.verify|realtime|realtime\.reconnectPolicy)$/,
           ];
           const summary = JSON.parse(readFileSync("conformance/reports/swift-linux/summary.json", "utf8"));
           const scenarios = summary.suites.flatMap((suite) => suite.scenarios);
@@ -240,7 +240,7 @@ jobs:
             console.log(`::error::${scenario.id} ${scenario.status}: ${scenario.reason ?? "no reason"}`);
           }
           console.log(`${summary.driver.name}: ${passed.length} of ${scenarios.length} passed`);
-          if (summary.driver.name !== "convohop-swift" || passed.length === 0 || other.length > 0) process.exit(1);
+          if (summary.driver.name !== "relay-swift" || passed.length === 0 || other.length > 0) process.exit(1);
           EOF
       - name: Upload JUnit and summary reports
         if: always()
@@ -252,7 +252,7 @@ jobs:
           retention-days: 14
 
   # Like the dev-stack job in conformance.yml, runs the scenarios against the
-  # ConvoHop dev stack: the private, development-only linux/arm64 image that
+  # Relay dev stack: the private, development-only linux/arm64 image that
   # runs the whole platform in one container (see spec/conformance/targets.md),
   # which conformance/dev-stack.mjs starts. GitHub's macOS runners have no
   # container runtime, so the job builds the driver for Linux, where it doesn't
@@ -290,7 +290,7 @@ jobs:
         run: >-
           npm run conformance --
           --target conformance/targets/dev-stack.json
-          --driver conformance/drivers/swift/Driver/.build/debug/ConvoHopConformanceDriver
+          --driver conformance/drivers/swift/Driver/.build/debug/RelayConformanceDriver
           --reports conformance/reports/swift-dev-stack
       - name: Show why the dev stack stopped
         if: failure()

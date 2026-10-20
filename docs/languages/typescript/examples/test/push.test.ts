@@ -4,7 +4,7 @@ import { createRequire } from "node:module";
 import { test } from "node:test";
 import { fileURLToPath } from "node:url";
 import webpush from "web-push";
-import { webhooks, type FcmRequest, type WebhookEvent, type WebhookNotificationEvent, type WebPushRequest } from "@convohop/server";
+import { webhooks, type FcmRequest, type WebhookEvent, type WebhookNotificationEvent, type WebPushRequest } from "@instantrelay/server";
 import { firebaseMessage, notify, webPushOptions, type Device, type FcmTarget, type PushSenders, type WebSubscription } from "../src/push.ts";
 import { newSecret, signDelivery } from "./deliveries.ts";
 import { pushVectors } from "./vectors.ts";

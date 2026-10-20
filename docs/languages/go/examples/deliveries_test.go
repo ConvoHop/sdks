@@ -18,7 +18,7 @@ import (
 )
 
 // newUUID returns a random version 4 UUID.
-var newUUID = convohop.NewRequestID
+var newUUID = relay.NewRequestID
 
 // newSecret returns a new webhook endpoint secret.
 func newSecret() string {
@@ -27,7 +27,7 @@ func newSecret() string {
 	return "whsec_" + base64.StdEncoding.EncodeToString(key)
 }
 
-// wireJSON encodes a value as ConvoHop sends it: compact JSON, with text left
+// wireJSON encodes a value as Relay sends it: compact JSON, with text left
 // as UTF-8 rather than escaped.
 func wireJSON(t *testing.T, value any) []byte {
 	t.Helper()
@@ -40,7 +40,7 @@ func wireJSON(t *testing.T, value any) []byte {
 	return bytes.TrimSuffix(body.Bytes(), []byte("\n"))
 }
 
-// signDelivery signs a body the way ConvoHop does: Standard Webhooks, with
+// signDelivery signs a body the way Relay does: Standard Webhooks, with
 // HMAC-SHA256 over "id.timestamp.body". It returns the webhook ID and the
 // request's headers.
 func signDelivery(t *testing.T, body []byte, secret string) (string, http.Header) {

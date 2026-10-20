@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { randomUUID } from "node:crypto";
 import test from "node:test";
-import { cliOperations } from "@convohop/cli";
+import { cliOperations } from "@instantrelay/cli";
 import { reply, resolution } from "../../../test/graphql-fixtures.mjs";
 import {
   BACKEND_KEY, COMMUNICATION_URL, UUID, assertNoSecrets, assertUsage, fakeAuthority, mockTarget, sandbox, stdinOf,
@@ -71,7 +71,7 @@ test("call waits out a rate limit and sends the same request again, but not a wa
   assert.equal(limited.code, 1);
   assert.equal(limited.stdout, "");
   assert.deepEqual(limited.waits, []);
-  assert.match(limited.stderr, /^convohop: RATE_LIMITED: .+\n {2}outcome: rejected\n {2}requestId: [0-9a-f-]{36}\n {2}retryAfter: 31s\n {2}next: The authority asked to wait 31 seconds before sending again\.\n$/);
+  assert.match(limited.stderr, /^relay: RATE_LIMITED: .+\n {2}outcome: rejected\n {2}requestId: [0-9a-f-]{36}\n {2}retryAfter: 31s\n {2}next: The authority asked to wait 31 seconds before sending again\.\n$/);
 });
 
 test("a missing scope is reported with the scope it needs, and the key never appears", async t => {
@@ -79,10 +79,10 @@ test("a missing scope is reported with the scope it needs, and the key never app
   const { env, descriptor } = await mockTarget(t);
   const input = { conversationId: randomUUID(), members: [{ principalId: randomUUID(), role: "member", expectedRevision: "0" }] };
   const result = await cli(["call", "communication.addMembers", "--input", JSON.stringify(input)],
-    { env: { ...env, CONVOHOP_BACKEND_KEY: descriptor.credentials.backendLimited }, fetch });
+    { env: { ...env, RELAY_BACKEND_KEY: descriptor.credentials.backendLimited }, fetch });
   assert.equal(result.code, 1);
   assert.equal(result.stdout, "");
-  assert.match(result.stderr, /^convohop: SCOPE_REQUIRED: .+\n {2}outcome: rejected\n {2}requestId: [0-9a-f-]{36}\n {2}scope: membershipManage\n$/);
+  assert.match(result.stderr, /^relay: SCOPE_REQUIRED: .+\n {2}outcome: rejected\n {2}requestId: [0-9a-f-]{36}\n {2}scope: membershipManage\n$/);
   assertNoSecrets(result, descriptor.credentials.backendLimited, descriptor.credentials.backend);
 });
 
@@ -102,7 +102,7 @@ test("call asks before a destructive operation and sends it only after yes", asy
     const declined = await send(stdinOf(answer, { tty: true }));
     assert.equal(declined.code, 1, answer);
     assert.equal(declined.stdout, "");
-    assert.equal(declined.stderr, `${prompt}convohop: Cancelled; nothing was sent\n`);
+    assert.equal(declined.stderr, `${prompt}relay: Cancelled; nothing was sent\n`);
   }
   assert.deepEqual(deletes(), []);
 
@@ -146,9 +146,9 @@ test("call exits 3 with how to look the request up when its outcome stays unknow
       : request.variables.context.requestId, requestId);
   assert.ok(authority.requests.slice(1).filter(request => request.operationName === "CommunicationCreatePrincipal")
     .every(request => request.variables.input.externalUserId === "cli-unknown"));
-  const lookUp = `Don't run the command again: that sends a new request. Check it with convohop resolve --request ${requestId} ` +
+  const lookUp = `Don't run the command again: that sends a new request. Check it with relay resolve --request ${requestId} ` +
     `--plane communication --project ${authority.projectId}`;
-  assert.equal(result.stderr, "convohop: RESOLUTION_REQUIRED: The request's outcome is unknown\n  outcome: unknown\n" +
+  assert.equal(result.stderr, "relay: RESOLUTION_REQUIRED: The request's outcome is unknown\n  outcome: unknown\n" +
     `  requestId: ${requestId}\n  next: ${lookUp}\n`);
 
   const controller = new AbortController();
@@ -158,7 +158,7 @@ test("call exits 3 with how to look the request up when its outcome stays unknow
   const sentAgain = authority.requests.filter(request => request.operationName === "CommunicationCreatePrincipal").at(-1);
   assert.equal(sentAgain.variables.input.externalUserId, "cli-interrupted");
   const again = sentAgain.variables.context.requestId;
-  assert.equal(interrupted.stderr, "convohop: TRANSPORT_UNKNOWN: Interrupted; the request's outcome is unknown\n" +
+  assert.equal(interrupted.stderr, "relay: TRANSPORT_UNKNOWN: Interrupted; the request's outcome is unknown\n" +
     `  outcome: unknown\n  requestId: ${again}\n  next: ${lookUp.replaceAll(requestId, again)}\n`);
 });
 
@@ -171,21 +171,21 @@ test("communication operations need a backend key, a project, its incarnation an
     delete env[name];
     return cli(argv, { env });
   };
-  assertUsage(await without("CONVOHOP_BACKEND_KEY"),
-    "Communication operations need a backend key: set CONVOHOP_BACKEND_KEY or CONVOHOP_BACKEND_KEY_FILE");
-  assertUsage(await without("CONVOHOP_PROJECT_ID"), "Set --project or CONVOHOP_PROJECT_ID", "call");
-  assertUsage(await without("CONVOHOP_INCARNATION"),
-    "Set --incarnation or CONVOHOP_INCARNATION. convohop projects get --project ID shows it", "call");
-  assertUsage(await without("CONVOHOP_COMMUNICATION_URL"),
-    "Set --communication-url or CONVOHOP_COMMUNICATION_URL, or log in with --communication-url", "call");
+  assertUsage(await without("RELAY_BACKEND_KEY"),
+    "Communication operations need a backend key: set RELAY_BACKEND_KEY or RELAY_BACKEND_KEY_FILE");
+  assertUsage(await without("RELAY_PROJECT_ID"), "Set --project or RELAY_PROJECT_ID", "call");
+  assertUsage(await without("RELAY_INCARNATION"),
+    "Set --incarnation or RELAY_INCARNATION. relay projects get --project ID shows it", "call");
+  assertUsage(await without("RELAY_COMMUNICATION_URL"),
+    "Set --communication-url or RELAY_COMMUNICATION_URL, or log in with --communication-url", "call");
   const secret = "c2VjcmV0LWluLWEtcHJvamVjdC1vcHRpb24";
   const invalid = await cli([...argv, "--project", secret], { env: authority.env });
   assertUsage(invalid, "--project must be a UUID", "call");
   assertNoSecrets(invalid, secret);
-  const empty = await cli(argv, { env: { ...authority.env, CONVOHOP_BACKEND_KEY: "",
-    CONVOHOP_BACKEND_KEY_FILE: `${directory}/missing` } });
+  const empty = await cli(argv, { env: { ...authority.env, RELAY_BACKEND_KEY: "",
+    RELAY_BACKEND_KEY_FILE: `${directory}/missing` } });
   assert.equal(empty.code, 1);
-  assert.equal(empty.stderr, "convohop: Can't read the file that CONVOHOP_BACKEND_KEY_FILE names\n");
+  assert.equal(empty.stderr, "relay: Can't read the file that RELAY_BACKEND_KEY_FILE names\n");
 });
 
 test("--project and --incarnation choose the communication project, and IDs are compared in lower case", async t => {
@@ -217,7 +217,7 @@ test("keys issue requests a key and says how to redeem it, and resolve looks up 
   assert.equal(output.payload.status, "accepted");
   const { operationId } = output.payload.operation;
   assert.match(operationId, UUID);
-  assert.equal(result.stderr, `Redeem the key with convohop redeem --operation ${operationId} --out FILE\n`);
+  assert.equal(result.stderr, `Redeem the key with relay redeem --operation ${operationId} --out FILE\n`);
   assertNoSecrets(result, descriptor.credentials.management);
 
   const resolved = await cli(["resolve", "--request", output.requestId.toUpperCase()], { env, fetch });

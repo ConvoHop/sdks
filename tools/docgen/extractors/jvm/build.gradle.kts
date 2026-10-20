@@ -34,7 +34,7 @@ tasks.withType<Test>().configureEach {
 tasks.register<JavaExec>("extract") {
     description = "Writes the JVM SDK's public API. Run it through tools/docgen/extractors/jvm.mjs."
     classpath = sourceSets.main.get().runtimeClasspath
-    mainClass.set("com.convohop.docs.surface.Main")
+    mainClass.set("dev.instantrelay.docs.surface.Main")
     javaLauncher.set(buildJdk)
     // Arguments name repository-relative paths.
     workingDir = rootDir.parentFile

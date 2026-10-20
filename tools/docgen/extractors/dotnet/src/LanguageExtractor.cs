@@ -4,7 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Text.Json;
 
-namespace ConvoHop.Docgen;
+namespace Relay.Docgen;
 
 /// <summary>Extracts the packages a language file lists, one package per namespace.</summary>
 internal static class LanguageExtractor

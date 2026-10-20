@@ -14,7 +14,7 @@ test('buildAssets packs every public package with only publishable files', async
   assert.deepEqual(packages, npmReleasePackages(REPO_ROOT));
   assert.deepEqual(
     packages.map((pkg) => pkg.name),
-    ['@convohop/core', '@convohop/client', '@convohop/server'],
+    ['@instantrelay/core', '@instantrelay/client', '@instantrelay/server'],
   );
   for (const pkg of packages) {
     const dir = join(out, pkg.component);
@@ -59,8 +59,8 @@ function releaseRoot(t, { coreVersion = '0.2.0', manifestCore = '0.2.0' } = {}) 
     config: CONFIG,
     manifest: { 'packages/core': manifestCore, 'packages/client': '0.2.1', 'packages/python': '0.1.0' },
     packages: {
-      'packages/core': { name: '@convohop/core', version: coreVersion },
-      'packages/client': { name: '@convohop/client', version: '0.2.1', dependencies: { '@convohop/core': coreVersion } },
+      'packages/core': { name: '@instantrelay/core', version: coreVersion },
+      'packages/client': { name: '@instantrelay/client', version: '0.2.1', dependencies: { '@instantrelay/core': coreVersion } },
       'packages/python': { name: 'not-npm', version: '0.1.0' },
     },
   });
@@ -78,8 +78,8 @@ test('resolveReleases checks releases against the release commit', (t) => {
   assert.deepEqual(
     releases.map((pkg) => [pkg.name, pkg.tag, pkg.tarball, pkg.sbom]),
     [
-      ['@convohop/core', 'core-v0.2.0', 'convohop-core-0.2.0.tgz', 'convohop-core-0.2.0.cdx.json'],
-      ['@convohop/client', 'client-v0.2.1', 'convohop-client-0.2.1.tgz', 'convohop-client-0.2.1.cdx.json'],
+      ['@instantrelay/core', 'core-v0.2.0', 'instantrelay-core-0.2.0.tgz', 'instantrelay-core-0.2.0.cdx.json'],
+      ['@instantrelay/client', 'client-v0.2.1', 'instantrelay-client-0.2.1.tgz', 'instantrelay-client-0.2.1.cdx.json'],
     ],
   );
   const core = (fields) => JSON.stringify([{ path: 'packages/core', version: '0.2.0', tag: 'core-v0.2.0', ...fields }]);
@@ -134,8 +134,8 @@ test('inspectTarball checks the published package.json', () => {
     license: 'MIT',
     publishConfig: { access: 'restricted', registry: 'https://npm.example.com/' },
     repository: { type: 'git', url: 'git+https://github.com/example/fork.git', directory: 'packages/other' },
-    dependencies: { '@convohop/core': '^1.0.0', '@convohop/internal': '1.0.0', leftpad: 'github:example/leftpad' },
-    peerDependencies: { '@convohop/core': 'workspace:*' },
+    dependencies: { '@instantrelay/core': '^1.0.0', '@instantrelay/internal': '1.0.0', leftpad: 'github:example/leftpad' },
+    peerDependencies: { '@instantrelay/core': 'workspace:*' },
   });
   const { problems } = inspectTarball(packageTarball({ manifest }), EXPECTED);
   for (const pattern of [
@@ -147,25 +147,25 @@ test('inspectTarball checks the published package.json', () => {
     /license must be Apache-2.0/,
     /repository.url/,
     /repository.directory/,
-    /dependencies.@convohop\/core is \^1.0.0, expected exactly 1.0.0/,
-    /dependencies.@convohop\/internal is not a released package/,
+    /dependencies.@instantrelay\/core is \^1.0.0, expected exactly 1.0.0/,
+    /dependencies.@instantrelay\/internal is not a released package/,
     /dependencies.leftpad is not a registry dependency/,
-    /peerDependencies.@convohop\/core is not a registry dependency/,
+    /peerDependencies.@instantrelay\/core is not a registry dependency/,
   ]) {
     assert.ok(problems.some((problem) => pattern.test(problem)), `${pattern}: ${problems}`);
   }
 });
 
 test('inspectTarball keeps prerelease internal dependencies out of stable releases', () => {
-  const internalVersions = { '@convohop/core': '0.3.0-rc.1' };
+  const internalVersions = { '@instantrelay/core': '0.3.0-rc.1' };
   const check = (version) =>
     inspectTarball(
-      packageTarball({ manifest: publishableManifest({ version, dependencies: { '@convohop/core': '0.3.0-rc.1' } }) }),
+      packageTarball({ manifest: publishableManifest({ version, dependencies: { '@instantrelay/core': '0.3.0-rc.1' } }) }),
       { ...EXPECTED, version, internalVersions },
     ).problems;
-  assert.deepEqual(check('0.2.1'), ['dependencies.@convohop/core is prerelease 0.3.0-rc.1, so 0.2.1 must be a prerelease too']);
+  assert.deepEqual(check('0.2.1'), ['dependencies.@instantrelay/core is prerelease 0.3.0-rc.1, so 0.2.1 must be a prerelease too']);
   assert.deepEqual(check('0.2.1+build.7'), [
-    'dependencies.@convohop/core is prerelease 0.3.0-rc.1, so 0.2.1+build.7 must be a prerelease too',
+    'dependencies.@instantrelay/core is prerelease 0.3.0-rc.1, so 0.2.1+build.7 must be a prerelease too',
   ]);
   assert.deepEqual(check('0.3.0-rc.1'), []);
 });

@@ -94,7 +94,7 @@ mutation CommunicationJoinLiveSession($context: RequestContextInput!, $input: Jo
 | Language | Members |
 | --- | --- |
 | [TypeScript](../../typescript/reference/operations.md) | [`LiveSessionHandle.join`](../../typescript/reference/client.md#livesessionhandlejoin-method) |
-| [Swift](../../swift/reference/operations.md) | [`LiveSessionHandle.join`](../../swift/reference/convohop.md#livesessionhandlejoin-method) |
-| [Android](../../android/reference/operations.md) | [`LiveSessionHandle.join`](../../android/reference/android-core.md#livesessionhandlejoin-method), [`ConvoHopCall.answer` (static)](../../android/reference/android.md#convohopcallanswer-static-method) |
-| [Flutter](../../flutter/reference/operations.md) | [`LiveSessionHandle.join`](../../flutter/reference/convohop.md#livesessionhandlejoin-method), [`CommunicationOperations.joinLiveSession`](../../flutter/reference/convohop.md#communicationoperationsjoinlivesession-method) |
+| [Swift](../../swift/reference/operations.md) | [`LiveSessionHandle.join`](../../swift/reference/relay.md#livesessionhandlejoin-method) |
+| [Android](../../android/reference/operations.md) | [`LiveSessionHandle.join`](../../android/reference/android-core.md#livesessionhandlejoin-method), [`RelayCall.answer` (static)](../../android/reference/android.md#relaycallanswer-static-method) |
+| [Flutter](../../flutter/reference/operations.md) | [`LiveSessionHandle.join`](../../flutter/reference/instantrelay.md#livesessionhandlejoin-method), [`CommunicationOperations.joinLiveSession`](../../flutter/reference/instantrelay.md#communicationoperationsjoinlivesession-method) |
 | [React Native](../../react-native/reference/operations.md) | [`LiveSessionHandle.join`](../../react-native/reference/client.md#livesessionhandlejoin-method) |

@@ -129,7 +129,7 @@ func TestEnvelopeFailures(t *testing.T) {
 		"case-varied name":   resource(`"eventType"`, `"EventType"`),
 		"last duplicate bad": resource(`}}`, `},"eventType":""}`),
 	} {
-		if _, err := verifyEvent(t, body); err == nil || err.Error() != "convohop webhooks: INVALID_BODY: Webhook body is not a ConvoHop event envelope" {
+		if _, err := verifyEvent(t, body); err == nil || err.Error() != "convohop webhooks: INVALID_BODY: Webhook body is not a Relay event envelope" {
 			t.Errorf("%s: Verify() error = %v; want not an envelope", name, err)
 		}
 		// VerifySignature doesn't parse the body.

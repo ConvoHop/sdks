@@ -1,6 +1,6 @@
 # TypeScript calling quickstart
 
-Add voice and video calls to a conversation with `@convohop/client`: start a call and ring other members, join the current call, and leave or end it.
+Add voice and video calls to a conversation with `@instantrelay/client`: start a call and ring other members, join the current call, and leave or end it.
 
 ## Before you start
 
@@ -34,7 +34,7 @@ Leaving ends this device's participation, and the call goes on for everyone else
 
 ## Calls in React
 
-With `@convohop/react`, inside the provider that the [client quickstart](client.md#use-react) sets up:
+With `@instantrelay/react`, inside the provider that the [client quickstart](client.md#use-react) sets up:
 
 ```tsx include=examples/src/react.tsx#call
 ```
@@ -59,4 +59,4 @@ The SDK gets a single-use token for this device's participation, then calls your
 
 - [Push notifications quickstart](push.md): ring members whose app isn't open.
 - [`LiveParticipationHandle` reference](../reference/client.md#liveparticipationhandle-class): join, connect, leave and end.
-- [`@convohop/react` reference](../reference/react.md): `useLiveSession` and `useMediaConnection`.
+- [`@instantrelay/react` reference](../reference/react.md): `useLiveSession` and `useMediaConnection`.

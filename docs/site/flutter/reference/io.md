@@ -1,4 +1,4 @@
-# `package:convohop/io.dart`
+# `package:instantrelay/io.dart`
 
 File-backed recovery storage for the conversation store and the outbox.
 

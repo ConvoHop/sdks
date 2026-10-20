@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import { join } from "node:path";
 import test from "node:test";
-import { cliOperations, cliTypes, withheldOperations } from "@convohop/cli";
+import { cliOperations, cliTypes, withheldOperations } from "@instantrelay/cli";
 import { assertNoSecrets, assertUsage, sandbox } from "./helpers.mjs";
 
 const manifest = JSON.parse(await readFile(new URL("../package.json", import.meta.url), "utf8"));
@@ -18,12 +18,12 @@ const GROUPS = {
 };
 const listed = text => [...text.matchAll(/^ {2}([a-z]+(?: [a-z]+)?) {2,}\S/gm)].map(match => match[1]);
 
-test("convohop alone, help and --help print the overview of every command and the exit codes", async t => {
+test("relay alone, help and --help print the overview of every command and the exit codes", async t => {
   const { cli } = await sandbox(t);
   const overview = await cli([]);
   assert.equal(overview.code, 0);
   assert.equal(overview.stderr, "");
-  assert.ok(overview.stdout.startsWith("convohop: the ConvoHop command-line interface for project operators.\n"));
+  assert.ok(overview.stdout.startsWith("relay: the Relay command-line interface for project operators.\n"));
   assert.deepEqual(listed(overview.stdout), COMMANDS);
   assert.match(overview.stdout, /Exit codes: 0 success, 1 failure, 2 usage error, 3 unknown outcome, 130 interrupted\./);
   for (const argv of [["help"], ["--help"], ["-h"], ["--profile", "staging", "--help"]])
@@ -43,13 +43,13 @@ test("a group word prints the group's commands, and help COMMAND, --help and -h 
   for (const [group, commands] of Object.entries(GROUPS)) {
     const result = await cli([group]);
     assert.equal(result.code, 0, group);
-    assert.ok(result.stdout.startsWith(`Usage: convohop ${group} COMMAND [options]\n`), group);
+    assert.ok(result.stdout.startsWith(`Usage: relay ${group} COMMAND [options]\n`), group);
     assert.deepEqual(listed(result.stdout), commands, group);
     assert.deepEqual(await cli([group, "--help"]), result, group);
   }
   const help = await cli(["keys", "revoke", "--help"]);
   assert.equal(help.code, 0);
-  assert.ok(help.stdout.startsWith("Usage: convohop keys revoke --project ID --key ID --expected-revision REVISION " +
+  assert.ok(help.stdout.startsWith("Usage: relay keys revoke --project ID --key ID --expected-revision REVISION " +
     "[--revoke-sessions] [--yes]\n"));
   assert.match(help.stdout, /^ {2}--yes {2,}Don't ask for confirmation\.$/m);
   assert.match(help.stdout, /^Global options:\n {2}--profile NAME /m);
@@ -58,7 +58,7 @@ test("a group word prints the group's commands, and help COMMAND, --help and -h 
   for (const command of COMMANDS) {
     const result = await cli([...command.split(" "), "--help"]);
     assert.equal(result.code, 0, command);
-    assert.ok(result.stdout.startsWith(`Usage: convohop ${command}`), command);
+    assert.ok(result.stdout.startsWith(`Usage: relay ${command}`), command);
   }
 });
 
@@ -77,7 +77,7 @@ test("unknown commands and options are usage errors that never echo what may be 
   for (const argv of [["status", `--token=${secret}`], ["status", `--${secret}`], ["status", "-x"], [`--${secret}`]]) {
     const result = await cli(argv);
     assert.equal(result.code, 2);
-    assert.match(result.stderr, /^convohop: Unknown option( --token)?\n/);
+    assert.match(result.stderr, /^relay: Unknown option( --token)?\n/);
     assertNoSecrets(result, secret);
   }
   assertUsage(await cli(["status", secret]), "This command takes no arguments", "status");
@@ -96,7 +96,7 @@ test("--profile can come before the command, and profile names are checked", asy
   assert.equal(before.code, 0, before.stderr);
   assert.deepEqual(before, after);
   assert.equal(JSON.parse(before.stdout).profile, "staging");
-  const fromEnvironment = await cli(["status"], { env: { CONVOHOP_PROFILE: "staging" } });
+  const fromEnvironment = await cli(["status"], { env: { RELAY_PROFILE: "staging" } });
   assert.equal(JSON.parse(fromEnvironment.stdout).profile, "staging");
   for (const name of ["-dash", "with space", "x".repeat(65), "slash/name"]) {
     const result = await cli(["status", `--profile=${name}`]);
@@ -128,22 +128,22 @@ test("call OPERATION --help shows the operation's annotations and input fields",
   const revoke = await cli(["call", "management.revokeBackendKey", "--help"]);
   assert.equal(revoke.code, 0, revoke.stderr);
   const op = cliOperations["management.revokeBackendKey"];
-  assert.ok(revoke.stdout.startsWith("Usage: convohop call management.revokeBackendKey [--input JSON | --input-file FILE] " +
+  assert.ok(revoke.stdout.startsWith("Usage: relay call management.revokeBackendKey [--input JSON | --input-file FILE] " +
     `[--yes]\n\n${op.summary}\n`));
   assert.match(revoke.stdout, new RegExp(`^Kind: management mutation\nCredential: ${op.credential}\nRequires: ` +
-    `.+\nIdempotency: ${op.idempotency}\nDestructive: yes\\. convohop asks first, unless --yes is given$`, "m"));
+    `.+\nIdempotency: ${op.idempotency}\nDestructive: yes\\. relay asks first, unless --yes is given$`, "m"));
   assert.match(revoke.stdout, new RegExp(`^Input \\(${op.input}\\):$`, "m"));
   for (const field of cliTypes[op.input].fields)
     assert.match(revoke.stdout, new RegExp(`^ {2}${field.name} +${field.type.replace(/[[\]!]/g, "\\$&")} +required`, "m"));
-  assert.doesNotMatch(revoke.stdout, /CONVOHOP_BACKEND_KEY/);
+  assert.doesNotMatch(revoke.stdout, /RELAY_BACKEND_KEY/);
 
   const members = await cli(["help", "call", "communication.addMembers"]);
   assert.equal(members.code, 0, members.stderr);
-  assert.match(members.stdout, /^Usage: convohop call communication\.addMembers \[--input JSON \| --input-file FILE\] /);
+  assert.match(members.stdout, /^Usage: relay call communication\.addMembers \[--input JSON \| --input-file FILE\] /);
   assert.match(members.stdout, /\[--project ID\] \[--incarnation ID\]\n/);
   assert.doesNotMatch(members.stdout, /Destructive/);
   assert.match(members.stdout, /^MemberBatchEntryInput:\n {2}principalId +UUID! +required/m);
-  assert.match(members.stdout, /\nCommunication operations use a backend key from CONVOHOP_BACKEND_KEY or CONVOHOP_BACKEND_KEY_FILE\.\n$/);
+  assert.match(members.stdout, /\nCommunication operations use a backend key from RELAY_BACKEND_KEY or RELAY_BACKEND_KEY_FILE\.\n$/);
 
   const capabilities = await cli(["call", "management.capabilities", "--help"]);
   assert.match(capabilities.stdout, /^Input: none$/m);
@@ -152,18 +152,18 @@ test("call OPERATION --help shows the operation's annotations and input fields",
 test("call refuses operations whose results are credentials or record consent, and unknown operations, before sending anything", async t => {
   const { cli } = await sandbox(t);
   for (const [id, reason] of Object.entries(withheldOperations)) {
-    assertUsage(await cli(["call", id]), `convohop call doesn't run ${id}, which ${reason}`, "call");
-    assertUsage(await cli(["call", id, "--help"]), `convohop call doesn't run ${id}, which ${reason}`, "call");
+    assertUsage(await cli(["call", id]), `relay call doesn't run ${id}, which ${reason}`, "call");
+    assertUsage(await cli(["call", id, "--help"]), `relay call doesn't run ${id}, which ${reason}`, "call");
   }
   for (const id of ["communication.redeemCredential", "communication.acknowledgeCredential"])
-    assertUsage(await cli(["call", id, "--input", "{}"]), `convohop redeem runs ${id}, and keeps the credential out of its output`,
+    assertUsage(await cli(["call", id, "--input", "{}"]), `relay redeem runs ${id}, and keeps the credential out of its output`,
       "call");
   assertUsage(await cli(["call"]), "Name an operation, such as management.getProject, or pass --list", "call");
   assertUsage(await cli(["call", "management.launchRocket"]),
-    "Unknown operation management.launchRocket. convohop call --list lists them", "call");
+    "Unknown operation management.launchRocket. relay call --list lists them", "call");
   const secret = "whsec_c2VjcmV0LXRoYXQtbXVzdC1ub3QtcHJpbnQ=";
   const unknown = await cli(["call", secret]);
-  assertUsage(unknown, "Unknown operation. convohop call --list lists them", "call");
+  assertUsage(unknown, "Unknown operation. relay call --list lists them", "call");
   assertNoSecrets(unknown, secret);
 });
 
@@ -182,14 +182,14 @@ test("call checks its input before it needs credentials", async t => {
   assertNoSecrets(invalid, secret);
   assertUsage(await run(["management.getProject", "--input", "[]"]), "The input must be a JSON object", "call");
   assertUsage(await run(["management.getProject", "--input", "{\"projectID\":\"x\"}"]),
-    "management.getProject has no input field projectID. convohop call management.getProject --help lists them", "call");
+    "management.getProject has no input field projectID. relay call management.getProject --help lists them", "call");
   const hidden = await run(["management.getProject", "--input", `{"${secret}":1}`]);
-  assertUsage(hidden, "management.getProject has no input field with that name. convohop call management.getProject " +
+  assertUsage(hidden, "management.getProject has no input field with that name. relay call management.getProject " +
     "--help lists them", "call");
   assertNoSecrets(hidden, secret);
   assertUsage(await run(["management.getProject", "--input", "{\"projectId\":null}"]),
-    "The input needs projectId. convohop call management.getProject --help lists the fields", "call");
+    "The input needs projectId. relay call management.getProject --help lists the fields", "call");
   const path = join(directory, "missing.json"), missing = await run(["management.getProject", "--input-file", path]);
   assert.equal(missing.code, 1);
-  assert.equal(missing.stderr, `convohop: Can't read ${path}\n`);
+  assert.equal(missing.stderr, `relay: Can't read ${path}\n`);
 });

@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Xunit;
 
-namespace ConvoHop.Docgen.Tests;
+namespace Relay.Docgen.Tests;
 
 /// <summary>Extracts in-memory sources as the <c>Lib</c> project, for both target frameworks the SDK has.</summary>
 internal static class Lib

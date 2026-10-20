@@ -1,7 +1,7 @@
 // Compile-time checks of public types that no runtime test reaches. `npm test` runs them with `tsc -p test`.
-import type { PushRegistration } from "@convohop/client";
+import type { PushRegistration } from "@instantrelay/client";
 
-// One of each registration that a ConvoHop client hands your backend.
+// One of each registration that a Relay client hands your backend.
 export const registrations: readonly PushRegistration[] = [
   { kind: "webPush", subscription: { endpoint: "https://push.example/1", keys: { p256dh: "key", auth: "secret" } } },
   { kind: "apns", token: "apns-token", environment: "production" },

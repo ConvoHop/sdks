@@ -104,7 +104,7 @@ func TestRequestErrors(t *testing.T) {
 		{"required option", `{"id":2,"method":"client.create","params":{"client":"b",` + backend + `}}`,
 			requestError("2", "INVALID_PARAMS", "projectId is required for this role")},
 		{"constructor", `{"id":2,"method":"client.create","params":{"client":"b",` + backend + `,"projectId":"p","incarnation":"i"}}`,
-			requestError("2", "INVALID_PARAMS", "convohop: the project ID and incarnation must be canonical lowercase UUIDs")},
+			requestError("2", "INVALID_PARAMS", "relay: the project ID and incarnation must be canonical lowercase UUIDs")},
 		{"unknown client", `{"id":2,"method":"invoke","params":{"client":"b","operation":"conversations.get"}}`,
 			requestError("2", "UNKNOWN_HANDLE", "Unknown client handle b")},
 	}
@@ -213,12 +213,12 @@ func TestSDKErrorProjection(t *testing.T) {
 		`{"code":"SDK_ERROR","status":null,"outcome":null,"requestId":null,"retryAfterMs":null,"message":"boom"}`; got != want {
 		t.Errorf("plain error = %s; want %s", got, want)
 	}
-	problem := &convohop.Problem{Code: "TRANSPORT_UNKNOWN", Outcome: convohop.OutcomeUnknown, RequestID: "r"}
+	problem := &relay.Problem{Code: "TRANSPORT_UNKNOWN", Outcome: relay.OutcomeUnknown, RequestID: "r"}
 	if got, want := encoded(problem), `{"code":"TRANSPORT_UNKNOWN","status":null,"outcome":"unknown","requestId":"r",`+
 		`"retryAfterMs":null,"message":`+mustQuote(t, problem.Error())+`}`; got != want {
 		t.Errorf("problem = %s; want %s", got, want)
 	}
-	problem = &convohop.Problem{Code: "NOT_FOUND", Status: 404, Outcome: convohop.OutcomeRejected, Message: "gone"}
+	problem = &relay.Problem{Code: "NOT_FOUND", Status: 404, Outcome: relay.OutcomeRejected, Message: "gone"}
 	if got, want := encoded(problem), `{"code":"NOT_FOUND","status":404,"outcome":"rejected","requestId":null,`+
 		`"retryAfterMs":null,"message":"gone"}`; got != want {
 		t.Errorf("problem = %s; want %s", got, want)

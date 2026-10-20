@@ -1,6 +1,6 @@
-name: convohop
+name: instantrelay
 description: >-
-  ConvoHop client SDK for Flutter: user sessions, conversation history and
+  Relay client SDK for Flutter: user sessions, conversation history and
   realtime, an offline outbox, receipts, typing, calls and push.
 version: 0.0.0
 # Registry publishing waits for release approval; see RELEASING.md.
@@ -30,7 +30,7 @@ flutter:
   plugin:
     platforms:
       android:
-        package: com.convohop.flutter
-        pluginClass: ConvoHopPlugin
+        package: dev.instantrelay.flutter
+        pluginClass: RelayPlugin
       ios:
-        pluginClass: ConvoHopPlugin
+        pluginClass: RelayPlugin

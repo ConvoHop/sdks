@@ -29,12 +29,12 @@ jobs:
       publish: ${{ github.event_name == 'push' && vars.PUBDEV_PUBLISH_ENABLED == 'true' }}
 
   publish:
-    name: Publish convohop after the real pub.dev bootstrap
+    name: Publish instantrelay after the real pub.dev bootstrap
     needs: prepare
     if: github.event_name == 'push' && needs.prepare.outputs.publish == 'true'
     runs-on: ubuntu-24.04
     timeout-minutes: 15
-    environment: pub.dev
+    environment: pubdev
     permissions:
       contents: read
       id-token: write
@@ -60,7 +60,7 @@ jobs:
             --sha "$SOURCE_SHA" --source-ref "$GITHUB_REF" --directory "$RUNNER_TEMP/registry-assets"
           node scripts/release/registry.mjs pubdev-ready
           mkdir "$RUNNER_TEMP/pubdev"
-          tar -xzf "$RUNNER_TEMP/registry-assets/convohop-$VERSION.tar.gz" -C "$RUNNER_TEMP/pubdev"
+          tar -xzf "$RUNNER_TEMP/registry-assets/instantrelay-$VERSION.tar.gz" -C "$RUNNER_TEMP/pubdev"
       - uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2 # v2.23.0
         with:
           channel: stable

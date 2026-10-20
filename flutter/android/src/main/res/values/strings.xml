@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Text for ConvoHop notifications without a title or body, which is the
+<!-- Text for Relay notifications without a title or body, which is the
      default because message previews are off. Override or translate these
      in your app's resources. -->
 <resources>

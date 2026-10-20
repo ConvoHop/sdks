@@ -106,7 +106,7 @@ const pushTestCommand: Command = {
   summary: "Build the push payloads for a signed notification webhook, without sending a push.",
   usage: "[--type TYPE | --event FILE] [--platform PLATFORM...] [--bundle-id ID] [--deliver URL]",
   details: "Signs a sample notification event (or --event's body) as a Standard Webhooks delivery, verifies it with " +
-    "webhooks.verify and builds each platform's push request with the @convohop/server push builders. Prints the event, " +
+    "webhooks.verify and builds each platform's push request with the @instantrelay/server push builders. Prints the event, " +
     "the requests and their measured sizes; a null request means the platform sends nothing for the event. Nothing " +
     "reaches a push provider. With --deliver, also posts the signed delivery to your webhook endpoint.",
   options: pushTestOptions,

@@ -1,11 +1,11 @@
-// Runs @convohop/client on the React Native platform, and loads @convohop/react's hooks, without the globals Hermes
+// Runs @instantrelay/client on the React Native platform, and loads @instantrelay/react's hooks, without the globals Hermes
 // lacks. Started by runtime.test.mjs, which compares a run without them ("bare") against one on Node's own globals
 // ("full").
 import module from "node:module";
 import { readFileSync } from "node:fs";
 import { emulateReactNative } from "./support/globals.mjs";
 
-const bare = process.env.CONVOHOP_RUNTIME === "bare", NodeURL = URL;
+const bare = process.env.RELAY_RUNTIME === "bare", NodeURL = URL;
 await import("./support/register.mjs");
 // Registered after the stand-ins, so it runs first and sees every specifier.
 const resolved = [];
@@ -18,10 +18,10 @@ if (bare) {
 }
 
 // The SDKs load first, so nothing else has evaluated their modules with the globals present.
-const { ConvoHopClient, Outbox } = await import("@convohop/client");
-const { handleNotification } = await import("@convohop/client/push");
-const { createPlatform } = await import("@convohop/react-native");
-const { useConversation } = await import("@convohop/react");
+const { RelayClient, Outbox } = await import("@instantrelay/client");
+const { handleNotification } = await import("@instantrelay/client/push");
+const { createPlatform } = await import("@instantrelay/react-native");
+const { useConversation } = await import("@instantrelay/react");
 const { linkPlatform } = await import("./support/native.mjs");
 const { full } = await import("../../../test/graphql-fixtures.mjs");
 const { operationCatalog } = await import("../../core/dist/generated/operations.js");
@@ -46,11 +46,11 @@ const options = { projectId, principalId, incarnation, sessionToken: "fixture-pr
 
 let refused = null;
 if (bare) {
-  try { new ConvoHopClient(options); }
+  try { new RelayClient(options); }
   catch (error) { refused = error.message; }
 }
 const platform = bare ? createPlatform() : undefined;
-const client = new ConvoHopClient({ ...options, platform });
+const client = new RelayClient({ ...options, platform });
 const receipt = await client.send(conversationId, "héllo 👋\u2028", undefined, { nested: { list: [1, "two", null, true] } });
 const outbox = new Outbox(client);
 outbox.send(conversationId, "queued 🎈");
@@ -68,7 +68,7 @@ const pushed = [["message-title", "apnsAlert"], ["message-title", "fcm"], ["call
 process.stdout.write(JSON.stringify({
   refused, fingerprints: client.http.recoveryStates.map(state => state.payloadFingerprint), sent: receipt.status,
   outbox: outbox.entries.map(entry => entry.status), requestIds: client.http.recoveryStates.map(state => state.requestId),
-  nativeRandom: native.log.length, pushed, sdkResolved: resolved.includes("@convohop/react-native"),
+  nativeRandom: native.log.length, pushed, sdkResolved: resolved.includes("@instantrelay/react-native"),
   livekit: resolved.filter(specifier => /^(?:livekit-client|@livekit\/)/.test(specifier)),
   hooks: typeof useConversation, reactDom: resolved.filter(specifier => /^react-dom(?:\/|$)/.test(specifier)),
 }) + "\n");

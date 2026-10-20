@@ -90,7 +90,7 @@ mutation CommunicationIssueSession($context: RequestContextInput!, $input: Issue
 | Language | Members |
 | --- | --- |
 | [TypeScript](../../typescript/reference/operations.md) | [`ProjectServerClient.sessions.issue`](../../typescript/reference/server.md#projectserverclientsessionsissue-property), [`ProjectServerClient.issueSession`](../../typescript/reference/server.md#projectserverclientissuesession-method) |
-| [Python](../../python/reference/operations.md) | [`ConvoHop.issue_session`](../../python/reference/convohop.md#convohopissue_session-method), [`AsyncConvoHop.issue_session`](../../python/reference/convohop.md#asyncconvohopissue_session-method) |
-| [.NET](../../dotnet/reference/operations.md) | [`ServerSessions.IssueAsync`](../../dotnet/reference/convohop.md#serversessionsissueasync-method), [`CommunicationApi.IssueSessionAsync`](../../dotnet/reference/api.md#communicationapiissuesessionasync-method) |
+| [Python](../../python/reference/operations.md) | [`Relay.issue_session`](../../python/reference/instantrelay.md#relayissue_session-method), [`AsyncRelay.issue_session`](../../python/reference/instantrelay.md#asyncrelayissue_session-method) |
+| [.NET](../../dotnet/reference/operations.md) | [`ServerSessions.IssueAsync`](../../dotnet/reference/relay.md#serversessionsissueasync-method), [`CommunicationApi.IssueSessionAsync`](../../dotnet/reference/api.md#communicationapiissuesessionasync-method) |
 | [Java and Kotlin](../../jvm/reference/operations.md) | [`ProjectServerClient.sessions.issue`](../../jvm/reference/server.md#projectserverclientsessionsissue-method), [`CommunicationApi.issueSession`](../../jvm/reference/server.md#communicationapiissuesession-method), [`CommunicationSuspendApi.issueSession`](../../jvm/reference/server-kotlin.md#communicationsuspendapiissuesession-method) |
-| [Go](../../go/reference/operations.md) | [`ProjectClient.IssueSession`](../../go/reference/convohop.md#projectclientissuesession-method) |
+| [Go](../../go/reference/operations.md) | [`ProjectClient.IssueSession`](../../go/reference/relay.md#projectclientissuesession-method) |

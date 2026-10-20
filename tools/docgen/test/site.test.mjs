@@ -256,7 +256,7 @@ test("llms.txt lists every page by language, then the API operations", t => {
       "",
       "## API operations",
       "",
-      "- [API operations](operations/index.md): Every operation in the ConvoHop GraphQL API, with its authorization, idempotency, input, result and errors, and the SDK members that send it.",
+      "- [API operations](operations/index.md): Every operation in the Relay GraphQL API, with its authorization, idempotency, input, result and errors, and the SDK members that send it.",
       "- [alpha.ping](operations/alpha/ping.md): Check that the API answers.",
       "- [alpha.purge](operations/alpha/purge.md): Delete every message.",
       "- [alpha.watch](operations/alpha/watch.md): Watch a user's events.",

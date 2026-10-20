@@ -49,7 +49,7 @@ export interface McpToolDefinition {
   readonly operation: McpToolOperation;
 }
 export const retryToolName = "retry_request";
-export const operationMetaKey = "com.convohop/operation";
+export const operationMetaKey = "dev.instantrelay/operation";
 export const withheldOperations: Readonly<Record<string, string>> = {
   "communication.issueSession": "returns a user session token",
   "communication.renewSession": "returns a user session token",

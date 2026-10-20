@@ -1,14 +1,14 @@
-// Calling quickstart snippets. CI compiles them for macOS and iOS but doesn't run them, because calls need a ConvoHop
+// Calling quickstart snippets. CI compiles them for macOS and iOS but doesn't run them, because calls need a Relay
 // project with calls and a LiveKit media server.
 
 // #region imports
-import ConvoHop
-import ConvoHopLiveKit
+import Relay
+import RelayLiveKit
 // #endregion imports
 
 // #region start-call
 // Starts a voice call in the conversation, joins it and rings other members.
-func startCall(_ client: ConvoHopClient, in conversationId: String, ringing principalIds: [String]) async throws
+func startCall(_ client: RelayClient, in conversationId: String, ringing principalIds: [String]) async throws
     -> MediaConnection
 {
     let live = try await client.conversation(conversationId).live.startVoice().ready() // startVideo() for video.
@@ -21,7 +21,7 @@ func startCall(_ client: ConvoHopClient, in conversationId: String, ringing prin
 
 // #region join-call
 // Joins the conversation's current call, or returns nil when there's none. A ring isn't required.
-func joinCurrentCall(_ client: ConvoHopClient, in conversationId: String) async throws -> MediaConnection? {
+func joinCurrentCall(_ client: RelayClient, in conversationId: String) async throws -> MediaConnection? {
     guard let live = try await client.conversation(conversationId).live.current() else { return nil }
     return try await joinCall(live)
 }
@@ -53,7 +53,7 @@ func startCapture(_ media: MediaConnection) async throws {
 // #region video
 // Starts a video call. media.liveKitRoom is LiveKit's Room: render its participants' video tracks with LiveKit's
 // views.
-func startVideoCall(_ client: ConvoHopClient, in conversationId: String) async throws -> MediaConnection {
+func startVideoCall(_ client: RelayClient, in conversationId: String) async throws -> MediaConnection {
     let live = try await client.conversation(conversationId).live.startVideo().ready()
     let media = try await joinCall(live)
     try await startCapture(media) // A video call allows the camera.
@@ -72,6 +72,6 @@ func leaveCall(_ media: MediaConnection) async throws {
 func endCall(_ media: MediaConnection) async throws {
     let live = media.participation.live
     try await leaveCall(media)
-    _ = try await live.end().action.completed() // Returns once ConvoHop has cut off everyone's media.
+    _ = try await live.end().action.completed() // Returns once Relay has cut off everyone's media.
 }
 // #endregion end-call

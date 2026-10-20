@@ -7,7 +7,7 @@ import { pathToFileURL } from "node:url";
 import { builtImportSpecifiers } from "../../../test/package-fixtures.mjs";
 
 test("built-import scan reports every import form and ignores string data", async () => {
-  const dist = await mkdtemp(join(tmpdir(), "convohop-import-scan-"));
+  const dist = await mkdtemp(join(tmpdir(), "relay-import-scan-"));
   try {
     await mkdir(join(dist, "generated"));
     await writeFile(join(dist, "imports.js"), [

@@ -1,19 +1,19 @@
-# `ConvoHopLiveKit`
+# `RelayLiveKit`
 
 Call media through the official LiveKit Swift SDK, and CallKit audio session handling on iOS.
 
-**Layer:** Client. **Runtime:** iOS 15 or later, or macOS 12 or later, with LiveKit's `client-sdk-swift` 2.17.0 or later. **Source:** `swift/Sources/ConvoHopLiveKit`.
+**Layer:** Client. **Runtime:** iOS 15 or later, or macOS 12 or later, with LiveKit's `client-sdk-swift` 2.17.0 or later. **Source:** `swift/Sources/RelayLiveKit`.
 
 ## Classes
 
 ### `LiveKitMediaRoom` class
 
 ```swift
-public final class LiveKitMediaRoom: NSObject, ConvoHopMediaRoom, @unchecked Sendable
+public final class LiveKitMediaRoom: NSObject, RelayMediaRoom, @unchecked Sendable
 extension LiveKitMediaRoom: RoomDelegate
 ```
 
-A `ConvoHopMediaRoom` on the official LiveKit Swift SDK.
+A `RelayMediaRoom` on the official LiveKit Swift SDK.
 
 Each instance connects once. LiveKit resumes a dropped connection itself while its token allows, and reports the
 resume; anything else needs `MediaConnection.reconnect()`, which admits a new connection with a new room.
@@ -44,8 +44,8 @@ Parameters:
 public func connect(
     url: URL,
     token: String,
-    iceTransportPolicy: ConvoHopICETransportPolicy,
-    onEvent: @escaping @Sendable (ConvoHopMediaRoomEvent) -> Void
+    iceTransportPolicy: RelayICETransportPolicy,
+    onEvent: @escaping @Sendable (RelayMediaRoomEvent) -> Void
 ) async throws -> String
 ```
 
@@ -91,7 +91,7 @@ public func room(_ room: Room, didDisconnectWithError error: LiveKitError?)
 extension MediaConnection
 ```
 
-What `ConvoHopLiveKit` adds to `MediaConnection`, which `ConvoHop` declares.
+What `RelayLiveKit` adds to `MediaConnection`, which `Relay` declares.
 
 #### `MediaConnection.liveKitRoom` property
 
@@ -99,75 +99,34 @@ What `ConvoHopLiveKit` adds to `MediaConnection`, which `ConvoHop` declares.
 public nonisolated var liveKitRoom: Room? { get }
 ```
 
-LiveKit's room, when the connection uses `ConvoHopMediaOptions.liveKit(iceTransportPolicy:roomOptions:reconnectAttempts:onDisconnected:onResuming:onResumed:)`.
+LiveKit's room, when the connection uses `RelayMediaOptions.liveKit(iceTransportPolicy:roomOptions:reconnectAttempts:onDisconnected:onResuming:onResumed:)`.
 
 ## Structs
 
-### `ConvoHopMediaOptions` struct
+### `RelayMediaOptions` struct
 
 ```swift
-extension ConvoHopMediaOptions
+extension RelayMediaOptions
 ```
 
-What `ConvoHopLiveKit` adds to `ConvoHopMediaOptions`, which `ConvoHop` declares.
+What `RelayLiveKit` adds to `RelayMediaOptions`, which `Relay` declares.
 
-#### `ConvoHopMediaOptions.liveKit` static method
+#### `RelayMediaOptions.liveKit` static method
 
 ```swift
 public static func liveKit(
-    iceTransportPolicy: ConvoHopICETransportPolicy = .all,
+    iceTransportPolicy: RelayICETransportPolicy = .all,
     roomOptions: RoomOptions = RoomOptions(),
     reconnectAttempts: Int = 3,
     onDisconnected: (@Sendable () -> Void)? = nil,
     onResuming: (@Sendable () -> Void)? = nil,
     onResumed: (@Sendable () -> Void)? = nil
-) -> ConvoHopMediaOptions
+) -> RelayMediaOptions
 ```
 
 Connects native media with the official LiveKit Swift SDK.
 
 ## Enums
-
-### `ConvoHopCallKitAudio` enum
-
-```swift
-public enum ConvoHopCallKitAudio
-```
-
-Starts LiveKit's audio only while CallKit's audio session is active, as LiveKit's CallKit guide requires.
-
-Call `prepare()` at launch, before any room connects. Then call `activate(_:mode:options:)` and
-`deactivate()` from CallKit's audio session callbacks, for example `ConvoHopCallsDelegate`'s.
-
-Available on iOS only.
-
-#### `ConvoHopCallKitAudio.prepare` static method
-
-```swift
-public static func prepare() throws
-```
-
-Stops LiveKit from configuring the audio session and keeps its audio engine off.
-
-#### `ConvoHopCallKitAudio.activate` static method
-
-```swift
-public static func activate(
-    _ session: AVAudioSession,
-    mode: AVAudioSession.Mode = .voiceChat,
-    options: AVAudioSession.CategoryOptions = [.mixWithOthers]
-) throws
-```
-
-Configures the session CallKit activated and starts LiveKit's audio engine.
-
-#### `ConvoHopCallKitAudio.deactivate` static method
-
-```swift
-public static func deactivate() throws
-```
-
-Stops LiveKit's audio engine after CallKit deactivated the session.
 
 ### `LiveKitMediaRoomError` enum
 
@@ -204,3 +163,44 @@ public var description: String { get }
 ```swift
 public var errorDescription: String? { get }
 ```
+
+### `RelayCallKitAudio` enum
+
+```swift
+public enum RelayCallKitAudio
+```
+
+Starts LiveKit's audio only while CallKit's audio session is active, as LiveKit's CallKit guide requires.
+
+Call `prepare()` at launch, before any room connects. Then call `activate(_:mode:options:)` and
+`deactivate()` from CallKit's audio session callbacks, for example `RelayCallsDelegate`'s.
+
+Available on iOS only.
+
+#### `RelayCallKitAudio.prepare` static method
+
+```swift
+public static func prepare() throws
+```
+
+Stops LiveKit from configuring the audio session and keeps its audio engine off.
+
+#### `RelayCallKitAudio.activate` static method
+
+```swift
+public static func activate(
+    _ session: AVAudioSession,
+    mode: AVAudioSession.Mode = .voiceChat,
+    options: AVAudioSession.CategoryOptions = [.mixWithOthers]
+) throws
+```
+
+Configures the session CallKit activated and starts LiveKit's audio engine.
+
+#### `RelayCallKitAudio.deactivate` static method
+
+```swift
+public static func deactivate() throws
+```
+
+Stops LiveKit's audio engine after CallKit deactivated the session.

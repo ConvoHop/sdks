@@ -49,7 +49,7 @@ export interface McpToolDefinition {
   readonly operation: McpToolOperation;
 }
 export const retryToolName = "retry_request";
-export const operationMetaKey = "com.convohop/operation";
+export const operationMetaKey = "dev.instantrelay/operation";
 export const withheldOperations: Readonly<Record<string, string>> = {
   "communication.issueSession": "returns a user session token",
   "communication.renewSession": "returns a user session token",
@@ -1878,7 +1878,7 @@ export const mcpTools: readonly McpToolDefinition[] = [
   {
     "name": "management_organization_billing",
     "title": "Management: organization billing",
-    "description": "Read the billing state of an organization in any status: the plan whose limits apply, whether ConvoHop bills the organization and, when it does, its standing and subscription.\n\nOperation management.organizationBilling (query).\nRequires portalCredential (condition owner: The caller owns the organization, deployment or project).\nRead-only and safe to repeat.",
+    "description": "Read the billing state of an organization in any status: the plan whose limits apply, whether Relay bills the organization and, when it does, its standing and subscription.\n\nOperation management.organizationBilling (query).\nRequires portalCredential (condition owner: The caller owns the organization, deployment or project).\nRead-only and safe to repeat.",
     "inputSchema": {
       "type": "object",
       "properties": {

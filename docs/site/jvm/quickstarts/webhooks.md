@@ -1,6 +1,6 @@
 # Java and Kotlin webhooks quickstart
 
-Receive ConvoHop events in your Java or Kotlin backend with `convohop-server`: verify each signed delivery, acknowledge it quickly, and handle its event in a queue worker.
+Receive Relay events in your Java or Kotlin backend with `relay-server`: verify each signed delivery, acknowledge it quickly, and handle its event in a queue worker.
 
 ## Before you start
 
@@ -8,15 +8,15 @@ Create a webhook endpoint for your project with the [`management.configureWebhoo
 
 The samples on this page use these imports:
 
-```java snippet=docs/languages/jvm/examples/src/main/java/com/convohop/examples/Webhooks.java#imports
-import com.convohop.server.ProjectServerClient;
-import com.convohop.server.model.Conversation;
-import com.convohop.server.webhooks.VerifiedWebhook;
-import com.convohop.server.webhooks.WebhookEvent;
-import com.convohop.server.webhooks.WebhookHeaders;
-import com.convohop.server.webhooks.WebhookNotificationEvent;
-import com.convohop.server.webhooks.WebhookVerificationException;
-import com.convohop.server.webhooks.WebhookVerifier;
+```java snippet=docs/languages/jvm/examples/src/main/java/dev/instantrelay/examples/Webhooks.java#imports
+import dev.instantrelay.server.ProjectServerClient;
+import dev.instantrelay.server.model.Conversation;
+import dev.instantrelay.server.webhooks.VerifiedWebhook;
+import dev.instantrelay.server.webhooks.WebhookEvent;
+import dev.instantrelay.server.webhooks.WebhookHeaders;
+import dev.instantrelay.server.webhooks.WebhookNotificationEvent;
+import dev.instantrelay.server.webhooks.WebhookVerificationException;
+import dev.instantrelay.server.webhooks.WebhookVerifier;
 import com.sun.net.httpserver.HttpHandler;
 import java.io.IOException;
 import java.io.InputStream;
@@ -26,9 +26,9 @@ import java.util.function.BiConsumer;
 
 ## Verify deliveries
 
-ConvoHop signs each delivery with the [Standard Webhooks](https://www.standardwebhooks.com) scheme. `WebhookVerifier` checks the signature and timestamp against the raw body, and returns the event. `receive` works with any HTTP framework, and `webhookHandler` serves it with the JDK's HTTP server.
+Relay signs each delivery with the [Standard Webhooks](https://www.standardwebhooks.com) scheme. `WebhookVerifier` checks the signature and timestamp against the raw body, and returns the event. `receive` works with any HTTP framework, and `webhookHandler` serves it with the JDK's HTTP server.
 
-```java snippet=docs/languages/jvm/examples/src/main/java/com/convohop/examples/Webhooks.java#receive
+```java snippet=docs/languages/jvm/examples/src/main/java/dev/instantrelay/examples/Webhooks.java#receive
 // secrets are the endpoint's whsec_ secrets from your secret store. Pass every one you hold, so
 // deliveries keep verifying during a secret rotation. build() throws a WebhookVerificationException
 // with code INVALID_SECRET if one is malformed, so build the verifier once, when your app starts.
@@ -69,7 +69,7 @@ public static HttpHandler webhookHandler(WebhookVerifier verifier, BiConsumer<St
 }
 ```
 
-- Pass every secret you hold. While a rotation is pending, ConvoHop signs with both the current and the next secret, and it signs with the replaced secret for 24 hours after the rotation.
+- Pass every secret you hold. While a rotation is pending, Relay signs with both the current and the next secret, and it signs with the replaced secret for 24 hours after the rotation.
 - Verify the exact bytes you received, never re-serialized JSON. A body over 4096 bytes fails.
 - Answer within 5 seconds, and process the event afterwards.
 - Delivery is at least once, and retries keep the webhook ID, so deduplicate on it.
@@ -81,7 +81,7 @@ public static HttpHandler webhookHandler(WebhookVerifier verifier, BiConsumer<St
 
 Events carry IDs and metadata, not content, so read the current state through the API. Events arrive in any order.
 
-```java snippet=docs/languages/jvm/examples/src/main/java/com/convohop/examples/Webhooks.java#handle
+```java snippet=docs/languages/jvm/examples/src/main/java/dev/instantrelay/examples/Webhooks.java#handle
 // What your app does with the events it subscribes to.
 public interface EventHandlers {
   void conversationChanged(Conversation conversation);

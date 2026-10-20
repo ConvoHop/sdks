@@ -4,7 +4,7 @@ using System.Linq;
 using System.Xml.Linq;
 using Microsoft.CodeAnalysis;
 
-namespace ConvoHop.Docgen;
+namespace Relay.Docgen;
 
 /// <summary>Renders XML documentation comments as the Markdown that surface <c>docs</c> hold.</summary>
 /// <remarks>

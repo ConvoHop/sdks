@@ -1,4 +1,4 @@
-import 'package:convohop/convohop.dart';
+import 'package:instantrelay/instantrelay.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:http/http.dart' as http;
 
@@ -9,7 +9,7 @@ void main() {
     test('posts canonical GraphQL requests with auth header and no token in failures', () async {
       final bodies = <Map<String, Object?>>[];
       late http.Request seen;
-      final transport = ConvoHopTransport(
+      final transport = RelayTransport(
         baseUrl: 'https://authority.example',
         namespace: 'test',
         incarnation: incarnation,
@@ -34,7 +34,7 @@ void main() {
     });
 
     test('maps GraphQL errors to problems with retryAfter from extensions', () async {
-      final transport = ConvoHopTransport(
+      final transport = RelayTransport(
         baseUrl: 'https://authority.example',
         namespace: 'test',
         incarnation: incarnation,
@@ -63,7 +63,7 @@ void main() {
       await expectLater(
         transport.execute(Operations.communicationRoute, projectId, const <String, Object?>{}),
         throwsA(
-          isA<ConvoHopProblem>()
+          isA<RelayProblem>()
               .having((problem) => problem.code, 'code', 'RATE_LIMITED')
               .having((problem) => problem.status, 'status', 429)
               .having((problem) => problem.outcome, 'outcome', 'rejected')
@@ -73,7 +73,7 @@ void main() {
     });
 
     test('maps HTTP errors and Retry-After headers to problems', () async {
-      final transport = ConvoHopTransport(
+      final transport = RelayTransport(
         baseUrl: 'https://authority.example',
         namespace: 'test',
         incarnation: incarnation,
@@ -90,7 +90,7 @@ void main() {
       await expectLater(
         transport.execute(Operations.communicationRoute, projectId, const <String, Object?>{}),
         throwsA(
-          isA<ConvoHopProblem>()
+          isA<RelayProblem>()
               .having((problem) => problem.code, 'code', 'AUTHORITY_UNAVAILABLE')
               .having((problem) => problem.retryAfter, 'retryAfter', 5),
         ),
@@ -101,7 +101,7 @@ void main() {
       final storage = MemoryRecoveryStorage();
       var calls = 0;
       final bodies = <Map<String, Object?>>[];
-      final transport = ConvoHopTransport(
+      final transport = RelayTransport(
         baseUrl: 'https://authority.example',
         namespace: 'test',
         incarnation: incarnation,
@@ -126,7 +126,7 @@ void main() {
           'props': <String, Object?>{},
         }, requestId: requestId),
         throwsA(
-          isA<ConvoHopProblem>()
+          isA<RelayProblem>()
               .having((problem) => problem.code, 'code', 'TRANSPORT_UNKNOWN')
               .having((problem) => problem.outcome, 'outcome', 'unknown'),
         ),
@@ -154,10 +154,10 @@ void main() {
     });
 
     test('an answer from another URL is transport uncertainty, not success', () async {
-      ConvoHopTransport transportAnsweredFrom(
+      RelayTransport transportAnsweredFrom(
         Uri Function(Uri requested) answeredFrom,
         MemoryRecoveryStorage storage,
-      ) => ConvoHopTransport(
+      ) => RelayTransport(
         baseUrl: 'https://authority.example',
         namespace: 'test',
         incarnation: incarnation,
@@ -169,7 +169,7 @@ void main() {
         ),
         clock: fixedClock,
       );
-      Future<SendMessageReply> send(ConvoHopTransport transport) => transport.execute(
+      Future<SendMessageReply> send(RelayTransport transport) => transport.execute(
         Operations.communicationSendMessage,
         projectId,
         <String, Object?>{'conversationId': conversationId, 'text': 'hello', 'props': <String, Object?>{}},
@@ -184,7 +184,7 @@ void main() {
       await expectLater(
         send(redirected),
         throwsA(
-          isA<ConvoHopProblem>()
+          isA<RelayProblem>()
               .having((problem) => problem.code, 'code', 'TRANSPORT_UNKNOWN')
               .having((problem) => problem.outcome, 'outcome', 'unknown'),
         ),
@@ -199,7 +199,7 @@ void main() {
     });
 
     test('rejects malformed success envelopes instead of disguising them as success', () async {
-      final transport = ConvoHopTransport(
+      final transport = RelayTransport(
         baseUrl: 'https://authority.example',
         namespace: 'test',
         incarnation: incarnation,
@@ -215,7 +215,7 @@ void main() {
 
       await expectLater(
         transport.execute(Operations.communicationRoute, projectId, const <String, Object?>{}, requestId: requestId),
-        throwsA(isA<ConvoHopProblem>().having((problem) => problem.code, 'code', 'INVALID_RESPONSE')),
+        throwsA(isA<RelayProblem>().having((problem) => problem.code, 'code', 'INVALID_RESPONSE')),
       );
     });
   });

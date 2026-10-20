@@ -12,7 +12,7 @@ using Xunit;
 
 namespace Examples.Tests;
 
-// Starts the conformance mock, a local stand-in for the ConvoHop API, as a Node.js process.
+// Starts the conformance mock, a local stand-in for the Relay API, as a Node.js process.
 public sealed class MockTarget : IAsyncLifetime
 {
     private static readonly HttpClient Http = new();

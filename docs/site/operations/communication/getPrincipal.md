@@ -81,7 +81,7 @@ query CommunicationGetPrincipal($context: RequestContextInput!, $input: GetPrinc
 | Language | Members |
 | --- | --- |
 | [TypeScript](../../typescript/reference/operations.md) | [`ProjectServerClient.principals.get`](../../typescript/reference/server.md#projectserverclientprincipalsget-property) |
-| [Python](../../python/reference/operations.md) | [`ConvoHop.get_principal`](../../python/reference/convohop.md#convohopget_principal-method), [`AsyncConvoHop.get_principal`](../../python/reference/convohop.md#asyncconvohopget_principal-method) |
-| [.NET](../../dotnet/reference/operations.md) | [`ServerPrincipals.GetAsync`](../../dotnet/reference/convohop.md#serverprincipalsgetasync-method), [`CommunicationApi.GetPrincipalAsync`](../../dotnet/reference/api.md#communicationapigetprincipalasync-method) |
+| [Python](../../python/reference/operations.md) | [`Relay.get_principal`](../../python/reference/instantrelay.md#relayget_principal-method), [`AsyncRelay.get_principal`](../../python/reference/instantrelay.md#asyncrelayget_principal-method) |
+| [.NET](../../dotnet/reference/operations.md) | [`ServerPrincipals.GetAsync`](../../dotnet/reference/relay.md#serverprincipalsgetasync-method), [`CommunicationApi.GetPrincipalAsync`](../../dotnet/reference/api.md#communicationapigetprincipalasync-method) |
 | [Java and Kotlin](../../jvm/reference/operations.md) | [`ProjectServerClient.principals.get`](../../jvm/reference/server.md#projectserverclientprincipalsget-method), [`CommunicationApi.getPrincipal`](../../jvm/reference/server.md#communicationapigetprincipal-method), [`CommunicationSuspendApi.getPrincipal`](../../jvm/reference/server-kotlin.md#communicationsuspendapigetprincipal-method) |
-| [Go](../../go/reference/operations.md) | [`ProjectClient.GetPrincipal`](../../go/reference/convohop.md#projectclientgetprincipal-method) |
+| [Go](../../go/reference/operations.md) | [`ProjectClient.GetPrincipal`](../../go/reference/relay.md#projectclientgetprincipal-method) |

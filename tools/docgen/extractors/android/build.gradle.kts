@@ -34,7 +34,7 @@ tasks.test {
 tasks.register<JavaExec>("extract") {
     description = "Writes the Android SDK's public API. Run it through tools/docgen/extractors/android.mjs."
     classpath = sourceSets.main.get().runtimeClasspath
-    mainClass.set("com.convohop.docs.android.MainKt")
+    mainClass.set("dev.instantrelay.docs.android.MainKt")
     // Arguments name repository-relative paths.
     workingDir = rootDir.parentFile
     maxHeapSize = "512m"

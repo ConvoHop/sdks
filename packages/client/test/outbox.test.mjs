@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { ConvoHopClient, Outbox } from "@convohop/client";
+import { RelayClient, Outbox } from "@instantrelay/client";
 import { reply, resolution } from "../../../test/graphql-fixtures.mjs";
 import { asyncStorage } from "../../../test/recovery-fixtures.mjs";
 
@@ -67,7 +67,7 @@ function authority({ recoveryStorage, projectId = id(), incarnation = id(), prin
     }
     throw new Error("Unexpected operation " + request.operationName);
   };
-  setup.client = (options = {}) => new ConvoHopClient({ baseUrl: "http://localhost:18080", projectId, incarnation, principalId,
+  setup.client = (options = {}) => new RelayClient({ baseUrl: "http://localhost:18080", projectId, incarnation, principalId,
     sessionToken: "outbox-test-session", ...(recoveryStorage ? { recoveryStorage } : {}), ...clientOptions, fetch: setup.fetch, ...options });
   return setup;
 }
@@ -309,7 +309,7 @@ test("an outbox keeps the record of a message it will still retry, even when a f
   setup.onSend = () => { throw new Error("connection reset"); };
   for (let index = 0; index < 127; index++)
     await assert.rejects(client.send(conversationId, "filler", id()), { code: "TRANSPORT_UNKNOWN" });
-  await assert.rejects(client.send(conversationId, "refused"), { name: "ConvoHopProblem", code: "RECOVERY_LIMIT", outcome: "rejected", status: 409 });
+  await assert.rejects(client.send(conversationId, "refused"), { name: "RelayProblem", code: "RECOVERY_LIMIT", outcome: "rejected", status: 409 });
   assert.ok(client.http.recoveryStates.some(state => state.requestId === entry.requestId));
   await box.close();
   setup.onSend = undefined;

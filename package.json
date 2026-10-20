@@ -1,5 +1,5 @@
 {
-  "name": "convohop-sdks",
+  "name": "relay-sdks",
   "private": true,
   "workspaces": [
     "packages/core",

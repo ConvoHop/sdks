@@ -1,4 +1,4 @@
-package convohop
+package relay
 
 import (
 	"errors"
@@ -9,7 +9,7 @@ import (
 // continue consistently, for example after a visibility change. A Pages
 // iterator yields the page that requires the refresh together with this error
 // and stops. Start again from the first page.
-var ErrRefreshRequired = errors.New("convohop: the page sequence requires a refresh; start again from the first page")
+var ErrRefreshRequired = errors.New("relay: the page sequence requires a refresh; start again from the first page")
 
 // pageState is what an iterator needs to know about a page.
 type pageState struct {

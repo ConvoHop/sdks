@@ -1,6 +1,6 @@
 # .NET webhooks quickstart
 
-Receive ConvoHop events in your .NET backend: verify each signed delivery with `Webhooks.Verify`, acknowledge it quickly, and handle its event in a queue worker.
+Receive Relay events in your .NET backend: verify each signed delivery with `Webhooks.Verify`, acknowledge it quickly, and handle its event in a queue worker.
 
 ## Before you start
 
@@ -13,16 +13,16 @@ The samples use ASP.NET Core and these namespaces:
 
 ## Verify deliveries
 
-ConvoHop signs each delivery with the [Standard Webhooks](https://www.standardwebhooks.com) scheme. `Webhooks.Verify` checks the signature and timestamp against the raw body, and returns the delivery's webhook ID and event. `WebhookHeaders.From` takes ASP.NET Core's `request.Headers`, an `HttpHeaders`, a dictionary or a lookup function.
+Relay signs each delivery with the [Standard Webhooks](https://www.standardwebhooks.com) scheme. `Webhooks.Verify` checks the signature and timestamp against the raw body, and returns the delivery's webhook ID and event. `WebhookHeaders.From` takes ASP.NET Core's `request.Headers`, an `HttpHeaders`, a dictionary or a lookup function.
 
 ```cs include=examples/src/Webhooks.cs#receive
 ```
 
-- Pass every secret you hold. While a rotation is pending, ConvoHop signs with both the current and the next secret, and it signs with the replaced secret for 24 hours after the rotation.
+- Pass every secret you hold. While a rotation is pending, Relay signs with both the current and the next secret, and it signs with the replaced secret for 24 hours after the rotation.
 - Verify the exact bytes you received, never re-serialized JSON. A body over 4096 bytes fails with `BodyTooLarge`, so the sample reads at most one byte more.
 - Answer within 5 seconds, and process the event afterwards.
 - Delivery is at least once, and retries keep the webhook ID, so deduplicate on it.
-- A failed check throws `WebhookVerificationException`, whose `Code` names the check. Only `InvalidSecret` means your configuration is wrong. The [`WebhookVerificationCode` reference](../reference/convohop.md#webhookverificationcode-enum) lists the others.
+- A failed check throws `WebhookVerificationException`, whose `Code` names the check. Only `InvalidSecret` means your configuration is wrong. The [`WebhookVerificationCode` reference](../reference/relay.md#webhookverificationcode-enum) lists the others.
 
 ## Handle events
 
@@ -38,4 +38,4 @@ Notification events, such as `notification.message`, are `WebhookNotificationEve
 ## Next steps
 
 - [Push notifications quickstart](push.md): turn notification events into APNs, FCM and Web Push requests.
-- [`WebhookEvent` reference](../reference/convohop.md#webhookevent-class): every event type and its fields.
+- [`WebhookEvent` reference](../reference/relay.md#webhookevent-class): every event type and its fields.

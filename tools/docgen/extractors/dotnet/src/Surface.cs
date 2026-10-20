@@ -6,7 +6,7 @@ using System.Text;
 using System.Text.Encodings.Web;
 using System.Text.Json;
 
-namespace ConvoHop.Docgen;
+namespace Relay.Docgen;
 
 /// <summary>The extractor's output: spec/docs/surface.schema.json without <c>$schema</c>, which docgen adds.</summary>
 internal sealed record SurfaceDocument(string Language, IReadOnlyList<SurfacePackage> Packages);

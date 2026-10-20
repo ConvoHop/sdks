@@ -1,0 +1,10 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/Relay/Relay.csproj" />
+  </Folder>
+  <Folder Name="/test/">
+    <Project Path="test/Relay.SdkgenEdge.AllLayers/Relay.SdkgenEdge.AllLayers.csproj" />
+    <Project Path="test/Relay.SdkgenEdge/Relay.SdkgenEdge.csproj" />
+    <Project Path="test/Relay.Tests/Relay.Tests.csproj" />
+  </Folder>
+</Solution>

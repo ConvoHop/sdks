@@ -5,7 +5,7 @@
 //
 // Environment:
 //   FAKE_DOCKER_FAIL   comma-separated steps that exit 1: login, pull, logout, run, wait, cat, inspect, logs
-//   FAKE_DOCKER_SEED   what `docker exec convohop-dev-stack cat <seed.env>` prints
+//   FAKE_DOCKER_SEED   what `docker exec relay-dev-stack cat <seed.env>` prints
 //   FAKE_DOCKER_STATE  what `docker inspect` prints (default {})
 //   FAKE_DOCKER_LOGS   JSON [stream, line] pairs that `docker logs` writes, in order, to stdout or stderr
 import { appendFileSync, readFileSync, writeSync } from "node:fs";
@@ -27,7 +27,7 @@ switch (step) {
   case "pull": write("stdout", `${args.at(-1)}\n`); break;
   case "logout": write("stdout", "Removing login credentials for ghcr.io\n"); break;
   case "run": write("stdout", "0123456789abcdef\n"); break;
-  case "wait": write("stdout", "ConvoHop dev stack ready (development only); seed: /run/convohop/dev-stack/seed.env\n"); break;
+  case "wait": write("stdout", "Relay dev stack ready (development only); seed: /run/convohop/dev-stack/seed.env\n"); break;
   case "cat": write("stdout", process.env.FAKE_DOCKER_SEED ?? ""); break;
   case "inspect": write("stdout", `${process.env.FAKE_DOCKER_STATE ?? "{}"}\n`); break;
   case "logs":

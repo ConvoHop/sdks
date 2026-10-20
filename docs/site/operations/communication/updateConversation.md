@@ -100,11 +100,11 @@ mutation CommunicationUpdateConversation($context: RequestContextInput!, $input:
 | Language | Members |
 | --- | --- |
 | [TypeScript](../../typescript/reference/operations.md) | [`ServerConversation.update`](../../typescript/reference/server.md#serverconversationupdate-method) |
-| [Python](../../python/reference/operations.md) | [`ConvoHop.update_conversation`](../../python/reference/convohop.md#convohopupdate_conversation-method), [`AsyncConvoHop.update_conversation`](../../python/reference/convohop.md#asyncconvohopupdate_conversation-method) |
-| [.NET](../../dotnet/reference/operations.md) | [`ServerConversation.UpdateAsync`](../../dotnet/reference/convohop.md#serverconversationupdateasync-method), [`CommunicationApi.UpdateConversationAsync`](../../dotnet/reference/api.md#communicationapiupdateconversationasync-method) |
+| [Python](../../python/reference/operations.md) | [`Relay.update_conversation`](../../python/reference/instantrelay.md#relayupdate_conversation-method), [`AsyncRelay.update_conversation`](../../python/reference/instantrelay.md#asyncrelayupdate_conversation-method) |
+| [.NET](../../dotnet/reference/operations.md) | [`ServerConversation.UpdateAsync`](../../dotnet/reference/relay.md#serverconversationupdateasync-method), [`CommunicationApi.UpdateConversationAsync`](../../dotnet/reference/api.md#communicationapiupdateconversationasync-method) |
 | [Java and Kotlin](../../jvm/reference/operations.md) | [`CommunicationApi.updateConversation`](../../jvm/reference/server.md#communicationapiupdateconversation-method), [`CommunicationSuspendApi.updateConversation`](../../jvm/reference/server-kotlin.md#communicationsuspendapiupdateconversation-method) |
-| [Go](../../go/reference/operations.md) | [`ProjectClient.UpdateConversation`](../../go/reference/convohop.md#projectclientupdateconversation-method) |
+| [Go](../../go/reference/operations.md) | [`ProjectClient.UpdateConversation`](../../go/reference/relay.md#projectclientupdateconversation-method) |
 | [Swift](../../swift/reference/operations.md) | Not wrapped by a method |
 | [Android](../../android/reference/operations.md) | Not wrapped by a method |
-| [Flutter](../../flutter/reference/operations.md) | [`CommunicationOperations.updateConversation`](../../flutter/reference/convohop.md#communicationoperationsupdateconversation-method) |
+| [Flutter](../../flutter/reference/operations.md) | [`CommunicationOperations.updateConversation`](../../flutter/reference/instantrelay.md#communicationoperationsupdateconversation-method) |
 | [React Native](../../react-native/reference/operations.md) | Not wrapped by a method |

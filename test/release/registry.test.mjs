@@ -8,6 +8,7 @@ import {
   artifactFiles,
   planFromGit,
   planRegistryRelease,
+  publishMaven,
   requirePubdevPackage,
   sealArtifacts,
   stageRegistrySource,
@@ -65,8 +66,8 @@ test('registry planning binds repository, source commit, main ancestry and exact
   }
 });
 
-test('PyPI and NuGet publication needs a tagged manual request, readiness and exact confirmation', () => {
-  for (const [registry, component] of [['pypi', 'python'], ['nuget', 'dotnet']]) {
+test('PyPI, NuGet and Central publication require a tagged manual request, readiness and exact confirmation', () => {
+  for (const [registry, component] of [['pypi', 'python'], ['nuget', 'dotnet'], ['maven-jvm', 'jvm'], ['maven-android', 'android']]) {
     const requested = {
       registry, ref: `refs/tags/${component}-v${VERSION}`, publish: true, enabled: true,
       confirmation: `publish ${registry} ${VERSION}`,
@@ -79,10 +80,74 @@ test('PyPI and NuGet publication needs a tagged manual request, readiness and ex
       assert.throws(() => plan({ ...requested, ...overrides }));
     }
   }
-  assert.throws(() => plan({
-    registry: 'maven-jvm', ref: `refs/tags/jvm-v${VERSION}`,
-    publish: true, enabled: true, confirmation: `publish maven-jvm ${VERSION}`,
-  }), /Maven Central publication is paused/);
+});
+
+const DEPLOYMENT = '11111111-2222-3333-4444-555555555555';
+const CENTRAL_PURLS = [`pkg:maven/dev.instantrelay/relay-server@${VERSION}`, `pkg:maven/dev.instantrelay/relay-server-kotlin@${VERSION}`];
+const central = (overrides = {}) => publishMaven({
+  registry: 'maven-jvm', version: VERSION, bundle: Buffer.from('fixture bundle, not compiled SDK evidence'),
+  username: 'fixture-user-token', password: 'fixture-password', wait: async () => {},
+  ...overrides,
+});
+const centralStatus = (state, overrides = {}) => new Response(JSON.stringify({
+  deploymentId: DEPLOYMENT, deploymentState: state, purls: CENTRAL_PURLS, ...overrides,
+}));
+
+test('Central uploads once, polls bounded status and requires exactly the approved published coordinates', async () => {
+  const calls = [], waits = [], deployments = [];
+  const states = ['PENDING', 'VALIDATING', 'PUBLISHING', 'PUBLISHED'];
+  const id = await central({
+    onDeployment: (deployment) => deployments.push(deployment),
+    wait: async (milliseconds) => waits.push(milliseconds),
+    fetch: async (url, options) => {
+      calls.push([url, options]);
+      return calls.length === 1 ? new Response(DEPLOYMENT, { status: 201 }) : centralStatus(states.shift());
+    },
+  });
+  assert.equal(id, DEPLOYMENT);
+  assert.deepEqual(deployments, [DEPLOYMENT]);
+  assert.deepEqual(waits, [5000, 5000, 5000]);
+  assert.equal(calls.filter(([url]) => url.includes('/upload?')).length, 1);
+  assert.match(calls[0][0], /^https:\/\/central\.sonatype\.com\/api\/v1\/publisher\/upload\?publishingType=AUTOMATIC/);
+  assert.equal(calls[0][1].body.get('bundle').name, `relay-maven-jvm-${VERSION}.zip`);
+  for (const [, options] of calls) {
+    assert.equal(options.method, 'POST');
+    assert.equal(options.redirect, 'error');
+    assert.equal(options.headers.Authorization, `Bearer ${Buffer.from('fixture-user-token:fixture-password').toString('base64')}`);
+  }
+});
+
+test('Central never reports unconfirmed or mismatched deployments as successful and never retries an upload', async () => {
+  for (const status of [
+    centralStatus('FAILED'), centralStatus('VALIDATED'), centralStatus('unknown'),
+    centralStatus('PUBLISHED', { deploymentId: 'another-deployment' }),
+    centralStatus('PUBLISHED', { purls: [] }), centralStatus('PUBLISHED', { purls: [...CENTRAL_PURLS, CENTRAL_PURLS[0]] }),
+    centralStatus('PUBLISHED', { purls: [null] }), new Response('{not-json'),
+    centralStatus('PENDING'), new Response('registry detail not suitable for logs', { status: 503 }),
+  ]) {
+    let calls = 0;
+    await assert.rejects(central({
+      attempts: 1, fetch: async () => ++calls === 1 ? new Response(DEPLOYMENT, { status: 201 }) : status,
+    }));
+    assert.equal(calls, 2);
+  }
+  let calls = 0;
+  await assert.rejects(central({
+    fetch: async () => { calls += 1; throw new TypeError('network failure'); },
+  }), /outcome may be unknown/);
+  assert.equal(calls, 1);
+  await assert.rejects(central({ fetch: async () => new Response('not-a-deployment-id', { status: 201 }) }), /invalid deployment ID/);
+});
+
+test('Central rejects missing credentials and invalid requests without accessing the registry', async () => {
+  for (const invalid of [
+    { username: '' }, { password: '' }, { username: 'user:password' }, { password: 'line\nbreak' },
+    { registry: 'pypi' }, { version: '0.0.0' }, { bundle: Buffer.alloc(0) }, { attempts: 0 }, { attempts: 121 },
+  ]) {
+    await assert.rejects(central({
+      ...invalid, fetch: async () => { assert.fail('invalid requests must not contact Central'); },
+    }));
+  }
 });
 
 test('pub.dev automation requires a tag push, never a manually dispatched bootstrap', () => {
@@ -101,16 +166,16 @@ test('pub.dev rejects absent, malformed and unavailable bootstrap evidence', asy
   const response = (status, body) => new Response(JSON.stringify(body), { status });
   await assert.rejects(requirePubdevPackage({ fetch: async () => response(404, {}) }), /first real publication/);
   await assert.rejects(requirePubdevPackage({ fetch: async () => response(503, {}) }), /HTTP 503/);
-  for (const body of [{}, { name: 'other', versions: [{ version: VERSION }] }, { name: 'convohop', versions: [] }]) {
+  for (const body of [{}, { name: 'other', versions: [{ version: VERSION }] }, { name: 'instantrelay', versions: [] }]) {
     await assert.rejects(requirePubdevPackage({ fetch: async () => response(200, body) }), /package evidence/);
   }
   await assert.rejects(requirePubdevPackage({ fetch: async () => { throw new Error('offline'); } }), /offline/);
   let requested;
   await requirePubdevPackage({ fetch: async (url) => {
     requested = url;
-    return response(200, { name: 'convohop', versions: [{ version: VERSION }] });
+    return response(200, { name: 'instantrelay', versions: [{ version: VERSION }] });
   } });
-  assert.equal(requested, 'https://pub.dev/api/packages/convohop');
+  assert.equal(requested, 'https://pub.dev/api/packages/instantrelay');
 });
 
 test('artifact seals cover exact files, registry, version, ref and source commit', async (t) => {
@@ -144,12 +209,12 @@ test('sealing refuses missing, extra, nested and symlinked artifacts', async (t)
 async function sourceFixture(t) {
   const root = tempDir(t);
   writeFiles(root, {
-    'python/pyproject.toml': '[project]\nname = "convohop"\nclassifiers = [\n  "Private :: Do Not Upload",\n]\n',
-    'python/src/convohop/_version.py': '__version__ = "0.1.0"\n',
-    'flutter/pubspec.yaml': 'name: convohop\nversion: 0.0.0\npublish_to: none\n',
-    'flutter/lib/convohop.dart': "export 'src/version.dart';\n",
-    'flutter/lib/src/version.dart': "const convoHopPackageVersion = '0.0.0';\n",
-    'flutter/README.md': '# ConvoHop\n',
+    'python/pyproject.toml': '[project]\nname = "instantrelay"\nclassifiers = [\n  "Private :: Do Not Upload",\n]\n',
+    'python/src/instantrelay/_version.py': '__version__ = "0.1.0"\n',
+    'flutter/pubspec.yaml': 'name: instantrelay\nversion: 0.0.0\npublish_to: none\n',
+    'flutter/lib/instantrelay.dart': "export 'src/version.dart';\n",
+    'flutter/lib/src/version.dart': "const relayPackageVersion = '0.0.0';\n",
+    'flutter/README.md': '# Relay\n',
     'spec/push-payload/vectors.json': '{}\n',
   });
   for (const args of [
@@ -202,12 +267,12 @@ test('Python staging releases only the committed copy and preserves the developm
   const { root, sha } = await sourceFixture(t);
   const original = readFileSync(join(root, 'python/pyproject.toml'), 'utf8');
   writeFileSync(join(root, 'python/untracked-secret'), 'must not be packaged');
-  writeFileSync(join(root, 'python/src/convohop/_version.py'), '__version__ = "uncommitted"\n');
+  writeFileSync(join(root, 'python/src/instantrelay/_version.py'), '__version__ = "uncommitted"\n');
   const out = join(tempDir(t), 'stage');
   await stageRegistrySource({ registry: 'pypi', version: '0.2.0', sha, root, out });
   assert.equal(readFileSync(join(root, 'python/pyproject.toml'), 'utf8'), original);
   assert.doesNotMatch(readFileSync(join(out, 'python/pyproject.toml'), 'utf8'), /Private :: Do Not Upload/);
-  assert.equal(readFileSync(join(out, 'python/src/convohop/_version.py'), 'utf8'), '__version__ = "0.2.0"\n');
+  assert.equal(readFileSync(join(out, 'python/src/instantrelay/_version.py'), 'utf8'), '__version__ = "0.2.0"\n');
   assert.equal(existsSync(join(out, 'python/untracked-secret')), false);
   await assert.rejects(stageRegistrySource({ registry: 'pypi', version: VERSION, sha, root, out }), /exists/);
 });
@@ -221,13 +286,13 @@ test('Flutter staging generates release metadata and changelog without enabling 
   assert.match(pubspec, /^version: 0\.1\.0$/m);
   assert.match(pubspec, /^publish_to: https:\/\/pub\.dev$/m);
   assert.equal(readFileSync(join(out, 'flutter/lib/src/version.dart'), 'utf8'),
-    `const convoHopPackageVersion = '${VERSION}';\n`);
+    `const relayPackageVersion = '${VERSION}';\n`);
   assert.equal(readFileSync(join(root, 'flutter/lib/src/version.dart'), 'utf8'),
-    "const convoHopPackageVersion = '0.0.0';\n");
+    "const relayPackageVersion = '0.0.0';\n");
   assert.match(readFileSync(join(root, 'flutter/pubspec.yaml'), 'utf8'), /^publish_to: none$/m);
   assert.match(readFileSync(join(out, 'flutter/CHANGELOG.md'), 'utf8'), new RegExp(sha));
   assert.ok(existsSync(join(out, 'spec/push-payload/vectors.json')));
-  assert.ok(existsSync(join(assets, `convohop-${VERSION}.tar.gz`)));
+  assert.ok(existsSync(join(assets, `instantrelay-${VERSION}.tar.gz`)));
 });
 
 test('archive metadata and Maven bundles have maintained standard-library regression coverage', async () => {

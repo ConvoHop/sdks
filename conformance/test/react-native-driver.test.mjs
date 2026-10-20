@@ -20,7 +20,7 @@ const version = async name => JSON.parse(await readFile(new URL(`../../packages/
 let spec, work;
 before(async () => {
   spec = await loadSpec();
-  work = await mkdtemp(join(tmpdir(), "convohop-react-native-driver-"));
+  work = await mkdtemp(join(tmpdir(), "relay-react-native-driver-"));
 });
 after(async () => { await rm(work, { recursive: true, force: true }); });
 
@@ -34,9 +34,9 @@ describe("the React Native driver", () => {
     const { driver, hello } = await start();
     try {
       assert.deepEqual(hello, {
-        driver: { name: "convohop-react-native", version: "0.1.0", language: "typescript", packages: {
-          "@convohop/core": await version("core"), "@convohop/client": await version("client"),
-          "@convohop/react-native": await version("react-native") } },
+        driver: { name: "relay-react-native", version: "0.1.0", language: "typescript", packages: {
+          "@instantrelay/core": await version("core"), "@instantrelay/client": await version("client"),
+          "@instantrelay/react-native": await version("react-native") } },
         roles: { user: { operations: OPERATIONS.user } },
         features: FEATURES.filter(feature => feature !== "webhooks.verify"),
       });
@@ -71,7 +71,7 @@ describe("the React Native driver", () => {
     });
     assert.equal(code, 0, `${out.join("")}${err.join("")}`);
     const summary = JSON.parse(await readFile(join(reports, "summary.json"), "utf8"));
-    assert.equal(summary.driver.name, "convohop-react-native");
+    assert.equal(summary.driver.name, "relay-react-native");
     assert.deepEqual(summary.suites.flatMap(suite => suite.scenarios).map(({ id, status }) => [id, status]).sort(),
       ids.map(id => [id, "passed"]).sort());
   });

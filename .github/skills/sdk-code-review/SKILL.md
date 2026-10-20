@@ -1,6 +1,6 @@
 ---
 name: sdk-code-review
-description: Review current ConvoHop SDK changes for schema alignment, authorization, retry/replay correctness and native media lifecycle defects. Use for pull request and release reviews.
+description: Review current Relay SDK changes for schema alignment, authorization, retry/replay correctness and native media lifecycle defects. Use for pull request and release reviews.
 ---
 
 # SDK review
@@ -28,7 +28,7 @@ caller-visible state together. Prioritize:
   scopes, mutation idempotency class, pagination fields and emitted events.
   Generator changes keep the IR validated against `schema/ir.schema.json`,
   and regenerate every emitter output and golden instead of hand-editing.
-- Package boundaries: `client` and `server` import only `@convohop/core`
+- Package boundaries: `client` and `server` import only `@instantrelay/core`
   entry points, never each other; `server` holds no browser/media code;
   backend-key code never reaches `client`.
   Exports maps, `types`, `sideEffects` and `engines` stay accurate

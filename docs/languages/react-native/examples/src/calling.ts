@@ -1,4 +1,4 @@
-// Calling quickstart snippets. A real call needs CallKit or Android's Telecom, LiveKit's native WebRTC and a ConvoHop
+// Calling quickstart snippets. A real call needs CallKit or Android's Telecom, LiveKit's native WebRTC and a Relay
 // project with calls, so test/calling.test.ts runs only joinCall, answerCalls and leaveCall, with stand-ins for the
 // native modules, the client and LiveKit's audio session. The tests typecheck the rest.
 
@@ -6,7 +6,7 @@
 import { AudioSession } from "@livekit/react-native";
 import { ConnectionState, type Room } from "livekit-client";
 import { AppState, Platform } from "react-native";
-import { ConvoHopProblem, type ConvoHopClient, type LiveConnector, type LiveParticipationHandle } from "@convohop/client";
+import { RelayProblem, type RelayClient, type LiveConnector, type LiveParticipationHandle } from "@instantrelay/client";
 import {
   canUseFullScreenIntent,
   endCall,
@@ -20,15 +20,15 @@ import {
   subscribeAnsweredCalls,
   watchRingingCalls,
   type Call,
-} from "@convohop/react-native";
-import { createRoom, createRoomConnector, type RoomConnection } from "@convohop/react-native/media";
+} from "@instantrelay/react-native";
+import { createRoom, createRoomConnector, type RoomConnection } from "@instantrelay/react-native/media";
 // #endregion imports
 
 // #region start-call
 // Starts a voice call in a conversation, joins it and rings other members. If the conversation already has a call, it
 // joins that one instead. title is what CallKit shows for the call, such as the conversation's name.
 export async function startCall(
-  client: ConvoHopClient,
+  client: RelayClient,
   conversationId: string,
   title: string,
   ring: string[],
@@ -44,14 +44,14 @@ export async function startCall(
   return call;
 }
 
-async function startOrFindCall(client: ConvoHopClient, conversationId: string) {
+async function startOrFindCall(client: RelayClient, conversationId: string) {
   const live = client.conversation(conversationId).live;
   try {
     const start = await live.startVoice(); // startVideo() for video.
     await start.completed(); // Waits until the call can be joined.
     return { liveSessionId: start.liveSessionId, started: true };
   } catch (error) {
-    if (!(error instanceof ConvoHopProblem) || error.code !== "LIVE_SESSION_EXISTS") throw error;
+    if (!(error instanceof RelayProblem) || error.code !== "LIVE_SESSION_EXISTS") throw error;
     const current = await live.current(); // Someone else started a call here first.
     if (!current) throw error;
     return { liveSessionId: current.liveSessionId, started: false };
@@ -81,7 +81,7 @@ export interface JoinedCall {
 
 // Joins a call and connects its media. systemCall is the call in the system's call UI, if it has one.
 export async function joinCall(
-  client: ConvoHopClient,
+  client: RelayClient,
   liveSessionId: string,
   systemCall?: Pick<Call, "id" | "muted" | "state">,
 ): Promise<JoinedCall> {
@@ -199,7 +199,7 @@ export async function setMuted(call: JoinedCall, muted: boolean): Promise<void> 
 // #region answer-call
 // Joins each call the user answers, and stops rings that ended elsewhere. Start it after sign-in, and call the
 // function it returns when the user signs out.
-export function answerCalls(client: ConvoHopClient, onJoined: (call: JoinedCall) => void): () => void {
+export function answerCalls(client: RelayClient, onJoined: (call: JoinedCall) => void): () => void {
   let answering = true;
   // Replays the calls answered before it started, such as one answered on the lock screen as the app launched.
   const stopAnswering = subscribeAnsweredCalls(answered => {
@@ -273,7 +273,7 @@ export async function leaveCall(call: JoinedCall): Promise<void> {
 export async function endCallForEveryone(call: JoinedCall): Promise<void> {
   await leaveCall(call);
   const ending = await call.participation.live.end();
-  await ending.completed(); // Resolves once ConvoHop has cut off everyone's media.
+  await ending.completed(); // Resolves once Relay has cut off everyone's media.
 }
 // #endregion end-call
 

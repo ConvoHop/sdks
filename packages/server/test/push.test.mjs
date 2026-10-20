@@ -1,7 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { createHmac, randomBytes } from "node:crypto";
-import { PushPayloadError, push, webhooks } from "@convohop/server";
+import { PushPayloadError, push, webhooks } from "@instantrelay/server";
 
 // Expected requests are written out from spec/push-payload/README.md, independently of the builders and the vectors.
 const BUNDLE = "com.example.chat", LIMITS = { apnsAlert: 4096, apnsVoip: 5120, fcm: 4096, webPush: 3993 };

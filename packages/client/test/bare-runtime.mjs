@@ -4,7 +4,7 @@ import module from "node:module";
 import { createHash, randomUUID } from "node:crypto";
 import { readFileSync } from "node:fs";
 
-const bare = process.env.CONVOHOP_RUNTIME === "bare", NodeURL = URL;
+const bare = process.env.RELAY_RUNTIME === "bare", NodeURL = URL;
 const resolved = [], hooked = typeof module.registerHooks === "function";
 if (hooked) module.registerHooks({ resolve(specifier, context, next) { resolved.push(specifier); return next(specifier, context); } });
 const removed = ["AggregateError", "crypto", "CustomEvent", "DOMException", "Event", "EventTarget", "navigator",
@@ -22,8 +22,8 @@ if (bare) {
 }
 
 // The SDK loads first, so nothing else has evaluated its modules with the globals present.
-const { ConvoHopClient, Outbox } = await import("@convohop/client");
-const push = await import("@convohop/client/push");
+const { RelayClient, Outbox } = await import("@instantrelay/client");
+const push = await import("@instantrelay/client/push");
 const { full } = await import("../../../test/graphql-fixtures.mjs");
 const { operationCatalog } = await import("../../core/dist/generated/operations.js");
 
@@ -48,10 +48,10 @@ const options = { projectId, principalId, incarnation, sessionToken: "fixture-pr
 
 let refused = null;
 if (bare) {
-  try { new ConvoHopClient({ ...options, platform: { randomUUID } }); }
+  try { new RelayClient({ ...options, platform: { randomUUID } }); }
   catch (error) { refused = error.message; }
 }
-const client = new ConvoHopClient({ ...options, platform });
+const client = new RelayClient({ ...options, platform });
 const receipt = await client.send(conversationId, "héllo 👋\u2028", undefined, { nested: { list: [1, "two", null, true] } });
 const outbox = new Outbox(client);
 outbox.send(conversationId, "queued 🎈");
@@ -62,7 +62,7 @@ const pushed = vectors.find(vector => vector.id === "message-title").expected.we
 const { kind } = push.handleNotification(pushed, Date.now());
 process.stdout.write(JSON.stringify({
   refused, fingerprints: client.http.recoveryStates.map(state => state.payloadFingerprint), sent: receipt.status,
-  outbox: outbox.entries.map(entry => entry.status), hooked, sdkResolved: resolved.includes("@convohop/client"),
+  outbox: outbox.entries.map(entry => entry.status), hooked, sdkResolved: resolved.includes("@instantrelay/client"),
   livekit: resolved.some(specifier => specifier === "livekit-client" || specifier.startsWith("livekit-client/")),
   pushed: kind,
 }) + "\n");

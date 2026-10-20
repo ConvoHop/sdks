@@ -3,7 +3,7 @@ from dataclasses import dataclass
 from uuid import uuid4
 
 import pytest
-from convohop import ConvoHop
+from instantrelay import Relay
 
 from conformance_mock import FaultAction, MockTarget, attempts, inject_fault
 from server import (
@@ -26,7 +26,7 @@ class Room:
     conversation_id: str
 
 
-def set_up(server: ConvoHop, config: ServerConfig, title: str) -> Room:
+def set_up(server: Relay, config: ServerConfig, title: str) -> Room:
     alice = bootstrap_user(server, config, f"alice-{uuid4()}", str(uuid4()))
     bob = bootstrap_user(server, config, f"bob-{uuid4()}", str(uuid4()))
     members = [alice["session"]["principalId"], bob["session"]["principalId"]]

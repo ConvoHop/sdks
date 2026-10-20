@@ -30,7 +30,7 @@ export function requireType(types, name, where) {
 
 /**
  * The runtime operation catalog keyed by operation id, as published in
- * schema/operations.json and @convohop/core's `operationCatalog`.
+ * schema/operations.json and @instantrelay/core's `operationCatalog`.
  */
 export function operationCatalog(ir) {
   const types = byName(ir.types);

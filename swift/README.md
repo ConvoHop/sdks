@@ -1,6 +1,6 @@
-# ConvoHop Swift client SDK
+# Relay Swift client SDK
 
-`ConvoHop` is the client SDK for iOS and macOS apps. It gives a signed-in user
+`Relay` is the client SDK for iOS and macOS apps. It gives a signed-in user
 chat, realtime updates with replay, offline sending, calls through the
 official [LiveKit Swift SDK](https://github.com/livekit/client-sdk-swift),
 CallKit ringing for VoIP pushes, and push notification routing. It holds one
@@ -20,16 +20,16 @@ License: [Apache-2.0](LICENSE).
 - iOS 15 or later, or macOS 12 or later.
 - Swift 6.1 or later (Xcode 16.4 or later). The package builds in the Swift 6
   language mode, with strict concurrency checking.
-- `ConvoHopLiveKit` depends on LiveKit's `client-sdk-swift` 2.17 or later.
+- `RelayLiveKit` depends on LiveKit's `client-sdk-swift` 2.17 or later.
   The other products depend only on Apple frameworks.
 
 | Product | Use it for | Platforms |
 | --- | --- | --- |
-| `ConvoHop` | Sessions, conversations, messages, realtime replay, recovery, the local cache and outbox, calls, and push routing. It re-exports `ConvoHopPush`. | iOS, macOS |
-| `ConvoHopLiveKit` | Call media with the LiveKit Swift SDK, and CallKit audio session handling | iOS, macOS (CallKit audio: iOS) |
-| `ConvoHopPush` | Push payload parsing, deduplication, the ring ledger and the push recipient. Foundation only and safe in app extensions. | iOS, macOS |
-| `ConvoHopCalls` | PushKit VoIP pushes to CallKit for incoming calls, and CallKit for outgoing calls | iOS |
-| `ConvoHopNotificationService` | A Notification Service Extension helper that shows message text when the push has none, and hides the text of other users' pushes | iOS, macOS |
+| `Relay` | Sessions, conversations, messages, realtime replay, recovery, the local cache and outbox, calls, and push routing. It re-exports `RelayPush`. | iOS, macOS |
+| `RelayLiveKit` | Call media with the LiveKit Swift SDK, and CallKit audio session handling | iOS, macOS (CallKit audio: iOS) |
+| `RelayPush` | Push payload parsing, deduplication, the ring ledger and the push recipient. Foundation only and safe in app extensions. | iOS, macOS |
+| `RelayCalls` | PushKit VoIP pushes to CallKit for incoming calls, and CallKit for outgoing calls | iOS |
+| `RelayNotificationService` | A Notification Service Extension helper that shows message text when the push has none, and hides the text of other users' pushes | iOS, macOS |
 
 ## Install from source
 
@@ -43,7 +43,7 @@ git clone https://github.com/ConvoHop/sdks.git
 
 - **Xcode:** choose **File › Add Package Dependencies…**, then **Add Local…**,
   and pick the `swift` directory of the checkout. Add the products you need to
-  each target: `ConvoHopNotificationService` to the extension target, and the
+  each target: `RelayNotificationService` to the extension target, and the
   others to the app.
 - **Package.swift:**
 
@@ -55,8 +55,8 @@ git clone https://github.com/ConvoHop/sdks.git
       .target(
           name: "ChatApp",
           dependencies: [
-              .product(name: "ConvoHop", package: "swift"),
-              .product(name: "ConvoHopLiveKit", package: "swift"),
+              .product(name: "Relay", package: "swift"),
+              .product(name: "RelayLiveKit", package: "swift"),
           ]
       ),
   ]
@@ -68,15 +68,15 @@ git clone https://github.com/ConvoHop/sdks.git
 ## Sign in
 
 Authenticate the user in your app as you do today. Then your backend maps the
-user to a ConvoHop principal and issues a session for this device with a server
+user to a Relay principal and issues a session for this device with a server
 SDK. Pass that session to the client:
 
 ```swift
-import ConvoHop
+import Relay
 
-let issued = try await myBackend.convoHopSession() // Your API, not ConvoHop's.
+let issued = try await myBackend.relaySession() // Your API, not Relay's.
 
-let client = try ConvoHopClient(configuration: ConvoHopConfiguration(
+let client = try RelayClient(configuration: RelayConfiguration(
     baseURL: issued.baseURL,
     projectId: issued.projectId,
     principalId: issued.principalId,
@@ -85,7 +85,7 @@ let client = try ConvoHopClient(configuration: ConvoHopConfiguration(
     recoveryStorage: try FileRecoveryStorage.applicationSupport(),
     refreshSession: { current in
         // Ask your backend to renew `current` with a server SDK, and return the SessionBootstrap it gets.
-        try await myBackend.renewConvoHopSession(current)
+        try await myBackend.renewRelaySession(current)
     }
 ))
 try await client.initialize()
@@ -98,7 +98,7 @@ current session. Create one client per signed-in user and session.
 
 ```swift
 let renewal = try client.scheduleSessionRefresh(
-    onError: { error in print("ConvoHop renewal failed: \(error)") }
+    onError: { error in print("Relay renewal failed: \(error)") }
 )
 // Keep `renewal` as long as the user is signed in. Call renewal.cancel(), or
 // release it, to stop.
@@ -147,7 +147,7 @@ The same operations are on the client: `send(_:to:props:requestId:)`,
 message stays in lists with `deleted` set and `nil` `text` and `props`.
 
 **Retries.** Every mutation has a request ID, which stays the same across the
-SDK's own retries. A `ConvoHopError` with an `unknown` outcome isn't a
+SDK's own retries. A `RelayError` with an `unknown` outcome isn't a
 rejection: the message may or may not be stored. That includes
 `TRANSPORT_UNKNOWN` after a lost connection or a redirected response, which the
 SDK never follows. Resend it with the same request ID, or look it up:
@@ -155,7 +155,7 @@ SDK never follows. Resend it with the same request ID, or look it up:
 ```swift
 do {
     _ = try await client.send(text, to: conversationId, requestId: requestId)
-} catch let error as ConvoHopError where error.outcome == .unknown {
+} catch let error as RelayError where error.outcome == .unknown {
     let resolution = try await client.resolveRequest(error.requestId)
 }
 ```
@@ -166,7 +166,7 @@ so it can resolve them after a restart: call
 
 The client keeps at most 128 records. When it is full, final records make
 room, oldest attempt first. A record is final when the SDK will never send its
-request again: ConvoHop committed or accepted it, or refused it with an error
+request again: Relay committed or accepted it, or refused it with an error
 that isn't retryable, or the request's three-attempt, 60-second retry budget
 is spent, whatever its outcome. A spent request fails with
 `RESOLUTION_REQUIRED` instead of being sent, and `resolveRequest(_:)` still
@@ -176,7 +176,7 @@ requests, and of requests refused with a retryable error such as
 lasts, since the request can still be resent with its ID. So do the records of
 messages an outbox may still send or look up, and those a live session or
 participation handle holds, whatever their state. When no record is final, a
-new mutation fails without being sent, with `ConvoHopError` code
+new mutation fails without being sent, with `RelayError` code
 `RECOVERY_LIMIT`, outcome `rejected` and status 409: retry or resolve the
 outstanding requests first.
 
@@ -200,7 +200,7 @@ let stream = try await client.watch(conversationId, apply: { events in
     // so make it idempotent: after a crash, events after the stored cursor come again.
     try await database.apply(events)
 }, onError: { error in
-    // ConvoHopReplayError.resyncRequired means this user's visible history changed.
+    // RelayReplayError.resyncRequired means this user's visible history changed.
 })
 
 for await connected in await stream.connectionChanges() {
@@ -210,7 +210,7 @@ for await connected in await stream.connectionChanges() {
 await stream.close()
 ```
 
-The cursor is never reset silently. After `ConvoHopReplayError.resyncRequired`,
+The cursor is never reset silently. After `RelayReplayError.resyncRequired`,
 call `client.resyncAuthorizedHistory(_:apply:onError:)`, which replays from the
 start of the history this user may see.
 
@@ -219,24 +219,24 @@ beginning of the conversation.
 
 When the organization's prepaid credits run out or it reaches its monthly
 spend cap, the stream closes with a 402 `CREDITS_EXHAUSTED` or
-`SPEND_CAP_REACHED` `ConvoHopError` and doesn't reconnect;
-`ConvoHopConversationModel` is `.failed` until you call `start()` once the
-organization can pay again. While ConvoHop can't verify current spend, the
+`SPEND_CAP_REACHED` `RelayError` and doesn't reconnect;
+`RelayConversationModel` is `.failed` until you call `start()` once the
+organization can pay again. While Relay can't verify current spend, the
 stream reports `SPEND_UNVERIFIED` to `onError` and reconnects as it does after
 `RATE_LIMITED`, waiting at least its `retryAfter`.
 
 ## Offline: cache, outbox and conversation model
 
-For a chat screen, `ConvoHopConversationModel` puts the pieces together. It is
+For a chat screen, `RelayConversationModel` puts the pieces together. It is
 an `ObservableObject` for SwiftUI and UIKit:
 
 ```swift
 let storage = try FileRecoveryStorage.applicationSupport()
-let store = try ConvoHopLocalStore(client: client, storage: storage)
-let outbox = try ConvoHopOutbox(client: client, network: SystemNetworkMonitor())
+let store = try RelayLocalStore(client: client, storage: storage)
+let outbox = try RelayOutbox(client: client, network: SystemNetworkMonitor())
 try await outbox.start()
 
-let model = try ConvoHopConversationModel(
+let model = try RelayConversationModel(
     client: client, conversationId: conversationId, store: store, outbox: outbox)
 await model.start()            // Cached messages first, then the server, then realtime.
 try await model.send("Hello")  // Shows at once, and survives restarts and lost connectivity.
@@ -256,13 +256,13 @@ List(model.entries) { entry in
 }
 ```
 
-- **`ConvoHopLocalStore`** caches each conversation's newest messages and the
+- **`RelayLocalStore`** caches each conversation's newest messages and the
   inbox, so screens show content before the network answers. It is never the
   source of truth.
-- **`ConvoHopOutbox`** queues outgoing messages and sends them in order per
+- **`RelayOutbox`** queues outgoing messages and sends them in order per
   conversation, so they appear the moment the user sends them (optimistic
   sends). Each keeps one request ID across retries, so a retry can't post it
-  twice. When the outbox can't learn whether ConvoHop stored a message, the
+  twice. When the outbox can't learn whether Relay stored a message, the
   item becomes `unresolved`: it rechecks when connectivity returns, and
   `resend(_:)` sends it again under a new request ID once the user accepts the
   small risk of a duplicate. Failures that the retry rules call retryable keep
@@ -275,9 +275,9 @@ List(model.entries) { entry in
   saved queue, so keep one outbox per user, in your app's process: outboxes
   that share a user's queue, such as a share extension's, overwrite each
   other's unsent messages.
-- **`ConvoHopTypingIndicator`** reports this user's typing at most every 3
+- **`RelayTypingIndicator`** reports this user's typing at most every 3
   seconds, and that typing stopped after 5 seconds without edits.
-  **`ConvoHopReadReceiptReporter`** reports how far this user has read, only
+  **`RelayReadReceiptReporter`** reports how far this user has read, only
   forward, combining calls within a second. The model drives both.
 
 The store and the outbox save message text in the storage you give them. Use
@@ -288,7 +288,7 @@ started have stopped writing, then call `removeAll()` on both. If you also
 clear the storage, first wait for requests still running elsewhere on the
 client: they save their recovery records when they settle.
 
-**Presence and typing.** ConvoHop's client API has no presence, and it doesn't
+**Presence and typing.** Relay's client API has no presence, and it doesn't
 deliver other members' typing state yet. `setTyping(_:in:)` sends this user's
 typing as a signal that is never stored. `model.lastActivity(of:)` derives
 when a member last sent or read a message, for "last seen" hints, and
@@ -301,8 +301,8 @@ and turning on the microphone or camera are separate steps. A media connection
 starts with capture off.
 
 ```swift
-import ConvoHop
-import ConvoHopLiveKit
+import Relay
+import RelayLiveKit
 
 let live = try await client.conversation(conversationId).live.startVoice().ready()
 let participation = try await live.join()
@@ -327,34 +327,34 @@ LiveKit's error, whose signaling URL can carry the token.
 
 ### Incoming calls with CallKit (iOS)
 
-`ConvoHopCalls` receives VoIP pushes through PushKit and rings in CallKit.
+`RelayCalls` receives VoIP pushes through PushKit and rings in CallKit.
 Start it in `application(_:didFinishLaunchingWithOptions:)`, because iOS can
 launch the app for a VoIP push:
 
 ```swift
-import ConvoHopCalls
-import ConvoHopLiveKit
+import RelayCalls
+import RelayLiveKit
 
 @main
-final class AppDelegate: NSObject, UIApplicationDelegate, ConvoHopCallsDelegate {
+final class AppDelegate: NSObject, UIApplicationDelegate, RelayCallsDelegate {
     private var media: MediaConnection?
 
     func application(
         _ application: UIApplication,
         didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?
     ) -> Bool {
-        try? ConvoHopCallKitAudio.prepare()
-        ConvoHopCalls.shared.start(
-            configuration: ConvoHopCallsConfiguration(ledgerSuiteName: "group.com.example.chat"),
+        try? RelayCallKitAudio.prepare()
+        RelayCalls.shared.start(
+            configuration: RelayCallsConfiguration(ledgerSuiteName: "group.com.example.chat"),
             delegate: self)
         return true
     }
 
-    func convoHopCalls(_ calls: ConvoHopCalls, didUpdateVoIPToken token: Data?) {
-        // Send ConvoHopPushToken.hex(token) to your backend, or remove the token when it's nil.
+    func relayCalls(_ calls: RelayCalls, didUpdateVoIPToken token: Data?) {
+        // Send RelayPushToken.hex(token) to your backend, or remove the token when it's nil.
     }
 
-    func convoHopCalls(_ calls: ConvoHopCalls, didAnswer call: ConvoHopCall) {
+    func relayCalls(_ calls: RelayCalls, didAnswer call: RelayCall) {
         Task {
             let participation = try await client.liveSession(call.liveSessionId).join()
             calls.reportConnecting(call.uuid)
@@ -363,26 +363,26 @@ final class AppDelegate: NSObject, UIApplicationDelegate, ConvoHopCallsDelegate 
         }
     }
 
-    func convoHopCalls(_ calls: ConvoHopCalls, didActivate audioSession: AVAudioSession) {
-        try? ConvoHopCallKitAudio.activate(audioSession)
+    func relayCalls(_ calls: RelayCalls, didActivate audioSession: AVAudioSession) {
+        try? RelayCallKitAudio.activate(audioSession)
         Task { try? await media?.microphone(true) }
     }
 
-    func convoHopCalls(_ calls: ConvoHopCalls, didDeactivate audioSession: AVAudioSession) {
-        try? ConvoHopCallKitAudio.deactivate()
+    func relayCalls(_ calls: RelayCalls, didDeactivate audioSession: AVAudioSession) {
+        try? RelayCallKitAudio.deactivate()
     }
 
-    func convoHopCalls(_ calls: ConvoHopCalls, didSetMuted muted: Bool, for call: ConvoHopCall) {
+    func relayCalls(_ calls: RelayCalls, didSetMuted muted: Bool, for call: RelayCall) {
         Task { try? await media?.microphone(!muted) }
     }
 
-    func convoHopCalls(_ calls: ConvoHopCalls, didEnd call: ConvoHopCall, reason: ConvoHopCallEndReason?) {
+    func relayCalls(_ calls: RelayCalls, didEnd call: RelayCall, reason: RelayCallEndReason?) {
         Task { await media?.disconnect() }
     }
 }
 ```
 
-- Set `ConvoHopCalls.shared.recipient` to
+- Set `RelayCalls.shared.recipient` to
   `.only(projectId: client.projectId, recipientId: client.principalId)` at
   sign-in, and to `.nobody` at sign-out: your backend can still hold the
   device's VoIP token. Until you set it, every call rings. It's stored in the
@@ -393,7 +393,7 @@ final class AppDelegate: NSObject, UIApplicationDelegate, ConvoHopCallsDelegate 
 - A ring answered or declined on another device gets no push. While a call
   rings, check `client.ringStopReason(alert)` when the conversation's stream
   delivers `live.participationChanged` or `live.ended`, and call
-  `ConvoHopCalls.shared.end(call.uuid, reason:)`. A ring stops at its
+  `RelayCalls.shared.end(call.uuid, reason:)`. A ring stops at its
   `expiresAt` on its own.
 - `answer(_:)` answers a ringing call from your own UI.
   `startOutgoingCall(liveSessionId:conversationId:handle:displayName:hasVideo:)`
@@ -403,22 +403,22 @@ final class AppDelegate: NSObject, UIApplicationDelegate, ConvoHopCallsDelegate 
 
 ## Push notifications
 
-ConvoHop never stores device tokens. Your backend keeps them, receives
-ConvoHop's notification webhooks, builds the push requests with a server SDK,
+Relay never stores device tokens. Your backend keeps them, receives
+Relay's notification webhooks, builds the push requests with a server SDK,
 and sends them with your APNs credentials. See the
 [push payload contract](https://github.com/ConvoHop/sdks/blob/main/spec/push-payload/README.md).
 
 ```swift
-// After sign-in. On iOS, also send the VoIP token from ConvoHopCalls.
-let allowed = try await ConvoHopPushRegistration.register()
+// After sign-in. On iOS, also send the VoIP token from RelayCalls.
+let allowed = try await RelayPushRegistration.register()
 
 func application(_ application: UIApplication, didRegisterForRemoteNotificationsWithDeviceToken deviceToken: Data) {
-    // Send ConvoHopPushToken.hex(deviceToken) to your backend.
+    // Send RelayPushToken.hex(deviceToken) to your backend.
 }
 ```
 
 `handleNotification(_:)` routes a push or a notification tap. It returns `nil`
-for pushes that aren't ConvoHop's, or that belong to another project or user,
+for pushes that aren't Relay's, or that belong to another project or user,
 for example after a sign-out on a device whose token your backend still holds:
 
 ```swift
@@ -436,13 +436,13 @@ func userNotificationCenter(_ center: UNUserNotificationCenter, didReceive respo
 ```
 
 Delivery is at least once and unordered. For pushes your app processes in the
-background, pass a `ConvoHopNotificationLedger` to `handleNotification(_:ledger:)`
+background, pass a `RelayNotificationLedger` to `handleNotification(_:ledger:)`
 to get `nil` for an event you already handled. Route taps without one.
 
 The ledger also stores whose pushes the device shows. Set its `recipient` to
 `.only(projectId: client.projectId, recipientId: client.principalId)` at
 sign-in. At sign-out, set it to `.nobody` and call `removeAll()`, which keeps
-the recipient. With `ConvoHopCalls`, set `ConvoHopCalls.shared.recipient`,
+the recipient. With `RelayCalls`, set `RelayCalls.shared.recipient`,
 which stores it in the same ledger. Until you set one, the recipient is
 `.any`.
 
@@ -452,19 +452,19 @@ app's `Localizable.strings`: alerts without text show them.
 ### Message text in a Notification Service Extension
 
 Message pushes carry no message text unless the project opts in to previews.
-`ConvoHopNotificationService` handles both cases. When a message push has no
+`RelayNotificationService` handles both cases. When a message push has no
 body, it fetches the message with the user's session and shows its text, up
 to 1024 characters. When the push already has text, from a preview or your
 backend, it delivers the push unchanged. It also delivers the push unchanged
 when anything fails or time runs out.
 
 ```swift
-import ConvoHopNotificationService
+import RelayNotificationService
 import UserNotifications
 
 final class NotificationService: UNNotificationServiceExtension {
-    private let service = ConvoHopNotificationService(
-        ledger: ConvoHopNotificationLedger(suiteName: "group.com.example.chat")
+    private let service = RelayNotificationService(
+        ledger: RelayNotificationLedger(suiteName: "group.com.example.chat")
     ) { notification in
         // A client for notification.recipientId with its own short-lived session, kept in memory
         // (for example, fetched from your backend), or nil.
@@ -486,7 +486,7 @@ final class NotificationService: UNNotificationServiceExtension {
 
 Give the extension's client in-memory recovery storage, and don't write its
 session token to disk. Share the ledger's App Group suite with
-`ConvoHopCallsConfiguration.ledgerSuiteName`: a missed-call push reaches the
+`RelayCallsConfiguration.ledgerSuiteName`: a missed-call push reaches the
 extension, and the ledger stops a late VoIP push for the same ring from
 ringing.
 
@@ -495,7 +495,7 @@ ledger's `recipient`, such as one that arrives after sign-out. The push shows
 no title, and the `CONVOHOP_MESSAGE`, `CONVOHOP_CALL` or `CONVOHOP_MISSED_CALL`
 string as its body, from the extension's `Localizable.strings` or else the
 app's. The extension fetches nothing for it. It also hides the text of a
-ConvoHop push it can't read, unless the recipient is `.any`. Without Apple's
+Relay push it can't read, unless the recipient is `.any`. Without Apple's
 notification filtering entitlement, iOS shows every alert push, so the helper
 hides the text instead of dropping the push.
 
@@ -503,14 +503,14 @@ hides the text instead of dropping the push.
 
 | Error | When |
 | --- | --- |
-| `ConvoHopError` | ConvoHop or the SDK's protocol checks refused a request. Classify it by `code`. `outcome` says whether a mutation may have taken effect, `retryAfter` is the delay the authority asked for, and `isRetryable` says whether resending with the same request ID can succeed. Messages never contain credentials. |
-| `ConvoHopReplayError` | A replay can't continue as asked, for example `resyncRequired`. |
-| `ConvoHopLiveError` | A call action doesn't fit the call's state. |
-| `ConvoHopPushPayloadError` | A `convohop` push object is malformed. |
-| `ConvoHopUsageError` | The app misused the SDK, for example by retrying a request it never recorded. |
-| `ConvoHopAggregateError` | Several failures from one call, such as a failed renewal and a replay that couldn't resume. |
+| `RelayError` | Relay or the SDK's protocol checks refused a request. Classify it by `code`. `outcome` says whether a mutation may have taken effect, `retryAfter` is the delay the authority asked for, and `isRetryable` says whether resending with the same request ID can succeed. Messages never contain credentials. |
+| `RelayReplayError` | A replay can't continue as asked, for example `resyncRequired`. |
+| `RelayLiveError` | A call action doesn't fit the call's state. |
+| `RelayPushPayloadError` | A `convohop` push object is malformed. |
+| `RelayUsageError` | The app misused the SDK, for example by retrying a request it never recorded. |
+| `RelayAggregateError` | Several failures from one call, such as a failed renewal and a replay that couldn't resume. |
 
-## Differences from `@convohop/client`
+## Differences from `@instantrelay/client`
 
 This SDK follows the TypeScript [client SDK](https://github.com/ConvoHop/sdks/blob/main/packages/client/README.md)
 and passes the same [conformance scenarios](https://github.com/ConvoHop/sdks/blob/main/spec/conformance/README.md)
@@ -528,11 +528,11 @@ swift test
 
 If SwiftPM stops responding in a headless session, add `--disable-keychain`.
 To build and test for iOS, use Xcode, or `xcodebuild` with the package's
-`ConvoHop-Package` scheme and an iPhone that
+`Relay-Package` scheme and an iPhone that
 `xcrun simctl list devices available` lists:
 
 ```sh
-xcodebuild test -scheme ConvoHop-Package -destination 'platform=iOS Simulator,name=iPhone 16'
+xcodebuild test -scheme Relay-Package -destination 'platform=iOS Simulator,name=iPhone 16'
 ```
 
 To run the [conformance suite](https://github.com/ConvoHop/sdks/blob/main/spec/conformance/README.md)
@@ -540,7 +540,7 @@ with the Swift driver, from the repository root:
 
 ```sh
 swift build --package-path conformance/drivers/swift/Driver
-npm run conformance -- --driver conformance/drivers/swift/Driver/.build/debug/ConvoHopConformanceDriver
+npm run conformance -- --driver conformance/drivers/swift/Driver/.build/debug/RelayConformanceDriver
 ```
 
 CI also builds the driver on Linux, because only Linux runners can start
@@ -548,7 +548,7 @@ the dev stack. Linux isn't a supported app platform. There the driver
 doesn't declare realtime, because Ubuntu 24.04's libcurl has no WebSocket
 support.
 
-`Sources/ConvoHop/Generated` holds code generated from the schemas: never edit
+`Sources/Relay/Generated` holds code generated from the schemas: never edit
 it. From the repository root, `npm run generate:graphql` regenerates it and
 `npm run check:graphql` checks it. See
 [SDK generation](https://github.com/ConvoHop/sdks/blob/main/docs/sdk-generation.md).
@@ -580,13 +580,13 @@ hosted service.
 
 | Path | Contents |
 | --- | --- |
-| `Sources/ConvoHop/Core` | Transport, recovery records, JSON and errors |
-| `Sources/ConvoHop/Client` | The client, replay streams, WebSockets and push routing |
-| `Sources/ConvoHop/Live` | Conversations, live sessions and media admission |
-| `Sources/ConvoHop/Local` | The cache, outbox, conversation model, typing and read receipts |
-| `Sources/ConvoHop/Generated` | Generated models and the operation catalog |
-| `Sources/ConvoHopPush` | Push payload parsing and the ledger |
-| `Sources/ConvoHopCalls` | PushKit and CallKit |
-| `Sources/ConvoHopLiveKit` | The LiveKit media room and CallKit audio |
-| `Sources/ConvoHopNotificationService` | The Notification Service Extension helper |
-| `Tests/ConvoHopTests` | XCTest unit tests and the shared push payload vectors |
+| `Sources/Relay/Core` | Transport, recovery records, JSON and errors |
+| `Sources/Relay/Client` | The client, replay streams, WebSockets and push routing |
+| `Sources/Relay/Live` | Conversations, live sessions and media admission |
+| `Sources/Relay/Local` | The cache, outbox, conversation model, typing and read receipts |
+| `Sources/Relay/Generated` | Generated models and the operation catalog |
+| `Sources/RelayPush` | Push payload parsing and the ledger |
+| `Sources/RelayCalls` | PushKit and CallKit |
+| `Sources/RelayLiveKit` | The LiveKit media room and CallKit audio |
+| `Sources/RelayNotificationService` | The Notification Service Extension helper |
+| `Tests/RelayTests` | XCTest unit tests and the shared push payload vectors |

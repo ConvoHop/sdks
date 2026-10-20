@@ -1,8 +1,8 @@
-# ConvoHop SDKs
+# Relay SDKs
 
 [![SDK CI](https://github.com/ConvoHop/sdks/actions/workflows/sdk-ci.yml/badge.svg?branch=main)](https://github.com/ConvoHop/sdks/actions/workflows/sdk-ci.yml)
 
-Official SDKs for ConvoHop, a platform for adding chat, voice and video calls
+Official SDKs for Relay, a platform for adding chat, voice and video calls
 to your apps. Messages and calls share the same conversations, identities and
 permissions, so you don't have to stitch separate services together.
 
@@ -11,11 +11,11 @@ permissions, so you don't have to stitch separate services together.
 > registry yet, and APIs can change in any 0.x release. Until registry
 > publishing starts, releases are attached to GitHub Releases in this
 > repository. This repository contains SDK source code only, not the
-> ConvoHop service.
+> Relay service.
 
 ## Two kinds of SDK
 
-ConvoHop SDKs are split by the credential they hold and where they run:
+Relay SDKs are split by the credential they hold and where they run:
 
 - **Server SDKs** run in trusted runtimes that you operate, such as
   application backends, workers, bots and AI agents. They use a secret
@@ -36,21 +36,21 @@ planned languages, push notifications, package names, versioning and support.
 
 | SDK | Package | Runtime | Covers |
 | --- | --- | --- | --- |
-| [Client](packages/client/README.md) | `@convohop/client` | Current browsers. React Native has run only by hand, on an Android emulator and an iOS simulator. | Chat, history and search, realtime updates with replay, a conversation store with an offline outbox, typing and read receipts, push in a Web Push service worker, and calls through `livekit-client` with explicit connect and capture |
-| [React hooks](packages/react/README.md) | `@convohop/react`, not in a release yet | React 18 or later, with `@convohop/client` | Conversations with optimistic, offline-safe sends, typing, session renewal, live sessions and browser media |
-| [Android client](android/README.md) | `com.convohop:convohop-android` | Android 7.0 (API 24) or later. Apps compile against API 36. | Chat, history and search, realtime updates with replay, session renewal, a SQLite store with an offline outbox and optimistic sends, typing and read receipts, FCM push with incoming calls through Telecom, and calls through the LiveKit Android SDK with explicit capture |
-| [Flutter](flutter/README.md) | `convohop` (Dart) | Flutter 3.38 or later, on Android 7.0 (API level 24) or later and iOS 13 or later | Session refresh, chat, history and search, realtime updates with resume, a local store and an offline outbox with optimistic sends, typing, read receipts and recent activity, calls through `livekit_client`, push registration, notification handling and the system incoming-call UI |
-| [iOS and macOS client](swift/README.md) | Swift package products `ConvoHop`, `ConvoHopLiveKit`, `ConvoHopCalls`, `ConvoHopPush` and `ConvoHopNotificationService` | iOS 15 or macOS 12 or later, Swift 6.1 or later | Chat, history and search, realtime updates with replay, session renewal, a local cache, an offline outbox with optimistic sends and a conversation model, typing and read receipts, calls with LiveKit and CallKit, push registration and routing, and a Notification Service Extension helper |
-| [Node.js server](packages/server/README.md) | `@convohop/server` | Node.js 22 or later | Organization and project management, user identities and sessions, conversations and membership, messages, inbox, search and calls for your backend, webhook verification, and push payload builders |
-| [Java and Kotlin server](jvm/README.md) | `com.convohop:convohop-server`, `com.convohop:convohop-server-kotlin` | Java 11 or later. Kotlin coroutine extensions are optional. | User identities and sessions, conversations, membership and messages for your backend, generated APIs with paginators for every server operation, backend key issuance, webhook verification, and push payload builders |
-| [.NET server](dotnet/README.md) | `ConvoHop` | .NET 8 or later. The `netstandard2.0` build also targets .NET Framework 4.7.2 or later, which isn't tested yet. | Organization and project management, backend key issuance, user identities and sessions, conversations and membership, messages, inbox, search and calls for your backend, generated APIs for every server operation with async page streams, webhook verification, and push payload builders |
+| [Client](packages/client/README.md) | `@instantrelay/client` | Current browsers. React Native has run only by hand, on an Android emulator and an iOS simulator. | Chat, history and search, realtime updates with replay, a conversation store with an offline outbox, typing and read receipts, push in a Web Push service worker, and calls through `livekit-client` with explicit connect and capture |
+| [React hooks](packages/react/README.md) | `@instantrelay/react`, not in a release yet | React 18 or later, with `@instantrelay/client` | Conversations with optimistic, offline-safe sends, typing, session renewal, live sessions and browser media |
+| [Android client](android/README.md) | `dev.instantrelay:relay-android` | Android 7.0 (API 24) or later. Apps compile against API 36. | Chat, history and search, realtime updates with replay, session renewal, a SQLite store with an offline outbox and optimistic sends, typing and read receipts, FCM push with incoming calls through Telecom, and calls through the LiveKit Android SDK with explicit capture |
+| [Flutter](flutter/README.md) | `instantrelay` (Dart) | Flutter 3.38 or later, on Android 7.0 (API level 24) or later and iOS 13 or later | Session refresh, chat, history and search, realtime updates with resume, a local store and an offline outbox with optimistic sends, typing, read receipts and recent activity, calls through `livekit_client`, push registration, notification handling and the system incoming-call UI |
+| [iOS and macOS client](swift/README.md) | Swift package products `Relay`, `RelayLiveKit`, `RelayCalls`, `RelayPush` and `RelayNotificationService` | iOS 15 or macOS 12 or later, Swift 6.1 or later | Chat, history and search, realtime updates with replay, session renewal, a local cache, an offline outbox with optimistic sends and a conversation model, typing and read receipts, calls with LiveKit and CallKit, push registration and routing, and a Notification Service Extension helper |
+| [Node.js server](packages/server/README.md) | `@instantrelay/server` | Node.js 22 or later | Organization and project management, user identities and sessions, conversations and membership, messages, inbox, search and calls for your backend, webhook verification, and push payload builders |
+| [Java and Kotlin server](jvm/README.md) | `dev.instantrelay:relay-server`, `dev.instantrelay:relay-server-kotlin` | Java 11 or later. Kotlin coroutine extensions are optional. | User identities and sessions, conversations, membership and messages for your backend, generated APIs with paginators for every server operation, backend key issuance, webhook verification, and push payload builders |
+| [.NET server](dotnet/README.md) | `InstantRelay` (namespace `Relay`) | .NET 8 or later. The `netstandard2.0` build also targets .NET Framework 4.7.2 or later, which isn't tested yet. | Organization and project management, backend key issuance, user identities and sessions, conversations and membership, messages, inbox, search and calls for your backend, generated APIs for every server operation with async page streams, webhook verification, and push payload builders |
 | [Go server](go/README.md) | `github.com/ConvoHop/sdks/go` | Go 1.26 or later, standard library only | Organization and project management, user identities and sessions, conversations, membership, messages, inbox, search and calls for your backend, a generated method with page iterators for every server operation, backend key issuance and delivery, request recovery, webhook verification, and push payload builders |
-| [Python server](python/README.md) | `convohop` | Python 3.11 or later | Sync and `asyncio` clients for organization and project management, backend key issuance, user identities and sessions, conversations and membership, messages, inbox, search and calls for your backend, generated methods for every server operation with page iterators, webhook verification, and push payload builders |
+| [Python server](python/README.md) | `instantrelay` | Python 3.11 or later | Sync and `asyncio` clients for organization and project management, backend key issuance, user identities and sessions, conversations and membership, messages, inbox, search and calls for your backend, generated methods for every server operation with page iterators, webhook verification, and push payload builders |
 
-The TypeScript packages depend on [`@convohop/core`](packages/core/README.md), which
+The TypeScript packages depend on [`@instantrelay/core`](packages/core/README.md), which
 holds the generated GraphQL types and operations and the shared transport.
-Don't import `@convohop/core` directly: everything you need from it is
-re-exported by `@convohop/client` and `@convohop/server`.
+Don't import `@instantrelay/core` directly: everything you need from it is
+re-exported by `@instantrelay/client` and `@instantrelay/server`.
 
 The packages are ESM-only, with TypeScript declarations included. CommonJS
 code on Node.js 22.12 or later can load them with `require()`.
@@ -77,10 +77,10 @@ checkout, as its [README](swift/README.md#install-from-source) shows.
 
 | Tool | Package | Runtime | Covers |
 | --- | --- | --- | --- |
-| [CLI](packages/cli/README.md) | `@convohop/cli`, command `convohop` | Node.js 22 or later | Login, projects, backend keys, webhook tail and replay, push payload tests, and any server operation with `convohop call` |
-| [MCP server](packages/mcp/README.md) | `@convohop/mcp`, command `convohop-mcp` | Node.js 22 or later | Management and backend-key operations as tools for AI agents, annotated with their credentials, scopes, idempotency and destructiveness |
+| [CLI](packages/cli/README.md) | `@instantrelay/cli`, command `relay` | Node.js 22 or later | Login, projects, backend keys, webhook tail and replay, push payload tests, and any server operation with `relay call` |
+| [MCP server](packages/mcp/README.md) | `@instantrelay/mcp`, command `relay-mcp` | Node.js 22 or later | Management and backend-key operations as tools for AI agents, annotated with their credentials, scopes, idempotency and destructiveness |
 
-Both are built on `@convohop/server`, and `tools/sdkgen` generates their
+Both are built on `@instantrelay/server`, and `tools/sdkgen` generates their
 operation catalogs from the schema. They hold server credentials, so run them
 only on machines you trust. They aren't released yet: run them from a checkout
 of this repository, as their READMEs describe.
@@ -88,15 +88,15 @@ of this repository, as their READMEs describe.
 ## How it fits together
 
 1. Your users sign in to your app with your own authentication.
-2. Your backend uses a server SDK to map each user to a ConvoHop identity and
+2. Your backend uses a server SDK to map each user to a Relay identity and
    issue a short-lived session for that user's device.
 3. Your app passes the session to a client SDK, which handles chat, realtime
    updates and calls for that user.
-4. ConvoHop sends signed webhooks to your backend. You verify them with a
+4. Relay sends signed webhooks to your backend. You verify them with a
    server SDK and can, for example, send push notifications with your own
    APNs, FCM or Web Push credentials.
 
-`@convohop/server` verifies these webhooks and returns typed events,
+`@instantrelay/server` verifies these webhooks and returns typed events,
 including the per-recipient notification events for push notifications. See
 [push notifications](docs/sdk-strategy.md#push-notifications-bring-your-own).
 The package READMEs have code samples.
@@ -109,20 +109,20 @@ repository, with checksums, an SBOM and signed build provenance. For
 example, to install client 0.1.0 with the core version that it needs:
 
 ```sh
-gh release download core-v0.1.0 --repo ConvoHop/sdks --dir convohop/core
-gh release download client-v0.1.0 --repo ConvoHop/sdks --dir convohop/client
+gh release download core-v0.1.0 --repo ConvoHop/sdks --dir relay/core
+gh release download client-v0.1.0 --repo ConvoHop/sdks --dir relay/client
 
 # Check the downloads. On macOS, use `shasum -a 256 -c SHA256SUMS`.
-(cd convohop/core && sha256sum -c SHA256SUMS)
-(cd convohop/client && sha256sum -c SHA256SUMS)
+(cd relay/core && sha256sum -c SHA256SUMS)
+(cd relay/client && sha256sum -c SHA256SUMS)
 
-npm install ./convohop/core/convohop-core-0.1.0.tgz ./convohop/client/convohop-client-0.1.0.tgz
+npm install ./relay/core/instantrelay-core-0.1.0.tgz ./relay/client/instantrelay-client-0.1.0.tgz
 ```
 
-- Always install the `@convohop/core` tarball in the same command.
-  Otherwise npm looks for `@convohop/core` on the registry, where it isn't
+- Always install the `@instantrelay/core` tarball in the same command.
+  Otherwise npm looks for `@instantrelay/core` on the registry, where it isn't
   published yet. To see the core version that a package needs, run
-  `tar -xzOf convohop/client/convohop-client-0.1.0.tgz package/package.json`.
+  `tar -xzOf relay/client/instantrelay-client-0.1.0.tgz package/package.json`.
 - npm saves the tarball paths in your `package.json`, so keep the tarballs
   with your project.
 - To check that this repository's release workflow built a tarball, see
@@ -151,8 +151,8 @@ run them against a real deployment.
 The unit tests and the mock don't need service credentials. They don't prove
 real WebRTC media, database persistence or the behavior of a hosted service.
 [CI](.github/workflows/sdk-ci.yml) runs the other checks on Node.js 22 and 24
-for every pull request. On Node.js 24, it also packs `@convohop/core`,
-`@convohop/client` and `@convohop/server` and runs `npm publish --dry-run`.
+for every pull request. On Node.js 24, it also packs `@instantrelay/core`,
+`@instantrelay/client` and `@instantrelay/server` and runs `npm publish --dry-run`.
 The [Conformance workflow](.github/workflows/conformance.yml) runs the
 scenarios on Node.js 24. Neither workflow publishes or deploys anything.
 
@@ -201,6 +201,12 @@ macOS runners. See [Build and test](swift/README.md#build-and-test).
 
 ## API contract
 
+Generated source is not proof of deployed support. This source catalog has
+92 operations; the last confirmed backend consumer pins SDK
+`d11bae63e3496f1b17e5041e3d45424cdc9a5c7c` with 79. The additional 13
+agent/spend-management fields need deployment qualification before use.
+This change does not advance that consumer's pin.
+
 - The Communication API and the Management API have separate origins. Each
   serves GraphQL at an unversioned `/graphql` path. Realtime uses the
   `graphql-transport-ws` protocol on the Communication origin's `/graphql`.
@@ -223,7 +229,7 @@ macOS runners. See [Build and test](swift/README.md#build-and-test).
 - Keep backend keys and management credentials on servers that you control.
   Never put them in browser or app bundles, URLs, storage or logs.
 - Authenticate each user with your own sign-in before your backend maps them
-  to a ConvoHop identity. A user ID sent by a client isn't proof of identity.
+  to a Relay identity. A user ID sent by a client isn't proof of identity.
 - Recovery storage holds original request inputs, which can include message
   text, so treat it as application data. It never holds bearer tokens, media
   grants or credential-delivery permits.
@@ -251,7 +257,7 @@ To report a vulnerability, see [SECURITY.md](SECURITY.md).
   [session refresh](packages/client/README.md#session-credential-lifetime).
 - Starting or joining a call, connecting media, and turning on the microphone
   or camera are separate, explicit steps. A reconnect starts with capture
-  off. Media admission needs the matching ConvoHop media server (SFU) and
+  off. Media admission needs the matching Relay media server (SFU) and
   current authorization. A token, membership or open WebSocket alone doesn't
   grant media forwarding. After a server restart, the old call ends through
   durable recovery instead of continuing transparently.
@@ -292,4 +298,4 @@ To report a vulnerability, see [SECURITY.md](SECURITY.md).
 
 The SDK source is licensed under the [Apache License, Version 2.0](LICENSE).
 See [NOTICE](NOTICE). The license covers this source code. It doesn't grant
-access to a hosted ConvoHop service.
+access to a hosted Relay service.

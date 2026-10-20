@@ -92,11 +92,11 @@ mutation CommunicationRevokeSession($context: RequestContextInput!, $input: Revo
 | Language | Members |
 | --- | --- |
 | [TypeScript](../../typescript/reference/operations.md) | [`ProjectServerClient.sessions.revoke`](../../typescript/reference/server.md#projectserverclientsessionsrevoke-property) |
-| [Python](../../python/reference/operations.md) | [`ConvoHop.revoke_session`](../../python/reference/convohop.md#convohoprevoke_session-method), [`AsyncConvoHop.revoke_session`](../../python/reference/convohop.md#asyncconvohoprevoke_session-method) |
-| [.NET](../../dotnet/reference/operations.md) | [`ServerSessions.RevokeAsync`](../../dotnet/reference/convohop.md#serversessionsrevokeasync-method), [`CommunicationApi.RevokeSessionAsync`](../../dotnet/reference/api.md#communicationapirevokesessionasync-method) |
+| [Python](../../python/reference/operations.md) | [`Relay.revoke_session`](../../python/reference/instantrelay.md#relayrevoke_session-method), [`AsyncRelay.revoke_session`](../../python/reference/instantrelay.md#asyncrelayrevoke_session-method) |
+| [.NET](../../dotnet/reference/operations.md) | [`ServerSessions.RevokeAsync`](../../dotnet/reference/relay.md#serversessionsrevokeasync-method), [`CommunicationApi.RevokeSessionAsync`](../../dotnet/reference/api.md#communicationapirevokesessionasync-method) |
 | [Java and Kotlin](../../jvm/reference/operations.md) | [`ProjectServerClient.sessions.revoke`](../../jvm/reference/server.md#projectserverclientsessionsrevoke-method), [`CommunicationApi.revokeSession`](../../jvm/reference/server.md#communicationapirevokesession-method), [`CommunicationSuspendApi.revokeSession`](../../jvm/reference/server-kotlin.md#communicationsuspendapirevokesession-method) |
-| [Go](../../go/reference/operations.md) | [`ProjectClient.RevokeSession`](../../go/reference/convohop.md#projectclientrevokesession-method) |
+| [Go](../../go/reference/operations.md) | [`ProjectClient.RevokeSession`](../../go/reference/relay.md#projectclientrevokesession-method) |
 | [Swift](../../swift/reference/operations.md) | Not wrapped by a method |
 | [Android](../../android/reference/operations.md) | Not wrapped by a method |
-| [Flutter](../../flutter/reference/operations.md) | [`CommunicationOperations.revokeSession`](../../flutter/reference/convohop.md#communicationoperationsrevokesession-method) |
+| [Flutter](../../flutter/reference/operations.md) | [`CommunicationOperations.revokeSession`](../../flutter/reference/instantrelay.md#communicationoperationsrevokesession-method) |
 | [React Native](../../react-native/reference/operations.md) | Not wrapped by a method |

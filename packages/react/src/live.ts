@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useState, useSyncExternalStore } from "react";
-import type { ConvoHopClient, LiveConnectOptions, LiveParticipationHandle, LiveSessionHandle, MediaConnection, MediaOptions,
-  RemoteMedia } from "@convohop/client";
-import { toError, useConvoHop } from "./provider.js";
+import type { RelayClient, LiveConnectOptions, LiveParticipationHandle, LiveSessionHandle, MediaConnection, MediaOptions,
+  RemoteMedia } from "@instantrelay/client";
+import { toError, useRelay } from "./provider.js";
 
 const noop = () => undefined;
 
@@ -41,7 +41,7 @@ class LiveSessionTracker extends StateCell<LiveSessionState> {
   #loading: Promise<void> | undefined;
   #queued: Promise<void> | undefined;
   #closed = false;
-  constructor(readonly client: ConvoHopClient, readonly conversationId: string) { super(idleLive); }
+  constructor(readonly client: RelayClient, readonly conversationId: string) { super(idleLive); }
   refresh(): Promise<void> {
     if (this.#closed) return Promise.resolve();
     if (this.#queued) return this.#queued;
@@ -71,7 +71,7 @@ class LiveSessionTracker extends StateCell<LiveSessionState> {
  * in other cases, for example when a call push notification arrives.
  */
 export function useLiveSession(conversationId: string | null | undefined): LiveSessionView {
-  const { client, events } = useConvoHop();
+  const { client, events } = useRelay();
   const [tracker, setTracker] = useState<LiveSessionTracker>();
   useEffect(() => {
     if (!conversationId) return;

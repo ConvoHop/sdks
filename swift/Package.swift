@@ -3,41 +3,41 @@
 import PackageDescription
 
 let package = Package(
-    name: "ConvoHop",
+    name: "Relay",
     platforms: [
         .iOS(.v15),
         .macOS(.v12),
     ],
     products: [
         // The client: sessions, conversations, messages, realtime, calls and push routing.
-        .library(name: "ConvoHop", targets: ["ConvoHop"]),
+        .library(name: "Relay", targets: ["Relay"]),
         // Native call media with the official LiveKit Swift SDK.
-        .library(name: "ConvoHopLiveKit", targets: ["ConvoHopLiveKit"]),
+        .library(name: "RelayLiveKit", targets: ["RelayLiveKit"]),
         // Push payload parsing and dedupe. Foundation only and safe in app extensions.
-        .library(name: "ConvoHopPush", targets: ["ConvoHopPush"]),
+        .library(name: "RelayPush", targets: ["RelayPush"]),
         // PushKit to CallKit for incoming calls, and CallKit for outgoing calls.
-        .library(name: "ConvoHopCalls", targets: ["ConvoHopCalls"]),
+        .library(name: "RelayCalls", targets: ["RelayCalls"]),
         // A Notification Service Extension helper that fetches message content on the device.
-        .library(name: "ConvoHopNotificationService", targets: ["ConvoHopNotificationService"]),
+        .library(name: "RelayNotificationService", targets: ["RelayNotificationService"]),
     ],
     dependencies: [
         .package(url: "https://github.com/livekit/client-sdk-swift.git", from: "2.17.0"),
     ],
     targets: [
-        .target(name: "ConvoHopPush"),
-        .target(name: "ConvoHopCalls", dependencies: ["ConvoHopPush"]),
-        .target(name: "ConvoHop", dependencies: ["ConvoHopPush"]),
-        .target(name: "ConvoHopNotificationService", dependencies: ["ConvoHop", "ConvoHopPush"]),
+        .target(name: "RelayPush"),
+        .target(name: "RelayCalls", dependencies: ["RelayPush"]),
+        .target(name: "Relay", dependencies: ["RelayPush"]),
+        .target(name: "RelayNotificationService", dependencies: ["Relay", "RelayPush"]),
         .target(
-            name: "ConvoHopLiveKit",
+            name: "RelayLiveKit",
             dependencies: [
-                "ConvoHop",
+                "Relay",
                 .product(name: "LiveKit", package: "client-sdk-swift"),
             ]
         ),
         .testTarget(
-            name: "ConvoHopTests",
-            dependencies: ["ConvoHop", "ConvoHopPush", "ConvoHopCalls", "ConvoHopNotificationService"],
+            name: "RelayTests",
+            dependencies: ["Relay", "RelayPush", "RelayCalls", "RelayNotificationService"],
             resources: [.copy("Fixtures")]
         ),
     ]

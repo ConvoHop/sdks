@@ -21,7 +21,7 @@ import (
 var repoRoot = filepath.Join("..", "..", "..", "..")
 
 // mockTarget is the conformance mock's descriptor: a local stand-in for the
-// ConvoHop API.
+// Relay API.
 type mockTarget struct {
 	CommunicationURL string `json:"communicationUrl"`
 	ProjectID        string `json:"projectId"`
@@ -88,10 +88,10 @@ func startMock(t *testing.T) mockTarget {
 }
 
 // projectConfig is the mock's project, as your backend configures it.
-func projectConfig(t *testing.T) convohop.ProjectConfig {
+func projectConfig(t *testing.T) relay.ProjectConfig {
 	t.Helper()
 	target := startMock(t)
-	return convohop.ProjectConfig{
+	return relay.ProjectConfig{
 		BaseURL:     target.CommunicationURL,
 		ProjectID:   target.ProjectID,
 		Incarnation: target.Incarnation,

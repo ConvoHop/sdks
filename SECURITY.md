@@ -22,7 +22,7 @@ of the following as you can:
 - Any mitigation or fix you suggest.
 
 Never include working credentials. Redact tokens, backend keys, session
-credentials and personal data from code, logs and screenshots. If a ConvoHop
+credentials and personal data from code, logs and screenshots. If a Relay
 credential was exposed, revoke or rotate it before you report.
 
 ## What to expect
@@ -61,7 +61,7 @@ In scope:
 - SDK behavior that could expose credentials, bypass authorization, replay or
   duplicate requests, or leak data between users.
 
-Vulnerabilities in the hosted ConvoHop service can be reported through the
+Vulnerabilities in the hosted Relay service can be reported through the
 same form. We'll route them to the right team.
 
 Out of scope:

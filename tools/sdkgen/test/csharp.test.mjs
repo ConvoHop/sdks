@@ -10,7 +10,7 @@ const renderCs = (ir, layers) => Object.fromEntries(csharp.emit(ir, layers ? { l
 const ALL_LAYERS = ["client", "server", "both"];
 
 test("the C# emitter renders every layer of the edge fixture to the golden files", () => {
-  // dotnet/test/ConvoHop.SdkgenEdge compiles these files with the runtime they depend on.
+  // dotnet/test/Relay.SdkgenEdge compiles these files with the runtime they depend on.
   assertGoldenTree("edge-all-layers", csharp.emit(buildIr(fixtureSources()), { layers: ALL_LAYERS }));
 });
 
@@ -24,7 +24,7 @@ test("C# literals and member names keep schema text from ending a literal or bec
   const keyword = JSON.parse(JSON.stringify(buildIr(fixtureSources())).replaceAll('"Widget"', '"object"'));
   const files = renderCs(keyword);
   assert.match(files["Outputs.cs"], /\n {4}public sealed class @object\n/);
-  assert.match(files["JsonContext.cs"], /typeof\(global::ConvoHop\.Models\.@object\)/);
+  assert.match(files["JsonContext.cs"], /typeof\(global::Relay\.Models\.@object\)/);
 });
 
 test("C# error codes say whether the schema marks each code retryable, and null for a code it doesn't list", () => {
@@ -107,11 +107,11 @@ test("the C# emitter rejects names and type positions it cannot map", () => {
 test("the C# emitter renders a plane API per plane with lazy pages methods for cursor-paginated queries", () => {
   const block = lines => lines.map(line => `        ${line}`).join("\n");
   const pages = (method, page, input, reply, plane, member, cursor, scalar, order, accessor) => block([
-    `public global::System.Collections.Generic.IAsyncEnumerable<global::ConvoHop.Models.${page}> ${method}(global::ConvoHop.Models.${input} input, global::System.Threading.CancellationToken cancellationToken = default)`,
+    `public global::System.Collections.Generic.IAsyncEnumerable<global::Relay.Models.${page}> ${method}(global::Relay.Models.${input} input, global::System.Threading.CancellationToken cancellationToken = default)`,
     "{",
-    `    return global::ConvoHop.Internal.PageSequence.Create<global::ConvoHop.Models.${input}, global::ConvoHop.Models.${reply}, global::ConvoHop.Models.${page}>(`,
-    `        _executor, global::ConvoHop.Operations.${plane}.${member}, input, "${cursor}",`,
-    `        global::ConvoHop.Generated.GeneratedSchema.Types["${scalar}"], global::ConvoHop.Internal.PageOrder.${order},`,
+    `    return global::Relay.Internal.PageSequence.Create<global::Relay.Models.${input}, global::Relay.Models.${reply}, global::Relay.Models.${page}>(`,
+    `        _executor, global::Relay.Operations.${plane}.${member}, input, "${cursor}",`,
+    `        global::Relay.Generated.GeneratedSchema.Types["${scalar}"], global::Relay.Internal.PageOrder.${order},`,
     `        ${accessor}, page => page.Complete, page => page.RefreshRequired, page => page.NextCursor,`,
     "        cancellationToken);",
     "}",
@@ -127,25 +127,25 @@ test("the C# emitter renders a plane API per plane with lazy pages methods for c
   assert.deepEqual(management.match(/\w+PagesAsync(?=\()/g), ["AgentGrantsPagesAsync", "AgentAuditEventsPagesAsync"],
     "bounded and unpaginated queries get no pages method");
   assert.ok(repo.includes(block([
-    "public global::System.Threading.Tasks.Task<global::ConvoHop.Models.RedeemCredentialReply> RedeemCredentialAsync(global::ConvoHop.Models.RedeemCredentialRequestInput input, global::System.Text.Json.JsonElement credentialDeliveryPermit, string? requestId = null, global::System.Threading.CancellationToken cancellationToken = default)",
+    "public global::System.Threading.Tasks.Task<global::Relay.Models.RedeemCredentialReply> RedeemCredentialAsync(global::Relay.Models.RedeemCredentialRequestInput input, global::System.Text.Json.JsonElement credentialDeliveryPermit, string? requestId = null, global::System.Threading.CancellationToken cancellationToken = default)",
     "{",
     "    if (input is null) throw new global::System.ArgumentNullException(nameof(input));",
     '    if (credentialDeliveryPermit.ValueKind == global::System.Text.Json.JsonValueKind.Undefined) throw new global::System.ArgumentException("Expected a credential, not a default JsonElement", nameof(credentialDeliveryPermit));',
-    "    return _executor.ExecuteAsync(global::ConvoHop.Operations.Communication.RedeemCredential, input, requestId, credentialDeliveryPermit, cancellationToken);",
+    "    return _executor.ExecuteAsync(global::Relay.Operations.Communication.RedeemCredential, input, requestId, credentialDeliveryPermit, cancellationToken);",
     "}",
   ])), "a context credential is a parameter, and only sameRequest mutations take a request ID");
-  assert.match(repo, /<para>Destructive: it deletes, revokes, removes, disables or ends something\.<\/para>\n(?: {8}\/\/\/ .*\n)*? {8}public global::System\.Threading\.Tasks\.Task<global::ConvoHop\.Models\.DeleteMessageReply> DeleteMessageAsync\(/);
-  assert.match(repo, /public global::System\.Threading\.Tasks\.Task<global::ConvoHop\.Models\.CapabilitiesReply> CapabilitiesAsync\(global::System\.Threading\.CancellationToken cancellationToken = default\)\n {8}\{\n {12}return _executor\.ExecuteAsync\(global::ConvoHop\.Operations\.Management\.Capabilities, global::ConvoHop\.NoInput\.Value, null, null, cancellationToken\);/);
+  assert.match(repo, /<para>Destructive: it deletes, revokes, removes, disables or ends something\.<\/para>\n(?: {8}\/\/\/ .*\n)*? {8}public global::System\.Threading\.Tasks\.Task<global::Relay\.Models\.DeleteMessageReply> DeleteMessageAsync\(/);
+  assert.match(repo, /public global::System\.Threading\.Tasks\.Task<global::Relay\.Models\.CapabilitiesReply> CapabilitiesAsync\(global::System\.Threading\.CancellationToken cancellationToken = default\)\n {8}\{\n {12}return _executor\.ExecuteAsync\(global::Relay\.Operations\.Management\.Capabilities, global::Relay\.NoInput\.Value, null, null, cancellationToken\);/);
 
   const edge = renderCs(buildIr(fixtureSources()), ALL_LAYERS)["Apis.cs"];
   assert.ok(edge.includes(pages("ItemsPagesAsync", "ItemPage", "ItemsInput", "ItemPage", "Alpha", "Items", "cursor", "String", "Opaque", "reply => reply")),
     "an empty pagePath pages the result itself");
   assert.ok(edge.includes(pages("EventsPagesAsync", "EventPage", "EventsInput", "EventPage", "Alpha", "Events", "after", "String", "Opaque", "reply => reply")),
     "an ordered style compares only decimal cursors");
-  assert.match(edge, /\[global::System\.Obsolete\("Use capabilities\."\)\]\n {8}public global::System\.Threading\.Tasks\.Task<int\?> FetchHttpStatusAsync\(global::ConvoHop\.Models\.FetchInput\? input = null, global::System\.Threading\.CancellationToken cancellationToken = default\)\n/);
-  assert.match(edge, /public global::System\.Threading\.Tasks\.Task<bool> PingAsync\(global::ConvoHop\.Models\.PingInput\? input = null, global::System\.Threading\.CancellationToken cancellationToken = default\)\n/,
+  assert.match(edge, /\[global::System\.Obsolete\("Use capabilities\."\)\]\n {8}public global::System\.Threading\.Tasks\.Task<int\?> FetchHttpStatusAsync\(global::Relay\.Models\.FetchInput\? input = null, global::System\.Threading\.CancellationToken cancellationToken = default\)\n/);
+  assert.match(edge, /public global::System\.Threading\.Tasks\.Task<bool> PingAsync\(global::Relay\.Models\.PingInput\? input = null, global::System\.Threading\.CancellationToken cancellationToken = default\)\n/,
     "an ephemeral mutation takes no request ID");
-  assert.match(edge, /RedeemAsync\(global::ConvoHop\.Models\.RedeemInput input, string permit, string\? requestId = null, global::System\.Threading\.CancellationToken cancellationToken = default\)\n {8}\{\n {12}if \(input is null\) throw new global::System\.ArgumentNullException\(nameof\(input\)\);\n {12}if \(permit is null\) throw new global::System\.ArgumentNullException\(nameof\(permit\)\);\n/);
+  assert.match(edge, /RedeemAsync\(global::Relay\.Models\.RedeemInput input, string permit, string\? requestId = null, global::System\.Threading\.CancellationToken cancellationToken = default\)\n {8}\{\n {12}if \(input is null\) throw new global::System\.ArgumentNullException\(nameof\(input\)\);\n {12}if \(permit is null\) throw new global::System\.ArgumentNullException\(nameof\(permit\)\);\n/);
   assert.ok(!edge.slice(edge.indexOf("public sealed class BetaApi")).includes("PagesAsync"));
 });
 

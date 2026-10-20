@@ -1,5 +1,5 @@
-export * from "@convohop/core";
-export { ConvoHopManagementClient } from "./management.js";
+export * from "@instantrelay/core";
+export { RelayManagementClient } from "./management.js";
 export type { DeploymentOptions, ProjectOptions } from "./management.js";
 export { ProjectServerClient } from "./project.js";
 export type {

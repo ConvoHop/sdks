@@ -10,7 +10,7 @@ import (
 	convohop "github.com/ConvoHop/sdks/go"
 )
 
-func connect(t *testing.T) (*convohop.ProjectClient, convohop.ProjectConfig) {
+func connect(t *testing.T) (*relay.ProjectClient, relay.ProjectConfig) {
 	t.Helper()
 	config := projectConfig(t)
 	client, err := examples.Connect(t.Context(), config)
@@ -20,7 +20,7 @@ func connect(t *testing.T) (*convohop.ProjectClient, convohop.ProjectConfig) {
 	return client, config
 }
 
-func login(t *testing.T, client *convohop.ProjectClient, config convohop.ProjectConfig, accountID string) *examples.Login {
+func login(t *testing.T, client *relay.ProjectClient, config relay.ProjectConfig, accountID string) *examples.Login {
 	t.Helper()
 	login, err := examples.BootstrapUser(t.Context(), client, config, accountID, newUUID())
 	if err != nil {
@@ -34,7 +34,7 @@ type room struct {
 	alice, bob, conversationID string
 }
 
-func setUp(t *testing.T, client *convohop.ProjectClient, config convohop.ProjectConfig, title string) room {
+func setUp(t *testing.T, client *relay.ProjectClient, config relay.ProjectConfig, title string) room {
 	t.Helper()
 	alice := login(t, client, config, "alice-"+newUUID()).Session.PrincipalID
 	bob := login(t, client, config, "bob-"+newUUID()).Session.PrincipalID
@@ -45,7 +45,7 @@ func setUp(t *testing.T, client *convohop.ProjectClient, config convohop.Project
 	return room{alice: alice, bob: bob, conversationID: conversationID}
 }
 
-func (r room) send(t *testing.T, client *convohop.ProjectClient, authorID, text string) line {
+func (r room) send(t *testing.T, client *relay.ProjectClient, authorID, text string) line {
 	t.Helper()
 	messageID, err := examples.SendAs(t.Context(), client, r.conversationID, authorID, text, newUUID())
 	if err != nil {
@@ -59,7 +59,7 @@ type line struct {
 	messageID, authorID, text string
 }
 
-func lines(messages []convohop.Message) []line {
+func lines(messages []relay.Message) []line {
 	found := []line{}
 	for _, message := range messages {
 		text := ""

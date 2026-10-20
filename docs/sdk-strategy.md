@@ -1,6 +1,6 @@
-# ConvoHop SDK strategy
+# Relay SDK strategy
 
-This document is the public plan for the ConvoHop SDKs. It covers how the SDKs
+This document is the public plan for the Relay SDKs. It covers how the SDKs
 are split, which languages and platforms they cover, how push notifications
 work, what the packages are called, and how they're versioned and supported.
 
@@ -15,14 +15,14 @@ work, what the packages are called, and how they're versioned and supported.
 
 | Layer | Credential | Languages and platforms | Available today as source |
 | --- | --- | --- | --- |
-| Server SDKs | Secret backend key | Node.js (TypeScript), Python, .NET, Java and Kotlin, Go | Node.js: [`@convohop/server`](../packages/server/README.md); Java and Kotlin: [`convohop-server`](../jvm/README.md); .NET: [`ConvoHop`](../dotnet/README.md); Go: [`github.com/ConvoHop/sdks/go`](../go/README.md); Python: [`convohop`](../python/README.md) |
-| Client SDKs | Short-lived session for one user | Web (TypeScript) with React hooks, iOS and macOS (Swift), Android (Kotlin), React Native, Flutter | Web: [`@convohop/client`](../packages/client/README.md); React: [`@convohop/react`](../packages/react/README.md); Android: [`convohop-android`](../android/README.md); Flutter: [`convohop`](../flutter/README.md); iOS and macOS: [`ConvoHop`](../swift/README.md) |
+| Server SDKs | Secret backend key | Node.js (TypeScript), Python, .NET, Java and Kotlin, Go | Node.js: [`@instantrelay/server`](../packages/server/README.md); Java and Kotlin: [`relay-server`](../jvm/README.md); .NET: [`InstantRelay`](../dotnet/README.md); Go: [`github.com/ConvoHop/sdks/go`](../go/README.md); Python: [`instantrelay`](../python/README.md) |
+| Client SDKs | Short-lived session for one user | Web (TypeScript) with React hooks, iOS and macOS (Swift), Android (Kotlin), React Native, Flutter | Web: [`@instantrelay/client`](../packages/client/README.md); React: [`@instantrelay/react`](../packages/react/README.md); Android: [`relay-android`](../android/README.md); Flutter: [`instantrelay`](../flutter/README.md); iOS and macOS: [`Relay`](../swift/README.md) |
 
 Everything else in this document is planned unless it says otherwise.
 
 ## Two layers, split by credential and runtime
 
-Every ConvoHop SDK belongs to one of two layers. What decides the layer is the
+Every Relay SDK belongs to one of two layers. What decides the layer is the
 credential the SDK holds and where the code runs, not which features it has.
 Both layers can read message history and send messages. They differ in whose
 authority they act with and where they can safely run.
@@ -48,7 +48,7 @@ credentials in a secret store, and never send them to a device.
 
 They cover the control plane:
 
-- Map your authenticated users to ConvoHop identities, and issue, renew and
+- Map your authenticated users to Relay identities, and issue, renew and
   revoke their short-lived client sessions.
 - Create conversations, and manage members, roles and permissions.
 - Moderate messages and control calls.
@@ -103,7 +103,7 @@ A client SDK can do what that user is allowed to do:
 sequenceDiagram
     participant App as Your app (client SDK)
     participant Backend as Your backend (server SDK)
-    participant API as ConvoHop API
+    participant API as Relay API
     participant Push as Your push provider
     App->>Backend: Sign in with your own authentication
     Backend->>API: Map the user to an identity and issue a session (backend key)
@@ -138,12 +138,12 @@ GraphQL API directly. The schemas in [`schema/`](../schema) describe it.
 | React | Hooks on top of the Web SDK | Same as Web | Source available |
 | iOS and macOS | Swift | LiveKit Swift SDK | Source available |
 | Android | Kotlin | LiveKit Android SDK | Source available |
-| React Native | TypeScript, sharing `@convohop/core` and `@convohop/client` with Web | LiveKit React Native SDK | In development; see the [design](react-native.md) |
+| React Native | TypeScript, sharing `@instantrelay/core` and `@instantrelay/client` with Web | LiveKit React Native SDK | In development; see the [design](react-native.md) |
 | Flutter | Dart | LiveKit Flutter SDK | Source available |
 
 ### How the SDKs are built
 
-- **One spec, many targets.** The GraphQL schemas exported by the ConvoHop API
+- **One spec, many targets.** The GraphQL schemas exported by the Relay API
   are the source of truth. Annotations record which layer can call each
   operation, the credential it needs, and how it paginates, retries and
   streams. Together they compile into a language-neutral intermediate
@@ -170,7 +170,7 @@ GraphQL API directly. The schemas in [`schema/`](../schema) describe it.
 
 Today the annotations, the IR and its TypeScript, Dart and reference-snippet
 generators exist. `npm run generate:graphql` generates the operations and
-types in `@convohop/core` and the Flutter SDK, and one reference snippet per
+types in `@instantrelay/core` and the Flutter SDK, and one reference snippet per
 operation, from [`schema/`](../schema). See
 [SDK generation](sdk-generation.md). The
 [conformance suite](../spec/conformance/README.md) runs its scenarios through
@@ -187,7 +187,7 @@ conformance driver. The [Flutter SDK](../flutter/README.md) adds a Dart
 generator and its own conformance driver. The
 [Swift client SDK](../swift/README.md) adds a Swift generator and its own
 conformance driver. Generators for the other languages are in development.
-The same IR generates the operation catalog of the `convohop` command-line
+The same IR generates the operation catalog of the `relay` command-line
 tool ([`packages/cli`](../packages/cli/README.md)) and the tools of an MCP
 server for AI agents ([`packages/mcp`](../packages/mcp/README.md)). Neither is
 released yet.
@@ -229,12 +229,12 @@ frames.
 
 Treat `connectToken` as a password. Don't log or store it, and send it only
 to `livekitUrl`. The Web SDK connects the same way, with `livekit-client`.
-Only the ConvoHop media server enforces these rules; a stock LiveKit server
+Only the Relay media server enforces these rules; a stock LiveKit server
 can't.
 
 ## Push notifications: bring your own
 
-ConvoHop doesn't send push notifications for you, and it never stores device
+Relay doesn't send push notifications for you, and it never stores device
 tokens. You keep control of:
 
 - Your push credentials: APNs keys or certificates, Firebase Cloud Messaging
@@ -252,7 +252,7 @@ How it works:
    sends it to your backend. On Android, that's the FCM registration token,
    or a Firebase Installation ID (FID) when the app's manifest sets
    `firebase_messaging_installation_id_enabled`.
-2. When a user should be notified, ConvoHop sends your backend a signed
+2. When a user should be notified, Relay sends your backend a signed
    webhook with a per-recipient notification event. Examples are a new
    message in one of their conversations, an incoming call, or a call that
    stopped ringing. Events carry identifiers, such as the recipient,
@@ -315,38 +315,37 @@ registry yet.
 > package with one of these names, or a similar name, as untrusted. Release
 > notes in this repository will list each official package when it's
 > published. Until then, install the TypeScript packages from this
-> repository's GitHub Releases, together with the `@convohop/core` release
+> repository's GitHub Releases, together with the `@instantrelay/core` release
 > that they need, as described in
 > [Installing and verifying a release](../RELEASING.md#installing-and-verifying-a-release).
 
 | Ecosystem | Server SDK | Client SDKs |
 | --- | --- | --- |
-| npm | `@convohop/server` | `@convohop/client` (Web), `@convohop/react`, `@convohop/react-native` |
-| PyPI | `convohop` | None |
-| NuGet | `ConvoHop` | None |
-| Maven Central | `com.convohop:convohop-server` (Java), `com.convohop:convohop-server-kotlin` (Kotlin coroutines) | `com.convohop:convohop-android`, which brings in `com.convohop:convohop-android-core` and `com.convohop:convohop-android-push` |
+| npm | `@instantrelay/server` | `@instantrelay/client` (Web), `@instantrelay/react`, `@instantrelay/react-native` |
+| PyPI | `instantrelay` | None |
+| NuGet | `InstantRelay` (namespace `Relay`) | None |
+| Maven Central | `dev.instantrelay:relay-server` (Java), `dev.instantrelay:relay-server-kotlin` (Kotlin coroutines) | `dev.instantrelay:relay-android`, which brings in `dev.instantrelay:relay-android-core` and `dev.instantrelay:relay-android-push` |
 | Go modules | `github.com/ConvoHop/sdks/go` | None |
-| Swift Package Manager | None | `ConvoHop`, from `github.com/ConvoHop/convohop-swift` |
-| pub.dev | None | `convohop` (Flutter) |
-| npm, tools | `@convohop/cli` (the `convohop` command), `@convohop/mcp` (an MCP server) | None |
+| Swift Package Manager | None | `Relay`, local source until its distribution repository is ready |
+| pub.dev | None | `instantrelay` (Flutter) |
+| npm, tools | `@instantrelay/cli` (the `relay` command), `@instantrelay/mcp` (an MCP server) | None |
 
 Notes:
 
-- **npm.** `@convohop/core` holds the shared TypeScript protocol and runtime.
+- **npm.** `@instantrelay/core` holds the shared TypeScript protocol and runtime.
   It's installed as a dependency of the other packages, but it isn't a
-  supported entry point, so don't import it directly. `@convohop/core`,
-  `@convohop/client` and `@convohop/server` are developed in this
+  supported entry point, so don't import it directly. `@instantrelay/core`,
+  `@instantrelay/client` and `@instantrelay/server` are developed in this
   repository, and their releases are attached to its GitHub Releases.
-  `@convohop/react` is developed here too, but it isn't in a release yet. The
-  earlier transitional workspace names,
-  `@convohop/browser-sdk` and `@convohop/server-sdk`, were removed before any
-  release and were never published.
-- **PyPI.** A single distribution, `convohop`, with the import package
-  `convohop`. It includes both the synchronous and the `asyncio` clients.
-- **NuGet.** `ConvoHop`. Optional add-ons, such as framework integrations,
-  use the `ConvoHop.*` prefix.
+  `@instantrelay/react` is developed here too, but it isn't in a release yet. The
+  earlier transitional workspace names were removed before any release and
+  were never published.
+- **PyPI.** A single distribution, `instantrelay`, with the import package
+  `instantrelay`. It includes both the synchronous and the `asyncio` clients.
+- **NuGet.** Package `InstantRelay`, assembly and root namespace `Relay`.
+  Any future add-on package needs its own explicit ownership/trust scope.
 - **Go.** The module lives in the `go/` directory of this repository, and
-  releases are tagged `go/vX.Y.Z`. The package name is `convohop`, because
+  releases are tagged `go/vX.Y.Z`. The package name is `relay`, because
   `go` is a reserved word. From major version 2, the module path ends in a
   major-version suffix such as `/v2`, as Go modules require. Module paths
   are case-sensitive.
@@ -357,11 +356,15 @@ Notes:
   don't plan to publish to
   CocoaPods, because its trunk is scheduled to become read-only in December
   2026.
-- **Maven Central and pub.dev.** These names need namespace ownership
-  verification before the first release. They're confirmed when verification
-  completes.
-- **npm tools.** `@convohop/cli` and `@convohop/mcp` are built on
-  `@convohop/server` and use its server credentials, so they're listed with
+- **Namespace ownership.** Names derive from the production domain,
+  `instantrelay.dev`, because plain `relay` names are occupied.
+  `dev.instantrelay` needs Central's domain-ownership verification.
+  npm needs owner-confirmed `@instantrelay` scope control; PyPI, NuGet and
+  pub.dev need their own owner-confirmed package/trust setup.
+  A public 404 is not ownership or reservation evidence. pub.dev can
+  bootstrap under an individual uploader without a verified publisher.
+- **npm tools.** `@instantrelay/cli` and `@instantrelay/mcp` are built on
+  `@instantrelay/server` and use its server credentials, so they're listed with
   the server SDK. They're private workspaces in this repository and aren't
   released yet.
 
@@ -379,8 +382,8 @@ Notes:
     package is at 0.x.
 - When a package is released, the packages in this repository that depend
   on it are released too, with at least a patch release. For example, a
-  `@convohop/core` release also releases `@convohop/client` and
-  `@convohop/server`.
+  `@instantrelay/core` release also releases `@instantrelay/client` and
+  `@instantrelay/server`.
 - Prereleases, such as `0.3.0-rc.1`, are marked as prereleases on GitHub
   and use the `next` tag on npm.
 - [RELEASING.md](../RELEASING.md) describes the release process.
@@ -472,12 +475,16 @@ macOS 12.
   check with `gh attestation verify`.
 - Publishing uses short-lived OpenID Connect (OIDC) credentials (trusted
   publishing) on registries that support it, such as npm, PyPI, NuGet and
-  pub.dev, with build provenance where the registry offers it. No long-lived
-  registry tokens are stored. Maven Central releases are signed. Go modules
+  pub.dev, with build provenance where the registry offers it. Those paths
+  reject long-lived token fallbacks. Central's official API requires its
+  own Portal user token and existing PGP signing key, scoped to the protected
+  `maven` environment. Go modules
   are released with `go/vX.Y.Z` tags in this repository, and the Swift
   package with tags in its own repository.
-- Registry publishing hasn't started, and the npm publish step is a dry run
-  until it does. Until then, install a release from this repository's
+- Registry publishing hasn't started. Automatic npm releases only rehearse
+  publication; real registry publishers are default-off and require reviewed
+  tags, confirmed ownership/trust and registry-specific approval. Until then,
+  install a release from this repository's
   GitHub Releases, as described in
   [RELEASING.md](../RELEASING.md#installing-and-verifying-a-release), or
   build from source.
@@ -496,7 +503,7 @@ macOS 12.
   outcome, not as success or failure.
 - Recovery state that your app chooses to persist never contains tokens.
 - Webhooks are signed. Verify the signature of every delivery before you
-  trust it. `@convohop/server` provides `webhooks.verify()`, and the other
+  trust it. `@instantrelay/server` provides `webhooks.verify()`, and the other
   server SDKs will include the same check.
 
 To report a vulnerability, see [SECURITY.md](../SECURITY.md).

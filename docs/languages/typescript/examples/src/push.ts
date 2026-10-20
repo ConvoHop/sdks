@@ -9,7 +9,7 @@ import {
   type FcmRequest,
   type WebhookNotificationEvent,
   type WebPushRequest,
-} from "@convohop/server";
+} from "@instantrelay/server";
 
 // The devices your app registered for a user, from your own database.
 export type Device =

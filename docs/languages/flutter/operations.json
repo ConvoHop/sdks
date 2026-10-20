@@ -2,214 +2,214 @@
   "$schema": "../../../spec/docs/operation-map.schema.json",
   "operations": {
     "communication.capabilities": [
-      "package:convohop/convohop.dart#CommunicationOperations.capabilities"
+      "package:instantrelay/instantrelay.dart#CommunicationOperations.capabilities"
     ],
     "communication.route": [
-      "package:convohop/convohop.dart#ConvoHopClient.initialize",
-      "package:convohop/convohop.dart#ConvoHopClient.refreshSession",
-      "package:convohop/convohop.dart#ConvoHopClient.resyncAuthorizedHistory",
-      "package:convohop/convohop.dart#SessionRefresher.SessionRefresher",
-      "package:convohop/convohop.dart#SessionRefresher.check",
-      "package:convohop/convohop.dart#CommunicationOperations.route"
+      "package:instantrelay/instantrelay.dart#RelayClient.initialize",
+      "package:instantrelay/instantrelay.dart#RelayClient.refreshSession",
+      "package:instantrelay/instantrelay.dart#RelayClient.resyncAuthorizedHistory",
+      "package:instantrelay/instantrelay.dart#SessionRefresher.SessionRefresher",
+      "package:instantrelay/instantrelay.dart#SessionRefresher.check",
+      "package:instantrelay/instantrelay.dart#CommunicationOperations.route"
     ],
     "communication.currentSession": [
-      "package:convohop/convohop.dart#ConvoHopClient.initialize",
-      "package:convohop/convohop.dart#ConvoHopClient.refreshSession",
-      "package:convohop/convohop.dart#SessionRefresher.SessionRefresher",
-      "package:convohop/convohop.dart#SessionRefresher.check",
-      "package:convohop/convohop.dart#CommunicationOperations.currentSession"
+      "package:instantrelay/instantrelay.dart#RelayClient.initialize",
+      "package:instantrelay/instantrelay.dart#RelayClient.refreshSession",
+      "package:instantrelay/instantrelay.dart#SessionRefresher.SessionRefresher",
+      "package:instantrelay/instantrelay.dart#SessionRefresher.check",
+      "package:instantrelay/instantrelay.dart#CommunicationOperations.currentSession"
     ],
     "communication.getConversation": [
-      "package:convohop/convohop.dart#ConvoHopClient.getConversation",
-      "package:convohop/convohop.dart#ConvoHopClient.resyncAuthorizedHistory",
-      "package:convohop/convohop.dart#ConversationHandle.get",
-      "package:convohop/convohop.dart#ConversationStore.ConversationStore",
-      "package:convohop/convohop.dart#ConversationStore.reconnect",
-      "package:convohop/convohop.dart#ConversationStore.resync",
-      "package:convohop/convohop.dart#ConversationStore.markRead",
-      "package:convohop/convohop.dart#CommunicationOperations.getConversation"
+      "package:instantrelay/instantrelay.dart#RelayClient.getConversation",
+      "package:instantrelay/instantrelay.dart#RelayClient.resyncAuthorizedHistory",
+      "package:instantrelay/instantrelay.dart#ConversationHandle.get",
+      "package:instantrelay/instantrelay.dart#ConversationStore.ConversationStore",
+      "package:instantrelay/instantrelay.dart#ConversationStore.reconnect",
+      "package:instantrelay/instantrelay.dart#ConversationStore.resync",
+      "package:instantrelay/instantrelay.dart#ConversationStore.markRead",
+      "package:instantrelay/instantrelay.dart#CommunicationOperations.getConversation"
     ],
     "communication.members": [
-      "package:convohop/convohop.dart#CommunicationOperations.members"
+      "package:instantrelay/instantrelay.dart#CommunicationOperations.members"
     ],
     "communication.messages": [
-      "package:convohop/convohop.dart#ConvoHopClient.messages",
-      "package:convohop/convohop.dart#ConversationMessages.list",
-      "package:convohop/convohop.dart#ConversationStore.ConversationStore",
-      "package:convohop/convohop.dart#ConversationStore.reconnect",
-      "package:convohop/convohop.dart#ConversationStore.resync",
-      "package:convohop/convohop.dart#ConversationStore.loadOlder",
-      "package:convohop/convohop.dart#CommunicationOperations.messages"
+      "package:instantrelay/instantrelay.dart#RelayClient.messages",
+      "package:instantrelay/instantrelay.dart#ConversationMessages.list",
+      "package:instantrelay/instantrelay.dart#ConversationStore.ConversationStore",
+      "package:instantrelay/instantrelay.dart#ConversationStore.reconnect",
+      "package:instantrelay/instantrelay.dart#ConversationStore.resync",
+      "package:instantrelay/instantrelay.dart#ConversationStore.loadOlder",
+      "package:instantrelay/instantrelay.dart#CommunicationOperations.messages"
     ],
     "communication.getMessage": [
-      "package:convohop/convohop.dart#ConvoHopClient.getMessage",
-      "package:convohop/convohop.dart#MessageNotification.fetchMessage",
-      "package:convohop/convohop.dart#ConversationStore.ConversationStore",
-      "package:convohop/convohop.dart#ConversationStore.reconnect",
-      "package:convohop/convohop.dart#ConversationStore.resync",
-      "package:convohop/convohop.dart#ConversationStore.send",
-      "package:convohop/convohop.dart#CommunicationOperations.getMessage"
+      "package:instantrelay/instantrelay.dart#RelayClient.getMessage",
+      "package:instantrelay/instantrelay.dart#MessageNotification.fetchMessage",
+      "package:instantrelay/instantrelay.dart#ConversationStore.ConversationStore",
+      "package:instantrelay/instantrelay.dart#ConversationStore.reconnect",
+      "package:instantrelay/instantrelay.dart#ConversationStore.resync",
+      "package:instantrelay/instantrelay.dart#ConversationStore.send",
+      "package:instantrelay/instantrelay.dart#CommunicationOperations.getMessage"
     ],
     "communication.events": [
-      "package:convohop/convohop.dart#ConvoHopClient.events",
-      "package:convohop/convohop.dart#ConvoHopClient.watch",
-      "package:convohop/convohop.dart#ConvoHopClient.resyncAuthorizedHistory",
-      "package:convohop/convohop.dart#ConversationStream.reconcile",
-      "package:convohop/convohop.dart#ConversationStore.ConversationStore",
-      "package:convohop/convohop.dart#ConversationStore.reconnect",
-      "package:convohop/convohop.dart#ConversationStore.resync",
-      "package:convohop/convohop.dart#CommunicationOperations.events"
+      "package:instantrelay/instantrelay.dart#RelayClient.events",
+      "package:instantrelay/instantrelay.dart#RelayClient.watch",
+      "package:instantrelay/instantrelay.dart#RelayClient.resyncAuthorizedHistory",
+      "package:instantrelay/instantrelay.dart#ConversationStream.reconcile",
+      "package:instantrelay/instantrelay.dart#ConversationStore.ConversationStore",
+      "package:instantrelay/instantrelay.dart#ConversationStore.reconnect",
+      "package:instantrelay/instantrelay.dart#ConversationStore.resync",
+      "package:instantrelay/instantrelay.dart#CommunicationOperations.events"
     ],
     "communication.receipts": [
-      "package:convohop/convohop.dart#ConvoHopClient.receipts",
-      "package:convohop/convohop.dart#ConversationStore.ConversationStore",
-      "package:convohop/convohop.dart#ConversationStore.reconnect",
-      "package:convohop/convohop.dart#ConversationStore.resync",
-      "package:convohop/convohop.dart#CommunicationOperations.receipts"
+      "package:instantrelay/instantrelay.dart#RelayClient.receipts",
+      "package:instantrelay/instantrelay.dart#ConversationStore.ConversationStore",
+      "package:instantrelay/instantrelay.dart#ConversationStore.reconnect",
+      "package:instantrelay/instantrelay.dart#ConversationStore.resync",
+      "package:instantrelay/instantrelay.dart#CommunicationOperations.receipts"
     ],
     "communication.inbox": [
-      "package:convohop/convohop.dart#ConvoHopClient.inbox",
-      "package:convohop/convohop.dart#CommunicationOperations.inbox"
+      "package:instantrelay/instantrelay.dart#RelayClient.inbox",
+      "package:instantrelay/instantrelay.dart#CommunicationOperations.inbox"
     ],
     "communication.search": [
-      "package:convohop/convohop.dart#ConvoHopClient.search",
-      "package:convohop/convohop.dart#CommunicationOperations.search"
+      "package:instantrelay/instantrelay.dart#RelayClient.search",
+      "package:instantrelay/instantrelay.dart#CommunicationOperations.search"
     ],
     "communication.resolveRequest": [
-      "package:convohop/convohop.dart#ClientRequests.resolve",
-      "package:convohop/convohop.dart#ClientRequests.retry",
-      "package:convohop/convohop.dart#ConvoHopClient.recoverPending",
-      "package:convohop/convohop.dart#ConvoHopClient.watch",
-      "package:convohop/convohop.dart#ConvoHopClient.resyncAuthorizedHistory",
-      "package:convohop/convohop.dart#ConvoHopTransport.retry",
-      "package:convohop/convohop.dart#ConvoHopOutbox.initialize",
-      "package:convohop/convohop.dart#ConvoHopOutbox.send",
-      "package:convohop/convohop.dart#ConvoHopOutbox.flush",
-      "package:convohop/convohop.dart#ConvoHopOutbox.resolve",
-      "package:convohop/convohop.dart#ConvoHopOutbox.resend",
-      "package:convohop/convohop.dart#ConversationStore.send",
-      "package:convohop/convohop.dart#ConversationStore.ConversationStore",
-      "package:convohop/convohop.dart#ConversationStore.reconnect",
-      "package:convohop/convohop.dart#ConversationStore.resync",
-      "package:convohop/convohop.dart#LiveParticipationHandle.connect",
-      "package:convohop/convohop.dart#LiveMediaConnection.reconnect",
-      "package:convohop/convohop.dart#CommunicationOperations.resolveRequest"
+      "package:instantrelay/instantrelay.dart#ClientRequests.resolve",
+      "package:instantrelay/instantrelay.dart#ClientRequests.retry",
+      "package:instantrelay/instantrelay.dart#RelayClient.recoverPending",
+      "package:instantrelay/instantrelay.dart#RelayClient.watch",
+      "package:instantrelay/instantrelay.dart#RelayClient.resyncAuthorizedHistory",
+      "package:instantrelay/instantrelay.dart#RelayTransport.retry",
+      "package:instantrelay/instantrelay.dart#RelayOutbox.initialize",
+      "package:instantrelay/instantrelay.dart#RelayOutbox.send",
+      "package:instantrelay/instantrelay.dart#RelayOutbox.flush",
+      "package:instantrelay/instantrelay.dart#RelayOutbox.resolve",
+      "package:instantrelay/instantrelay.dart#RelayOutbox.resend",
+      "package:instantrelay/instantrelay.dart#ConversationStore.send",
+      "package:instantrelay/instantrelay.dart#ConversationStore.ConversationStore",
+      "package:instantrelay/instantrelay.dart#ConversationStore.reconnect",
+      "package:instantrelay/instantrelay.dart#ConversationStore.resync",
+      "package:instantrelay/instantrelay.dart#LiveParticipationHandle.connect",
+      "package:instantrelay/instantrelay.dart#LiveMediaConnection.reconnect",
+      "package:instantrelay/instantrelay.dart#CommunicationOperations.resolveRequest"
     ],
     "communication.getOperation": [
-      "package:convohop/convohop.dart#CommunicationOperations.getOperation"
+      "package:instantrelay/instantrelay.dart#CommunicationOperations.getOperation"
     ],
     "communication.conversationMute": [
-      "package:convohop/convohop.dart#ConversationMuteControl.get",
-      "package:convohop/convohop.dart#CommunicationOperations.conversationMute"
+      "package:instantrelay/instantrelay.dart#ConversationMuteControl.get",
+      "package:instantrelay/instantrelay.dart#CommunicationOperations.conversationMute"
     ],
     "communication.currentLiveSession": [
-      "package:convohop/convohop.dart#ConversationLive.current",
-      "package:convohop/convohop.dart#CommunicationOperations.currentLiveSession"
+      "package:instantrelay/instantrelay.dart#ConversationLive.current",
+      "package:instantrelay/instantrelay.dart#CommunicationOperations.currentLiveSession"
     ],
     "communication.liveSession": [
-      "package:convohop/convohop.dart#ConvoHopClient.liveSession",
-      "package:convohop/convohop.dart#LiveSessionHandle.get",
-      "package:convohop/convohop.dart#LiveSessionHandle.participation",
-      "package:convohop/convohop.dart#LiveSessionHandle.end",
-      "package:convohop/convohop.dart#LiveStartOperation.ready",
-      "package:convohop/convohop.dart#LiveParticipationHandle.get",
-      "package:convohop/convohop.dart#LiveParticipationHandle.connect",
-      "package:convohop/convohop.dart#LiveMediaConnection.reconnect",
-      "package:convohop/convohop.dart#CommunicationOperations.liveSession"
+      "package:instantrelay/instantrelay.dart#RelayClient.liveSession",
+      "package:instantrelay/instantrelay.dart#LiveSessionHandle.get",
+      "package:instantrelay/instantrelay.dart#LiveSessionHandle.participation",
+      "package:instantrelay/instantrelay.dart#LiveSessionHandle.end",
+      "package:instantrelay/instantrelay.dart#LiveStartOperation.ready",
+      "package:instantrelay/instantrelay.dart#LiveParticipationHandle.get",
+      "package:instantrelay/instantrelay.dart#LiveParticipationHandle.connect",
+      "package:instantrelay/instantrelay.dart#LiveMediaConnection.reconnect",
+      "package:instantrelay/instantrelay.dart#CommunicationOperations.liveSession"
     ],
     "communication.liveSessions": [
-      "package:convohop/convohop.dart#ConversationLive.history",
-      "package:convohop/convohop.dart#CommunicationOperations.liveSessions"
+      "package:instantrelay/instantrelay.dart#ConversationLive.history",
+      "package:instantrelay/instantrelay.dart#CommunicationOperations.liveSessions"
     ],
     "communication.liveSessionParticipants": [
-      "package:convohop/convohop.dart#LiveSessionHandle.participants",
-      "package:convohop/convohop.dart#CommunicationOperations.liveSessionParticipants"
+      "package:instantrelay/instantrelay.dart#LiveSessionHandle.participants",
+      "package:instantrelay/instantrelay.dart#CommunicationOperations.liveSessionParticipants"
     ],
     "communication.liveSessionAlerts": [
-      "package:convohop/convohop.dart#LiveAlerts.list",
-      "package:convohop/convohop.dart#CommunicationOperations.liveSessionAlerts"
+      "package:instantrelay/instantrelay.dart#LiveAlerts.list",
+      "package:instantrelay/instantrelay.dart#CommunicationOperations.liveSessionAlerts"
     ],
     "communication.liveSessionOperation": [
-      "package:convohop/convohop.dart#LiveAction.get",
-      "package:convohop/convohop.dart#LiveAction.completed",
-      "package:convohop/convohop.dart#LiveStartOperation.ready",
-      "package:convohop/convohop.dart#CommunicationOperations.liveSessionOperation"
+      "package:instantrelay/instantrelay.dart#LiveAction.get",
+      "package:instantrelay/instantrelay.dart#LiveAction.completed",
+      "package:instantrelay/instantrelay.dart#LiveStartOperation.ready",
+      "package:instantrelay/instantrelay.dart#CommunicationOperations.liveSessionOperation"
     ],
     "communication.revokeSession": [
-      "package:convohop/convohop.dart#CommunicationOperations.revokeSession"
+      "package:instantrelay/instantrelay.dart#CommunicationOperations.revokeSession"
     ],
     "communication.updateConversation": [
-      "package:convohop/convohop.dart#CommunicationOperations.updateConversation"
+      "package:instantrelay/instantrelay.dart#CommunicationOperations.updateConversation"
     ],
     "communication.sendMessage": [
-      "package:convohop/convohop.dart#ConvoHopClient.send",
-      "package:convohop/convohop.dart#ConversationMessages.send",
-      "package:convohop/convohop.dart#ConvoHopOutbox.initialize",
-      "package:convohop/convohop.dart#ConvoHopOutbox.send",
-      "package:convohop/convohop.dart#ConvoHopOutbox.flush",
-      "package:convohop/convohop.dart#ConvoHopOutbox.resend",
-      "package:convohop/convohop.dart#ConversationStore.send",
-      "package:convohop/convohop.dart#CommunicationOperations.sendMessage"
+      "package:instantrelay/instantrelay.dart#RelayClient.send",
+      "package:instantrelay/instantrelay.dart#ConversationMessages.send",
+      "package:instantrelay/instantrelay.dart#RelayOutbox.initialize",
+      "package:instantrelay/instantrelay.dart#RelayOutbox.send",
+      "package:instantrelay/instantrelay.dart#RelayOutbox.flush",
+      "package:instantrelay/instantrelay.dart#RelayOutbox.resend",
+      "package:instantrelay/instantrelay.dart#ConversationStore.send",
+      "package:instantrelay/instantrelay.dart#CommunicationOperations.sendMessage"
     ],
     "communication.editMessage": [
-      "package:convohop/convohop.dart#ConvoHopClient.edit",
-      "package:convohop/convohop.dart#ConversationMessages.edit",
-      "package:convohop/convohop.dart#CommunicationOperations.editMessage"
+      "package:instantrelay/instantrelay.dart#RelayClient.edit",
+      "package:instantrelay/instantrelay.dart#ConversationMessages.edit",
+      "package:instantrelay/instantrelay.dart#CommunicationOperations.editMessage"
     ],
     "communication.deleteMessage": [
-      "package:convohop/convohop.dart#ConvoHopClient.delete",
-      "package:convohop/convohop.dart#ConversationMessages.delete",
-      "package:convohop/convohop.dart#CommunicationOperations.deleteMessage"
+      "package:instantrelay/instantrelay.dart#RelayClient.delete",
+      "package:instantrelay/instantrelay.dart#ConversationMessages.delete",
+      "package:instantrelay/instantrelay.dart#CommunicationOperations.deleteMessage"
     ],
     "communication.reportReceipt": [
-      "package:convohop/convohop.dart#ConvoHopClient.reportRead",
-      "package:convohop/convohop.dart#ConversationStore.markRead",
-      "package:convohop/convohop.dart#CommunicationOperations.reportReceipt"
+      "package:instantrelay/instantrelay.dart#RelayClient.reportRead",
+      "package:instantrelay/instantrelay.dart#ConversationStore.markRead",
+      "package:instantrelay/instantrelay.dart#CommunicationOperations.reportReceipt"
     ],
     "communication.typing": [
-      "package:convohop/convohop.dart#ConvoHopClient.sendTyping",
-      "package:convohop/convohop.dart#TypingIndicator.keystroke",
-      "package:convohop/convohop.dart#TypingIndicator.stop",
-      "package:convohop/convohop.dart#TypingIndicator.close",
-      "package:convohop/convohop.dart#CommunicationOperations.typing"
+      "package:instantrelay/instantrelay.dart#RelayClient.sendTyping",
+      "package:instantrelay/instantrelay.dart#TypingIndicator.keystroke",
+      "package:instantrelay/instantrelay.dart#TypingIndicator.stop",
+      "package:instantrelay/instantrelay.dart#TypingIndicator.close",
+      "package:instantrelay/instantrelay.dart#CommunicationOperations.typing"
     ],
     "communication.setConversationMute": [
-      "package:convohop/convohop.dart#ConversationMuteControl.set",
-      "package:convohop/convohop.dart#CommunicationOperations.setConversationMute"
+      "package:instantrelay/instantrelay.dart#ConversationMuteControl.set",
+      "package:instantrelay/instantrelay.dart#CommunicationOperations.setConversationMute"
     ],
     "communication.startLiveSession": [
-      "package:convohop/convohop.dart#ConversationLive.startVoice",
-      "package:convohop/convohop.dart#ConversationLive.startVideo",
-      "package:convohop/convohop.dart#ConversationLive.startBroadcast",
-      "package:convohop/convohop.dart#CommunicationOperations.startLiveSession"
+      "package:instantrelay/instantrelay.dart#ConversationLive.startVoice",
+      "package:instantrelay/instantrelay.dart#ConversationLive.startVideo",
+      "package:instantrelay/instantrelay.dart#ConversationLive.startBroadcast",
+      "package:instantrelay/instantrelay.dart#CommunicationOperations.startLiveSession"
     ],
     "communication.joinLiveSession": [
-      "package:convohop/convohop.dart#LiveSessionHandle.join",
-      "package:convohop/convohop.dart#CommunicationOperations.joinLiveSession"
+      "package:instantrelay/instantrelay.dart#LiveSessionHandle.join",
+      "package:instantrelay/instantrelay.dart#CommunicationOperations.joinLiveSession"
     ],
     "communication.alertLiveSession": [
-      "package:convohop/convohop.dart#LiveSessionAlerts.send",
-      "package:convohop/convohop.dart#CommunicationOperations.alertLiveSession"
+      "package:instantrelay/instantrelay.dart#LiveSessionAlerts.send",
+      "package:instantrelay/instantrelay.dart#CommunicationOperations.alertLiveSession"
     ],
     "communication.leaveLiveSession": [
-      "package:convohop/convohop.dart#LiveParticipationHandle.leave",
-      "package:convohop/convohop.dart#CommunicationOperations.leaveLiveSession"
+      "package:instantrelay/instantrelay.dart#LiveParticipationHandle.leave",
+      "package:instantrelay/instantrelay.dart#CommunicationOperations.leaveLiveSession"
     ],
     "communication.endLiveSession": [
-      "package:convohop/convohop.dart#LiveSessionHandle.end",
-      "package:convohop/convohop.dart#CommunicationOperations.endLiveSession"
+      "package:instantrelay/instantrelay.dart#LiveSessionHandle.end",
+      "package:instantrelay/instantrelay.dart#CommunicationOperations.endLiveSession"
     ],
     "communication.liveSessionCredentials": [
-      "package:convohop/convohop.dart#LiveParticipationHandle.connect",
-      "package:convohop/convohop.dart#LiveMediaConnection.reconnect",
-      "package:convohop/convohop.dart#CommunicationOperations.liveSessionCredentials"
+      "package:instantrelay/instantrelay.dart#LiveParticipationHandle.connect",
+      "package:instantrelay/instantrelay.dart#LiveMediaConnection.reconnect",
+      "package:instantrelay/instantrelay.dart#CommunicationOperations.liveSessionCredentials"
     ],
     "communication.conversationEvents": [
-      "package:convohop/convohop.dart#ConvoHopClient.watch",
-      "package:convohop/convohop.dart#ConvoHopClient.resyncAuthorizedHistory",
-      "package:convohop/convohop.dart#ConversationStore.ConversationStore",
-      "package:convohop/convohop.dart#ConversationStore.reconnect",
-      "package:convohop/convohop.dart#ConversationStore.resync"
+      "package:instantrelay/instantrelay.dart#RelayClient.watch",
+      "package:instantrelay/instantrelay.dart#RelayClient.resyncAuthorizedHistory",
+      "package:instantrelay/instantrelay.dart#ConversationStore.ConversationStore",
+      "package:instantrelay/instantrelay.dart#ConversationStore.reconnect",
+      "package:instantrelay/instantrelay.dart#ConversationStore.resync"
     ]
   }
 }

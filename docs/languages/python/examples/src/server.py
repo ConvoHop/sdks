@@ -5,7 +5,7 @@ from collections.abc import Iterator
 from contextlib import contextmanager
 from dataclasses import dataclass
 
-from convohop import ConvoHop
+from instantrelay import Relay
 
 
 @dataclass(frozen=True)
@@ -18,8 +18,8 @@ class ServerConfig:
 
 # Open one client when your backend starts and share it: it is thread-safe. The with block closes it.
 @contextmanager
-def connect(config: ServerConfig) -> Iterator[ConvoHop]:
-    with ConvoHop(
+def connect(config: ServerConfig) -> Iterator[Relay]:
+    with Relay(
         base_url=config.base_url,
         backend_key=config.backend_key,
         project_id=config.project_id,
@@ -37,7 +37,7 @@ from typing import Any
 
 # Call this after your own authentication. account_id is your user's ID:
 # never trust a principal ID that a browser sends.
-def bootstrap_user(server: ConvoHop, config: ServerConfig, account_id: str, device_id: str) -> dict[str, Any]:
+def bootstrap_user(server: Relay, config: ServerConfig, account_id: str, device_id: str) -> dict[str, Any]:
     principal = server.create_principal(external_user_id=account_id)  # The same principal on every login.
     bootstrap = server.issue_session(
         principal_id=principal.principal_id,
@@ -53,10 +53,10 @@ def bootstrap_user(server: ConvoHop, config: ServerConfig, account_id: str, devi
 # #region create-conversation
 from collections.abc import Sequence
 
-from convohop.types import MemberInputInput
+from instantrelay.types import MemberInputInput
 
 
-def create_conversation(server: ConvoHop, title: str, principal_ids: Sequence[str], request_id: str) -> str:
+def create_conversation(server: Relay, title: str, principal_ids: Sequence[str], request_id: str) -> str:
     conversation = server.create_conversation(
         title=title,
         props={},
@@ -71,7 +71,7 @@ def create_conversation(server: ConvoHop, title: str, principal_ids: Sequence[st
 
 # #region send-message
 # Sends as a member. Without act_as_principal_id, the backend's own principal is the sender.
-def send_as(server: ConvoHop, conversation_id: str, author_id: str, text: str, request_id: str) -> str:
+def send_as(server: Relay, conversation_id: str, author_id: str, text: str, request_id: str) -> str:
     ack = server.send_message(
         conversation_id=conversation_id,
         text=text,
@@ -85,11 +85,11 @@ def send_as(server: ConvoHop, conversation_id: str, author_id: str, text: str, r
 # #endregion send-message
 
 # #region list-messages
-from convohop.types import Message
+from instantrelay.types import Message
 
 
 # Reads what one member can see, newest first.
-def latest_messages(server: ConvoHop, conversation_id: str, reader_id: str) -> tuple[Message, ...]:
+def latest_messages(server: Relay, conversation_id: str, reader_id: str) -> tuple[Message, ...]:
     page = server.messages(conversation_id=conversation_id, act_as_principal_id=reader_id, limit=20)
     return page.items
 
@@ -97,15 +97,15 @@ def latest_messages(server: ConvoHop, conversation_id: str, reader_id: str) -> t
 # #endregion list-messages
 
 # #region recover
-from convohop import ConvoHopProblem
+from instantrelay import RelayProblem
 
 
 # A lost response leaves the outcome unknown: the message may or may not exist. Ask about the
 # same request ID instead of sending with a new one, which could post the message twice.
-def send_once(server: ConvoHop, conversation_id: str, author_id: str, text: str, request_id: str) -> str | None:
+def send_once(server: Relay, conversation_id: str, author_id: str, text: str, request_id: str) -> str | None:
     try:
         return send_as(server, conversation_id, author_id, text, request_id)
-    except ConvoHopProblem as problem:
+    except RelayProblem as problem:
         if problem.outcome != "unknown":
             raise
         # Resolves the request first, and resends the original only if the authority never saw it.
@@ -122,13 +122,13 @@ def send_once(server: ConvoHop, conversation_id: str, author_id: str, text: str,
 from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
 
-from convohop import AsyncConvoHop
+from instantrelay import AsyncRelay
 
 
-# In asyncio code, AsyncConvoHop has the same methods as coroutines. Use each client in one event loop.
+# In asyncio code, AsyncRelay has the same methods as coroutines. Use each client in one event loop.
 @asynccontextmanager
-async def connect_async(config: ServerConfig) -> AsyncIterator[AsyncConvoHop]:
-    async with AsyncConvoHop(
+async def connect_async(config: ServerConfig) -> AsyncIterator[AsyncRelay]:
+    async with AsyncRelay(
         base_url=config.base_url,
         backend_key=config.backend_key,
         project_id=config.project_id,
@@ -138,7 +138,7 @@ async def connect_async(config: ServerConfig) -> AsyncIterator[AsyncConvoHop]:
         yield server
 
 
-async def send_as_async(server: AsyncConvoHop, conversation_id: str, author_id: str, text: str, request_id: str) -> str:
+async def send_as_async(server: AsyncRelay, conversation_id: str, author_id: str, text: str, request_id: str) -> str:
     ack = await server.send_message(
         conversation_id=conversation_id,
         text=text,

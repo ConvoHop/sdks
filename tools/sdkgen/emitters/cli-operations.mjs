@@ -7,7 +7,7 @@ import {
 } from "../lib/server-operations.mjs";
 
 /**
- * Operation catalog for the convohop CLI (@convohop/cli).
+ * Operation catalog for the relay CLI (@instantrelay/cli).
  *
  * Lists the operations the MCP tools expose: each query and mutation that a
  * server bearer credential can call, without subscriptions, client-only,
@@ -15,12 +15,12 @@ import {
  * operation's text and annotations (credential, authorization, idempotency,
  * destructiveness, pagination and polling) and names its input type.
  * cliTypes describes every input type, enum and custom scalar that those
- * inputs use, so `convohop call <operation> --help` can explain any input.
- * cliScopes lists the backend-key scopes, so `convohop keys issue` can
+ * inputs use, so `relay call <operation> --help` can explain any input.
+ * cliScopes lists the backend-key scopes, so `relay keys issue` can
  * check and explain them.
  */
 export const DIRECTORY = "packages/cli/src/generated";
-/** Operations whose results are credentials or that record a person's consent. `convohop call` never runs them. */
+/** Operations whose results are credentials or that record a person's consent. `relay call` never runs them. */
 export const WITHHELD = WITHHELD_OPERATIONS;
 
 const EMITTER = "cli-operations";
@@ -147,7 +147,7 @@ export interface CliOperation {
 export function renderOperations(ir) {
   const operations = cliOperationList(ir);
   return NOTICE + DECLARATIONS +
-    `/** Operations \`convohop call\` never runs, because their results are credentials or they record a person's consent. */\n` +
+    `/** Operations \`relay call\` never runs, because their results are credentials or they record a person's consent. */\n` +
     `export const withheldOperations: Readonly<Record<string, string>> = ${formatJson(WITHHELD).trimEnd()};\n` +
     `/** The scopes a backend key can grant, by wire name, with what each allows. */\n` +
     `export const cliScopes: Readonly<Record<string, string>> = ${formatJson(cliScopeEntries(ir)).trimEnd()};\n` +
@@ -157,7 +157,7 @@ export function renderOperations(ir) {
 
 export default defineEmitter({
   name: "cli-operations",
-  description: "Operation catalog for the convohop CLI (@convohop/cli)",
+  description: "Operation catalog for the relay CLI (@instantrelay/cli)",
   owns: [DIRECTORY],
   emit(ir) {
     return [{ path: `${DIRECTORY}/operations.ts`, contents: renderOperations(ir) }];

@@ -1,4 +1,4 @@
-import type { Connectivity, ConvoHopPlatform, Lifecycle, LifecycleState } from "@convohop/core";
+import type { Connectivity, RelayPlatform, Lifecycle, LifecycleState } from "@instantrelay/core";
 
 type Listener = (event?: unknown) => void;
 interface EventSource {
@@ -40,10 +40,10 @@ export function storageWrites(listener: (key: string) => void): () => void {
   });
 }
 // Clients may be duck-typed objects without a platform.
-export function connectivityOf(platform: ConvoHopPlatform | undefined): Connectivity {
+export function connectivityOf(platform: RelayPlatform | undefined): Connectivity {
   return platform?.connectivity ?? browserConnectivity();
 }
-export function lifecycleOf(platform: ConvoHopPlatform | undefined): Lifecycle {
+export function lifecycleOf(platform: RelayPlatform | undefined): Lifecycle {
   return platform?.lifecycle ?? browserLifecycle();
 }
 /** Subscribes to a connectivity or lifecycle source. Returns its unsubscribe function, which must be a function. */

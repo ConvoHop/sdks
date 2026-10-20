@@ -1,8 +1,8 @@
-# `ConvoHop.Models`
+# `Relay.Models`
 
-Generated input and result models of the ConvoHop GraphQL API.
+Generated input and result models of the Relay GraphQL API.
 
-**Layer:** Server. **Runtime:** .NET 8 or later. The `netstandard2.0` build also targets .NET Framework 4.7.2 or later, which isn't tested yet. **Source:** `dotnet/src/ConvoHop`.
+**Layer:** Server. **Runtime:** .NET 8 or later. The `netstandard2.0` build also targets .NET Framework 4.7.2 or later, which isn't tested yet. **Source:** `dotnet/src/Relay`.
 
 ## Classes
 

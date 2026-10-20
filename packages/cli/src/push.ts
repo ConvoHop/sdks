@@ -2,12 +2,12 @@ import { createHmac, randomBytes, randomUUID } from "node:crypto";
 import {
   PushPayloadError, WebhookVerificationError, push, webhooks, type PushOptions, type WebhookEvent,
   type WebhookNotificationEvent,
-} from "@convohop/server";
+} from "@instantrelay/server";
 import { echoable, type Args, type OptionSpecs } from "./args.js";
 import { CliError, UsageError } from "./output.js";
 import { environmentSecret, readInput, uuidOption, type Context } from "./session.js";
 
-/** The platforms push test builds payloads for, and the @convohop/server builder of each. */
+/** The platforms push test builds payloads for, and the @instantrelay/server builder of each. */
 export const platforms = Object.freeze({
   "apns-alert": "apnsAlert", "apns-voip": "apnsVoip", fcm: "fcm", "web-push": "webPush",
 } as const);
@@ -39,8 +39,8 @@ export const pushTestOptions: OptionSpecs = {
   body: { kind: "string", value: "TEXT", description: "The visible body. Replaces a message's preview." },
   "no-preview": { kind: "boolean", description: "Don't show a message's preview as the body." },
   "secret-file": { kind: "string", value: "FILE",
-    description: "A file holding the endpoint's whsec_ signing secret. Default: CONVOHOP_WEBHOOK_SECRET or " +
-      "CONVOHOP_WEBHOOK_SECRET_FILE, else a new secret for this run." },
+    description: "A file holding the endpoint's whsec_ signing secret. Default: RELAY_WEBHOOK_SECRET or " +
+      "RELAY_WEBHOOK_SECRET_FILE, else a new secret for this run." },
   deliver: { kind: "string", value: "URL",
     description: "Also POST the signed delivery to your webhook endpoint: https, or http on localhost. Needs the " +
       "endpoint's secret. The URL is never printed." },
@@ -103,7 +103,7 @@ async function signingSecret(context: Context, args: Args): Promise<{ secret: st
     if (!secret) throw new CliError("--secret-file names an empty file");
     return { secret, source: "file" };
   }
-  const secret = await environmentSecret(context.env, "CONVOHOP_WEBHOOK_SECRET");
+  const secret = await environmentSecret(context.env, "RELAY_WEBHOOK_SECRET");
   if (secret !== undefined) return { secret, source: "environment" };
   return { secret: `whsec_${randomBytes(32).toString("base64")}`, source: "ephemeral" };
 }
@@ -179,7 +179,7 @@ async function deliver(context: Context, url: URL, headers: Readonly<Record<stri
 
 /**
  * Signs a notification event as a webhook delivery, verifies it with webhooks.verify and builds each platform's push
- * request from it with the @convohop/server push builders, without sending any push. Prints the event, the requests
+ * request from it with the @instantrelay/server push builders, without sending any push. Prints the event, the requests
  * and their measured sizes. With --deliver, also posts the signed delivery to a webhook endpoint.
  */
 export async function pushTest(context: Context, args: Args): Promise<void> {
@@ -193,8 +193,8 @@ export async function pushTest(context: Context, args: Args): Promise<void> {
   const { secret, source } = await signingSecret(context, args);
   context.printer.secret(secret);
   if (target !== undefined && source === "ephemeral")
-    throw new UsageError("--deliver needs the endpoint's secret: set --secret-file, CONVOHOP_WEBHOOK_SECRET or " +
-      "CONVOHOP_WEBHOOK_SECRET_FILE", command);
+    throw new UsageError("--deliver needs the endpoint's secret: set --secret-file, RELAY_WEBHOOK_SECRET or " +
+      "RELAY_WEBHOOK_SECRET_FILE", command);
 
   const body = eventPath === undefined ? Buffer.from(JSON.stringify(sampleEvent(context, args)), "utf8")
     : await readInput(context, eventPath, bodyLimit, "--event", command);

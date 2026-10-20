@@ -5,7 +5,7 @@ import assert from "node:assert/strict";
 import { afterEach } from "node:test";
 import { StrictMode, createElement } from "react";
 import { act, create } from "react-test-renderer";
-import { ConvoHopProvider } from "../dist/index.js";
+import { RelayProvider } from "../dist/index.js";
 
 globalThis.IS_REACT_ACT_ENVIRONMENT = true;
 
@@ -47,7 +47,7 @@ export async function renderHook(hook, { client, outbox, props } = {}) {
   const element = () => {
     const probe = createElement(Probe, { props: state.props });
     return createElement(StrictMode, null,
-      state.client ? createElement(ConvoHopProvider, { client: state.client, outbox: state.outbox }, probe) : probe);
+      state.client ? createElement(RelayProvider, { client: state.client, outbox: state.outbox }, probe) : probe);
   };
   let renderer;
   await act(async () => { renderer = create(element(), { unstable_isConcurrent: true }); });

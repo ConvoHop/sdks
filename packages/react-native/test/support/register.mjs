@@ -1,5 +1,5 @@
 // Loaded with --import. React Native and LiveKit's React Native packages only run inside an app, so the tests resolve
-// them to the stand-ins in this directory. Everything else, including livekit-client and @convohop/client, is real.
+// them to the stand-ins in this directory. Everything else, including livekit-client and @instantrelay/client, is real.
 import module from "node:module";
 import { URL } from "node:url";
 

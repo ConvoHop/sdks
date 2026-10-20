@@ -1,6 +1,6 @@
 import { validateOutput, type OperationPayload } from "./graphql.js";
 import type { OperationKey } from "./generated/operations.js";
-import { hex, parseURL, sha256, utf8, type ConvoHopPlatform } from "./platform.js";
+import { hex, parseURL, sha256, utf8, type RelayPlatform } from "./platform.js";
 export type ProtocolObject = Record<string, unknown>;
 export type ConversationCursor = NonNullable<NonNullable<OperationPayload<"communication.events">["result"]>["nextCursor"]>;
 export interface ItemPage<T> { items: T[]; complete: boolean; refreshRequired: boolean; nextCursor?: unknown }
@@ -45,25 +45,25 @@ export interface AsyncRecoveryStorage {
 }
 export interface CommandOptions { requestId?: string }
 export interface PageOptions { cursor?: string; limit?: number }
-export class ConvoHopProblem extends Error {
+export class RelayProblem extends Error {
   /**
    * Whole seconds to wait before resending the same request, when the authority sent a delay (for example with
    * `RATE_LIMITED`). Read from the error's `extensions.retryAfter`, else from an HTTP `Retry-After` delay in seconds,
    * or from a realtime close reason's `retryAfter=`. A request the caller sends is never resent on its own; when
-   * `@convohop/client` reconnects its stream or resends a queued message, it waits at least this long first.
+   * `@instantrelay/client` reconnects its stream or resends a queued message, it waits at least this long first.
    */
   declare readonly retryAfter?: number;
   constructor(readonly code: string, readonly requestId: string, readonly outcome: string,
     readonly status: number, message: string, options?: ErrorOptions & { retryAfter?: number }) {
-    super(message, options); this.name = "ConvoHopProblem";
+    super(message, options); this.name = "RelayProblem";
     if (options?.retryAfter !== undefined) this.retryAfter = options.retryAfter;
   }
 }
 /**
  * `SCOPE_REQUIRED`: the backend key lacks a scope the operation requires (403, rejected, not retryable).
- * Classify it by `instanceof ConvoHopProblem` and `code`; `scope` is a diagnostic detail.
+ * Classify it by `instanceof RelayProblem` and `code`; `scope` is a diagnostic detail.
  */
-export class ScopeRequiredProblem extends ConvoHopProblem {
+export class ScopeRequiredProblem extends RelayProblem {
   declare readonly code: "SCOPE_REQUIRED";
   /**
    * The missing scope. The authority names it only in the message, so this is `undefined` when the message does not
@@ -80,10 +80,10 @@ export class ScopeRequiredProblem extends ConvoHopProblem {
 }
 /** Builds the most specific problem class for an authority error code. */
 export function authorityProblem(code: string, requestId: string, outcome: string, status: number, message: string,
-  retryAfter?: number): ConvoHopProblem {
+  retryAfter?: number): RelayProblem {
   const options = retryAfter === undefined ? undefined : { retryAfter };
   return code === "SCOPE_REQUIRED" ? new ScopeRequiredProblem(requestId, outcome, status, message, options)
-    : new ConvoHopProblem(code, requestId, outcome, status, message, options);
+    : new RelayProblem(code, requestId, outcome, status, message, options);
 }
 export function parseObject(value: unknown): ProtocolObject {
   if (value === null || typeof value !== "object" || Array.isArray(value)) throw new TypeError("Invalid protocol object");
@@ -183,7 +183,7 @@ export function sameSession(left: SessionMetadata, right: SessionMetadata): bool
   return left.sessionId === right.sessionId && left.principalId === right.principalId &&
     left.deviceId === right.deviceId && left.incarnation === right.incarnation;
 }
-export function origin(value: string, platform?: ConvoHopPlatform): string {
+export function origin(value: string, platform?: RelayPlatform): string {
   const url = parseURL(value, platform);
   if (url.username || url.password || url.search || url.hash || url.pathname !== "/" ||
       (url.protocol !== "https:" && !(url.protocol === "http:" && ["127.0.0.1", "localhost", "[::1]"].includes(url.hostname))))
@@ -205,6 +205,6 @@ export function canonical(value: unknown): string {
 export function jsonClone<T>(value: T): T {
   return JSON.parse(canonical(value)) as T;
 }
-export async function fingerprint(value: unknown, platform?: ConvoHopPlatform): Promise<string> {
+export async function fingerprint(value: unknown, platform?: RelayPlatform): Promise<string> {
   return "sha256:" + hex(await sha256(utf8(canonical(value)), platform));
 }

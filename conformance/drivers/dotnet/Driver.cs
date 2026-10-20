@@ -7,12 +7,12 @@ using System.Text.Json;
 using System.Text.Json.Nodes;
 using System.Threading.Tasks;
 
-namespace ConvoHop.Conformance
+namespace Relay.Conformance
 {
-    /// <summary>ConvoHop conformance driver for the .NET SDK: NDJSON over stdio (spec/conformance/driver-protocol.md).</summary>
+    /// <summary>Relay conformance driver for the .NET SDK: NDJSON over stdio (spec/conformance/driver-protocol.md).</summary>
     internal sealed class Driver
     {
-        private const string Name = "convohop-dotnet";
+        private const string Name = "relay-dotnet";
         private const string Version = "0.1.0";
         private const string Language = "csharp";
 

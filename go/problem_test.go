@@ -1,4 +1,4 @@
-package convohop
+package relay
 
 import (
 	"context"
@@ -10,11 +10,11 @@ import (
 
 func TestProblemError(t *testing.T) {
 	p := problem(codeInvalidResponse, testRequest, OutcomeUnknown, 503, "Malformed authority response")
-	want := "convohop: INVALID_RESPONSE (status 503, outcome unknown, request " + testRequest + "): Malformed authority response"
+	want := "relay: INVALID_RESPONSE (status 503, outcome unknown, request " + testRequest + "): Malformed authority response"
 	if p.Error() != want {
 		t.Fatalf("Error() = %q, want %q", p.Error(), want)
 	}
-	if got := codeInvalidRequest.Error(); got != "convohop: INVALID_REQUEST" {
+	if got := codeInvalidRequest.Error(); got != "relay: INVALID_REQUEST" {
 		t.Fatalf("ErrorCode.Error() = %q", got)
 	}
 	wrapped := fmt.Errorf("send: %w", p)

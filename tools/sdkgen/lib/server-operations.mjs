@@ -3,7 +3,7 @@ import { byName } from "./ir-model.mjs";
 
 /**
  * Selection and wording rules shared by the emitters that expose operations to
- * server-side tooling: the MCP tools (mcp-tools) and the convohop CLI
+ * server-side tooling: the MCP tools (mcp-tools) and the relay CLI
  * (cli-operations). `where` prefixes error messages with the emitter's name.
  */
 

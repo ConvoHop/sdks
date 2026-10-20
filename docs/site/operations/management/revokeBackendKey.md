@@ -134,7 +134,7 @@ mutation ManagementRevokeBackendKey($context: RequestContextInput!, $input: Revo
 | Language | Members |
 | --- | --- |
 | [TypeScript](../../typescript/reference/operations.md) | Not wrapped by a method |
-| [Python](../../python/reference/operations.md) | [`ConvoHopManagement.revoke_backend_key`](../../python/reference/convohop.md#convohopmanagementrevoke_backend_key-method), [`AsyncConvoHopManagement.revoke_backend_key`](../../python/reference/convohop.md#asyncconvohopmanagementrevoke_backend_key-method) |
+| [Python](../../python/reference/operations.md) | [`RelayManagement.revoke_backend_key`](../../python/reference/instantrelay.md#relaymanagementrevoke_backend_key-method), [`AsyncRelayManagement.revoke_backend_key`](../../python/reference/instantrelay.md#asyncrelaymanagementrevoke_backend_key-method) |
 | [.NET](../../dotnet/reference/operations.md) | [`ManagementApi.RevokeBackendKeyAsync`](../../dotnet/reference/api.md#managementapirevokebackendkeyasync-method) |
 | [Java and Kotlin](../../jvm/reference/operations.md) | [`ManagementApi.revokeBackendKey`](../../jvm/reference/server.md#managementapirevokebackendkey-method), [`ManagementSuspendApi.revokeBackendKey`](../../jvm/reference/server-kotlin.md#managementsuspendapirevokebackendkey-method) |
-| [Go](../../go/reference/operations.md) | [`ManagementClient.RevokeBackendKey`](../../go/reference/convohop.md#managementclientrevokebackendkey-method) |
+| [Go](../../go/reference/operations.md) | [`ManagementClient.RevokeBackendKey`](../../go/reference/relay.md#managementclientrevokebackendkey-method) |

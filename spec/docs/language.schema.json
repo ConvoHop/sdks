@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "title": "ConvoHop docs pipeline language",
+  "title": "Relay docs pipeline language",
   "description": "One SDK language in the docs pipeline, stored as docs/languages/<id>/language.json. Paths are relative to that directory. Commands are argument vectors that docgen runs from the repository root without a shell. See docs/docs-pipeline.md.",
   "type": "object",
   "additionalProperties": false,
@@ -118,7 +118,7 @@
           "minLength": 1,
           "maxLength": 214,
           "pattern": "^[^\\s`<>{}#]+$",
-          "description": "The name users install or import, such as @convohop/server."
+          "description": "The name users install or import, such as @instantrelay/server."
         },
         "slug": {
           "$ref": "#/$defs/id",

@@ -13,7 +13,7 @@ import tempfile
 import unittest
 import zipfile
 from pathlib import Path
-from unittest.mock import patch
+from unittest.mock import Mock, patch
 
 ROOT = Path(__file__).resolve().parents[2]
 SPEC = importlib.util.spec_from_file_location("registry_artifacts", ROOT / "scripts/release/registry-artifacts.py")
@@ -45,11 +45,11 @@ def tarred(files: dict[str, bytes]) -> bytes:
 
 def pom(module: str, packaging: str) -> bytes:
     return f"""<project xmlns="http://maven.apache.org/POM/4.0.0">
-      <groupId>com.convohop</groupId><artifactId>{module}</artifactId><version>{VERSION}</version>
-      <packaging>{packaging}</packaging><name>ConvoHop</name><description>SDK</description>
+      <groupId>dev.instantrelay</groupId><artifactId>{module}</artifactId><version>{VERSION}</version>
+      <packaging>{packaging}</packaging><name>Relay</name><description>SDK</description>
       <url>https://github.com/ConvoHop/sdks</url>
       <licenses><license><name>Apache-2.0</name><url>https://www.apache.org/licenses/LICENSE-2.0</url></license></licenses>
-      <developers><developer><name>ConvoHop</name></developer></developers>
+      <developers><developer><name>Relay</name></developer></developers>
       <scm><url>https://github.com/ConvoHop/sdks</url><connection>scm:git:https://github.com/ConvoHop/sdks.git</connection>
       <developerConnection>scm:git:https://github.com/ConvoHop/sdks.git</developerConnection></scm>
     </project>""".encode()
@@ -57,56 +57,56 @@ def pom(module: str, packaging: str) -> bytes:
 
 class RegistryArtifactsTest(unittest.TestCase):
     def setUp(self) -> None:
-        self.temporary = tempfile.TemporaryDirectory(prefix="convohop-registry-artifacts-")
+        self.temporary = tempfile.TemporaryDirectory(prefix="relay-registry-artifacts-")
         self.addCleanup(self.temporary.cleanup)
         self.directory = Path(self.temporary.name)
 
     def python(self, private: bool = False, wheel_version: str = VERSION) -> None:
         metadata = (
-            f"Metadata-Version: 2.4\nName: convohop\nVersion: {VERSION}\nRequires-Python: >=3.11\n"
+            f"Metadata-Version: 2.4\nName: instantrelay\nVersion: {VERSION}\nRequires-Python: >=3.11\n"
             "License-Expression: Apache-2.0\n"
         )
         if private:
             metadata += "Classifier: Private :: Do Not Upload\n"
-        info = f"convohop-{VERSION}.dist-info"
+        info = f"instantrelay-{VERSION}.dist-info"
         version_file = f'__version__ = "{wheel_version}"\n'.encode()
-        (self.directory / f"convohop-{VERSION}-py3-none-any.whl").write_bytes(
+        (self.directory / f"instantrelay-{VERSION}-py3-none-any.whl").write_bytes(
             zipped(
                 {
                     f"{info}/METADATA": metadata.encode(),
                     f"{info}/licenses/LICENSE": b"Apache-2.0",
-                    f"{info}/licenses/NOTICE": b"ConvoHop",
-                    "convohop/py.typed": b"",
-                    "convohop/_version.py": version_file,
+                    f"{info}/licenses/NOTICE": b"Relay",
+                    "instantrelay/py.typed": b"",
+                    "instantrelay/_version.py": version_file,
                 }
             )
         )
         files = {
             "PKG-INFO": metadata.encode(),
-            "pyproject.toml": b'[project]\nname = "convohop"\n',
-            "src/convohop/_version.py": version_file,
+            "pyproject.toml": b'[project]\nname = "instantrelay"\n',
+            "src/instantrelay/_version.py": version_file,
             "README.md": b"SDK",
             "LICENSE": b"Apache-2.0",
-            "NOTICE": b"ConvoHop",
+            "NOTICE": b"Relay",
         }
-        (self.directory / f"convohop-{VERSION}.tar.gz").write_bytes(
-            tarred({f"convohop-{VERSION}/{name}": body for name, body in files.items()})
+        (self.directory / f"instantrelay-{VERSION}.tar.gz").write_bytes(
+            tarred({f"instantrelay-{VERSION}/{name}": body for name, body in files.items()})
         )
 
     def nuget(self, commit: str = SHA) -> None:
         spec = f"""<package xmlns="http://schemas.microsoft.com/packaging/2013/05/nuspec.xsd">
-          <metadata><id>ConvoHop</id><version>{VERSION}</version><license type="expression">Apache-2.0</license>
+          <metadata><id>InstantRelay</id><version>{VERSION}</version><license type="expression">Apache-2.0</license>
           <repository url="https://github.com/ConvoHop/sdks" commit="{commit}"/></metadata></package>""".encode()
-        package = {"ConvoHop.nuspec": spec, "README.md": b"SDK", "LICENSE": b"Apache-2.0", "NOTICE": b"ConvoHop"}
-        symbols = {"ConvoHop.nuspec": spec.replace(b'<license type="expression">Apache-2.0</license>', b"")}
+        package = {"InstantRelay.nuspec": spec, "README.md": b"SDK", "LICENSE": b"Apache-2.0", "NOTICE": b"Relay"}
+        symbols = {"InstantRelay.nuspec": spec.replace(b'<license type="expression">Apache-2.0</license>', b"")}
         for framework in ("netstandard2.0", "net10.0"):
             for suffix in ("dll", "xml"):
-                package[f"lib/{framework}/ConvoHop.{suffix}"] = b"fixture"
-            symbols[f"lib/{framework}/ConvoHop.pdb"] = (
+                package[f"lib/{framework}/Relay.{suffix}"] = b"fixture"
+            symbols[f"lib/{framework}/Relay.pdb"] = (
                 f'"https://raw.githubusercontent.com/ConvoHop/sdks/{commit}/*"'.encode()
             )
         for extension, files in (("nupkg", package), ("snupkg", symbols)):
-            (self.directory / f"ConvoHop.{VERSION}.{extension}").write_bytes(zipped(files))
+            (self.directory / f"InstantRelay.{VERSION}.{extension}").write_bytes(zipped(files))
 
     def maven(self, sdk: str, signatures: bool = False) -> None:
         for name, module in ARTIFACTS.maven_artifacts(sdk, VERSION).items():
@@ -121,7 +121,7 @@ class RegistryArtifactsTest(unittest.TestCase):
             elif name.endswith(".module"):
                 body = json.dumps(
                     {
-                        "component": {"group": "com.convohop", "module": module, "version": VERSION},
+                        "component": {"group": "dev.instantrelay", "module": module, "version": VERSION},
                         "variants": [{"name": "runtimeElements"}],
                     }
                 ).encode()
@@ -156,41 +156,41 @@ class RegistryArtifactsTest(unittest.TestCase):
 
     def test_nuget_symbols_without_license_still_require_the_exact_version_and_source_link(self) -> None:
         self.nuget()
-        archive = self.directory / f"ConvoHop.{VERSION}.snupkg"
+        archive = self.directory / f"InstantRelay.{VERSION}.snupkg"
         files = ARTIFACTS.zip_files(archive.read_bytes())
-        self.assertNotIn(b"<license", files["ConvoHop.nuspec"])
+        self.assertNotIn(b"<license", files["InstantRelay.nuspec"])
         ARTIFACTS.inspect_nuget(self.directory, VERSION, SHA)
-        original = files["ConvoHop.nuspec"]
-        files["ConvoHop.nuspec"] = original.replace(
+        original = files["InstantRelay.nuspec"]
+        files["InstantRelay.nuspec"] = original.replace(
             f"<version>{VERSION}</version>".encode(), b"<version>0.2.0</version>"
         )
         archive.write_bytes(zipped(files))
         with self.assertRaisesRegex(ValueError, "snupkg version"):
             ARTIFACTS.inspect_nuget(self.directory, VERSION, SHA)
-        files["ConvoHop.nuspec"] = original
-        files["lib/net10.0/ConvoHop.pdb"] = b"wrong Source Link"
+        files["InstantRelay.nuspec"] = original
+        files["lib/net10.0/Relay.pdb"] = b"wrong Source Link"
         archive.write_bytes(zipped(files))
         with self.assertRaisesRegex(ValueError, "Source Link"):
             ARTIFACTS.inspect_nuget(self.directory, VERSION, SHA)
 
     def test_flutter_bootstrap_archive_is_a_real_package(self) -> None:
         files = {
-            "pubspec.yaml": f"name: convohop\nversion: {VERSION}\npublish_to: https://pub.dev\n".encode(),
-            "lib/convohop.dart": b"library;",
-            "lib/src/version.dart": f"const convoHopPackageVersion = '{VERSION}';\n".encode(),
+            "pubspec.yaml": f"name: instantrelay\nversion: {VERSION}\npublish_to: https://pub.dev\n".encode(),
+            "lib/instantrelay.dart": b"library;",
+            "lib/src/version.dart": f"const relayPackageVersion = '{VERSION}';\n".encode(),
             "README.md": b"SDK",
             "LICENSE": b"Apache-2.0",
-            "NOTICE": b"ConvoHop",
+            "NOTICE": b"Relay",
             "CHANGELOG.md": b"# Changelog",
         }
-        archive = self.directory / f"convohop-{VERSION}.tar.gz"
+        archive = self.directory / f"instantrelay-{VERSION}.tar.gz"
         archive.write_bytes(tarred(files))
         ARTIFACTS.inspect_pubdev(self.directory, VERSION)
-        files["lib/src/version.dart"] = b"const convoHopPackageVersion = '0.0.0';\n"
+        files["lib/src/version.dart"] = b"const relayPackageVersion = '0.0.0';\n"
         archive.write_bytes(tarred(files))
         with self.assertRaisesRegex(ValueError, "library version"):
             ARTIFACTS.inspect_pubdev(self.directory, VERSION)
-        files["lib/src/version.dart"] = f"const convoHopPackageVersion = '{VERSION}';\n".encode()
+        files["lib/src/version.dart"] = f"const relayPackageVersion = '{VERSION}';\n".encode()
         files["pubspec.yaml"] = files["pubspec.yaml"].replace(b"https://pub.dev", b"none")
         archive.write_bytes(tarred(files))
         with self.assertRaisesRegex(ValueError, "publish_to"):
@@ -233,7 +233,7 @@ class RegistryArtifactsTest(unittest.TestCase):
             ARTIFACTS.bundle_maven(self.directory, "jvm", VERSION, self.directory / "missing-unsigned.tar.gz")
         self.maven("jvm")
         pom_file = Path(f"{base}.pom")
-        pom_file.write_bytes(pom_file.read_bytes().replace(b"com.convohop", b"io.github.convohop"))
+        pom_file.write_bytes(pom_file.read_bytes().replace(b"dev.instantrelay", b"io.github.instantrelay"))
         with self.assertRaisesRegex(ValueError, "groupId"):
             ARTIFACTS.bundle_maven(self.directory, "jvm", VERSION, self.directory / "wrong-unsigned.tar.gz")
 
@@ -259,6 +259,100 @@ class RegistryArtifactsTest(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "discard their signatures"):
             ARTIFACTS.bundle_maven(self.directory, "jvm", VERSION, self.directory / "wrong-unsigned.tar.gz")
 
+    def test_central_signs_only_verified_bytes_with_an_existing_key_and_cleans_up(self) -> None:
+        self.maven("jvm")
+        source = self.directory / "release-unsigned.tar.gz"
+        out = self.directory / "central.zip"
+        ARTIFACTS.bundle_maven(self.directory, "jvm", VERSION, source)
+        original = ARTIFACTS.tar_files(source.read_bytes())
+        agent = Mock()
+        agent.poll.return_value = None
+        homes = []
+
+        def start_agent(arguments, **_options):
+            home = Path(arguments[arguments.index("--homedir") + 1])
+            homes.append(home)
+            (home / "S.gpg-agent").touch()
+            return agent
+
+        def gpg(arguments, **options):
+            self.assertNotIn("fixture-private-key", repr(arguments))
+            self.assertNotIn("fixture-passphrase", repr(arguments))
+            self.assertFalse(any(name.startswith("MAVEN_") for name in options["env"]))
+            if "--import" in arguments:
+                self.assertEqual(options["input"], b"fixture-private-key")
+            if "--list-secret-keys" in arguments:
+                return subprocess.CompletedProcess(arguments, 0, f"sec:::::::::\nfpr:::::::::{'A' * 40}:\n".encode())
+            if "--detach-sign" in arguments:
+                self.assertEqual(options["input"], b"fixture-passphrase\n")
+                Path(arguments[arguments.index("--output") + 1]).write_bytes(b"mocked detached signature")
+            return subprocess.CompletedProcess(arguments, 0, b"")
+
+        with (
+            patch.dict(ARTIFACTS.os.environ, MAVEN_SIGNING_KEY="fixture-private-key", MAVEN_SIGNING_PASSWORD="fixture-passphrase"),
+            patch.object(ARTIFACTS.shutil, "which", side_effect=lambda name: f"/fixture/{name}"),
+            patch.object(ARTIFACTS.subprocess, "Popen", side_effect=start_agent),
+            patch.object(ARTIFACTS.subprocess, "run", side_effect=gpg),
+        ):
+            ARTIFACTS.sign_maven_bundle(source, "jvm", VERSION, out)
+        signed = ARTIFACTS.zip_files(out.read_bytes())
+        ARTIFACTS.inspect_maven(signed, "jvm", VERSION, signed=True)
+        for name, body in original.items():
+            self.assertEqual(signed[name], body, f"signing changed approved bytes: {name}")
+        agent.terminate.assert_called_once()
+        self.assertFalse(homes[0].exists(), "the isolated private keyring must be removed")
+
+    def test_central_signing_fails_closed_without_keys_or_with_unverified_source(self) -> None:
+        self.maven("jvm")
+        source = self.directory / "release-unsigned.tar.gz"
+        out = self.directory / "central.zip"
+        ARTIFACTS.bundle_maven(self.directory, "jvm", VERSION, source)
+        with (
+            patch.dict(ARTIFACTS.os.environ, MAVEN_SIGNING_KEY="", MAVEN_SIGNING_PASSWORD=""),
+            patch.object(ARTIFACTS.subprocess, "Popen") as agent,
+            self.assertRaisesRegex(ValueError, "existing MAVEN_SIGNING_KEY"),
+        ):
+            ARTIFACTS.sign_maven_bundle(source, "jvm", VERSION, out)
+        agent.assert_not_called()
+        files = ARTIFACTS.tar_files(source.read_bytes())
+        name = next(iter(ARTIFACTS.maven_artifacts("jvm", VERSION)))
+        files[name] += b"tampered"
+        source.write_bytes(tarred(files))
+        with self.assertRaisesRegex(ValueError, "checksum"):
+            ARTIFACTS.sign_maven_bundle(source, "jvm", VERSION, out)
+        self.assertFalse(out.exists())
+
+    def test_central_signing_errors_withhold_diagnostics_and_remove_the_isolated_keyring(self) -> None:
+        self.maven("jvm")
+        source = self.directory / "release-unsigned.tar.gz"
+        out = self.directory / "central.zip"
+        ARTIFACTS.bundle_maven(self.directory, "jvm", VERSION, source)
+        agent = Mock()
+        agent.poll.return_value = None
+        homes = []
+
+        def start_agent(arguments, **_options):
+            home = Path(arguments[arguments.index("--homedir") + 1])
+            homes.append(home)
+            (home / "S.gpg-agent").touch()
+            return agent
+
+        with (
+            patch.dict(ARTIFACTS.os.environ, MAVEN_SIGNING_KEY="fixture-private-key", MAVEN_SIGNING_PASSWORD="fixture-passphrase"),
+            patch.object(ARTIFACTS.shutil, "which", side_effect=lambda name: f"/fixture/{name}"),
+            patch.object(ARTIFACTS.subprocess, "Popen", side_effect=start_agent),
+            patch.object(ARTIFACTS.subprocess, "run", return_value=subprocess.CompletedProcess(
+                [], 2, b"fixture-private-key", b"fixture-passphrase",
+            )),
+            self.assertRaisesRegex(ValueError, "diagnostics are withheld") as error,
+        ):
+            ARTIFACTS.sign_maven_bundle(source, "jvm", VERSION, out)
+        self.assertNotIn("fixture-private-key", str(error.exception))
+        self.assertNotIn("fixture-passphrase", str(error.exception))
+        self.assertFalse(out.exists())
+        self.assertFalse(homes[0].exists())
+        agent.terminate.assert_called_once()
+
     def test_xml_rejects_dtds_entities_and_oversized_metadata(self) -> None:
         for data in (
             b'<!DOCTYPE project [<!ENTITY x "expanded">]><project>&x;</project>',
@@ -283,8 +377,8 @@ class RegistryArtifactsTest(unittest.TestCase):
         metadata = json.loads(path.read_bytes())
         metadata["variants"][0]["dependencies"] = [
             {
-                "group": "com.convohop",
-                "module": "convohop-server",
+                "group": "dev.instantrelay",
+                "module": "relay-server",
                 "version": {"requires": "0.2.0"},
             }
         ]

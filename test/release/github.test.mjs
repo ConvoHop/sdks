@@ -102,7 +102,7 @@ test('tags resolve to commits through annotated tags', async () => {
 });
 
 const { config } = loadReleaseConfig(REPO_ROOT);
-const core = describeNpmPackage(config, 'packages/core', '@convohop/core', '0.2.0');
+const core = describeNpmPackage(config, 'packages/core', '@instantrelay/core', '0.2.0');
 const TARBALL = Buffer.from('tarball');
 const TARBALL_SHA256 = createHash('sha256').update(TARBALL).digest('hex');
 
@@ -180,7 +180,7 @@ test('uploadAssets attaches every asset to each draft', async (t) => {
   assert.deepEqual(uploads.sort(), releaseAssetNames(core).map((name) => `core-v0.2.0/${name}`));
 
   uploads.length = 0;
-  const client = describeNpmPackage(config, 'packages/client', '@convohop/client', '0.2.0');
+  const client = describeNpmPackage(config, 'packages/client', '@instantrelay/client', '0.2.0');
   await assert.rejects(uploadAssets({ github, packages: [core, client], assets, attestations }), /ENOENT/);
   assert.deepEqual(uploads, [], 'nothing is uploaded when any package is incomplete');
 });
@@ -205,7 +205,7 @@ test('publishReleases un-drafts only complete releases', async () => {
     /missing .*SHA256SUMS/,
   );
 
-  const rc = describeNpmPackage(config, 'packages/core', '@convohop/core', '0.3.0-rc.1');
+  const rc = describeNpmPackage(config, 'packages/core', '@instantrelay/core', '0.3.0-rc.1');
   const rcDraft = release({ tag_name: rc.tag, assets: releaseAssetNames(rc).map((name, id) => ({ id, name })) });
   await publishReleases({ github: github(rcDraft), packages: [rc] });
   assert.deepEqual(published[1], [7, { prerelease: true }]);

@@ -11,8 +11,8 @@ from typing import Any
 import httpx
 import pytest
 
-from convohop import AsyncConvoHop, AsyncConvoHopManagement, ConvoHop, ConvoHopManagement, ConvoHopProblem
-from convohop._generated.operations import OBJECTS, OPERATIONS
+from instantrelay import AsyncRelay, AsyncRelayManagement, Relay, RelayManagement, RelayProblem
+from instantrelay._generated.operations import OBJECTS, OPERATIONS
 
 BASE_URL = "http://127.0.0.1:18080"
 ENDPOINT = BASE_URL + "/graphql"
@@ -119,25 +119,25 @@ class Authority:
     def async_http(self) -> httpx.AsyncClient:
         return httpx.AsyncClient(transport=httpx.MockTransport(self._handle_async))
 
-    def project(self, **options: Any) -> ConvoHop:
+    def project(self, **options: Any) -> Relay:
         settings: dict[str, Any] = {"base_url": BASE_URL, "backend_key": BACKEND_KEY, "project_id": uid()}
         settings |= {"incarnation": uid(), "http_client": self.http(), **options}
-        return ConvoHop(**settings)
+        return Relay(**settings)
 
-    def management(self, **options: Any) -> ConvoHopManagement:
+    def management(self, **options: Any) -> RelayManagement:
         settings: dict[str, Any] = {"base_url": BASE_URL, "access_token": ACCESS_TOKEN, "actor_id": uid()}
         settings |= {"http_client": self.http(), **options}
-        return ConvoHopManagement(**settings)
+        return RelayManagement(**settings)
 
-    def async_project(self, **options: Any) -> AsyncConvoHop:
+    def async_project(self, **options: Any) -> AsyncRelay:
         settings: dict[str, Any] = {"base_url": BASE_URL, "backend_key": BACKEND_KEY, "project_id": uid()}
         settings |= {"incarnation": uid(), "http_client": self.async_http(), **options}
-        return AsyncConvoHop(**settings)
+        return AsyncRelay(**settings)
 
-    def async_management(self, **options: Any) -> AsyncConvoHopManagement:
+    def async_management(self, **options: Any) -> AsyncRelayManagement:
         settings: dict[str, Any] = {"base_url": BASE_URL, "access_token": ACCESS_TOKEN, "actor_id": uid()}
         settings |= {"http_client": self.async_http(), **options}
-        return AsyncConvoHopManagement(**settings)
+        return AsyncRelayManagement(**settings)
 
 
 def reply(request: Received, **fields: Any) -> httpx.Response:
@@ -355,9 +355,9 @@ class Chunks(httpx.SyncByteStream, httpx.AsyncByteStream):
             raise self._error
 
 
-def rejects(call: Callable[[], object], code: str, message: str | None = None) -> ConvoHopProblem:
+def rejects(call: Callable[[], object], code: str, message: str | None = None) -> RelayProblem:
     """Runs ``call``, which must raise the problem ``code`` (with ``message``, when given), and returns it."""
-    with pytest.raises(ConvoHopProblem) as caught:
+    with pytest.raises(RelayProblem) as caught:
         call()
     problem = caught.value
     assert problem.code == code, repr(problem)
@@ -368,9 +368,9 @@ def rejects(call: Callable[[], object], code: str, message: str | None = None) -
 
 async def rejects_async(
     call: Callable[[], Awaitable[object]], code: str, message: str | None = None
-) -> ConvoHopProblem:
+) -> RelayProblem:
     """Awaits ``call``, which must raise the problem ``code`` (with ``message``, when given), and returns it."""
-    with pytest.raises(ConvoHopProblem) as caught:
+    with pytest.raises(RelayProblem) as caught:
         await call()
     problem = caught.value
     assert problem.code == code, repr(problem)

@@ -1,6 +1,6 @@
-# ConvoHop Android client SDK
+# Relay Android client SDK
 
-`com.convohop:convohop-android` is the Kotlin SDK for Android apps. It
+`dev.instantrelay:relay-android` is the Kotlin SDK for Android apps. It
 works with a short-lived user session token from your backend, never with
 a backend key or operator credential. It covers:
 
@@ -17,16 +17,16 @@ code and the API reference. License: [Apache-2.0](../LICENSE).
 
 [Central preparation](../RELEASING.md#maven-central-preparation-while-the-domain-is-deferred)
 includes POM metadata, sources, documentation and offline bundle/signature
-checks. It does not upload; actual `com.convohop` namespace verification
+checks. It does not upload; actual `dev.instantrelay` namespace verification
 and publication remain paused for domain ownership.
 
 ## Requirements
 
 - Android 7.0 (API 24) or later.
 - Apps compile against API 36 (`compileSdk = 36`). An app or wrapper that
-  uses only `convohop-android-push` needs API 34.
+  uses only `relay-android-push` needs API 34.
 - Built and tested with Kotlin 2.2.21 and Android Gradle Plugin 9.4.1.
-  `convohop-android-push` is compiled for Kotlin 2.0 with standard library
+  `relay-android-push` is compiled for Kotlin 2.0 with standard library
   2.0.21, so wrappers on Kotlin 1.9 can read it. Only Kotlin 2.2.21 is
   tested.
 - Building from source needs JDK 17 and the Android SDK with platform 36.
@@ -45,9 +45,9 @@ and publication remain paused for domain ownership.
 
 | Artifact | Contents |
 | --- | --- |
-| `com.convohop:convohop-android` | The SDK, in `com.convohop.android`. Depend on this one; it brings in the other two. |
-| `com.convohop:convohop-android-core` | The platform-free client in `com.convohop.android.core`: generated protocol types, transport, session renewal, recovery, the store, outbox and timelines. Not a supported entry point on its own. |
-| `com.convohop:convohop-android-push` | FCM handling, notifications and Telecom incoming calls, in `com.convohop.android.push`. It has no networking, LiveKit or coroutines, so a React Native or Flutter wrapper can ship it alone. |
+| `dev.instantrelay:relay-android` | The SDK, in `dev.instantrelay.android`. Depend on this one; it brings in the other two. |
+| `dev.instantrelay:relay-android-core` | The platform-free client in `dev.instantrelay.android.core`: generated protocol types, transport, session renewal, recovery, the store, outbox and timelines. Not a supported entry point on its own. |
+| `dev.instantrelay:relay-android-push` | FCM handling, notifications and Telecom incoming calls, in `dev.instantrelay.android.push`. It has no networking, LiveKit or coroutines, so a React Native or Flutter wrapper can ship it alone. |
 
 ## Install from source
 
@@ -78,7 +78,7 @@ Then depend on the SDK and on Firebase Cloud Messaging:
 
 ```kotlin
 dependencies {
-    implementation("com.convohop:convohop-android:0.1.0-SNAPSHOT")
+    implementation("dev.instantrelay:relay-android:0.1.0-SNAPSHOT")
     implementation(platform("com.google.firebase:firebase-bom:34.18.0"))
     implementation("com.google.firebase:firebase-messaging")
 }
@@ -99,15 +99,15 @@ don't use with `tools:node="remove"`.
 
 ## Sessions
 
-Your backend signs the user in, asks ConvoHop for a user session and
+Your backend signs the user in, asks Relay for a user session and
 returns the `SessionBootstrap` it received, with the project's `baseUrl` and
 `projectId`. Never put a backend key, operator credential or webhook secret
 in an app. The client keeps the session token in memory only.
 
 ```kotlin
 val session = checkNotNull(signIn.bootstrap.session)
-val client = ConvoHopClient(
-    ConvoHopClientOptions(
+val client = RelayClient(
+    RelayClientOptions(
         baseUrl = signIn.baseUrl,
         projectId = signIn.projectId,
         sessionToken = signIn.bootstrap.sessionToken,
@@ -130,7 +130,7 @@ val renewal = client.refreshAutomatically { error ->
 
 - `baseUrl` must be HTTPS, or loopback HTTP for local development.
 - `SessionRefresh` asks your backend to renew exactly `current` and returns
-  the `SessionBootstrap` your backend received from ConvoHop. Parse a JSON
+  the `SessionBootstrap` your backend received from Relay. Parse a JSON
   body with `SessionBootstrap.fromJson(Json.parseToJsonElement(body))`. The
   hook runs on the client's dispatcher, so move blocking work off it.
 - `refreshAutomatically` initializes the client first if needed, renews 5
@@ -150,13 +150,13 @@ val renewal = client.refreshAutomatically { error ->
 
 ## Conversations and offline sends
 
-`ConvoHopStore` keeps messages and an outbox in a local store, shows a
+`RelayStore` keeps messages and an outbox in a local store, shows a
 timeline from it at once and keeps it current.
 
 ```kotlin
 val network = NetworkMonitor(context)
 val local = SqliteLocalStore(context, client)
-val store = ConvoHopStore(client, local, network.online) { error ->
+val store = RelayStore(client, local, network.online) { error ->
     Log.w("Chat", "Chat error", error)
 }
 
@@ -255,7 +255,7 @@ as network errors, timeouts, `RATE_LIMITED` and most 5xx responses, with a
 backoff that waits at least the `retryAfter` the authority asked for. After
 `WRONG_REGION` they route again first. While the session renews they pause,
 and they resume on the renewed session. When the network comes back,
-`ConvoHopStore` skips the reconnect backoff; without a store, call
+`RelayStore` skips the reconnect backoff; without a store, call
 `client.reconnectNow()`. Neither skips a `retryAfter` wait.
 
 A problem that reconnecting can't change, such as `NOT_FOUND`, `FORBIDDEN`,
@@ -268,7 +268,7 @@ renew the session.
 When the organization's prepaid credits run out or it reaches its monthly
 spend cap, the replay closes with a 402 `CREDITS_EXHAUSTED` or
 `SPEND_CAP_REACHED` problem and doesn't reconnect; open a new timeline once
-the organization can pay again. While ConvoHop can't verify current spend,
+the organization can pay again. While Relay can't verify current spend,
 the replay reports `SPEND_UNVERIFIED` and reconnects no sooner than its
 `retryAfter`. Coming back online doesn't cut that wait short.
 
@@ -299,13 +299,13 @@ committed or accepted it, or rejected it with a problem that isn't
 retryable, or the request's three-attempt/60-second retry budget is spent,
 whatever its outcome (see the
 [recovery journal rules](../spec/recovery/README.md#recovery-journal)).
-Sending or retrying a spent request throws `ConvoHopProblem` code
+Sending or retrying a spent request throws `RelayProblem` code
 `RESOLUTION_REQUIRED` instead of sending it, and
 `client.requests.resolve(id)` still looks it up once its record is gone.
 Records stay while a call in progress uses them, while the outbox may still
 send their message, and while the app holds a live session or participation
 handle that may still end, leave or connect with them. With no record to
-evict, the new request fails before it's sent, with `ConvoHopProblem` code
+evict, the new request fails before it's sent, with `RelayProblem` code
 `RECOVERY_LIMIT`, outcome `rejected` and status 409: resend or resolve the
 outstanding requests first.
 
@@ -335,7 +335,7 @@ sends one directly; check `features?.typing` first.
 ## Calls
 
 Calls run on the [LiveKit Android SDK](https://github.com/livekit/client-sdk-android).
-`ConvoHopCall` joins a live session's media with one single-use admission
+`RelayCall` joins a live session's media with one single-use admission
 grant, reconnects with fresh credentials when media drops, and leaves the
 live session when it ends. Connecting never starts capture: turn on the
 microphone and camera once the user has granted `RECORD_AUDIO` and
@@ -345,7 +345,7 @@ Start a call and ring the other members:
 
 ```kotlin
 val live = client.conversation(conversationId).live.startVoice().ready()
-val call = ConvoHopCall.join(context, live.join())
+val call = RelayCall.join(context, live.join())
 call.microphone(true)
 live.alerts.send(listOf(otherPrincipalId))
 ```
@@ -364,7 +364,7 @@ when the user accepts:
 ```kotlin
 override fun onCallAnswered(call: CallInfo) {
     appScope.launch {
-        activeCall = ConvoHopCall.answer(context, client, call.alertId)
+        activeCall = RelayCall.answer(context, client, call.alertId)
         activeCall?.microphone(true)
     }
 }
@@ -372,13 +372,13 @@ override fun onCallAnswered(call: CallInfo) {
 
 `answer` checks the call is for this client's project and user, answers it
 if it still rings, joins the live session and connects media. If it fails,
-the system call ends. The `ConvoHopCall` follows the system call: capture
+the system call ends. The `RelayCall` follows the system call: capture
 stays off while the system mutes or holds it, and ending it leaves the live
 session.
 
 - Android 14 lets the user or Google Play deny full-screen intents; calls
   then show as a heads-up notification. Check
-  `ConvoHopNotifications.getInstance(context).canUseFullScreenIntent()` and
+  `RelayNotifications.getInstance(context).canUseFullScreenIntent()` and
   open `fullScreenIntentSettings()` to ask the user.
 - The SDK starts no foreground service. To keep a call running while your
   app is in the background, start your own
@@ -388,14 +388,14 @@ session.
 
 ## Push notifications
 
-ConvoHop sends pushes through Firebase Cloud Messaging. Add your own
+Relay sends pushes through Firebase Cloud Messaging. Add your own
 `google-services.json` and the Google Services Gradle plugin to your app;
 never commit Firebase configuration to a public repository. Declare the
 messaging service in your app's manifest:
 
 ```xml
 <service
-    android:name="com.convohop.android.push.ConvoHopMessagingService"
+    android:name="dev.instantrelay.android.push.RelayMessagingService"
     android:exported="false">
     <intent-filter>
         <action android:name="com.google.firebase.MESSAGING_EVENT" />
@@ -404,34 +404,34 @@ messaging service in your app's manifest:
 ```
 
 If your app already has a messaging service, subclass
-`ConvoHopMessagingService` (call `super` from every override and handle
-other pushes in `onOtherMessage`), or forward to `ConvoHopFirebase`'s
+`RelayMessagingService` (call `super` from every override and handle
+other pushes in `onOtherMessage`), or forward to `RelayFirebase`'s
 `handleMessage`, `onNewToken`, `onRegistered` and `onUnregistered`.
 
 Configure notifications in `Application.onCreate`, because a push can start
 your process:
 
 ```kotlin
-val notifications = ConvoHopNotifications.getInstance(this)
-notifications.options = ConvoHopNotificationOptions().apply {
+val notifications = RelayNotifications.getInstance(this)
+notifications.options = RelayNotificationOptions().apply {
     smallIcon = R.drawable.ic_notification
     recipientFilter = RecipientFilter { recipientId -> recipientId == signedInPrincipalId() }
     incomingCallIntent = CallIntentFactory { context, call ->
         Intent(context, CallActivity::class.java).putExtra("alertId", call.alertId)
     }
-    messageContent = ConvoHopMessageContent { currentClient() }
+    messageContent = RelayMessageContent { currentClient() }
 }
-notifications.addListener(object : ConvoHopNotificationListener {
+notifications.addListener(object : RelayNotificationListener {
     override fun onRegistered(registration: PushRegistration) {
         appScope.launch { backend.savePushRegistration(registration.toJson()) }
     }
-    override fun onCallAnswered(call: CallInfo) { /* ConvoHopCall.answer, above */ }
+    override fun onCallAnswered(call: CallInfo) { /* RelayCall.answer, above */ }
 })
-ConvoHopFirebase.register(this)
+RelayFirebase.register(this)
 ```
 
-Store the registration with your backend for the signed-in user; ConvoHop
-never stores registrations. Call `ConvoHopFirebase.register` whenever your
+Store the registration with your backend for the signed-in user; Relay
+never stores registrations. Call `RelayFirebase.register` whenever your
 app starts: it reports the registration FCM holds, even when Firebase's own
 callbacks don't fire. With FCM auto-init off, nothing registers until you
 call it, so you can wait for the user's consent. The same registration can
@@ -440,7 +440,7 @@ arrive more than once, so store it idempotently.
 **Token or installation ID.** By default FCM registers the device with a
 registration token, and `toJson()` gives `{"kind":"fcm","token":"…"}`. If
 your app's manifest turns on registration by Firebase Installation ID,
-ConvoHop registers that way and gives `{"kind":"fcm","fid":"…"}`:
+Relay registers that way and gives `{"kind":"fcm","fid":"…"}`:
 
 ```xml
 <meta-data android:name="firebase_messaging_installation_id_enabled" android:value="true" />
@@ -453,7 +453,7 @@ your app that uses FCM supports installation IDs. With the flag on,
 firebase-messaging is older than 25.1.2.
 
 **Message previews.** Previews are off unless the project turns them on, so
-a message push usually carries no text. `ConvoHopMessageContent` then reads
+a message push usually carries no text. `RelayMessageContent` then reads
 the message with the user's own session, for up to 5 seconds, so its text
 never passes through FCM. Without it, or when the read fails, the
 notification says "New message". When the project turns previews on, the
@@ -466,8 +466,8 @@ FCM data map from your own code and returns a `PushResult`:
 
 | `PushResult` | Meaning |
 | --- | --- |
-| `NOT_CONVOHOP` | Not ConvoHop's push: handle it yourself. |
-| `INVALID` | A ConvoHop push this SDK version can't read. |
+| `NOT_RELAY` | Not Relay's push: handle it yourself. |
+| `INVALID` | A Relay push this SDK version can't read. |
 | `IGNORED` | A duplicate, a ring that already stopped, or a recipient your filter rejected. |
 | `MESSAGE` | A new message. |
 | `RINGING` | A call is ringing. |
@@ -496,7 +496,7 @@ SharedPreferencesRecoveryStorage(context, client).clear()
 
 Delete the user's push registration on your backend, and reject their
 pushes in `recipientFilter`. To unregister the device from FCM too, call
-`ConvoHopFirebase.unregister(context)`. It deletes the app's token, which
+`RelayFirebase.unregister(context)`. It deletes the app's token, which
 every library in your app shares, or unregisters the installation ID;
 listeners then get `onUnregistered`. With auto-init on, Firebase registers
 the device again when your app next starts.
@@ -523,14 +523,14 @@ cd android
 
 - `:core` tests run on the JVM with JUnit 4, against an in-memory
   authority.
-- `:push` and `:convohop` tests run on Robolectric, at API 34 and also at
+- `:push` and `:relay` tests run on Robolectric, at API 34 and also at
   24, 26 or 33 where behavior differs, with Firebase and media rooms faked.
   Add `-ProbolectricSdks=34` to run only API 34.
 - `:edge-fixture` compiles the generator's edge-case golden files, so
   emitter changes stay valid Kotlin.
 
 The generated protocol code is in
-`core/src/main/kotlin/com/convohop/android/generated`. Don't edit it:
+`core/src/main/kotlin/dev/instantrelay/android/generated`. Don't edit it:
 change the schema or `tools/sdkgen/emitters/android.mjs`, then run
 `npm run generate:graphql` from the repository root.
 
@@ -539,7 +539,7 @@ the repository root:
 
 ```sh
 (cd android && ./gradlew :conformance-driver:installDist)
-npm run conformance -- --driver conformance/drivers/android/build/install/convohop-conformance-android/bin/convohop-conformance-android
+npm run conformance -- --driver conformance/drivers/android/build/install/relay-conformance-android/bin/relay-conformance-android
 ```
 
 The driver declares only the user role, so the runner skips scenarios that
@@ -562,9 +562,9 @@ npm run test:docs -- android      # compile and run the docs examples
 
 | Path | Contents |
 | --- | --- |
-| `android/core` | `convohop-android-core`, including the generated code |
-| `android/push` | `convohop-android-push` |
-| `android/convohop` | `convohop-android`: the SQLite store, recovery storage, network monitor and LiveKit calls |
+| `android/core` | `relay-android-core`, including the generated code |
+| `android/push` | `relay-android-push` |
+| `android/relay` | `relay-android`: the SQLite store, recovery storage, network monitor and LiveKit calls |
 | `android/edge-fixture` | Compiles the generator's edge goldens |
 | `conformance/drivers/android` | The conformance driver |
 | `tools/sdkgen/emitters/android.mjs` | The Kotlin emitter |

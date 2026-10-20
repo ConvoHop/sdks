@@ -1,6 +1,6 @@
 # Conformance targets
 
-A target is the ConvoHop service that scenarios run against. The runner
+A target is the Relay service that scenarios run against. The runner
 reads it from a **descriptor**: a JSON object that says where the service
 is, which credentials scenarios may use and which optional
 [capabilities](#capabilities) it offers. `--target mock`, the default,
@@ -137,7 +137,7 @@ it.
 ## Mock target
 
 [`conformance/mock/`](../../conformance/mock) is a deterministic,
-in-process ConvoHop service for running the suite without a deployment.
+in-process Relay service for running the suite without a deployment.
 It executes requests against the real GraphQL schemas in
 [`schema/`](../../schema), so a request the service would reject as invalid
 GraphQL is rejected by the mock too, with `GRAPHQL_INVALID_REQUEST`, and
@@ -165,7 +165,7 @@ behaviour, and only enough of it for the scenarios:
   and the [control API](#control-api).
 
 Its project, incarnation and actor ids derive from a seed
-(`convohop-conformance` by default), so they are the same on every run, and
+(`relay-conformance` by default), so they are the same on every run, and
 its credentials are fixed, public test values. Nothing about it is secret.
 To use it from another tool, start it on its own:
 
@@ -180,7 +180,7 @@ deployment.
 ## Dev-stack target
 
 [`conformance/targets/dev-stack.json`](../../conformance/targets/dev-stack.json)
-describes the ConvoHop dev-stack container image for SDK CI. Every value
+describes the Relay dev-stack container image for SDK CI. Every value
 comes from an environment variable:
 
 | Variable | Descriptor field |
@@ -196,7 +196,7 @@ comes from an environment variable:
 | `CONVOHOP_DEV_MANAGEMENT_TOKEN` | `credentials.management` |
 | `CONVOHOP_DEV_CONTROL_URL` | `control` |
 
-The image is `ghcr.io/convohop/dev-stack`, which the private ConvoHop
+The image is `ghcr.io/convohop/dev-stack`, which the private Relay
 platform repository publishes. `:main` follows that repository's main branch
 and `:<commit SHA>` pins one build. The image is development-only and
 linux/arm64 only. It is private, so a workflow pulls it with its
@@ -204,14 +204,14 @@ linux/arm64 only. It is private, so a workflow pulls it with its
 Every listener is on the container's loopback, so on a Linux host:
 
 ```sh
-docker run --detach --name convohop-dev-stack --network host ghcr.io/convohop/dev-stack:main
-docker exec convohop-dev-stack convohop-dev-stack wait --timeout 900
-export $(docker exec convohop-dev-stack cat /run/convohop/dev-stack/seed.env)
+docker run --detach --name relay-dev-stack --network host ghcr.io/convohop/dev-stack:main
+docker exec relay-dev-stack relay-dev-stack wait --timeout 900
+export $(docker exec relay-dev-stack cat /run/convohop/dev-stack/seed.env)
 npm run conformance -- --target conformance/targets/dev-stack.json
 ```
 
 On macOS, Docker's host network is its VM's, so run the suite in a container
-started with `--network container:convohop-dev-stack`. `seed.env` has one
+started with `--network container:relay-dev-stack`. `seed.env` has one
 `NAME=value` line for every variable above except `CONVOHOP_DEV_CONTROL_URL`.
 The image has no control API, so the descriptor offers no capabilities and
 the scenarios that need one skip. The stack generates its keys and tokens

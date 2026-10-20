@@ -1,8 +1,8 @@
-# `com.convohop:convohop-server`
+# `dev.instantrelay:relay-server`
 
 Java server SDK for trusted JVM backends: backend-key data-plane calls, management, webhook verification and push requests.
 
-**Layer:** Server. **Runtime:** Java 11 or later. **Source:** `jvm/convohop-server`.
+**Layer:** Server. **Runtime:** Java 11 or later. **Source:** `jvm/relay-server`.
 
 ## Classes
 
@@ -14,7 +14,7 @@ public final class ApnsRequest
 
 An APNs request: an alert from `PushPayloads.apnsAlert` or a VoIP push from `PushPayloads.apnsVoip`. Your APNs client adds `authorization` and sends the payload to `/3/device/<token>` with these headers. `toString()` omits the payload.
 
-Package: `com.convohop.server.push`.
+Package: `dev.instantrelay.server.push`.
 
 #### `ApnsRequest.getHeaders` method
 
@@ -96,7 +96,7 @@ The `communication` plane: Conversations, members, messages, receipts, realtime 
 
 Obtain an instance from a client; every call blocks until the authority answers or the request fails.
 
-Package: `com.convohop.server.api`.
+Package: `dev.instantrelay.server.api`.
 
 #### `CommunicationApi.capabilities` method
 
@@ -112,7 +112,7 @@ Authorization: userSession, backendKey.
 
 Returns: the authority result
 
-Throws: `ConvoHopProblem` if the authority rejects the request or its outcome is unknown
+Throws: `RelayProblem` if the authority rejects the request or its outcome is unknown
 
 Sends [`communication.capabilities`](../../operations/communication/capabilities.md).
 
@@ -130,7 +130,7 @@ Authorization: userSession, backendKey.
 
 Returns: the authority result
 
-Throws: `ConvoHopProblem` if the authority rejects the request or its outcome is unknown
+Throws: `RelayProblem` if the authority rejects the request or its outcome is unknown
 
 Sends [`communication.route`](../../operations/communication/route.md).
 
@@ -152,7 +152,7 @@ Parameters:
 
 Returns: the authority result
 
-Throws: `ConvoHopProblem` if the authority rejects the request or its outcome is unknown
+Throws: `RelayProblem` if the authority rejects the request or its outcome is unknown
 
 Sends [`communication.getPrincipal`](../../operations/communication/getPrincipal.md).
 
@@ -174,7 +174,7 @@ Parameters:
 
 Returns: the authority result
 
-Throws: `ConvoHopProblem` if the authority rejects the request or its outcome is unknown
+Throws: `RelayProblem` if the authority rejects the request or its outcome is unknown
 
 Sends [`communication.getConversation`](../../operations/communication/getConversation.md).
 
@@ -196,7 +196,7 @@ Parameters:
 
 Returns: the authority result
 
-Throws: `ConvoHopProblem` if the authority rejects the request or its outcome is unknown
+Throws: `RelayProblem` if the authority rejects the request or its outcome is unknown
 
 Sends [`communication.members`](../../operations/communication/members.md).
 
@@ -210,7 +210,7 @@ Every page of `members(MembersRequestInput)`, each requested when iteration reac
 
 Pagination: `cursor`. Server-ordered pages. Pass nextCursor back as the cursor input until complete is true.
 
-Iteration throws `ConvoHopProblem` if the authority rejects a request or a page is malformed or does not advance, and `IllegalStateException` if a page reports `refreshRequired`: start again from current state, not from the cursor.
+Iteration throws `RelayProblem` if the authority rejects a request or a page is malformed or does not advance, and `IllegalStateException` if a page reports `refreshRequired`: start again from current state, not from the cursor.
 
 Parameters:
 
@@ -240,7 +240,7 @@ Parameters:
 
 Returns: the authority result
 
-Throws: `ConvoHopProblem` if the authority rejects the request or its outcome is unknown
+Throws: `RelayProblem` if the authority rejects the request or its outcome is unknown
 
 Sends [`communication.messages`](../../operations/communication/messages.md).
 
@@ -254,7 +254,7 @@ Every page of `messages(MessagesRequestInput)`, each requested when iteration re
 
 Pagination: `sequence`. Newest first. Pass nextCursor back as the sequence cursor input to read older items until complete is true.
 
-Iteration throws `ConvoHopProblem` if the authority rejects a request or a page is malformed or does not advance, and `IllegalStateException` if a page reports `refreshRequired`: start again from current state, not from the cursor.
+Iteration throws `RelayProblem` if the authority rejects a request or a page is malformed or does not advance, and `IllegalStateException` if a page reports `refreshRequired`: start again from current state, not from the cursor.
 
 Parameters:
 
@@ -284,7 +284,7 @@ Parameters:
 
 Returns: the authority result
 
-Throws: `ConvoHopProblem` if the authority rejects the request or its outcome is unknown
+Throws: `RelayProblem` if the authority rejects the request or its outcome is unknown
 
 Sends [`communication.getMessage`](../../operations/communication/getMessage.md).
 
@@ -306,7 +306,7 @@ Parameters:
 
 Returns: the authority result
 
-Throws: `ConvoHopProblem` if the authority rejects the request or its outcome is unknown
+Throws: `RelayProblem` if the authority rejects the request or its outcome is unknown
 
 Sends [`communication.inbox`](../../operations/communication/inbox.md).
 
@@ -320,7 +320,7 @@ Every page of `inbox(InboxRequestInput)`, each requested when iteration reaches 
 
 Pagination: `cursor`. Server-ordered pages. Pass nextCursor back as the cursor input until complete is true.
 
-Iteration throws `ConvoHopProblem` if the authority rejects a request or a page is malformed or does not advance, and `IllegalStateException` if a page reports `refreshRequired`: start again from current state, not from the cursor.
+Iteration throws `RelayProblem` if the authority rejects a request or a page is malformed or does not advance, and `IllegalStateException` if a page reports `refreshRequired`: start again from current state, not from the cursor.
 
 Parameters:
 
@@ -350,7 +350,7 @@ Parameters:
 
 Returns: the authority result
 
-Throws: `ConvoHopProblem` if the authority rejects the request or its outcome is unknown
+Throws: `RelayProblem` if the authority rejects the request or its outcome is unknown
 
 Sends [`communication.search`](../../operations/communication/search.md).
 
@@ -364,7 +364,7 @@ Every page of `search(SearchRequestInput)`, each requested when iteration reache
 
 Pagination: `cursor`. Server-ordered pages. Pass nextCursor back as the cursor input until complete is true.
 
-Iteration throws `ConvoHopProblem` if the authority rejects a request or a page is malformed or does not advance, and `IllegalStateException` if a page reports `refreshRequired`: start again from current state, not from the cursor.
+Iteration throws `RelayProblem` if the authority rejects a request or a page is malformed or does not advance, and `IllegalStateException` if a page reports `refreshRequired`: start again from current state, not from the cursor.
 
 Parameters:
 
@@ -394,7 +394,7 @@ Parameters:
 
 Returns: the authority result
 
-Throws: `ConvoHopProblem` if the authority rejects the request or its outcome is unknown
+Throws: `RelayProblem` if the authority rejects the request or its outcome is unknown
 
 Sends [`communication.resolveRequest`](../../operations/communication/resolveRequest.md).
 
@@ -416,7 +416,7 @@ Parameters:
 
 Returns: the authority result
 
-Throws: `ConvoHopProblem` if the authority rejects the request or its outcome is unknown
+Throws: `RelayProblem` if the authority rejects the request or its outcome is unknown
 
 Sends [`communication.getOperation`](../../operations/communication/getOperation.md).
 
@@ -438,7 +438,7 @@ Parameters:
 
 Returns: the authority result
 
-Throws: `ConvoHopProblem` if the authority rejects the request or its outcome is unknown
+Throws: `RelayProblem` if the authority rejects the request or its outcome is unknown
 
 Sends [`communication.conversationMute`](../../operations/communication/conversationMute.md).
 
@@ -460,7 +460,7 @@ Parameters:
 
 Returns: the authority result
 
-Throws: `ConvoHopProblem` if the authority rejects the request or its outcome is unknown
+Throws: `RelayProblem` if the authority rejects the request or its outcome is unknown
 
 Sends [`communication.currentLiveSession`](../../operations/communication/currentLiveSession.md).
 
@@ -482,7 +482,7 @@ Parameters:
 
 Returns: the authority result
 
-Throws: `ConvoHopProblem` if the authority rejects the request or its outcome is unknown
+Throws: `RelayProblem` if the authority rejects the request or its outcome is unknown
 
 Sends [`communication.liveSession`](../../operations/communication/liveSession.md).
 
@@ -504,7 +504,7 @@ Parameters:
 
 Returns: the authority result
 
-Throws: `ConvoHopProblem` if the authority rejects the request or its outcome is unknown
+Throws: `RelayProblem` if the authority rejects the request or its outcome is unknown
 
 Sends [`communication.liveSessions`](../../operations/communication/liveSessions.md).
 
@@ -518,7 +518,7 @@ Every page of `liveSessions(LiveSessionsInput)`, each requested when iteration r
 
 Pagination: `cursor`. Server-ordered pages. Pass nextCursor back as the cursor input until complete is true.
 
-Iteration throws `ConvoHopProblem` if the authority rejects a request or a page is malformed or does not advance, and `IllegalStateException` if a page reports `refreshRequired`: start again from current state, not from the cursor.
+Iteration throws `RelayProblem` if the authority rejects a request or a page is malformed or does not advance, and `IllegalStateException` if a page reports `refreshRequired`: start again from current state, not from the cursor.
 
 Parameters:
 
@@ -548,7 +548,7 @@ Parameters:
 
 Returns: the authority result
 
-Throws: `ConvoHopProblem` if the authority rejects the request or its outcome is unknown
+Throws: `RelayProblem` if the authority rejects the request or its outcome is unknown
 
 Sends [`communication.liveSessionParticipants`](../../operations/communication/liveSessionParticipants.md).
 
@@ -562,7 +562,7 @@ Every page of `liveSessionParticipants(LiveParticipantsInput)`, each requested w
 
 Pagination: `cursor`. Server-ordered pages. Pass nextCursor back as the cursor input until complete is true.
 
-Iteration throws `ConvoHopProblem` if the authority rejects a request or a page is malformed or does not advance, and `IllegalStateException` if a page reports `refreshRequired`: start again from current state, not from the cursor.
+Iteration throws `RelayProblem` if the authority rejects a request or a page is malformed or does not advance, and `IllegalStateException` if a page reports `refreshRequired`: start again from current state, not from the cursor.
 
 Parameters:
 
@@ -592,7 +592,7 @@ Parameters:
 
 Returns: the authority result
 
-Throws: `ConvoHopProblem` if the authority rejects the request or its outcome is unknown
+Throws: `RelayProblem` if the authority rejects the request or its outcome is unknown
 
 Sends [`communication.liveSessionOperation`](../../operations/communication/liveSessionOperation.md).
 
@@ -614,7 +614,7 @@ Parameters:
 
 Returns: the authority result
 
-Throws: `ConvoHopProblem` if the authority rejects the request or its outcome is unknown
+Throws: `RelayProblem` if the authority rejects the request or its outcome is unknown
 
 Sends [`communication.sessionRequestOutcome`](../../operations/communication/sessionRequestOutcome.md).
 
@@ -638,7 +638,7 @@ Parameters:
 
 Returns: the authority result
 
-Throws: `ConvoHopProblem` if the authority rejects the request or its outcome is unknown
+Throws: `RelayProblem` if the authority rejects the request or its outcome is unknown
 
 Sends [`communication.createPrincipal`](../../operations/communication/createPrincipal.md).
 
@@ -662,7 +662,7 @@ Parameters:
 
 Returns: the authority result
 
-Throws: `ConvoHopProblem` if the authority rejects the request or its outcome is unknown
+Throws: `RelayProblem` if the authority rejects the request or its outcome is unknown
 
 Sends [`communication.disablePrincipal`](../../operations/communication/disablePrincipal.md).
 
@@ -686,7 +686,7 @@ Parameters:
 
 Returns: the authority result
 
-Throws: `ConvoHopProblem` if the authority rejects the request or its outcome is unknown
+Throws: `RelayProblem` if the authority rejects the request or its outcome is unknown
 
 Sends [`communication.issueSession`](../../operations/communication/issueSession.md).
 
@@ -710,7 +710,7 @@ Parameters:
 
 Returns: the authority result
 
-Throws: `ConvoHopProblem` if the authority rejects the request or its outcome is unknown
+Throws: `RelayProblem` if the authority rejects the request or its outcome is unknown
 
 Sends [`communication.renewSession`](../../operations/communication/renewSession.md).
 
@@ -734,7 +734,7 @@ Parameters:
 
 Returns: the authority result
 
-Throws: `ConvoHopProblem` if the authority rejects the request or its outcome is unknown
+Throws: `RelayProblem` if the authority rejects the request or its outcome is unknown
 
 Sends [`communication.revokeSession`](../../operations/communication/revokeSession.md).
 
@@ -758,7 +758,7 @@ Parameters:
 
 Returns: the authority result
 
-Throws: `ConvoHopProblem` if the authority rejects the request or its outcome is unknown
+Throws: `RelayProblem` if the authority rejects the request or its outcome is unknown
 
 Sends [`communication.createConversation`](../../operations/communication/createConversation.md).
 
@@ -782,7 +782,7 @@ Parameters:
 
 Returns: the authority result
 
-Throws: `ConvoHopProblem` if the authority rejects the request or its outcome is unknown
+Throws: `RelayProblem` if the authority rejects the request or its outcome is unknown
 
 Sends [`communication.updateConversation`](../../operations/communication/updateConversation.md).
 
@@ -806,7 +806,7 @@ Parameters:
 
 Returns: the authority result
 
-Throws: `ConvoHopProblem` if the authority rejects the request or its outcome is unknown
+Throws: `RelayProblem` if the authority rejects the request or its outcome is unknown
 
 Sends [`communication.addMember`](../../operations/communication/addMember.md).
 
@@ -830,7 +830,7 @@ Parameters:
 
 Returns: the authority result
 
-Throws: `ConvoHopProblem` if the authority rejects the request or its outcome is unknown
+Throws: `RelayProblem` if the authority rejects the request or its outcome is unknown
 
 Sends [`communication.addMembers`](../../operations/communication/addMembers.md).
 
@@ -854,7 +854,7 @@ Parameters:
 
 Returns: the authority result
 
-Throws: `ConvoHopProblem` if the authority rejects the request or its outcome is unknown
+Throws: `RelayProblem` if the authority rejects the request or its outcome is unknown
 
 Sends [`communication.removeMember`](../../operations/communication/removeMember.md).
 
@@ -878,7 +878,7 @@ Parameters:
 
 Returns: the authority result
 
-Throws: `ConvoHopProblem` if the authority rejects the request or its outcome is unknown
+Throws: `RelayProblem` if the authority rejects the request or its outcome is unknown
 
 Sends [`communication.historyGrant`](../../operations/communication/historyGrant.md).
 
@@ -902,7 +902,7 @@ Parameters:
 
 Returns: the authority result
 
-Throws: `ConvoHopProblem` if the authority rejects the request or its outcome is unknown
+Throws: `RelayProblem` if the authority rejects the request or its outcome is unknown
 
 Sends [`communication.sendMessage`](../../operations/communication/sendMessage.md).
 
@@ -926,7 +926,7 @@ Parameters:
 
 Returns: the authority result
 
-Throws: `ConvoHopProblem` if the authority rejects the request or its outcome is unknown
+Throws: `RelayProblem` if the authority rejects the request or its outcome is unknown
 
 Sends [`communication.editMessage`](../../operations/communication/editMessage.md).
 
@@ -950,7 +950,7 @@ Parameters:
 
 Returns: the authority result
 
-Throws: `ConvoHopProblem` if the authority rejects the request or its outcome is unknown
+Throws: `RelayProblem` if the authority rejects the request or its outcome is unknown
 
 Sends [`communication.deleteMessage`](../../operations/communication/deleteMessage.md).
 
@@ -974,7 +974,7 @@ Parameters:
 
 Returns: the authority result
 
-Throws: `ConvoHopProblem` if the authority rejects the request or its outcome is unknown
+Throws: `RelayProblem` if the authority rejects the request or its outcome is unknown
 
 Sends [`communication.setBroadcastPermission`](../../operations/communication/setBroadcastPermission.md).
 
@@ -998,7 +998,7 @@ Parameters:
 
 Returns: the authority result
 
-Throws: `ConvoHopProblem` if the authority rejects the request or its outcome is unknown
+Throws: `RelayProblem` if the authority rejects the request or its outcome is unknown
 
 Sends [`communication.setConversationMute`](../../operations/communication/setConversationMute.md).
 
@@ -1022,7 +1022,7 @@ Parameters:
 
 Returns: the authority result
 
-Throws: `ConvoHopProblem` if the authority rejects the request or its outcome is unknown
+Throws: `RelayProblem` if the authority rejects the request or its outcome is unknown
 
 Sends [`communication.alertLiveSession`](../../operations/communication/alertLiveSession.md).
 
@@ -1046,7 +1046,7 @@ Parameters:
 
 Returns: the authority result
 
-Throws: `ConvoHopProblem` if the authority rejects the request or its outcome is unknown
+Throws: `RelayProblem` if the authority rejects the request or its outcome is unknown
 
 Sends [`communication.endLiveSession`](../../operations/communication/endLiveSession.md).
 
@@ -1071,7 +1071,7 @@ Parameters:
 
 Returns: the authority result
 
-Throws: `ConvoHopProblem` if the authority rejects the request or its outcome is unknown
+Throws: `RelayProblem` if the authority rejects the request or its outcome is unknown
 
 Sends [`communication.redeemCredential`](../../operations/communication/redeemCredential.md).
 
@@ -1096,90 +1096,9 @@ Parameters:
 
 Returns: the authority result
 
-Throws: `ConvoHopProblem` if the authority rejects the request or its outcome is unknown
+Throws: `RelayProblem` if the authority rejects the request or its outcome is unknown
 
 Sends [`communication.acknowledgeCredential`](../../operations/communication/acknowledgeCredential.md).
-
-### `ConvoHopProblem` class
-
-```java
-public class ConvoHopProblem extends RuntimeException
-```
-
-A request the authority rejected, or one whose outcome the SDK could not establish.
-
-Classify a problem by `getCode()`. `getOutcome()` says what is known about the request: `rejected` means it had no effect, `committed` or `accepted` means it took effect, and `unknown` means it may have taken effect, so resolve or retry the same request ID instead of sending a new one. Messages never contain credentials.
-
-Package: `com.convohop.server`.
-
-#### `ConvoHopProblem` constructor
-
-```java
-public ConvoHopProblem(String code, String requestId, String outcome, int status, String message)
-public ConvoHopProblem(String code, String requestId, String outcome, int status, String message, @Nullable Duration retryAfter, @Nullable Throwable cause)
-```
-
-Creates a problem with a retry delay and a cause.
-
-Parameters:
-
-- `code`: the stable error code, such as `RATE_LIMITED`
-- `requestId`: the request ID the problem belongs to
-- `outcome`: what is known about the request: `rejected`, `unknown`, `committed` or `accepted`
-- `status`: the HTTP status, or 0 when no response arrived
-- `message`: a description without credentials
-- `retryAfter`: how long to wait before resending the same request, or null
-- `cause`: the underlying failure, or null
-
-#### `ConvoHopProblem.getCode` method
-
-```java
-public String getCode()
-```
-
-The stable error code, such as `RATE_LIMITED` or `TRANSPORT_UNKNOWN`.
-
-Returns: the code
-
-#### `ConvoHopProblem.getRequestId` method
-
-```java
-public String getRequestId()
-```
-
-The request ID the problem belongs to. Resolve or retry with this ID when the outcome is `unknown`.
-
-Returns: the request ID
-
-#### `ConvoHopProblem.getOutcome` method
-
-```java
-public String getOutcome()
-```
-
-What is known about the request: `rejected`, `unknown`, `committed` or `accepted`.
-
-Returns: the outcome
-
-#### `ConvoHopProblem.getStatus` method
-
-```java
-public int getStatus()
-```
-
-The HTTP status, or 0 when no authority response arrived.
-
-Returns: the status
-
-#### `ConvoHopProblem.getRetryAfter` method
-
-```java
-public @Nullable Duration getRetryAfter()
-```
-
-How long to wait before resending the same request, when the authority sent a delay (for example with `RATE_LIMITED`). Read from the error's `extensions.retryAfter`, else from an HTTP `Retry-After` delay in seconds. The SDK never waits or resends on its own because of it.
-
-Returns: the delay in whole seconds, or null
 
 ### `FcmRequest` class
 
@@ -1189,7 +1108,7 @@ public final class FcmRequest
 
 An FCM data message from `PushPayloads.fcm`. `getMessage()` is an FCM HTTP v1 `messages:send` message without a target: add `token` or `fid`. With the Firebase Admin SDK, put `getData()` and set the Android priority, TTL and collapse key from the getters. `toString()` omits the data.
 
-Package: `com.convohop.server.push`.
+Package: `dev.instantrelay.server.push`.
 
 #### `FcmRequest.getData` method
 
@@ -1251,7 +1170,7 @@ The `management` plane: Organizations, deployments, projects, backend keys and w
 
 Obtain an instance from a client; every call blocks until the authority answers or the request fails.
 
-Package: `com.convohop.server.api`.
+Package: `dev.instantrelay.server.api`.
 
 #### `ManagementApi.capabilities` method
 
@@ -1267,7 +1186,7 @@ Authorization: portalCredential.
 
 Returns: the authority result
 
-Throws: `ConvoHopProblem` if the authority rejects the request or its outcome is unknown
+Throws: `RelayProblem` if the authority rejects the request or its outcome is unknown
 
 Sends [`management.capabilities`](../../operations/management/capabilities.md).
 
@@ -1285,7 +1204,7 @@ Authorization: portalCredential.
 
 Returns: the authority result
 
-Throws: `ConvoHopProblem` if the authority rejects the request or its outcome is unknown
+Throws: `RelayProblem` if the authority rejects the request or its outcome is unknown
 
 Sends [`management.organizations`](../../operations/management/organizations.md).
 
@@ -1307,7 +1226,7 @@ Parameters:
 
 Returns: the authority result
 
-Throws: `ConvoHopProblem` if the authority rejects the request or its outcome is unknown
+Throws: `RelayProblem` if the authority rejects the request or its outcome is unknown
 
 Sends [`management.getOrganization`](../../operations/management/getOrganization.md).
 
@@ -1329,7 +1248,7 @@ Parameters:
 
 Returns: the authority result
 
-Throws: `ConvoHopProblem` if the authority rejects the request or its outcome is unknown
+Throws: `RelayProblem` if the authority rejects the request or its outcome is unknown
 
 Sends [`management.getDeployment`](../../operations/management/getDeployment.md).
 
@@ -1351,7 +1270,7 @@ Parameters:
 
 Returns: the authority result
 
-Throws: `ConvoHopProblem` if the authority rejects the request or its outcome is unknown
+Throws: `RelayProblem` if the authority rejects the request or its outcome is unknown
 
 Sends [`management.getProject`](../../operations/management/getProject.md).
 
@@ -1373,7 +1292,7 @@ Parameters:
 
 Returns: the authority result
 
-Throws: `ConvoHopProblem` if the authority rejects the request or its outcome is unknown
+Throws: `RelayProblem` if the authority rejects the request or its outcome is unknown
 
 Sends [`management.deploymentHealth`](../../operations/management/deploymentHealth.md).
 
@@ -1395,7 +1314,7 @@ Parameters:
 
 Returns: the authority result
 
-Throws: `ConvoHopProblem` if the authority rejects the request or its outcome is unknown
+Throws: `RelayProblem` if the authority rejects the request or its outcome is unknown
 
 Sends [`management.deploymentUsage`](../../operations/management/deploymentUsage.md).
 
@@ -1417,7 +1336,7 @@ Parameters:
 
 Returns: the authority result
 
-Throws: `ConvoHopProblem` if the authority rejects the request or its outcome is unknown
+Throws: `RelayProblem` if the authority rejects the request or its outcome is unknown
 
 Sends [`management.projectUsage`](../../operations/management/projectUsage.md).
 
@@ -1439,7 +1358,7 @@ Parameters:
 
 Returns: the authority result
 
-Throws: `ConvoHopProblem` if the authority rejects the request or its outcome is unknown
+Throws: `RelayProblem` if the authority rejects the request or its outcome is unknown
 
 Sends [`management.organizationUsage`](../../operations/management/organizationUsage.md).
 
@@ -1449,7 +1368,7 @@ Sends [`management.organizationUsage`](../../operations/management/organizationU
 public OrganizationBillingReply organizationBilling(OrganizationBillingRequestInput input)
 ```
 
-Read the billing state of an organization in any status: the plan whose limits apply, whether ConvoHop bills the organization and, when it does, its standing and subscription.
+Read the billing state of an organization in any status: the plan whose limits apply, whether Relay bills the organization and, when it does, its standing and subscription.
 
 Idempotency: `safe`. Read-only. Repeat freely; each attempt may use a new requestId.
 
@@ -1461,7 +1380,7 @@ Parameters:
 
 Returns: the authority result
 
-Throws: `ConvoHopProblem` if the authority rejects the request or its outcome is unknown
+Throws: `RelayProblem` if the authority rejects the request or its outcome is unknown
 
 #### `ManagementApi.webhookEndpoints` method
 
@@ -1481,7 +1400,7 @@ Parameters:
 
 Returns: the authority result
 
-Throws: `ConvoHopProblem` if the authority rejects the request or its outcome is unknown
+Throws: `RelayProblem` if the authority rejects the request or its outcome is unknown
 
 Sends [`management.webhookEndpoints`](../../operations/management/webhookEndpoints.md).
 
@@ -1503,7 +1422,7 @@ Parameters:
 
 Returns: the authority result
 
-Throws: `ConvoHopProblem` if the authority rejects the request or its outcome is unknown
+Throws: `RelayProblem` if the authority rejects the request or its outcome is unknown
 
 Sends [`management.webhookDeliveries`](../../operations/management/webhookDeliveries.md).
 
@@ -1525,7 +1444,7 @@ Parameters:
 
 Returns: the authority result
 
-Throws: `ConvoHopProblem` if the authority rejects the request or its outcome is unknown
+Throws: `RelayProblem` if the authority rejects the request or its outcome is unknown
 
 Sends [`management.resolveRequest`](../../operations/management/resolveRequest.md).
 
@@ -1547,7 +1466,7 @@ Parameters:
 
 Returns: the authority result
 
-Throws: `ConvoHopProblem` if the authority rejects the request or its outcome is unknown
+Throws: `RelayProblem` if the authority rejects the request or its outcome is unknown
 
 Sends [`management.getOperation`](../../operations/management/getOperation.md).
 
@@ -1569,7 +1488,7 @@ Parameters:
 
 Returns: the authority result
 
-Throws: `ConvoHopProblem` if the authority rejects the request or its outcome is unknown
+Throws: `RelayProblem` if the authority rejects the request or its outcome is unknown
 
 #### `ManagementApi.agentSignup` method
 
@@ -1585,7 +1504,7 @@ Authorization: agentVerifier (condition ownSignup).
 
 Returns: the authority result
 
-Throws: `ConvoHopProblem` if the authority rejects the request or its outcome is unknown
+Throws: `RelayProblem` if the authority rejects the request or its outcome is unknown
 
 #### `ManagementApi.agentGrants` method
 
@@ -1605,7 +1524,7 @@ Parameters:
 
 Returns: the authority result
 
-Throws: `ConvoHopProblem` if the authority rejects the request or its outcome is unknown
+Throws: `RelayProblem` if the authority rejects the request or its outcome is unknown
 
 #### `ManagementApi.agentGrantsPages` method
 
@@ -1617,7 +1536,7 @@ Every page of `agentGrants(AgentGrantsRequestInput)`, each requested when iterat
 
 Pagination: `cursor`. Server-ordered pages. Pass nextCursor back as the cursor input until complete is true.
 
-Iteration throws `ConvoHopProblem` if the authority rejects a request or a page is malformed or does not advance, and `IllegalStateException` if a page reports `refreshRequired`: start again from current state, not from the cursor.
+Iteration throws `RelayProblem` if the authority rejects a request or a page is malformed or does not advance, and `IllegalStateException` if a page reports `refreshRequired`: start again from current state, not from the cursor.
 
 Parameters:
 
@@ -1645,7 +1564,7 @@ Parameters:
 
 Returns: the authority result
 
-Throws: `ConvoHopProblem` if the authority rejects the request or its outcome is unknown
+Throws: `RelayProblem` if the authority rejects the request or its outcome is unknown
 
 #### `ManagementApi.agentAuditEventsPages` method
 
@@ -1657,7 +1576,7 @@ Every page of `agentAuditEvents(AgentAuditEventsRequestInput)`, each requested w
 
 Pagination: `cursor`. Server-ordered pages. Pass nextCursor back as the cursor input until complete is true.
 
-Iteration throws `ConvoHopProblem` if the authority rejects a request or a page is malformed or does not advance, and `IllegalStateException` if a page reports `refreshRequired`: start again from current state, not from the cursor.
+Iteration throws `RelayProblem` if the authority rejects a request or a page is malformed or does not advance, and `IllegalStateException` if a page reports `refreshRequired`: start again from current state, not from the cursor.
 
 Parameters:
 
@@ -1685,7 +1604,7 @@ Parameters:
 
 Returns: the authority result
 
-Throws: `ConvoHopProblem` if the authority rejects the request or its outcome is unknown
+Throws: `RelayProblem` if the authority rejects the request or its outcome is unknown
 
 #### `ManagementApi.createOrganization` method
 
@@ -1707,7 +1626,7 @@ Parameters:
 
 Returns: the authority result
 
-Throws: `ConvoHopProblem` if the authority rejects the request or its outcome is unknown
+Throws: `RelayProblem` if the authority rejects the request or its outcome is unknown
 
 Sends [`management.createOrganization`](../../operations/management/createOrganization.md).
 
@@ -1731,7 +1650,7 @@ Parameters:
 
 Returns: the authority result
 
-Throws: `ConvoHopProblem` if the authority rejects the request or its outcome is unknown
+Throws: `RelayProblem` if the authority rejects the request or its outcome is unknown
 
 Sends [`management.createDeployment`](../../operations/management/createDeployment.md).
 
@@ -1755,7 +1674,7 @@ Parameters:
 
 Returns: the authority result
 
-Throws: `ConvoHopProblem` if the authority rejects the request or its outcome is unknown
+Throws: `RelayProblem` if the authority rejects the request or its outcome is unknown
 
 Sends [`management.createProject`](../../operations/management/createProject.md).
 
@@ -1779,7 +1698,7 @@ Parameters:
 
 Returns: the authority result
 
-Throws: `ConvoHopProblem` if the authority rejects the request or its outcome is unknown
+Throws: `RelayProblem` if the authority rejects the request or its outcome is unknown
 
 Sends [`management.issueBackendKey`](../../operations/management/issueBackendKey.md).
 
@@ -1803,7 +1722,7 @@ Parameters:
 
 Returns: the authority result
 
-Throws: `ConvoHopProblem` if the authority rejects the request or its outcome is unknown
+Throws: `RelayProblem` if the authority rejects the request or its outcome is unknown
 
 Sends [`management.revokeBackendKey`](../../operations/management/revokeBackendKey.md).
 
@@ -1827,7 +1746,7 @@ Parameters:
 
 Returns: the authority result
 
-Throws: `ConvoHopProblem` if the authority rejects the request or its outcome is unknown
+Throws: `RelayProblem` if the authority rejects the request or its outcome is unknown
 
 Sends [`management.projectPolicy`](../../operations/management/projectPolicy.md).
 
@@ -1851,7 +1770,7 @@ Parameters:
 
 Returns: the authority result
 
-Throws: `ConvoHopProblem` if the authority rejects the request or its outcome is unknown
+Throws: `RelayProblem` if the authority rejects the request or its outcome is unknown
 
 Sends [`management.credentialPermit`](../../operations/management/credentialPermit.md).
 
@@ -1875,7 +1794,7 @@ Parameters:
 
 Returns: the authority result
 
-Throws: `ConvoHopProblem` if the authority rejects the request or its outcome is unknown
+Throws: `RelayProblem` if the authority rejects the request or its outcome is unknown
 
 Sends [`management.pauseOperation`](../../operations/management/pauseOperation.md).
 
@@ -1899,7 +1818,7 @@ Parameters:
 
 Returns: the authority result
 
-Throws: `ConvoHopProblem` if the authority rejects the request or its outcome is unknown
+Throws: `RelayProblem` if the authority rejects the request or its outcome is unknown
 
 Sends [`management.resumeOperation`](../../operations/management/resumeOperation.md).
 
@@ -1923,7 +1842,7 @@ Parameters:
 
 Returns: the authority result
 
-Throws: `ConvoHopProblem` if the authority rejects the request or its outcome is unknown
+Throws: `RelayProblem` if the authority rejects the request or its outcome is unknown
 
 #### `ManagementApi.createBillingPortalSession` method
 
@@ -1945,7 +1864,7 @@ Parameters:
 
 Returns: the authority result
 
-Throws: `ConvoHopProblem` if the authority rejects the request or its outcome is unknown
+Throws: `RelayProblem` if the authority rejects the request or its outcome is unknown
 
 #### `ManagementApi.configureWebhook` method
 
@@ -1967,7 +1886,7 @@ Parameters:
 
 Returns: the authority result
 
-Throws: `ConvoHopProblem` if the authority rejects the request or its outcome is unknown
+Throws: `RelayProblem` if the authority rejects the request or its outcome is unknown
 
 Sends [`management.configureWebhook`](../../operations/management/configureWebhook.md).
 
@@ -1991,7 +1910,7 @@ Parameters:
 
 Returns: the authority result
 
-Throws: `ConvoHopProblem` if the authority rejects the request or its outcome is unknown
+Throws: `RelayProblem` if the authority rejects the request or its outcome is unknown
 
 Sends [`management.updateWebhook`](../../operations/management/updateWebhook.md).
 
@@ -2015,7 +1934,7 @@ Parameters:
 
 Returns: the authority result
 
-Throws: `ConvoHopProblem` if the authority rejects the request or its outcome is unknown
+Throws: `RelayProblem` if the authority rejects the request or its outcome is unknown
 
 Sends [`management.rotateWebhookSecret`](../../operations/management/rotateWebhookSecret.md).
 
@@ -2039,7 +1958,7 @@ Parameters:
 
 Returns: the authority result
 
-Throws: `ConvoHopProblem` if the authority rejects the request or its outcome is unknown
+Throws: `RelayProblem` if the authority rejects the request or its outcome is unknown
 
 Sends [`management.disableWebhook`](../../operations/management/disableWebhook.md).
 
@@ -2063,7 +1982,7 @@ Parameters:
 
 Returns: the authority result
 
-Throws: `ConvoHopProblem` if the authority rejects the request or its outcome is unknown
+Throws: `RelayProblem` if the authority rejects the request or its outcome is unknown
 
 Sends [`management.replayWebhookDeliveries`](../../operations/management/replayWebhookDeliveries.md).
 
@@ -2087,7 +2006,7 @@ Parameters:
 
 Returns: the authority result
 
-Throws: `ConvoHopProblem` if the authority rejects the request or its outcome is unknown
+Throws: `RelayProblem` if the authority rejects the request or its outcome is unknown
 
 #### `ManagementApi.rejectAgentSignup` method
 
@@ -2109,7 +2028,7 @@ Parameters:
 
 Returns: the authority result
 
-Throws: `ConvoHopProblem` if the authority rejects the request or its outcome is unknown
+Throws: `RelayProblem` if the authority rejects the request or its outcome is unknown
 
 #### `ManagementApi.approveAgentSignup` method
 
@@ -2131,7 +2050,7 @@ Parameters:
 
 Returns: the authority result
 
-Throws: `ConvoHopProblem` if the authority rejects the request or its outcome is unknown
+Throws: `RelayProblem` if the authority rejects the request or its outcome is unknown
 
 #### `ManagementApi.issueAgentKey` method
 
@@ -2153,7 +2072,7 @@ Parameters:
 
 Returns: the authority result
 
-Throws: `ConvoHopProblem` if the authority rejects the request or its outcome is unknown
+Throws: `RelayProblem` if the authority rejects the request or its outcome is unknown
 
 #### `ManagementApi.agentCredentialPermit` method
 
@@ -2175,7 +2094,7 @@ Parameters:
 
 Returns: the authority result
 
-Throws: `ConvoHopProblem` if the authority rejects the request or its outcome is unknown
+Throws: `RelayProblem` if the authority rejects the request or its outcome is unknown
 
 #### `ManagementApi.revokeAgentGrant` method
 
@@ -2197,7 +2116,7 @@ Parameters:
 
 Returns: the authority result
 
-Throws: `ConvoHopProblem` if the authority rejects the request or its outcome is unknown
+Throws: `RelayProblem` if the authority rejects the request or its outcome is unknown
 
 #### `ManagementApi.setSpendControls` method
 
@@ -2219,7 +2138,7 @@ Parameters:
 
 Returns: the authority result
 
-Throws: `ConvoHopProblem` if the authority rejects the request or its outcome is unknown
+Throws: `RelayProblem` if the authority rejects the request or its outcome is unknown
 
 #### `ManagementApi.purchaseAgentCredits` method
 
@@ -2241,7 +2160,7 @@ Parameters:
 
 Returns: the authority result
 
-Throws: `ConvoHopProblem` if the authority rejects the request or its outcome is unknown
+Throws: `RelayProblem` if the authority rejects the request or its outcome is unknown
 
 ### `ManagementClient` class
 
@@ -2253,7 +2172,7 @@ Operator client for organizations, deployments, projects and backend keys. Its a
 
 Clients are safe for concurrent use, and calls block the calling thread.
 
-Package: `com.convohop.server`.
+Package: `dev.instantrelay.server`.
 
 #### `ManagementClient.builder` static method
 
@@ -2314,7 +2233,7 @@ Parameters:
 
 Returns: the reply
 
-Throws: `ConvoHopProblem` if the authority rejects the request
+Throws: `RelayProblem` if the authority rejects the request
 
 Sends [`management.issueBackendKey`](../../operations/management/issueBackendKey.md).
 
@@ -2326,7 +2245,7 @@ public static final class Builder
 
 Builds a `ManagementClient`.
 
-Package: `com.convohop.server`.
+Package: `dev.instantrelay.server`.
 
 #### `ManagementClient.Builder.baseUrl` method
 
@@ -2420,7 +2339,7 @@ public final class Operations
 
 Descriptors of the server-layer queries and mutations, and each plane's resolve operation.
 
-Package: `com.convohop.server.api`.
+Package: `dev.instantrelay.server.api`.
 
 ### `ProjectServerClient` class
 
@@ -2432,9 +2351,9 @@ Backend-key client for one project. Use it only in trusted server runtimes; neve
 
 The helpers check that each result names the resource the request did. `communication()` reaches every backend operation in the schema without those checks. A key without the scope an operation needs fails with `ScopeRequiredProblem`. Handles from `conversation(String)` send nothing until a method is called.
 
-Clients are safe for concurrent use. Calls block the calling thread; the `convohop-server-kotlin` module adds suspending wrappers. Mutations accept an optional request ID: pass the same ID to repeat a mutation safely, and see `requests()` to recover one whose outcome is unknown.
+Clients are safe for concurrent use. Calls block the calling thread; the `relay-server-kotlin` module adds suspending wrappers. Mutations accept an optional request ID: pass the same ID to repeat a mutation safely, and see `requests()` to recover one whose outcome is unknown.
 
-Package: `com.convohop.server`.
+Package: `dev.instantrelay.server`.
 
 #### `ProjectServerClient.builder` static method
 
@@ -2512,7 +2431,7 @@ Parameters:
 
 Returns: the principal
 
-Throws: `ConvoHopProblem` if the authority rejects the request or its reply names another user
+Throws: `RelayProblem` if the authority rejects the request or its reply names another user
 
 Sends [`communication.createPrincipal`](../../operations/communication/createPrincipal.md).
 
@@ -2530,7 +2449,7 @@ Parameters:
 
 Returns: the principal
 
-Throws: `ConvoHopProblem` if the authority rejects the read or its reply names another principal
+Throws: `RelayProblem` if the authority rejects the read or its reply names another principal
 
 Sends [`communication.getPrincipal`](../../operations/communication/getPrincipal.md).
 
@@ -2551,7 +2470,7 @@ Parameters:
 
 Returns: the disabled principal
 
-Throws: `ConvoHopProblem` if the authority rejects the request or its reply names another principal
+Throws: `RelayProblem` if the authority rejects the request or its reply names another principal
 
 Sends [`communication.disablePrincipal`](../../operations/communication/disablePrincipal.md).
 
@@ -2583,7 +2502,7 @@ Parameters:
 
 Returns: the session and its token
 
-Throws: `ConvoHopProblem` if the authority rejects the request or its reply names another session
+Throws: `RelayProblem` if the authority rejects the request or its reply names another session
 
 Sends [`communication.issueSession`](../../operations/communication/issueSession.md).
 
@@ -2607,7 +2526,7 @@ Parameters:
 
 Returns: the renewed session and its new token
 
-Throws: `ConvoHopProblem` if the authority rejects the request or its reply names another session
+Throws: `RelayProblem` if the authority rejects the request or its reply names another session
 
 Sends [`communication.renewSession`](../../operations/communication/renewSession.md).
 
@@ -2628,7 +2547,7 @@ Parameters:
 
 Returns: the revocation
 
-Throws: `ConvoHopProblem` if the authority rejects the request or its reply names another session
+Throws: `RelayProblem` if the authority rejects the request or its reply names another session
 
 Sends [`communication.revokeSession`](../../operations/communication/revokeSession.md).
 
@@ -2658,7 +2577,7 @@ Parameters:
 
 Returns: the conversation
 
-Throws: `ConvoHopProblem` if the authority rejects the request or its reply is malformed
+Throws: `RelayProblem` if the authority rejects the request or its reply is malformed
 
 Sends [`communication.createConversation`](../../operations/communication/createConversation.md).
 
@@ -2698,7 +2617,7 @@ Reads the route of this client's project and records its serving epoch, which la
 
 Throws: `IllegalStateException` if the project or its incarnation changed; recover explicitly
 
-Throws: `ConvoHopProblem` if the authority rejects the read or its reply is malformed
+Throws: `RelayProblem` if the authority rejects the read or its reply is malformed
 
 Sends [`communication.route`](../../operations/communication/route.md).
 
@@ -2712,7 +2631,7 @@ Reads the authority's capabilities and limits.
 
 Returns: the capabilities
 
-Throws: `ConvoHopProblem` if the authority rejects the read or its reply is malformed
+Throws: `RelayProblem` if the authority rejects the read or its reply is malformed
 
 Sends [`communication.capabilities`](../../operations/communication/capabilities.md).
 
@@ -2732,7 +2651,7 @@ Returns: the operation
 
 Throws: `IllegalArgumentException` if the ID is not a canonical nonzero UUID
 
-Throws: `ConvoHopProblem` if the authority rejects the read or its reply names another operation
+Throws: `RelayProblem` if the authority rejects the read or its reply names another operation
 
 Sends [`communication.getOperation`](../../operations/communication/getOperation.md).
 
@@ -2744,7 +2663,7 @@ public static final class Builder
 
 Builds a `ProjectServerClient`.
 
-Package: `com.convohop.server`.
+Package: `dev.instantrelay.server`.
 
 #### `ProjectServerClient.Builder.baseUrl` method
 
@@ -2852,7 +2771,7 @@ public final class PushOptions
 
 Options for `PushPayloads`. Immutable; `toString()` omits the visible text.
 
-Package: `com.convohop.server.push`.
+Package: `dev.instantrelay.server.push`.
 
 #### `PushOptions.defaults` static method
 
@@ -2922,7 +2841,7 @@ public static final class Builder
 
 Configures `PushOptions`.
 
-Package: `com.convohop.server.push`.
+Package: `dev.instantrelay.server.push`.
 
 #### `PushOptions.Builder.title` method
 
@@ -3004,7 +2923,7 @@ Builds provider requests from per-recipient notification events (`notification.m
 
 Each builder returns null when the event doesn't apply to the platform or is stale. Payloads are metadata-only unless you set a title or body, or the event carries an opted-in message preview. Every payload carries a `convohop` object: the event's fields without `subjectRef`, `connected` and `preview`. APNs VoIP, FCM and Web Push payloads also carry the visible `title` and `body` there, because they have no visible alert of their own. A payload that exceeds its platform's limit has its body, then its title, shortened to the longest prefix that fits followed by `…`.
 
-Package: `com.convohop.server.push`.
+Package: `dev.instantrelay.server.push`.
 
 #### `PushPayloads.apnsAlert` static method
 
@@ -3084,7 +3003,7 @@ public final class RecoveryState
 
 A snapshot of one mutation's recovery record: the original request ID, payload and incarnation, the retry budget and what is known about the outcome. Records are created and updated only by the SDK.
 
-Package: `com.convohop.server`.
+Package: `dev.instantrelay.server`.
 
 #### `RecoveryState.getRequestId` method
 
@@ -3216,15 +3135,96 @@ Whether a native media connection was attempted with the request's credentials, 
 
 Returns: whether native admission was attempted
 
+### `RelayProblem` class
+
+```java
+public class RelayProblem extends RuntimeException
+```
+
+A request the authority rejected, or one whose outcome the SDK could not establish.
+
+Classify a problem by `getCode()`. `getOutcome()` says what is known about the request: `rejected` means it had no effect, `committed` or `accepted` means it took effect, and `unknown` means it may have taken effect, so resolve or retry the same request ID instead of sending a new one. Messages never contain credentials.
+
+Package: `dev.instantrelay.server`.
+
+#### `RelayProblem` constructor
+
+```java
+public RelayProblem(String code, String requestId, String outcome, int status, String message)
+public RelayProblem(String code, String requestId, String outcome, int status, String message, @Nullable Duration retryAfter, @Nullable Throwable cause)
+```
+
+Creates a problem with a retry delay and a cause.
+
+Parameters:
+
+- `code`: the stable error code, such as `RATE_LIMITED`
+- `requestId`: the request ID the problem belongs to
+- `outcome`: what is known about the request: `rejected`, `unknown`, `committed` or `accepted`
+- `status`: the HTTP status, or 0 when no response arrived
+- `message`: a description without credentials
+- `retryAfter`: how long to wait before resending the same request, or null
+- `cause`: the underlying failure, or null
+
+#### `RelayProblem.getCode` method
+
+```java
+public String getCode()
+```
+
+The stable error code, such as `RATE_LIMITED` or `TRANSPORT_UNKNOWN`.
+
+Returns: the code
+
+#### `RelayProblem.getRequestId` method
+
+```java
+public String getRequestId()
+```
+
+The request ID the problem belongs to. Resolve or retry with this ID when the outcome is `unknown`.
+
+Returns: the request ID
+
+#### `RelayProblem.getOutcome` method
+
+```java
+public String getOutcome()
+```
+
+What is known about the request: `rejected`, `unknown`, `committed` or `accepted`.
+
+Returns: the outcome
+
+#### `RelayProblem.getStatus` method
+
+```java
+public int getStatus()
+```
+
+The HTTP status, or 0 when no authority response arrived.
+
+Returns: the status
+
+#### `RelayProblem.getRetryAfter` method
+
+```java
+public @Nullable Duration getRetryAfter()
+```
+
+How long to wait before resending the same request, when the authority sent a delay (for example with `RATE_LIMITED`). Read from the error's `extensions.retryAfter`, else from an HTTP `Retry-After` delay in seconds. The SDK never waits or resends on its own because of it.
+
+Returns: the delay in whole seconds, or null
+
 ### `Requests` class
 
 ```java
 public final class Requests
 ```
 
-Resolves and retries mutations by their original request ID. A `ConvoHopProblem` whose outcome is `unknown` means the mutation may or may not have committed: resolve it, or retry it with the same request ID, instead of sending it again under a new one.
+Resolves and retries mutations by their original request ID. A `RelayProblem` whose outcome is `unknown` means the mutation may or may not have committed: resolve it, or retry it with the same request ID, instead of sending it again under a new one.
 
-Package: `com.convohop.server`.
+Package: `dev.instantrelay.server`.
 
 #### `Requests.resolve` method
 
@@ -3242,7 +3242,7 @@ Returns: the resolution: `notObservedYet`, `accepted` or `committed`
 
 Throws: `IllegalArgumentException` if the request ID is not a canonical nonzero UUID
 
-Throws: `ConvoHopProblem` if the authority rejects the lookup or its reply is malformed
+Throws: `RelayProblem` if the authority rejects the lookup or its reply is malformed
 
 Sends [`communication.resolveRequest`](../../operations/communication/resolveRequest.md) and [`management.resolveRequest`](../../operations/management/resolveRequest.md).
 
@@ -3264,19 +3264,19 @@ Throws: `IllegalArgumentException` if the request ID is not a canonical nonzero 
 
 Throws: `IllegalStateException` if this client holds no recovery record for the request
 
-Throws: `ConvoHopProblem` `RESOLUTION_REQUIRED` once the request is no longer eligible for resend, or the error of the lookup or the resend
+Throws: `RelayProblem` `RESOLUTION_REQUIRED` once the request is no longer eligible for resend, or the error of the lookup or the resend
 
 Sends [`communication.resolveRequest`](../../operations/communication/resolveRequest.md) and [`management.resolveRequest`](../../operations/management/resolveRequest.md).
 
 ### `ScopeRequiredProblem` class
 
 ```java
-public final class ScopeRequiredProblem extends ConvoHopProblem
+public final class ScopeRequiredProblem extends RelayProblem
 ```
 
-`SCOPE_REQUIRED`: the backend key lacks a scope the operation requires (403, rejected, not retryable). Classify it by `ConvoHopProblem.getCode()`; `getScope()` is a diagnostic detail.
+`SCOPE_REQUIRED`: the backend key lacks a scope the operation requires (403, rejected, not retryable). Classify it by `RelayProblem.getCode()`; `getScope()` is a diagnostic detail.
 
-Package: `com.convohop.server`.
+Package: `dev.instantrelay.server`.
 
 #### `ScopeRequiredProblem.CODE` static property
 
@@ -3322,7 +3322,7 @@ The stable error code, such as `RATE_LIMITED` or `TRANSPORT_UNKNOWN`.
 
 Returns: the code
 
-Inherited from `ConvoHopProblem`.
+Inherited from `RelayProblem`.
 
 #### `ScopeRequiredProblem.getRequestId` method
 
@@ -3334,7 +3334,7 @@ The request ID the problem belongs to. Resolve or retry with this ID when the ou
 
 Returns: the request ID
 
-Inherited from `ConvoHopProblem`.
+Inherited from `RelayProblem`.
 
 #### `ScopeRequiredProblem.getOutcome` method
 
@@ -3346,7 +3346,7 @@ What is known about the request: `rejected`, `unknown`, `committed` or `accepted
 
 Returns: the outcome
 
-Inherited from `ConvoHopProblem`.
+Inherited from `RelayProblem`.
 
 #### `ScopeRequiredProblem.getStatus` method
 
@@ -3358,7 +3358,7 @@ The HTTP status, or 0 when no authority response arrived.
 
 Returns: the status
 
-Inherited from `ConvoHopProblem`.
+Inherited from `RelayProblem`.
 
 #### `ScopeRequiredProblem.getRetryAfter` method
 
@@ -3370,7 +3370,7 @@ How long to wait before resending the same request, when the authority sent a de
 
 Returns: the delay in whole seconds, or null
 
-Inherited from `ConvoHopProblem`.
+Inherited from `RelayProblem`.
 
 ### `ServerConversation` class
 
@@ -3380,7 +3380,7 @@ public final class ServerConversation
 
 Backend view of one conversation, from `ProjectServerClient.conversation(String)`. Creating it sends nothing; each method needs the backend key scope its operation names. Message reads and sends accept `actAs`, a member principal ID: reads then see what that member sees, sends are authored by it, and the authority audits both.
 
-Package: `com.convohop.server`.
+Package: `dev.instantrelay.server`.
 
 #### `ServerConversation.getConversationId` method
 
@@ -3421,7 +3421,7 @@ Returns: the page
 
 Throws: `IllegalArgumentException` if an argument is invalid
 
-Throws: `ConvoHopProblem` if the authority rejects the read or its reply holds another conversation's messages
+Throws: `RelayProblem` if the authority rejects the read or its reply holds another conversation's messages
 
 Sends [`communication.messages`](../../operations/communication/messages.md).
 
@@ -3441,7 +3441,7 @@ Parameters:
 
 Returns: the message
 
-Throws: `ConvoHopProblem` if the authority rejects the read or its reply names another message
+Throws: `RelayProblem` if the authority rejects the read or its reply names another message
 
 Sends [`communication.getMessage`](../../operations/communication/getMessage.md).
 
@@ -3463,7 +3463,7 @@ Parameters:
 
 Returns: the receipt, with the message's cursor
 
-Throws: `ConvoHopProblem` if the authority rejects the message or its receipt names another conversation
+Throws: `RelayProblem` if the authority rejects the message or its receipt names another conversation
 
 Sends [`communication.sendMessage`](../../operations/communication/sendMessage.md).
 
@@ -3486,7 +3486,7 @@ Parameters:
 
 Returns: the edited message
 
-Throws: `ConvoHopProblem` if the authority rejects the edit or its reply names another message
+Throws: `RelayProblem` if the authority rejects the edit or its reply names another message
 
 Sends [`communication.editMessage`](../../operations/communication/editMessage.md).
 
@@ -3507,7 +3507,7 @@ Parameters:
 
 Returns: the deleted message
 
-Throws: `ConvoHopProblem` if the authority rejects the deletion or its reply names another message
+Throws: `RelayProblem` if the authority rejects the deletion or its reply names another message
 
 Sends [`communication.deleteMessage`](../../operations/communication/deleteMessage.md).
 
@@ -3539,7 +3539,7 @@ Returns: the page
 
 Throws: `IllegalArgumentException` if the page size is invalid
 
-Throws: `ConvoHopProblem` if the authority rejects the read or its reply holds another conversation's members
+Throws: `RelayProblem` if the authority rejects the read or its reply holds another conversation's members
 
 Sends [`communication.members`](../../operations/communication/members.md).
 
@@ -3561,7 +3561,7 @@ Parameters:
 
 Returns: the membership
 
-Throws: `ConvoHopProblem` if the authority rejects the request or its reply names another member
+Throws: `RelayProblem` if the authority rejects the request or its reply names another member
 
 Sends [`communication.addMember`](../../operations/communication/addMember.md).
 
@@ -3583,7 +3583,7 @@ Returns: the memberships, one per entry
 
 Throws: `IllegalArgumentException` if the batch is empty, too large, repeats a principal or has an invalid entry
 
-Throws: `ConvoHopProblem` if the authority rejects the batch or its reply has the wrong number of members
+Throws: `RelayProblem` if the authority rejects the batch or its reply has the wrong number of members
 
 Sends [`communication.addMembers`](../../operations/communication/addMembers.md).
 
@@ -3604,7 +3604,7 @@ Parameters:
 
 Returns: the membership
 
-Throws: `ConvoHopProblem` if the authority rejects the request or its reply names another member
+Throws: `RelayProblem` if the authority rejects the request or its reply names another member
 
 Sends [`communication.removeMember`](../../operations/communication/removeMember.md).
 
@@ -3618,7 +3618,7 @@ Reads the conversation.
 
 Returns: the conversation
 
-Throws: `ConvoHopProblem` if the authority rejects the read or its reply names another conversation
+Throws: `RelayProblem` if the authority rejects the read or its reply names another conversation
 
 Sends [`communication.getConversation`](../../operations/communication/getConversation.md).
 
@@ -3630,7 +3630,7 @@ public final class VerifiedWebhook extends WebhookSignature
 
 A verified delivery: its `webhook-id`, `webhook-timestamp` and event.
 
-Package: `com.convohop.server.webhooks`.
+Package: `dev.instantrelay.server.webhooks`.
 
 #### `VerifiedWebhook.getEvent` method
 
@@ -3674,7 +3674,7 @@ public final class WebPushRequest
 
 A Web Push message from `PushPayloads.webPush`. Your Web Push library encrypts the payload (RFC 8291), signs with VAPID and sends it with these RFC 8030 headers. Where the library sets `TTL`, `Urgency` or `Topic` from its own options, pass the values there, or its defaults replace them. `toString()` omits the payload.
 
-Package: `com.convohop.server.push`.
+Package: `dev.instantrelay.server.push`.
 
 #### `WebPushRequest.getHeaders` method
 
@@ -3734,7 +3734,7 @@ public final class WebhookCallCancelledNotificationEvent extends WebhookNotifica
 
 `notification.callCancelled`: a ring that stopped for the recipient. Only recipients of the ring's `notification.call` get it.
 
-Package: `com.convohop.server.webhooks`.
+Package: `dev.instantrelay.server.webhooks`.
 
 #### `WebhookCallCancelledNotificationEvent.getLiveSessionId` method
 
@@ -3920,7 +3920,7 @@ public final class WebhookCallNotificationEvent extends WebhookNotificationEvent
 
 `notification.call`: an incoming call, as one ring for the recipient.
 
-Package: `com.convohop.server.webhooks`.
+Package: `dev.instantrelay.server.webhooks`.
 
 #### `WebhookCallNotificationEvent.getLiveSessionId` method
 
@@ -4086,7 +4086,7 @@ public final class WebhookEndpointDisabledEvent extends WebhookEvent
 
 `webhook.endpointDisabled`: one of the project's other webhook endpoints was disabled after repeated failures. `getSubjectRef()` names it, with kind `webhookEndpoint`.
 
-Package: `com.convohop.server.webhooks`.
+Package: `dev.instantrelay.server.webhooks`.
 
 #### `WebhookEndpointDisabledEvent.isKnown` method
 
@@ -4168,7 +4168,7 @@ A verified delivery's metadata-only event. Fetch the resource through the API wh
 
 The subclasses are `WebhookResourceEvent`, `WebhookEndpointDisabledEvent`, the `WebhookNotificationEvent` types and `WebhookUnknownEvent`. Check `isKnown()` or the subclass, then `getEventType()`.
 
-Package: `com.convohop.server.webhooks`.
+Package: `dev.instantrelay.server.webhooks`.
 
 #### `WebhookEvent.getEventId` method
 
@@ -4238,7 +4238,7 @@ public final class WebhookMessageNotificationEvent extends WebhookNotificationEv
 
 `notification.message`: a message for the recipient.
 
-Package: `com.convohop.server.webhooks`.
+Package: `dev.instantrelay.server.webhooks`.
 
 #### `WebhookMessageNotificationEvent.getMessageId` method
 
@@ -4382,11 +4382,11 @@ Inherited from `WebhookEvent`.
 public abstract class WebhookNotificationEvent extends WebhookEvent
 ```
 
-A per-recipient notification event: the input of the push payload builders in `com.convohop.server.push`. The contract is `spec/push-payload/`.
+A per-recipient notification event: the input of the push payload builders in `dev.instantrelay.server.push`. The contract is `spec/push-payload/`.
 
 The subclasses are `WebhookMessageNotificationEvent` (`notification.message`), `WebhookCallNotificationEvent` (`notification.call`) and `WebhookCallCancelledNotificationEvent` (`notification.callCancelled`). Every instance matches the contract.
 
-Package: `com.convohop.server.webhooks`.
+Package: `dev.instantrelay.server.webhooks`.
 
 #### `WebhookNotificationEvent.parse` static method
 
@@ -4522,7 +4522,7 @@ public final class WebhookNotificationPreview
 
 The start of a message's text. Present only when the project opts in to message previews and the message has text. `toString()` omits the text.
 
-Package: `com.convohop.server.webhooks`.
+Package: `dev.instantrelay.server.webhooks`.
 
 #### `WebhookNotificationPreview.getText` method
 
@@ -4554,7 +4554,7 @@ A change to a conversation, member, message, receipt or call. `getSubjectRef()` 
 
 The event types are `conversation.created`, `conversation.updated`, `member.added`, `member.roleChanged`, `member.historyExpanded`, `member.removed`, `member.broadcastPermissionChanged`, `message.created`, `message.edited`, `message.deleted`, `receipt.reported`, `live.started`, `live.participationChanged`, `live.alerted`, `live.ready`, `live.connected` and `live.ended`.
 
-Package: `com.convohop.server.webhooks`.
+Package: `dev.instantrelay.server.webhooks`.
 
 #### `WebhookResourceEvent.isKnown` method
 
@@ -4634,7 +4634,7 @@ public class WebhookSignature
 
 A verified delivery's `webhook-id` and `webhook-timestamp`.
 
-Package: `com.convohop.server.webhooks`.
+Package: `dev.instantrelay.server.webhooks`.
 
 #### `WebhookSignature.getWebhookId` method
 
@@ -4664,7 +4664,7 @@ public final class WebhookSubjectRef
 
 The resource an event names.
 
-Package: `com.convohop.server.webhooks`.
+Package: `dev.instantrelay.server.webhooks`.
 
 #### `WebhookSubjectRef.getId` method
 
@@ -4694,7 +4694,7 @@ public final class WebhookUnknownEvent extends WebhookEvent
 
 An event this SDK does not know, including a `notification.*` event that doesn't match the push payload contract. Acknowledge it; it never makes `WebhookVerifier.verify` fail.
 
-Package: `com.convohop.server.webhooks`.
+Package: `dev.instantrelay.server.webhooks`.
 
 #### `WebhookUnknownEvent.isKnown` method
 
@@ -4774,7 +4774,7 @@ public final class WebhookVerificationException extends RuntimeException
 
 A delivery that failed verification. The message never contains secrets, signatures or the body.
 
-Package: `com.convohop.server.webhooks`.
+Package: `dev.instantrelay.server.webhooks`.
 
 #### `WebhookVerificationException` constructor
 
@@ -4805,13 +4805,13 @@ Returns: the code
 public final class WebhookVerifier
 ```
 
-Verifies ConvoHop webhook deliveries (Standard Webhooks, symmetric `v1` signatures). Pass the exact request body, respond `2xx` within 5 seconds, then process, and de-duplicate on `webhook-id`.
+Verifies Relay webhook deliveries (Standard Webhooks, symmetric `v1` signatures). Pass the exact request body, respond `2xx` within 5 seconds, then process, and de-duplicate on `webhook-id`.
 
 Build one verifier with `WebhookVerifier.builder().secrets(secret).build()`, then pass each delivery's `WebhookHeaders` and raw body to `verify`.
 
 Failures throw `WebhookVerificationException`. Its message never contains secrets, signatures or the body. A verifier is immutable and thread-safe.
 
-Package: `com.convohop.server.webhooks`.
+Package: `dev.instantrelay.server.webhooks`.
 
 #### `WebhookVerifier.builder` static method
 
@@ -4867,7 +4867,7 @@ public static final class Builder
 
 Configures a `WebhookVerifier`.
 
-Package: `com.convohop.server.webhooks`.
+Package: `dev.instantrelay.server.webhooks`.
 
 #### `WebhookVerifier.Builder.secrets` method
 
@@ -4938,7 +4938,7 @@ Durable storage for mutation recovery records, so a process restart can resolve 
 
 `setItem` must return only once the value is durable; throw when it is not. Calls arrive from any thread that uses the client, so implementations must be thread-safe.
 
-Package: `com.convohop.server`.
+Package: `dev.instantrelay.server`.
 
 #### `RecoveryStorage.getItem` method
 
@@ -4997,7 +4997,7 @@ Returns: new, empty storage
 
 A request's headers, as the verifier reads them. Adapt your framework's headers with a lambda or method reference, for example `name -> Collections.list(request.getHeaders(name))` for a servlet request or `httpHeaders::allValues` for `java.net.http.HttpHeaders`, or with `of` or `ofMultiValued`.
 
-Package: `com.convohop.server.webhooks`.
+Package: `dev.instantrelay.server.webhooks`.
 
 #### `WebhookHeaders.values` method
 
@@ -5051,7 +5051,7 @@ public enum LiveCutoffEvidence
 
 The `LiveCutoffEvidence` enum.
 
-Package: `com.convohop.server.model`.
+Package: `dev.instantrelay.server.model`.
 
 #### `LiveCutoffEvidence.NATIVE_FENCE` case
 
@@ -5079,7 +5079,7 @@ public enum LiveCutoffScopeKind
 
 The `LiveCutoffScopeKind` enum.
 
-Package: `com.convohop.server.model`.
+Package: `dev.instantrelay.server.model`.
 
 #### `LiveCutoffScopeKind.PARTICIPATION` case
 
@@ -5101,7 +5101,7 @@ public enum LiveCutoffState
 
 The `LiveCutoffState` enum.
 
-Package: `com.convohop.server.model`.
+Package: `dev.instantrelay.server.model`.
 
 #### `LiveCutoffState.PENDING` case
 
@@ -5129,7 +5129,7 @@ public enum LiveErrorCode
 
 The `LiveErrorCode` enum.
 
-Package: `com.convohop.server.model`.
+Package: `dev.instantrelay.server.model`.
 
 #### `LiveErrorCode.LIVE_SESSION_EXISTS` case
 
@@ -5217,7 +5217,7 @@ public enum LiveMediaProfile
 
 The `LiveMediaProfile` enum.
 
-Package: `com.convohop.server.model`.
+Package: `dev.instantrelay.server.model`.
 
 #### `LiveMediaProfile.AUDIO_ONLY` case
 
@@ -5239,7 +5239,7 @@ public enum LiveOperationKind
 
 The `LiveOperationKind` enum.
 
-Package: `com.convohop.server.model`.
+Package: `dev.instantrelay.server.model`.
 
 #### `LiveOperationKind.START` case
 
@@ -5261,7 +5261,7 @@ public enum LiveOperationState
 
 The `LiveOperationState` enum.
 
-Package: `com.convohop.server.model`.
+Package: `dev.instantrelay.server.model`.
 
 #### `LiveOperationState.RUNNING` case
 
@@ -5289,7 +5289,7 @@ public enum LiveParticipationState
 
 The `LiveParticipationState` enum.
 
-Package: `com.convohop.server.model`.
+Package: `dev.instantrelay.server.model`.
 
 #### `LiveParticipationState.JOINED` case
 
@@ -5335,7 +5335,7 @@ public enum LiveRole
 
 The `LiveRole` enum.
 
-Package: `com.convohop.server.model`.
+Package: `dev.instantrelay.server.model`.
 
 #### `LiveRole.PUBLISHER` case
 
@@ -5357,7 +5357,7 @@ public enum LiveSessionKind
 
 The `LiveSessionKind` enum.
 
-Package: `com.convohop.server.model`.
+Package: `dev.instantrelay.server.model`.
 
 #### `LiveSessionKind.INTERACTIVE` case
 
@@ -5379,7 +5379,7 @@ public enum LiveSessionState
 
 The `LiveSessionState` enum.
 
-Package: `com.convohop.server.model`.
+Package: `dev.instantrelay.server.model`.
 
 #### `LiveSessionState.PREPARING` case
 
@@ -5425,7 +5425,7 @@ public enum Resolution
 
 What is known about a mutation's outcome.
 
-Package: `com.convohop.server`.
+Package: `dev.instantrelay.server`.
 
 #### `RecoveryState.Resolution.PENDING` case
 
@@ -5485,7 +5485,7 @@ public enum WebhookVerificationCode
 
 Why a delivery failed verification. Verification checks run in this order and stop at the first failure.
 
-Package: `com.convohop.server.webhooks`.
+Package: `dev.instantrelay.server.webhooks`.
 
 #### `WebhookVerificationCode.INVALID_SECRET` case
 
@@ -5577,7 +5577,7 @@ public final class AcknowledgeCredentialReply
 
 The `AcknowledgeCredentialReply` result type.
 
-Package: `com.convohop.server.model`.
+Package: `dev.instantrelay.server.model`.
 
 ### `AcknowledgeCredentialRequestInput` type
 
@@ -5589,7 +5589,7 @@ The `AcknowledgeCredentialRequestInput` input type.
 
 Build instances with `builder()`. Fields without a value are omitted from the request.
 
-Package: `com.convohop.server.model`.
+Package: `dev.instantrelay.server.model`.
 
 ### `ActorRef` type
 
@@ -5599,7 +5599,7 @@ public final class ActorRef
 
 The `ActorRef` result type.
 
-Package: `com.convohop.server.model`.
+Package: `dev.instantrelay.server.model`.
 
 ### `AddMemberReply` type
 
@@ -5609,7 +5609,7 @@ public final class AddMemberReply
 
 The `AddMemberReply` result type.
 
-Package: `com.convohop.server.model`.
+Package: `dev.instantrelay.server.model`.
 
 ### `AddMemberRequestInput` type
 
@@ -5621,7 +5621,7 @@ The `AddMemberRequestInput` input type.
 
 Build instances with `builder()`. Fields without a value are omitted from the request.
 
-Package: `com.convohop.server.model`.
+Package: `dev.instantrelay.server.model`.
 
 ### `AddMembersInput` type
 
@@ -5633,7 +5633,7 @@ The `AddMembersInput` input type.
 
 Build instances with `builder()`. Fields without a value are omitted from the request.
 
-Package: `com.convohop.server.model`.
+Package: `dev.instantrelay.server.model`.
 
 ### `AddMembersPayload` type
 
@@ -5643,7 +5643,7 @@ public final class AddMembersPayload
 
 The `AddMembersPayload` result type.
 
-Package: `com.convohop.server.model`.
+Package: `dev.instantrelay.server.model`.
 
 ### `AgentAuditEvent` type
 
@@ -5653,7 +5653,7 @@ public final class AgentAuditEvent
 
 The `AgentAuditEvent` result type.
 
-Package: `com.convohop.server.model`.
+Package: `dev.instantrelay.server.model`.
 
 ### `AgentAuditEventPage` type
 
@@ -5663,7 +5663,7 @@ public final class AgentAuditEventPage
 
 The `AgentAuditEventPage` result type.
 
-Package: `com.convohop.server.model`.
+Package: `dev.instantrelay.server.model`.
 
 ### `AgentAuditEventsReply` type
 
@@ -5673,7 +5673,7 @@ public final class AgentAuditEventsReply
 
 The `AgentAuditEventsReply` result type.
 
-Package: `com.convohop.server.model`.
+Package: `dev.instantrelay.server.model`.
 
 ### `AgentAuditEventsRequestInput` type
 
@@ -5685,7 +5685,7 @@ The `AgentAuditEventsRequestInput` input type.
 
 Build instances with `builder()`. Fields without a value are omitted from the request.
 
-Package: `com.convohop.server.model`.
+Package: `dev.instantrelay.server.model`.
 
 ### `AgentCredentialPermitReply` type
 
@@ -5695,7 +5695,7 @@ public final class AgentCredentialPermitReply
 
 The `AgentCredentialPermitReply` result type.
 
-Package: `com.convohop.server.model`.
+Package: `dev.instantrelay.server.model`.
 
 ### `AgentCredentialPermitRequestInput` type
 
@@ -5707,7 +5707,7 @@ The `AgentCredentialPermitRequestInput` input type.
 
 Build instances with `builder()`. Fields without a value are omitted from the request.
 
-Package: `com.convohop.server.model`.
+Package: `dev.instantrelay.server.model`.
 
 ### `AgentGrant` type
 
@@ -5717,7 +5717,7 @@ public final class AgentGrant
 
 The `AgentGrant` result type.
 
-Package: `com.convohop.server.model`.
+Package: `dev.instantrelay.server.model`.
 
 ### `AgentGrantPage` type
 
@@ -5727,7 +5727,7 @@ public final class AgentGrantPage
 
 The `AgentGrantPage` result type.
 
-Package: `com.convohop.server.model`.
+Package: `dev.instantrelay.server.model`.
 
 ### `AgentGrantsReply` type
 
@@ -5737,7 +5737,7 @@ public final class AgentGrantsReply
 
 The `AgentGrantsReply` result type.
 
-Package: `com.convohop.server.model`.
+Package: `dev.instantrelay.server.model`.
 
 ### `AgentGrantsRequestInput` type
 
@@ -5749,7 +5749,7 @@ The `AgentGrantsRequestInput` input type.
 
 Build instances with `builder()`. Fields without a value are omitted from the request.
 
-Package: `com.convohop.server.model`.
+Package: `dev.instantrelay.server.model`.
 
 ### `AgentKey` type
 
@@ -5759,7 +5759,7 @@ public final class AgentKey
 
 The `AgentKey` result type.
 
-Package: `com.convohop.server.model`.
+Package: `dev.instantrelay.server.model`.
 
 ### `AgentPayment` type
 
@@ -5769,7 +5769,7 @@ public final class AgentPayment
 
 The `AgentPayment` result type.
 
-Package: `com.convohop.server.model`.
+Package: `dev.instantrelay.server.model`.
 
 ### `AgentSignupForApprovalReply` type
 
@@ -5779,7 +5779,7 @@ public final class AgentSignupForApprovalReply
 
 The `AgentSignupForApprovalReply` result type.
 
-Package: `com.convohop.server.model`.
+Package: `dev.instantrelay.server.model`.
 
 ### `AgentSignupForApprovalRequestInput` type
 
@@ -5791,7 +5791,7 @@ The `AgentSignupForApprovalRequestInput` input type.
 
 Build instances with `builder()`. Fields without a value are omitted from the request.
 
-Package: `com.convohop.server.model`.
+Package: `dev.instantrelay.server.model`.
 
 ### `AgentSignupReply` type
 
@@ -5801,7 +5801,7 @@ public final class AgentSignupReply
 
 The `AgentSignupReply` result type.
 
-Package: `com.convohop.server.model`.
+Package: `dev.instantrelay.server.model`.
 
 ### `AgentSignupReview` type
 
@@ -5811,7 +5811,7 @@ public final class AgentSignupReview
 
 The `AgentSignupReview` result type.
 
-Package: `com.convohop.server.model`.
+Package: `dev.instantrelay.server.model`.
 
 ### `AgentSignupStatus` type
 
@@ -5821,7 +5821,7 @@ public final class AgentSignupStatus
 
 The `AgentSignupStatus` result type.
 
-Package: `com.convohop.server.model`.
+Package: `dev.instantrelay.server.model`.
 
 ### `AgentSignupTicket` type
 
@@ -5831,7 +5831,7 @@ public final class AgentSignupTicket
 
 The `AgentSignupTicket` result type.
 
-Package: `com.convohop.server.model`.
+Package: `dev.instantrelay.server.model`.
 
 ### `AlertLiveSessionInput` type
 
@@ -5843,7 +5843,7 @@ The `AlertLiveSessionInput` input type.
 
 Build instances with `builder()`. Fields without a value are omitted from the request.
 
-Package: `com.convohop.server.model`.
+Package: `dev.instantrelay.server.model`.
 
 ### `AlertLiveSessionPayload` type
 
@@ -5853,7 +5853,7 @@ public final class AlertLiveSessionPayload
 
 The `AlertLiveSessionPayload` result type.
 
-Package: `com.convohop.server.model`.
+Package: `dev.instantrelay.server.model`.
 
 ### `ApproveAgentSignupReply` type
 
@@ -5863,7 +5863,7 @@ public final class ApproveAgentSignupReply
 
 The `ApproveAgentSignupReply` result type.
 
-Package: `com.convohop.server.model`.
+Package: `dev.instantrelay.server.model`.
 
 ### `ApproveAgentSignupRequestInput` type
 
@@ -5875,7 +5875,7 @@ The `ApproveAgentSignupRequestInput` input type.
 
 Build instances with `builder()`. Fields without a value are omitted from the request.
 
-Package: `com.convohop.server.model`.
+Package: `dev.instantrelay.server.model`.
 
 ### `BillingCheckoutSession` type
 
@@ -5885,7 +5885,7 @@ public final class BillingCheckoutSession
 
 The `BillingCheckoutSession` result type.
 
-Package: `com.convohop.server.model`.
+Package: `dev.instantrelay.server.model`.
 
 ### `BillingPortalSession` type
 
@@ -5895,7 +5895,7 @@ public final class BillingPortalSession
 
 The `BillingPortalSession` result type.
 
-Package: `com.convohop.server.model`.
+Package: `dev.instantrelay.server.model`.
 
 ### `BroadcastPermissionChanged` type
 
@@ -5905,7 +5905,7 @@ public final class BroadcastPermissionChanged
 
 The `BroadcastPermissionChanged` result type.
 
-Package: `com.convohop.server.model`.
+Package: `dev.instantrelay.server.model`.
 
 ### `Capabilities` type
 
@@ -5915,7 +5915,7 @@ public final class Capabilities
 
 The `Capabilities` result type.
 
-Package: `com.convohop.server.model`.
+Package: `dev.instantrelay.server.model`.
 
 ### `CapabilitiesReply` type
 
@@ -5925,7 +5925,7 @@ public final class CapabilitiesReply
 
 The `CapabilitiesReply` result type.
 
-Package: `com.convohop.server.model`.
+Package: `dev.instantrelay.server.model`.
 
 ### `ConfigureWebhookReply` type
 
@@ -5935,7 +5935,7 @@ public final class ConfigureWebhookReply
 
 The `ConfigureWebhookReply` result type.
 
-Package: `com.convohop.server.model`.
+Package: `dev.instantrelay.server.model`.
 
 ### `ConfigureWebhookRequestInput` type
 
@@ -5947,7 +5947,7 @@ The `ConfigureWebhookRequestInput` input type.
 
 Build instances with `builder()`. Fields without a value are omitted from the request.
 
-Package: `com.convohop.server.model`.
+Package: `dev.instantrelay.server.model`.
 
 ### `Conversation` type
 
@@ -5957,7 +5957,7 @@ public final class Conversation
 
 The `Conversation` result type.
 
-Package: `com.convohop.server.model`.
+Package: `dev.instantrelay.server.model`.
 
 ### `ConversationLiveInput` type
 
@@ -5969,7 +5969,7 @@ The `ConversationLiveInput` input type.
 
 Build instances with `builder()`. Fields without a value are omitted from the request.
 
-Package: `com.convohop.server.model`.
+Package: `dev.instantrelay.server.model`.
 
 ### `ConversationMemberBatch` type
 
@@ -5979,7 +5979,7 @@ public final class ConversationMemberBatch
 
 The `ConversationMemberBatch` result type.
 
-Package: `com.convohop.server.model`.
+Package: `dev.instantrelay.server.model`.
 
 ### `ConversationMute` type
 
@@ -5989,7 +5989,7 @@ public final class ConversationMute
 
 The `ConversationMute` result type.
 
-Package: `com.convohop.server.model`.
+Package: `dev.instantrelay.server.model`.
 
 ### `ConversationMuteInput` type
 
@@ -6001,7 +6001,7 @@ The `ConversationMuteInput` input type.
 
 Build instances with `builder()`. Fields without a value are omitted from the request.
 
-Package: `com.convohop.server.model`.
+Package: `dev.instantrelay.server.model`.
 
 ### `ConversationMuteReply` type
 
@@ -6011,7 +6011,7 @@ public final class ConversationMuteReply
 
 The `ConversationMuteReply` result type.
 
-Package: `com.convohop.server.model`.
+Package: `dev.instantrelay.server.model`.
 
 ### `CreateBillingCheckoutSessionReply` type
 
@@ -6021,7 +6021,7 @@ public final class CreateBillingCheckoutSessionReply
 
 The `CreateBillingCheckoutSessionReply` result type.
 
-Package: `com.convohop.server.model`.
+Package: `dev.instantrelay.server.model`.
 
 ### `CreateBillingCheckoutSessionRequestInput` type
 
@@ -6033,7 +6033,7 @@ The `CreateBillingCheckoutSessionRequestInput` input type.
 
 Build instances with `builder()`. Fields without a value are omitted from the request.
 
-Package: `com.convohop.server.model`.
+Package: `dev.instantrelay.server.model`.
 
 ### `CreateBillingPortalSessionReply` type
 
@@ -6043,7 +6043,7 @@ public final class CreateBillingPortalSessionReply
 
 The `CreateBillingPortalSessionReply` result type.
 
-Package: `com.convohop.server.model`.
+Package: `dev.instantrelay.server.model`.
 
 ### `CreateBillingPortalSessionRequestInput` type
 
@@ -6055,7 +6055,7 @@ The `CreateBillingPortalSessionRequestInput` input type.
 
 Build instances with `builder()`. Fields without a value are omitted from the request.
 
-Package: `com.convohop.server.model`.
+Package: `dev.instantrelay.server.model`.
 
 ### `CreateConversationReply` type
 
@@ -6065,7 +6065,7 @@ public final class CreateConversationReply
 
 The `CreateConversationReply` result type.
 
-Package: `com.convohop.server.model`.
+Package: `dev.instantrelay.server.model`.
 
 ### `CreateConversationRequestInput` type
 
@@ -6077,7 +6077,7 @@ The `CreateConversationRequestInput` input type.
 
 Build instances with `builder()`. Fields without a value are omitted from the request.
 
-Package: `com.convohop.server.model`.
+Package: `dev.instantrelay.server.model`.
 
 ### `CreateDeploymentReply` type
 
@@ -6087,7 +6087,7 @@ public final class CreateDeploymentReply
 
 The `CreateDeploymentReply` result type.
 
-Package: `com.convohop.server.model`.
+Package: `dev.instantrelay.server.model`.
 
 ### `CreateDeploymentRequestInput` type
 
@@ -6099,7 +6099,7 @@ The `CreateDeploymentRequestInput` input type.
 
 Build instances with `builder()`. Fields without a value are omitted from the request.
 
-Package: `com.convohop.server.model`.
+Package: `dev.instantrelay.server.model`.
 
 ### `CreateOrganizationReply` type
 
@@ -6109,7 +6109,7 @@ public final class CreateOrganizationReply
 
 The `CreateOrganizationReply` result type.
 
-Package: `com.convohop.server.model`.
+Package: `dev.instantrelay.server.model`.
 
 ### `CreateOrganizationRequestInput` type
 
@@ -6121,7 +6121,7 @@ The `CreateOrganizationRequestInput` input type.
 
 Build instances with `builder()`. Fields without a value are omitted from the request.
 
-Package: `com.convohop.server.model`.
+Package: `dev.instantrelay.server.model`.
 
 ### `CreatePrincipalReply` type
 
@@ -6131,7 +6131,7 @@ public final class CreatePrincipalReply
 
 The `CreatePrincipalReply` result type.
 
-Package: `com.convohop.server.model`.
+Package: `dev.instantrelay.server.model`.
 
 ### `CreatePrincipalRequestInput` type
 
@@ -6143,7 +6143,7 @@ The `CreatePrincipalRequestInput` input type.
 
 Build instances with `builder()`. Fields without a value are omitted from the request.
 
-Package: `com.convohop.server.model`.
+Package: `dev.instantrelay.server.model`.
 
 ### `CreateProjectReply` type
 
@@ -6153,7 +6153,7 @@ public final class CreateProjectReply
 
 The `CreateProjectReply` result type.
 
-Package: `com.convohop.server.model`.
+Package: `dev.instantrelay.server.model`.
 
 ### `CreateProjectRequestInput` type
 
@@ -6165,7 +6165,7 @@ The `CreateProjectRequestInput` input type.
 
 Build instances with `builder()`. Fields without a value are omitted from the request.
 
-Package: `com.convohop.server.model`.
+Package: `dev.instantrelay.server.model`.
 
 ### `CredentialCapsule` type
 
@@ -6175,7 +6175,7 @@ public final class CredentialCapsule
 
 The `CredentialCapsule` result type.
 
-Package: `com.convohop.server.model`.
+Package: `dev.instantrelay.server.model`.
 
 ### `CredentialDelivery` type
 
@@ -6185,7 +6185,7 @@ public final class CredentialDelivery
 
 The `CredentialDelivery` result type.
 
-Package: `com.convohop.server.model`.
+Package: `dev.instantrelay.server.model`.
 
 ### `CredentialDeliveryReceipt` type
 
@@ -6195,7 +6195,7 @@ public final class CredentialDeliveryReceipt
 
 The `CredentialDeliveryReceipt` result type.
 
-Package: `com.convohop.server.model`.
+Package: `dev.instantrelay.server.model`.
 
 ### `CredentialPermitReply` type
 
@@ -6205,7 +6205,7 @@ public final class CredentialPermitReply
 
 The `CredentialPermitReply` result type.
 
-Package: `com.convohop.server.model`.
+Package: `dev.instantrelay.server.model`.
 
 ### `CredentialPermitRequestInput` type
 
@@ -6217,7 +6217,7 @@ The `CredentialPermitRequestInput` input type.
 
 Build instances with `builder()`. Fields without a value are omitted from the request.
 
-Package: `com.convohop.server.model`.
+Package: `dev.instantrelay.server.model`.
 
 ### `CurrentLiveSessionReply` type
 
@@ -6227,7 +6227,7 @@ public final class CurrentLiveSessionReply
 
 The `CurrentLiveSessionReply` result type.
 
-Package: `com.convohop.server.model`.
+Package: `dev.instantrelay.server.model`.
 
 ### `Cursor` type
 
@@ -6237,7 +6237,7 @@ public final class Cursor
 
 The `Cursor` result type.
 
-Package: `com.convohop.server.model`.
+Package: `dev.instantrelay.server.model`.
 
 ### `CutoffScope` type
 
@@ -6247,7 +6247,7 @@ public final class CutoffScope
 
 The `CutoffScope` result type.
 
-Package: `com.convohop.server.model`.
+Package: `dev.instantrelay.server.model`.
 
 ### `DeleteMessageReply` type
 
@@ -6257,7 +6257,7 @@ public final class DeleteMessageReply
 
 The `DeleteMessageReply` result type.
 
-Package: `com.convohop.server.model`.
+Package: `dev.instantrelay.server.model`.
 
 ### `DeleteMessageRequestInput` type
 
@@ -6269,7 +6269,7 @@ The `DeleteMessageRequestInput` input type.
 
 Build instances with `builder()`. Fields without a value are omitted from the request.
 
-Package: `com.convohop.server.model`.
+Package: `dev.instantrelay.server.model`.
 
 ### `DeliveryAck` type
 
@@ -6279,7 +6279,7 @@ public final class DeliveryAck
 
 The `DeliveryAck` result type.
 
-Package: `com.convohop.server.model`.
+Package: `dev.instantrelay.server.model`.
 
 ### `Deployment` type
 
@@ -6289,7 +6289,7 @@ public final class Deployment
 
 The `Deployment` result type.
 
-Package: `com.convohop.server.model`.
+Package: `dev.instantrelay.server.model`.
 
 ### `DeploymentHealth` type
 
@@ -6299,7 +6299,7 @@ public final class DeploymentHealth
 
 The `DeploymentHealth` result type.
 
-Package: `com.convohop.server.model`.
+Package: `dev.instantrelay.server.model`.
 
 ### `DeploymentHealthReply` type
 
@@ -6309,7 +6309,7 @@ public final class DeploymentHealthReply
 
 The `DeploymentHealthReply` result type.
 
-Package: `com.convohop.server.model`.
+Package: `dev.instantrelay.server.model`.
 
 ### `DeploymentHealthRequestInput` type
 
@@ -6321,7 +6321,7 @@ The `DeploymentHealthRequestInput` input type.
 
 Build instances with `builder()`. Fields without a value are omitted from the request.
 
-Package: `com.convohop.server.model`.
+Package: `dev.instantrelay.server.model`.
 
 ### `DeploymentUsage` type
 
@@ -6331,7 +6331,7 @@ public final class DeploymentUsage
 
 The `DeploymentUsage` result type.
 
-Package: `com.convohop.server.model`.
+Package: `dev.instantrelay.server.model`.
 
 ### `DeploymentUsageReply` type
 
@@ -6341,7 +6341,7 @@ public final class DeploymentUsageReply
 
 The `DeploymentUsageReply` result type.
 
-Package: `com.convohop.server.model`.
+Package: `dev.instantrelay.server.model`.
 
 ### `DeploymentUsageRequestInput` type
 
@@ -6353,7 +6353,7 @@ The `DeploymentUsageRequestInput` input type.
 
 Build instances with `builder()`. Fields without a value are omitted from the request.
 
-Package: `com.convohop.server.model`.
+Package: `dev.instantrelay.server.model`.
 
 ### `DisablePrincipalReply` type
 
@@ -6363,7 +6363,7 @@ public final class DisablePrincipalReply
 
 The `DisablePrincipalReply` result type.
 
-Package: `com.convohop.server.model`.
+Package: `dev.instantrelay.server.model`.
 
 ### `DisablePrincipalRequestInput` type
 
@@ -6375,7 +6375,7 @@ The `DisablePrincipalRequestInput` input type.
 
 Build instances with `builder()`. Fields without a value are omitted from the request.
 
-Package: `com.convohop.server.model`.
+Package: `dev.instantrelay.server.model`.
 
 ### `DisableWebhookReply` type
 
@@ -6385,7 +6385,7 @@ public final class DisableWebhookReply
 
 The `DisableWebhookReply` result type.
 
-Package: `com.convohop.server.model`.
+Package: `dev.instantrelay.server.model`.
 
 ### `DisableWebhookRequestInput` type
 
@@ -6397,7 +6397,7 @@ The `DisableWebhookRequestInput` input type.
 
 Build instances with `builder()`. Fields without a value are omitted from the request.
 
-Package: `com.convohop.server.model`.
+Package: `dev.instantrelay.server.model`.
 
 ### `EditMessageReply` type
 
@@ -6407,7 +6407,7 @@ public final class EditMessageReply
 
 The `EditMessageReply` result type.
 
-Package: `com.convohop.server.model`.
+Package: `dev.instantrelay.server.model`.
 
 ### `EditMessageRequestInput` type
 
@@ -6419,7 +6419,7 @@ The `EditMessageRequestInput` input type.
 
 Build instances with `builder()`. Fields without a value are omitted from the request.
 
-Package: `com.convohop.server.model`.
+Package: `dev.instantrelay.server.model`.
 
 ### `EndLiveSessionInput` type
 
@@ -6431,7 +6431,7 @@ The `EndLiveSessionInput` input type.
 
 Build instances with `builder()`. Fields without a value are omitted from the request.
 
-Package: `com.convohop.server.model`.
+Package: `dev.instantrelay.server.model`.
 
 ### `EndLiveSessionPayload` type
 
@@ -6441,7 +6441,7 @@ public final class EndLiveSessionPayload
 
 The `EndLiveSessionPayload` result type.
 
-Package: `com.convohop.server.model`.
+Package: `dev.instantrelay.server.model`.
 
 ### `Features` type
 
@@ -6451,7 +6451,7 @@ public final class Features
 
 The `Features` result type.
 
-Package: `com.convohop.server.model`.
+Package: `dev.instantrelay.server.model`.
 
 ### `GetConversationReply` type
 
@@ -6461,7 +6461,7 @@ public final class GetConversationReply
 
 The `GetConversationReply` result type.
 
-Package: `com.convohop.server.model`.
+Package: `dev.instantrelay.server.model`.
 
 ### `GetConversationRequestInput` type
 
@@ -6473,7 +6473,7 @@ The `GetConversationRequestInput` input type.
 
 Build instances with `builder()`. Fields without a value are omitted from the request.
 
-Package: `com.convohop.server.model`.
+Package: `dev.instantrelay.server.model`.
 
 ### `GetDeploymentReply` type
 
@@ -6483,7 +6483,7 @@ public final class GetDeploymentReply
 
 The `GetDeploymentReply` result type.
 
-Package: `com.convohop.server.model`.
+Package: `dev.instantrelay.server.model`.
 
 ### `GetDeploymentRequestInput` type
 
@@ -6495,7 +6495,7 @@ The `GetDeploymentRequestInput` input type.
 
 Build instances with `builder()`. Fields without a value are omitted from the request.
 
-Package: `com.convohop.server.model`.
+Package: `dev.instantrelay.server.model`.
 
 ### `GetMessageReply` type
 
@@ -6505,7 +6505,7 @@ public final class GetMessageReply
 
 The `GetMessageReply` result type.
 
-Package: `com.convohop.server.model`.
+Package: `dev.instantrelay.server.model`.
 
 ### `GetMessageRequestInput` type
 
@@ -6517,7 +6517,7 @@ The `GetMessageRequestInput` input type.
 
 Build instances with `builder()`. Fields without a value are omitted from the request.
 
-Package: `com.convohop.server.model`.
+Package: `dev.instantrelay.server.model`.
 
 ### `GetOperationReply` type
 
@@ -6527,7 +6527,7 @@ public final class GetOperationReply
 
 The `GetOperationReply` result type.
 
-Package: `com.convohop.server.model`.
+Package: `dev.instantrelay.server.model`.
 
 ### `GetOperationRequestInput` type
 
@@ -6539,7 +6539,7 @@ The `GetOperationRequestInput` input type.
 
 Build instances with `builder()`. Fields without a value are omitted from the request.
 
-Package: `com.convohop.server.model`.
+Package: `dev.instantrelay.server.model`.
 
 ### `GetOrganizationReply` type
 
@@ -6549,7 +6549,7 @@ public final class GetOrganizationReply
 
 The `GetOrganizationReply` result type.
 
-Package: `com.convohop.server.model`.
+Package: `dev.instantrelay.server.model`.
 
 ### `GetOrganizationRequestInput` type
 
@@ -6561,7 +6561,7 @@ The `GetOrganizationRequestInput` input type.
 
 Build instances with `builder()`. Fields without a value are omitted from the request.
 
-Package: `com.convohop.server.model`.
+Package: `dev.instantrelay.server.model`.
 
 ### `GetPrincipalReply` type
 
@@ -6571,7 +6571,7 @@ public final class GetPrincipalReply
 
 The `GetPrincipalReply` result type.
 
-Package: `com.convohop.server.model`.
+Package: `dev.instantrelay.server.model`.
 
 ### `GetPrincipalRequestInput` type
 
@@ -6583,7 +6583,7 @@ The `GetPrincipalRequestInput` input type.
 
 Build instances with `builder()`. Fields without a value are omitted from the request.
 
-Package: `com.convohop.server.model`.
+Package: `dev.instantrelay.server.model`.
 
 ### `GetProjectReply` type
 
@@ -6593,7 +6593,7 @@ public final class GetProjectReply
 
 The `GetProjectReply` result type.
 
-Package: `com.convohop.server.model`.
+Package: `dev.instantrelay.server.model`.
 
 ### `GetProjectRequestInput` type
 
@@ -6605,7 +6605,7 @@ The `GetProjectRequestInput` input type.
 
 Build instances with `builder()`. Fields without a value are omitted from the request.
 
-Package: `com.convohop.server.model`.
+Package: `dev.instantrelay.server.model`.
 
 ### `HistoryGrantReply` type
 
@@ -6615,7 +6615,7 @@ public final class HistoryGrantReply
 
 The `HistoryGrantReply` result type.
 
-Package: `com.convohop.server.model`.
+Package: `dev.instantrelay.server.model`.
 
 ### `HistoryGrantRequestInput` type
 
@@ -6627,7 +6627,7 @@ The `HistoryGrantRequestInput` input type.
 
 Build instances with `builder()`. Fields without a value are omitted from the request.
 
-Package: `com.convohop.server.model`.
+Package: `dev.instantrelay.server.model`.
 
 ### `InboxItem` type
 
@@ -6637,7 +6637,7 @@ public final class InboxItem
 
 The `InboxItem` result type.
 
-Package: `com.convohop.server.model`.
+Package: `dev.instantrelay.server.model`.
 
 ### `InboxPage` type
 
@@ -6647,7 +6647,7 @@ public final class InboxPage
 
 The `InboxPage` result type.
 
-Package: `com.convohop.server.model`.
+Package: `dev.instantrelay.server.model`.
 
 ### `InboxReply` type
 
@@ -6657,7 +6657,7 @@ public final class InboxReply
 
 The `InboxReply` result type.
 
-Package: `com.convohop.server.model`.
+Package: `dev.instantrelay.server.model`.
 
 ### `InboxRequestInput` type
 
@@ -6669,7 +6669,7 @@ The `InboxRequestInput` input type.
 
 Build instances with `builder()`. Fields without a value are omitted from the request.
 
-Package: `com.convohop.server.model`.
+Package: `dev.instantrelay.server.model`.
 
 ### `IssueAgentKeyReply` type
 
@@ -6679,7 +6679,7 @@ public final class IssueAgentKeyReply
 
 The `IssueAgentKeyReply` result type.
 
-Package: `com.convohop.server.model`.
+Package: `dev.instantrelay.server.model`.
 
 ### `IssueAgentKeyRequestInput` type
 
@@ -6691,7 +6691,7 @@ The `IssueAgentKeyRequestInput` input type.
 
 Build instances with `builder()`. Fields without a value are omitted from the request.
 
-Package: `com.convohop.server.model`.
+Package: `dev.instantrelay.server.model`.
 
 ### `IssueBackendKeyReply` type
 
@@ -6701,7 +6701,7 @@ public final class IssueBackendKeyReply
 
 The `IssueBackendKeyReply` result type.
 
-Package: `com.convohop.server.model`.
+Package: `dev.instantrelay.server.model`.
 
 ### `IssueBackendKeyRequestInput` type
 
@@ -6713,7 +6713,7 @@ The `IssueBackendKeyRequestInput` input type.
 
 Build instances with `builder()`. Fields without a value are omitted from the request.
 
-Package: `com.convohop.server.model`.
+Package: `dev.instantrelay.server.model`.
 
 ### `IssueSessionReply` type
 
@@ -6723,7 +6723,7 @@ public final class IssueSessionReply
 
 The `IssueSessionReply` result type.
 
-Package: `com.convohop.server.model`.
+Package: `dev.instantrelay.server.model`.
 
 ### `IssueSessionRequestInput` type
 
@@ -6735,7 +6735,7 @@ The `IssueSessionRequestInput` input type.
 
 Build instances with `builder()`. Fields without a value are omitted from the request.
 
-Package: `com.convohop.server.model`.
+Package: `dev.instantrelay.server.model`.
 
 ### `Limit` type
 
@@ -6745,7 +6745,7 @@ public final class Limit
 
 The `Limit` result type.
 
-Package: `com.convohop.server.model`.
+Package: `dev.instantrelay.server.model`.
 
 ### `LimitEntry` type
 
@@ -6755,7 +6755,7 @@ public final class LimitEntry
 
 The `LimitEntry` result type.
 
-Package: `com.convohop.server.model`.
+Package: `dev.instantrelay.server.model`.
 
 ### `LiveAlertBatch` type
 
@@ -6765,7 +6765,7 @@ public final class LiveAlertBatch
 
 The `LiveAlertBatch` result type.
 
-Package: `com.convohop.server.model`.
+Package: `dev.instantrelay.server.model`.
 
 ### `LiveCredentialIssuance` type
 
@@ -6775,7 +6775,7 @@ public final class LiveCredentialIssuance
 
 The `LiveCredentialIssuance` result type.
 
-Package: `com.convohop.server.model`.
+Package: `dev.instantrelay.server.model`.
 
 ### `LiveCutoffScope` type
 
@@ -6785,7 +6785,7 @@ public final class LiveCutoffScope
 
 The `LiveCutoffScope` result type.
 
-Package: `com.convohop.server.model`.
+Package: `dev.instantrelay.server.model`.
 
 ### `LiveMediaCutoff` type
 
@@ -6795,7 +6795,7 @@ public final class LiveMediaCutoff
 
 The `LiveMediaCutoff` result type.
 
-Package: `com.convohop.server.model`.
+Package: `dev.instantrelay.server.model`.
 
 ### `LiveMediaPermissions` type
 
@@ -6805,7 +6805,7 @@ public final class LiveMediaPermissions
 
 The `LiveMediaPermissions` result type.
 
-Package: `com.convohop.server.model`.
+Package: `dev.instantrelay.server.model`.
 
 ### `LiveOperationFailure` type
 
@@ -6815,7 +6815,7 @@ public final class LiveOperationFailure
 
 The `LiveOperationFailure` result type.
 
-Package: `com.convohop.server.model`.
+Package: `dev.instantrelay.server.model`.
 
 ### `LiveParticipantPage` type
 
@@ -6825,7 +6825,7 @@ public final class LiveParticipantPage
 
 The `LiveParticipantPage` result type.
 
-Package: `com.convohop.server.model`.
+Package: `dev.instantrelay.server.model`.
 
 ### `LiveParticipantPageReply` type
 
@@ -6835,7 +6835,7 @@ public final class LiveParticipantPageReply
 
 The `LiveParticipantPageReply` result type.
 
-Package: `com.convohop.server.model`.
+Package: `dev.instantrelay.server.model`.
 
 ### `LiveParticipantsInput` type
 
@@ -6847,7 +6847,7 @@ The `LiveParticipantsInput` input type.
 
 Build instances with `builder()`. Fields without a value are omitted from the request.
 
-Package: `com.convohop.server.model`.
+Package: `dev.instantrelay.server.model`.
 
 ### `LiveParticipation` type
 
@@ -6857,7 +6857,7 @@ public final class LiveParticipation
 
 The `LiveParticipation` result type.
 
-Package: `com.convohop.server.model`.
+Package: `dev.instantrelay.server.model`.
 
 ### `LiveSession` type
 
@@ -6867,7 +6867,7 @@ public final class LiveSession
 
 The `LiveSession` result type.
 
-Package: `com.convohop.server.model`.
+Package: `dev.instantrelay.server.model`.
 
 ### `LiveSessionEndRequested` type
 
@@ -6877,7 +6877,7 @@ public final class LiveSessionEndRequested
 
 The `LiveSessionEndRequested` result type.
 
-Package: `com.convohop.server.model`.
+Package: `dev.instantrelay.server.model`.
 
 ### `LiveSessionInput` type
 
@@ -6889,7 +6889,7 @@ The `LiveSessionInput` input type.
 
 Build instances with `builder()`. Fields without a value are omitted from the request.
 
-Package: `com.convohop.server.model`.
+Package: `dev.instantrelay.server.model`.
 
 ### `LiveSessionJoined` type
 
@@ -6899,7 +6899,7 @@ public final class LiveSessionJoined
 
 The `LiveSessionJoined` result type.
 
-Package: `com.convohop.server.model`.
+Package: `dev.instantrelay.server.model`.
 
 ### `LiveSessionLeft` type
 
@@ -6909,7 +6909,7 @@ public final class LiveSessionLeft
 
 The `LiveSessionLeft` result type.
 
-Package: `com.convohop.server.model`.
+Package: `dev.instantrelay.server.model`.
 
 ### `LiveSessionOperation` type
 
@@ -6919,7 +6919,7 @@ public final class LiveSessionOperation
 
 The `LiveSessionOperation` result type.
 
-Package: `com.convohop.server.model`.
+Package: `dev.instantrelay.server.model`.
 
 ### `LiveSessionOperationCompletion` type
 
@@ -6929,7 +6929,7 @@ public final class LiveSessionOperationCompletion
 
 The `LiveSessionOperationCompletion` result type.
 
-Package: `com.convohop.server.model`.
+Package: `dev.instantrelay.server.model`.
 
 ### `LiveSessionOperationInput` type
 
@@ -6941,7 +6941,7 @@ The `LiveSessionOperationInput` input type.
 
 Build instances with `builder()`. Fields without a value are omitted from the request.
 
-Package: `com.convohop.server.model`.
+Package: `dev.instantrelay.server.model`.
 
 ### `LiveSessionOperationReply` type
 
@@ -6951,7 +6951,7 @@ public final class LiveSessionOperationReply
 
 The `LiveSessionOperationReply` result type.
 
-Package: `com.convohop.server.model`.
+Package: `dev.instantrelay.server.model`.
 
 ### `LiveSessionPage` type
 
@@ -6961,7 +6961,7 @@ public final class LiveSessionPage
 
 The `LiveSessionPage` result type.
 
-Package: `com.convohop.server.model`.
+Package: `dev.instantrelay.server.model`.
 
 ### `LiveSessionPageReply` type
 
@@ -6971,7 +6971,7 @@ public final class LiveSessionPageReply
 
 The `LiveSessionPageReply` result type.
 
-Package: `com.convohop.server.model`.
+Package: `dev.instantrelay.server.model`.
 
 ### `LiveSessionReply` type
 
@@ -6981,7 +6981,7 @@ public final class LiveSessionReply
 
 The `LiveSessionReply` result type.
 
-Package: `com.convohop.server.model`.
+Package: `dev.instantrelay.server.model`.
 
 ### `LiveSessionStarted` type
 
@@ -6991,7 +6991,7 @@ public final class LiveSessionStarted
 
 The `LiveSessionStarted` result type.
 
-Package: `com.convohop.server.model`.
+Package: `dev.instantrelay.server.model`.
 
 ### `LiveSessionsInput` type
 
@@ -7003,7 +7003,7 @@ The `LiveSessionsInput` input type.
 
 Build instances with `builder()`. Fields without a value are omitted from the request.
 
-Package: `com.convohop.server.model`.
+Package: `dev.instantrelay.server.model`.
 
 ### `MediaCutoff` type
 
@@ -7013,7 +7013,7 @@ public final class MediaCutoff
 
 The `MediaCutoff` result type.
 
-Package: `com.convohop.server.model`.
+Package: `dev.instantrelay.server.model`.
 
 ### `MediaPolicy` type
 
@@ -7023,7 +7023,7 @@ public final class MediaPolicy
 
 The `MediaPolicy` result type.
 
-Package: `com.convohop.server.model`.
+Package: `dev.instantrelay.server.model`.
 
 ### `Member` type
 
@@ -7033,7 +7033,7 @@ public final class Member
 
 The `Member` result type.
 
-Package: `com.convohop.server.model`.
+Package: `dev.instantrelay.server.model`.
 
 ### `MemberBatchEntryInput` type
 
@@ -7045,7 +7045,7 @@ The `MemberBatchEntryInput` input type.
 
 Build instances with `builder()`. Fields without a value are omitted from the request.
 
-Package: `com.convohop.server.model`.
+Package: `dev.instantrelay.server.model`.
 
 ### `MemberInputInput` type
 
@@ -7057,7 +7057,7 @@ The `MemberInputInput` input type.
 
 Build instances with `builder()`. Fields without a value are omitted from the request.
 
-Package: `com.convohop.server.model`.
+Package: `dev.instantrelay.server.model`.
 
 ### `MemberPage` type
 
@@ -7067,7 +7067,7 @@ public final class MemberPage
 
 The `MemberPage` result type.
 
-Package: `com.convohop.server.model`.
+Package: `dev.instantrelay.server.model`.
 
 ### `MembersReply` type
 
@@ -7077,7 +7077,7 @@ public final class MembersReply
 
 The `MembersReply` result type.
 
-Package: `com.convohop.server.model`.
+Package: `dev.instantrelay.server.model`.
 
 ### `MembersRequestInput` type
 
@@ -7089,7 +7089,7 @@ The `MembersRequestInput` input type.
 
 Build instances with `builder()`. Fields without a value are omitted from the request.
 
-Package: `com.convohop.server.model`.
+Package: `dev.instantrelay.server.model`.
 
 ### `Message` type
 
@@ -7099,7 +7099,7 @@ public final class Message
 
 The `Message` result type.
 
-Package: `com.convohop.server.model`.
+Package: `dev.instantrelay.server.model`.
 
 ### `MessageAck` type
 
@@ -7109,7 +7109,7 @@ public final class MessageAck
 
 The `MessageAck` result type.
 
-Package: `com.convohop.server.model`.
+Package: `dev.instantrelay.server.model`.
 
 ### `MessagePage` type
 
@@ -7119,7 +7119,7 @@ public final class MessagePage
 
 The `MessagePage` result type.
 
-Package: `com.convohop.server.model`.
+Package: `dev.instantrelay.server.model`.
 
 ### `MessagesReply` type
 
@@ -7129,7 +7129,7 @@ public final class MessagesReply
 
 The `MessagesReply` result type.
 
-Package: `com.convohop.server.model`.
+Package: `dev.instantrelay.server.model`.
 
 ### `MessagesRequestInput` type
 
@@ -7141,7 +7141,7 @@ The `MessagesRequestInput` input type.
 
 Build instances with `builder()`. Fields without a value are omitted from the request.
 
-Package: `com.convohop.server.model`.
+Package: `dev.instantrelay.server.model`.
 
 ### `Operation` type
 
@@ -7151,7 +7151,7 @@ public final class Operation
 
 The `Operation` result type.
 
-Package: `com.convohop.server.model`.
+Package: `dev.instantrelay.server.model`.
 
 ### `OperationRef` type
 
@@ -7161,7 +7161,7 @@ public final class OperationRef
 
 The `OperationRef` result type.
 
-Package: `com.convohop.server.model`.
+Package: `dev.instantrelay.server.model`.
 
 ### `OperationResult` type
 
@@ -7171,7 +7171,7 @@ public final class OperationResult
 
 The `OperationResult` result type.
 
-Package: `com.convohop.server.model`.
+Package: `dev.instantrelay.server.model`.
 
 ### `OperationStep` type
 
@@ -7181,7 +7181,7 @@ public final class OperationStep
 
 The `OperationStep` result type.
 
-Package: `com.convohop.server.model`.
+Package: `dev.instantrelay.server.model`.
 
 ### `Organization` type
 
@@ -7191,7 +7191,7 @@ public final class Organization
 
 The `Organization` result type.
 
-Package: `com.convohop.server.model`.
+Package: `dev.instantrelay.server.model`.
 
 ### `OrganizationBilling` type
 
@@ -7201,7 +7201,7 @@ public final class OrganizationBilling
 
 The `OrganizationBilling` result type.
 
-Package: `com.convohop.server.model`.
+Package: `dev.instantrelay.server.model`.
 
 ### `OrganizationBillingReply` type
 
@@ -7211,7 +7211,7 @@ public final class OrganizationBillingReply
 
 The `OrganizationBillingReply` result type.
 
-Package: `com.convohop.server.model`.
+Package: `dev.instantrelay.server.model`.
 
 ### `OrganizationBillingRequestInput` type
 
@@ -7223,7 +7223,7 @@ The `OrganizationBillingRequestInput` input type.
 
 Build instances with `builder()`. Fields without a value are omitted from the request.
 
-Package: `com.convohop.server.model`.
+Package: `dev.instantrelay.server.model`.
 
 ### `OrganizationPage` type
 
@@ -7233,7 +7233,7 @@ public final class OrganizationPage
 
 The `OrganizationPage` result type.
 
-Package: `com.convohop.server.model`.
+Package: `dev.instantrelay.server.model`.
 
 ### `OrganizationSpend` type
 
@@ -7243,7 +7243,7 @@ public final class OrganizationSpend
 
 The `OrganizationSpend` result type.
 
-Package: `com.convohop.server.model`.
+Package: `dev.instantrelay.server.model`.
 
 ### `OrganizationSpendReply` type
 
@@ -7253,7 +7253,7 @@ public final class OrganizationSpendReply
 
 The `OrganizationSpendReply` result type.
 
-Package: `com.convohop.server.model`.
+Package: `dev.instantrelay.server.model`.
 
 ### `OrganizationSpendRequestInput` type
 
@@ -7265,7 +7265,7 @@ The `OrganizationSpendRequestInput` input type.
 
 Build instances with `builder()`. Fields without a value are omitted from the request.
 
-Package: `com.convohop.server.model`.
+Package: `dev.instantrelay.server.model`.
 
 ### `OrganizationUsage` type
 
@@ -7275,7 +7275,7 @@ public final class OrganizationUsage
 
 The `OrganizationUsage` result type.
 
-Package: `com.convohop.server.model`.
+Package: `dev.instantrelay.server.model`.
 
 ### `OrganizationUsageReply` type
 
@@ -7285,7 +7285,7 @@ public final class OrganizationUsageReply
 
 The `OrganizationUsageReply` result type.
 
-Package: `com.convohop.server.model`.
+Package: `dev.instantrelay.server.model`.
 
 ### `OrganizationUsageRequestInput` type
 
@@ -7297,7 +7297,7 @@ The `OrganizationUsageRequestInput` input type.
 
 Build instances with `builder()`. Fields without a value are omitted from the request.
 
-Package: `com.convohop.server.model`.
+Package: `dev.instantrelay.server.model`.
 
 ### `OrganizationsReply` type
 
@@ -7307,7 +7307,7 @@ public final class OrganizationsReply
 
 The `OrganizationsReply` result type.
 
-Package: `com.convohop.server.model`.
+Package: `dev.instantrelay.server.model`.
 
 ### `PauseOperationReply` type
 
@@ -7317,7 +7317,7 @@ public final class PauseOperationReply
 
 The `PauseOperationReply` result type.
 
-Package: `com.convohop.server.model`.
+Package: `dev.instantrelay.server.model`.
 
 ### `PauseOperationRequestInput` type
 
@@ -7329,7 +7329,7 @@ The `PauseOperationRequestInput` input type.
 
 Build instances with `builder()`. Fields without a value are omitted from the request.
 
-Package: `com.convohop.server.model`.
+Package: `dev.instantrelay.server.model`.
 
 ### `PolicyChangeInput` type
 
@@ -7341,7 +7341,7 @@ The `PolicyChangeInput` input type.
 
 Build instances with `builder()`. Fields without a value are omitted from the request.
 
-Package: `com.convohop.server.model`.
+Package: `dev.instantrelay.server.model`.
 
 ### `Principal` type
 
@@ -7351,7 +7351,7 @@ public final class Principal
 
 The `Principal` result type.
 
-Package: `com.convohop.server.model`.
+Package: `dev.instantrelay.server.model`.
 
 ### `Project` type
 
@@ -7361,7 +7361,7 @@ public final class Project
 
 The `Project` result type.
 
-Package: `com.convohop.server.model`.
+Package: `dev.instantrelay.server.model`.
 
 ### `ProjectPolicyReply` type
 
@@ -7371,7 +7371,7 @@ public final class ProjectPolicyReply
 
 The `ProjectPolicyReply` result type.
 
-Package: `com.convohop.server.model`.
+Package: `dev.instantrelay.server.model`.
 
 ### `ProjectPolicyRequestInput` type
 
@@ -7383,7 +7383,7 @@ The `ProjectPolicyRequestInput` input type.
 
 Build instances with `builder()`. Fields without a value are omitted from the request.
 
-Package: `com.convohop.server.model`.
+Package: `dev.instantrelay.server.model`.
 
 ### `ProjectUsage` type
 
@@ -7393,7 +7393,7 @@ public final class ProjectUsage
 
 The `ProjectUsage` result type.
 
-Package: `com.convohop.server.model`.
+Package: `dev.instantrelay.server.model`.
 
 ### `ProjectUsageReply` type
 
@@ -7403,7 +7403,7 @@ public final class ProjectUsageReply
 
 The `ProjectUsageReply` result type.
 
-Package: `com.convohop.server.model`.
+Package: `dev.instantrelay.server.model`.
 
 ### `ProjectUsageRequestInput` type
 
@@ -7415,7 +7415,7 @@ The `ProjectUsageRequestInput` input type.
 
 Build instances with `builder()`. Fields without a value are omitted from the request.
 
-Package: `com.convohop.server.model`.
+Package: `dev.instantrelay.server.model`.
 
 ### `PurchaseAgentCreditsReply` type
 
@@ -7425,7 +7425,7 @@ public final class PurchaseAgentCreditsReply
 
 The `PurchaseAgentCreditsReply` result type.
 
-Package: `com.convohop.server.model`.
+Package: `dev.instantrelay.server.model`.
 
 ### `PurchaseAgentCreditsRequestInput` type
 
@@ -7437,7 +7437,7 @@ The `PurchaseAgentCreditsRequestInput` input type.
 
 Build instances with `builder()`. Fields without a value are omitted from the request.
 
-Package: `com.convohop.server.model`.
+Package: `dev.instantrelay.server.model`.
 
 ### `ReadReceipt` type
 
@@ -7447,7 +7447,7 @@ public final class ReadReceipt
 
 The `ReadReceipt` result type.
 
-Package: `com.convohop.server.model`.
+Package: `dev.instantrelay.server.model`.
 
 ### `RedeemCredentialReply` type
 
@@ -7457,7 +7457,7 @@ public final class RedeemCredentialReply
 
 The `RedeemCredentialReply` result type.
 
-Package: `com.convohop.server.model`.
+Package: `dev.instantrelay.server.model`.
 
 ### `RedeemCredentialRequestInput` type
 
@@ -7469,7 +7469,7 @@ The `RedeemCredentialRequestInput` input type.
 
 Build instances with `builder()`. Fields without a value are omitted from the request.
 
-Package: `com.convohop.server.model`.
+Package: `dev.instantrelay.server.model`.
 
 ### `RejectAgentSignupReply` type
 
@@ -7479,7 +7479,7 @@ public final class RejectAgentSignupReply
 
 The `RejectAgentSignupReply` result type.
 
-Package: `com.convohop.server.model`.
+Package: `dev.instantrelay.server.model`.
 
 ### `RejectAgentSignupRequestInput` type
 
@@ -7491,7 +7491,7 @@ The `RejectAgentSignupRequestInput` input type.
 
 Build instances with `builder()`. Fields without a value are omitted from the request.
 
-Package: `com.convohop.server.model`.
+Package: `dev.instantrelay.server.model`.
 
 ### `RemoveMemberReply` type
 
@@ -7501,7 +7501,7 @@ public final class RemoveMemberReply
 
 The `RemoveMemberReply` result type.
 
-Package: `com.convohop.server.model`.
+Package: `dev.instantrelay.server.model`.
 
 ### `RemoveMemberRequestInput` type
 
@@ -7513,7 +7513,7 @@ The `RemoveMemberRequestInput` input type.
 
 Build instances with `builder()`. Fields without a value are omitted from the request.
 
-Package: `com.convohop.server.model`.
+Package: `dev.instantrelay.server.model`.
 
 ### `RenewSessionReply` type
 
@@ -7523,7 +7523,7 @@ public final class RenewSessionReply
 
 The `RenewSessionReply` result type.
 
-Package: `com.convohop.server.model`.
+Package: `dev.instantrelay.server.model`.
 
 ### `RenewSessionRequestInput` type
 
@@ -7535,7 +7535,7 @@ The `RenewSessionRequestInput` input type.
 
 Build instances with `builder()`. Fields without a value are omitted from the request.
 
-Package: `com.convohop.server.model`.
+Package: `dev.instantrelay.server.model`.
 
 ### `ReplayWebhookDeliveriesReply` type
 
@@ -7545,7 +7545,7 @@ public final class ReplayWebhookDeliveriesReply
 
 The `ReplayWebhookDeliveriesReply` result type.
 
-Package: `com.convohop.server.model`.
+Package: `dev.instantrelay.server.model`.
 
 ### `ReplayWebhookDeliveriesRequestInput` type
 
@@ -7557,7 +7557,7 @@ The `ReplayWebhookDeliveriesRequestInput` input type.
 
 Build instances with `builder()`. Fields without a value are omitted from the request.
 
-Package: `com.convohop.server.model`.
+Package: `dev.instantrelay.server.model`.
 
 ### `RequestAgentSignupReply` type
 
@@ -7567,7 +7567,7 @@ public final class RequestAgentSignupReply
 
 The `RequestAgentSignupReply` result type.
 
-Package: `com.convohop.server.model`.
+Package: `dev.instantrelay.server.model`.
 
 ### `RequestAgentSignupRequestInput` type
 
@@ -7579,7 +7579,7 @@ The `RequestAgentSignupRequestInput` input type.
 
 Build instances with `builder()`. Fields without a value are omitted from the request.
 
-Package: `com.convohop.server.model`.
+Package: `dev.instantrelay.server.model`.
 
 ### `RequestResolution` type
 
@@ -7589,7 +7589,7 @@ public final class RequestResolution
 
 The `RequestResolution` result type.
 
-Package: `com.convohop.server.model`.
+Package: `dev.instantrelay.server.model`.
 
 ### `ResolveRequestReply` type
 
@@ -7599,7 +7599,7 @@ public final class ResolveRequestReply
 
 The `ResolveRequestReply` result type.
 
-Package: `com.convohop.server.model`.
+Package: `dev.instantrelay.server.model`.
 
 ### `ResolveRequestRequestInput` type
 
@@ -7611,7 +7611,7 @@ The `ResolveRequestRequestInput` input type.
 
 Build instances with `builder()`. Fields without a value are omitted from the request.
 
-Package: `com.convohop.server.model`.
+Package: `dev.instantrelay.server.model`.
 
 ### `ResolvedReceipt` type
 
@@ -7621,7 +7621,7 @@ public final class ResolvedReceipt
 
 The `ResolvedReceipt` result type.
 
-Package: `com.convohop.server.model`.
+Package: `dev.instantrelay.server.model`.
 
 ### `ResourceRef` type
 
@@ -7631,7 +7631,7 @@ public final class ResourceRef
 
 The `ResourceRef` result type.
 
-Package: `com.convohop.server.model`.
+Package: `dev.instantrelay.server.model`.
 
 ### `ResumeOperationReply` type
 
@@ -7641,7 +7641,7 @@ public final class ResumeOperationReply
 
 The `ResumeOperationReply` result type.
 
-Package: `com.convohop.server.model`.
+Package: `dev.instantrelay.server.model`.
 
 ### `ResumeOperationRequestInput` type
 
@@ -7653,7 +7653,7 @@ The `ResumeOperationRequestInput` input type.
 
 Build instances with `builder()`. Fields without a value are omitted from the request.
 
-Package: `com.convohop.server.model`.
+Package: `dev.instantrelay.server.model`.
 
 ### `RetainedResult` type
 
@@ -7663,7 +7663,7 @@ public final class RetainedResult
 
 Exactly one typed field contains the retained, currently authorized receipt result.
 
-Package: `com.convohop.server.model`.
+Package: `dev.instantrelay.server.model`.
 
 ### `RevokeAgentGrantReply` type
 
@@ -7673,7 +7673,7 @@ public final class RevokeAgentGrantReply
 
 The `RevokeAgentGrantReply` result type.
 
-Package: `com.convohop.server.model`.
+Package: `dev.instantrelay.server.model`.
 
 ### `RevokeAgentGrantRequestInput` type
 
@@ -7685,7 +7685,7 @@ The `RevokeAgentGrantRequestInput` input type.
 
 Build instances with `builder()`. Fields without a value are omitted from the request.
 
-Package: `com.convohop.server.model`.
+Package: `dev.instantrelay.server.model`.
 
 ### `RevokeBackendKeyReply` type
 
@@ -7695,7 +7695,7 @@ public final class RevokeBackendKeyReply
 
 The `RevokeBackendKeyReply` result type.
 
-Package: `com.convohop.server.model`.
+Package: `dev.instantrelay.server.model`.
 
 ### `RevokeBackendKeyRequestInput` type
 
@@ -7707,7 +7707,7 @@ The `RevokeBackendKeyRequestInput` input type.
 
 Build instances with `builder()`. Fields without a value are omitted from the request.
 
-Package: `com.convohop.server.model`.
+Package: `dev.instantrelay.server.model`.
 
 ### `RevokeSessionReply` type
 
@@ -7717,7 +7717,7 @@ public final class RevokeSessionReply
 
 The `RevokeSessionReply` result type.
 
-Package: `com.convohop.server.model`.
+Package: `dev.instantrelay.server.model`.
 
 ### `RevokeSessionRequestInput` type
 
@@ -7729,7 +7729,7 @@ The `RevokeSessionRequestInput` input type.
 
 Build instances with `builder()`. Fields without a value are omitted from the request.
 
-Package: `com.convohop.server.model`.
+Package: `dev.instantrelay.server.model`.
 
 ### `RotateWebhookSecretReply` type
 
@@ -7739,7 +7739,7 @@ public final class RotateWebhookSecretReply
 
 The `RotateWebhookSecretReply` result type.
 
-Package: `com.convohop.server.model`.
+Package: `dev.instantrelay.server.model`.
 
 ### `RotateWebhookSecretRequestInput` type
 
@@ -7751,7 +7751,7 @@ The `RotateWebhookSecretRequestInput` input type.
 
 Build instances with `builder()`. Fields without a value are omitted from the request.
 
-Package: `com.convohop.server.model`.
+Package: `dev.instantrelay.server.model`.
 
 ### `RouteReply` type
 
@@ -7761,7 +7761,7 @@ public final class RouteReply
 
 The `RouteReply` result type.
 
-Package: `com.convohop.server.model`.
+Package: `dev.instantrelay.server.model`.
 
 ### `Scalars` type
 
@@ -7771,7 +7771,7 @@ public final class Scalars
 
 Decoders for the custom scalars, built from their representations and constraints.
 
-Package: `com.convohop.server.model`.
+Package: `dev.instantrelay.server.model`.
 
 ### `SearchHit` type
 
@@ -7781,7 +7781,7 @@ public final class SearchHit
 
 The `SearchHit` result type.
 
-Package: `com.convohop.server.model`.
+Package: `dev.instantrelay.server.model`.
 
 ### `SearchPage` type
 
@@ -7791,7 +7791,7 @@ public final class SearchPage
 
 The `SearchPage` result type.
 
-Package: `com.convohop.server.model`.
+Package: `dev.instantrelay.server.model`.
 
 ### `SearchReply` type
 
@@ -7801,7 +7801,7 @@ public final class SearchReply
 
 The `SearchReply` result type.
 
-Package: `com.convohop.server.model`.
+Package: `dev.instantrelay.server.model`.
 
 ### `SearchRequestInput` type
 
@@ -7813,7 +7813,7 @@ The `SearchRequestInput` input type.
 
 Build instances with `builder()`. Fields without a value are omitted from the request.
 
-Package: `com.convohop.server.model`.
+Package: `dev.instantrelay.server.model`.
 
 ### `SearchScopeInput` type
 
@@ -7825,7 +7825,7 @@ The `SearchScopeInput` input type.
 
 Build instances with `builder()`. Fields without a value are omitted from the request.
 
-Package: `com.convohop.server.model`.
+Package: `dev.instantrelay.server.model`.
 
 ### `SendMessageReply` type
 
@@ -7835,7 +7835,7 @@ public final class SendMessageReply
 
 The `SendMessageReply` result type.
 
-Package: `com.convohop.server.model`.
+Package: `dev.instantrelay.server.model`.
 
 ### `SendMessageRequestInput` type
 
@@ -7847,7 +7847,7 @@ The `SendMessageRequestInput` input type.
 
 Build instances with `builder()`. Fields without a value are omitted from the request.
 
-Package: `com.convohop.server.model`.
+Package: `dev.instantrelay.server.model`.
 
 ### `ServiceDetails` type
 
@@ -7857,7 +7857,7 @@ public final class ServiceDetails
 
 The `ServiceDetails` result type.
 
-Package: `com.convohop.server.model`.
+Package: `dev.instantrelay.server.model`.
 
 ### `ServiceObservation` type
 
@@ -7867,7 +7867,7 @@ public final class ServiceObservation
 
 The `ServiceObservation` result type.
 
-Package: `com.convohop.server.model`.
+Package: `dev.instantrelay.server.model`.
 
 ### `Session` type
 
@@ -7877,7 +7877,7 @@ public final class Session
 
 The `Session` result type.
 
-Package: `com.convohop.server.model`.
+Package: `dev.instantrelay.server.model`.
 
 ### `SessionBootstrap` type
 
@@ -7887,7 +7887,7 @@ public final class SessionBootstrap
 
 The `SessionBootstrap` result type.
 
-Package: `com.convohop.server.model`.
+Package: `dev.instantrelay.server.model`.
 
 ### `SessionRequestOutcome` type
 
@@ -7897,7 +7897,7 @@ public final class SessionRequestOutcome
 
 The `SessionRequestOutcome` result type.
 
-Package: `com.convohop.server.model`.
+Package: `dev.instantrelay.server.model`.
 
 ### `SessionRequestOutcomeReply` type
 
@@ -7907,7 +7907,7 @@ public final class SessionRequestOutcomeReply
 
 The `SessionRequestOutcomeReply` result type.
 
-Package: `com.convohop.server.model`.
+Package: `dev.instantrelay.server.model`.
 
 ### `SessionRequestOutcomeRequestInput` type
 
@@ -7919,7 +7919,7 @@ The `SessionRequestOutcomeRequestInput` input type.
 
 Build instances with `builder()`. Fields without a value are omitted from the request.
 
-Package: `com.convohop.server.model`.
+Package: `dev.instantrelay.server.model`.
 
 ### `SessionRevocation` type
 
@@ -7929,7 +7929,7 @@ public final class SessionRevocation
 
 The `SessionRevocation` result type.
 
-Package: `com.convohop.server.model`.
+Package: `dev.instantrelay.server.model`.
 
 ### `SetBroadcastPermissionInput` type
 
@@ -7941,7 +7941,7 @@ The `SetBroadcastPermissionInput` input type.
 
 Build instances with `builder()`. Fields without a value are omitted from the request.
 
-Package: `com.convohop.server.model`.
+Package: `dev.instantrelay.server.model`.
 
 ### `SetBroadcastPermissionPayload` type
 
@@ -7951,7 +7951,7 @@ public final class SetBroadcastPermissionPayload
 
 The `SetBroadcastPermissionPayload` result type.
 
-Package: `com.convohop.server.model`.
+Package: `dev.instantrelay.server.model`.
 
 ### `SetConversationMuteInput` type
 
@@ -7963,7 +7963,7 @@ The `SetConversationMuteInput` input type.
 
 Build instances with `builder()`. Fields without a value are omitted from the request.
 
-Package: `com.convohop.server.model`.
+Package: `dev.instantrelay.server.model`.
 
 ### `SetConversationMutePayload` type
 
@@ -7973,7 +7973,7 @@ public final class SetConversationMutePayload
 
 The `SetConversationMutePayload` result type.
 
-Package: `com.convohop.server.model`.
+Package: `dev.instantrelay.server.model`.
 
 ### `SetSpendControlsReply` type
 
@@ -7983,7 +7983,7 @@ public final class SetSpendControlsReply
 
 The `SetSpendControlsReply` result type.
 
-Package: `com.convohop.server.model`.
+Package: `dev.instantrelay.server.model`.
 
 ### `SetSpendControlsRequestInput` type
 
@@ -7995,7 +7995,7 @@ The `SetSpendControlsRequestInput` input type.
 
 Build instances with `builder()`. Fields without a value are omitted from the request.
 
-Package: `com.convohop.server.model`.
+Package: `dev.instantrelay.server.model`.
 
 ### `UpdateConversationReply` type
 
@@ -8005,7 +8005,7 @@ public final class UpdateConversationReply
 
 The `UpdateConversationReply` result type.
 
-Package: `com.convohop.server.model`.
+Package: `dev.instantrelay.server.model`.
 
 ### `UpdateConversationRequestInput` type
 
@@ -8017,7 +8017,7 @@ The `UpdateConversationRequestInput` input type.
 
 Build instances with `builder()`. Fields without a value are omitted from the request.
 
-Package: `com.convohop.server.model`.
+Package: `dev.instantrelay.server.model`.
 
 ### `UpdateWebhookReply` type
 
@@ -8027,7 +8027,7 @@ public final class UpdateWebhookReply
 
 The `UpdateWebhookReply` result type.
 
-Package: `com.convohop.server.model`.
+Package: `dev.instantrelay.server.model`.
 
 ### `UpdateWebhookRequestInput` type
 
@@ -8039,7 +8039,7 @@ The `UpdateWebhookRequestInput` input type.
 
 Build instances with `builder()`. Fields without a value are omitted from the request.
 
-Package: `com.convohop.server.model`.
+Package: `dev.instantrelay.server.model`.
 
 ### `UsageMeter` type
 
@@ -8049,7 +8049,7 @@ public final class UsageMeter
 
 The `UsageMeter` result type.
 
-Package: `com.convohop.server.model`.
+Package: `dev.instantrelay.server.model`.
 
 ### `WebhookDeliveriesReply` type
 
@@ -8059,7 +8059,7 @@ public final class WebhookDeliveriesReply
 
 The `WebhookDeliveriesReply` result type.
 
-Package: `com.convohop.server.model`.
+Package: `dev.instantrelay.server.model`.
 
 ### `WebhookDeliveriesRequestInput` type
 
@@ -8071,7 +8071,7 @@ The `WebhookDeliveriesRequestInput` input type.
 
 Build instances with `builder()`. Fields without a value are omitted from the request.
 
-Package: `com.convohop.server.model`.
+Package: `dev.instantrelay.server.model`.
 
 ### `WebhookDelivery` type
 
@@ -8081,7 +8081,7 @@ public final class WebhookDelivery
 
 The `WebhookDelivery` result type.
 
-Package: `com.convohop.server.model`.
+Package: `dev.instantrelay.server.model`.
 
 ### `WebhookDeliveryPage` type
 
@@ -8091,7 +8091,7 @@ public final class WebhookDeliveryPage
 
 The `WebhookDeliveryPage` result type.
 
-Package: `com.convohop.server.model`.
+Package: `dev.instantrelay.server.model`.
 
 ### `WebhookEndpoint` type
 
@@ -8101,7 +8101,7 @@ public final class WebhookEndpoint
 
 The `WebhookEndpoint` result type.
 
-Package: `com.convohop.server.model`.
+Package: `dev.instantrelay.server.model`.
 
 ### `WebhookEndpointPage` type
 
@@ -8111,7 +8111,7 @@ public final class WebhookEndpointPage
 
 The `WebhookEndpointPage` result type.
 
-Package: `com.convohop.server.model`.
+Package: `dev.instantrelay.server.model`.
 
 ### `WebhookEndpointsReply` type
 
@@ -8121,7 +8121,7 @@ public final class WebhookEndpointsReply
 
 The `WebhookEndpointsReply` result type.
 
-Package: `com.convohop.server.model`.
+Package: `dev.instantrelay.server.model`.
 
 ### `WebhookEndpointsRequestInput` type
 
@@ -8133,4 +8133,4 @@ The `WebhookEndpointsRequestInput` input type.
 
 Build instances with `builder()`. Fields without a value are omitted from the request.
 
-Package: `com.convohop.server.model`.
+Package: `dev.instantrelay.server.model`.

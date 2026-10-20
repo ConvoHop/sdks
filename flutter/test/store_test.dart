@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 
-import 'package:convohop/convohop.dart';
+import 'package:instantrelay/instantrelay.dart';
 import 'package:fake_async/fake_async.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:http/http.dart' as http;
@@ -17,7 +17,7 @@ const _fullLoad = <String>['GetConversation', 'Messages', 'Receipts', 'Route', '
 
 typedef _Answer = FutureOr<http.Response> Function(String requestId, Map<String, Object?> input);
 
-Matcher _problem(String code) => isA<ConvoHopProblem>().having((problem) => problem.code, 'code', code);
+Matcher _problem(String code) => isA<RelayProblem>().having((problem) => problem.code, 'code', code);
 
 /// One conversation's authority. Its messages, events and receipts share one
 /// sequence, as on the server. It records each request under its operation
@@ -247,7 +247,7 @@ final class _Setup {
     bool failingHandler = false,
   }) {
     int now() => fixedClock() + async.elapsed.inMilliseconds;
-    client = ConvoHopClient(
+    client = RelayClient(
       baseUrl: 'https://authority.example',
       projectId: projectId,
       principalId: principalId,
@@ -258,7 +258,7 @@ final class _Setup {
       realtimeConnector: connector.call,
       clock: now,
     );
-    outbox = withOutbox ? ConvoHopOutbox(client, clock: now, random: NoJitter(), persist: false) : null;
+    outbox = withOutbox ? RelayOutbox(client, clock: now, random: NoJitter(), persist: false) : null;
     store = ConversationStore(
       client,
       conversationId,
@@ -278,8 +278,8 @@ final class _Setup {
   final _Authority authority;
   final FakeRealtimeConnector connector = FakeRealtimeConnector();
   final List<Object> errors = <Object>[];
-  late final ConvoHopClient client;
-  late final ConvoHopOutbox? outbox;
+  late final RelayClient client;
+  late final RelayOutbox? outbox;
   late final ConversationStore store;
 
   ConversationSnapshot get snapshot => store.snapshot;
@@ -660,7 +660,7 @@ void main() {
       expect((setup.snapshot.status, setup.snapshot.connected), (ConversationStoreStatus.failed, false));
       expect(
         setup.snapshot.error,
-        isA<ConvoHopProblem>()
+        isA<RelayProblem>()
             .having((problem) => problem.code, 'code', 'CREDITS_EXHAUSTED')
             .having((problem) => problem.status, 'status', 402),
       );
@@ -697,7 +697,7 @@ void main() {
       expect((setup.snapshot.status, setup.snapshot.connected), (ConversationStoreStatus.ready, false));
       expect(
         setup.snapshot.error,
-        isA<ConvoHopProblem>()
+        isA<RelayProblem>()
             .having((problem) => problem.code, 'code', 'SPEND_UNVERIFIED')
             .having((problem) => problem.retryAfter, 'retryAfter', 5),
       );

@@ -1,25 +1,25 @@
 import AVFoundation
-internal import ConvoHopCalls
-internal import ConvoHopPush
+internal import RelayCalls
+internal import RelayPush
 import Foundation
 import UIKit
 import UserNotifications
 
-/// The process's ConvoHop state, shared by the modules of every React Native instance: the `ConvoHopCalls` delegate,
+/// The process's Relay state, shared by the modules of every React Native instance: the `RelayCalls` delegate,
 /// the APNs token, and the notification the user opened to launch the app.
 @MainActor
-final class Hub: ConvoHopCallsDelegate {
+final class Hub: RelayCallsDelegate {
     static let shared = Hub()
 
     /// How long after the app first becomes active a notification the user opened can still arrive.
     private static let initialGrace = 1.0
 
-    private(set) var options: ConvoHopReactNative.Options?
+    private(set) var options: RelayReactNative.Options?
     var isConfigured: Bool { options != nil }
 
-    private var callsBridges: [Weak<ConvoHopCallsBridge>] = []
-    private var pushBridges: [Weak<ConvoHopPushBridge>] = []
-    private var observation: ConvoHopCallsObservation?
+    private var callsBridges: [Weak<RelayCallsBridge>] = []
+    private var pushBridges: [Weak<RelayPushBridge>] = []
+    private var observation: RelayCallsObservation?
     /// What JavaScript last saw of each call.
     private var lastSeen: [UUID: CallView] = [:]
     /// The `endReason` of each ended call, fixed when it ended.
@@ -38,16 +38,16 @@ final class Hub: ConvoHopCallsDelegate {
 
     private init() {}
 
-    func configure(_ options: ConvoHopReactNative.Options) {
+    func configure(_ options: RelayReactNative.Options) {
         self.options = options
-        let calls = ConvoHopCalls.shared
+        let calls = RelayCalls.shared
         calls.start(
-            configuration: ConvoHopCallsConfiguration(
+            configuration: RelayCallsConfiguration(
                 supportsVideo: options.supportsVideo, supportsHolding: options.supportsHolding,
                 includesCallsInRecents: options.includesCallsInRecents, ringtoneSound: options.ringtoneSound,
                 iconTemplateImageData: options.iconTemplateImageData, ledgerSuiteName: options.appGroup),
             delegate: self)
-        // React Native accepts no ConvoHop push until JavaScript sets a recipient. `start` loads the suite's.
+        // React Native accepts no Relay push until JavaScript sets a recipient. `start` loads the suite's.
         if calls.recipient == .any { calls.recipient = .nobody }
         if observation == nil { observation = calls.addObserver { Hub.shared.observe($0) } }
         NotificationCenterDelegate.shared.install()
@@ -56,37 +56,37 @@ final class Hub: ConvoHopCallsDelegate {
 
     // MARK: - Modules
 
-    func attach(_ bridge: ConvoHopCallsBridge) {
+    func attach(_ bridge: RelayCallsBridge) {
         callsBridges.removeAll { $0.value == nil || $0.value === bridge }
         callsBridges.append(Weak(bridge))
     }
 
-    func attach(_ bridge: ConvoHopPushBridge) {
+    func attach(_ bridge: RelayPushBridge) {
         pushBridges.removeAll { $0.value == nil || $0.value === bridge }
         pushBridges.append(Weak(bridge))
     }
 
-    private var callsEmitters: [any ConvoHopCallsEmitter] {
+    private var callsEmitters: [any RelayCallsEmitter] {
         callsBridges.compactMap { $0.value?.emitter }
     }
 
-    private var pushEmitters: [any ConvoHopPushEmitter] {
+    private var pushEmitters: [any RelayPushEmitter] {
         pushBridges.compactMap { $0.value?.emitter }
     }
 
     // MARK: - Calls
 
-    func call(_ uuid: UUID) -> ConvoHopCall? {
-        ConvoHopCalls.shared.calls.first { $0.uuid == uuid }
+    func call(_ uuid: UUID) -> RelayCall? {
+        RelayCalls.shared.calls.first { $0.uuid == uuid }
     }
 
     func views() -> [[String: Any]] {
-        ConvoHopCalls.shared.calls.compactMap { view(of: $0)?.dictionary }
+        RelayCalls.shared.calls.compactMap { view(of: $0)?.dictionary }
     }
 
     /// The JavaScript snapshot of `call`, or `nil` for a call JavaScript can't describe, such as one started with
     /// another live session ID format.
-    private func view(of call: ConvoHopCall) -> CallView? {
+    private func view(of call: RelayCall) -> CallView? {
         guard Validate.isUUID(call.liveSessionId) else { return nil }
         var view = CallView(
             id: call.uuid.uuidString.lowercased(), liveSessionId: call.liveSessionId, outgoing: call.isOutgoing,
@@ -115,7 +115,7 @@ final class Hub: ConvoHopCallsDelegate {
         return view
     }
 
-    private static func endReason(_ reason: ConvoHopCallEndReason?, wasRinging: Bool) -> String {
+    private static func endReason(_ reason: RelayCallEndReason?, wasRinging: Bool) -> String {
         guard let reason else { return wasRinging ? "rejected" : "hungUp" }
         switch reason {
         case .answered: return "answeredElsewhere"
@@ -129,7 +129,7 @@ final class Hub: ConvoHopCallsDelegate {
 
     /// The server's reason for stopping a ring. `expired` is the server's only if it said so; the local ring timeout
     /// has no server reason.
-    private func serverReason(_ uuid: UUID, _ reason: ConvoHopCallEndReason?) -> String? {
+    private func serverReason(_ uuid: UUID, _ reason: RelayCallEndReason?) -> String? {
         guard let reason, reason != .failed else { return nil }
         if reason == .expired { return serverExpired.contains(uuid) ? "expired" : nil }
         return Validate.isIdentifier(reason.rawValue) ? reason.rawValue : nil
@@ -137,7 +137,7 @@ final class Hub: ConvoHopCallsDelegate {
 
     /// Emits `changed` and `ended`. `incoming`, `outgoing` and `answered` come from the delegate methods, which
     /// record what they emit, so the change they report isn't emitted twice.
-    private func observe(_ calls: [ConvoHopCall]) {
+    private func observe(_ calls: [RelayCall]) {
         var present = Set<UUID>()
         for call in calls {
             present.insert(call.uuid)
@@ -157,7 +157,7 @@ final class Hub: ConvoHopCallsDelegate {
     }
 
     /// Records and emits a call's current view for a delegate event, unless `accept` rejects its current state.
-    private func report(_ type: String, _ uuid: UUID, accept: (ConvoHopCall) -> Bool = { _ in true }) {
+    private func report(_ type: String, _ uuid: UUID, accept: (RelayCall) -> Bool = { _ in true }) {
         guard let call = call(uuid), accept(call), let view = view(of: call) else { return }
         lastSeen[uuid] = view
         emitCall(type, view)
@@ -169,8 +169,8 @@ final class Hub: ConvoHopCallsDelegate {
     }
 
     func voipRegistration() -> [String: Any]? {
-        guard let token = ConvoHopCalls.shared.voipToken else { return nil }
-        return registration("apnsVoip", ConvoHopPushToken.hex(token))
+        guard let token = RelayCalls.shared.voipToken else { return nil }
+        return registration("apnsVoip", RelayPushToken.hex(token))
     }
 
     private func registration(_ kind: String, _ token: String) -> [String: Any] {
@@ -185,32 +185,32 @@ final class Hub: ConvoHopCallsDelegate {
         for emitter in callsEmitters { emitter.emitOnAudioSession(["active": active]) }
     }
 
-    func convoHopCalls(_ calls: ConvoHopCalls, didUpdateVoIPToken token: Data?) {
+    func relayCalls(_ calls: RelayCalls, didUpdateVoIPToken token: Data?) {
         guard let registration = voipRegistration() else { return }
         for emitter in callsEmitters { emitter.emitOnVoipToken(registration) }
     }
 
-    func convoHopCalls(_ calls: ConvoHopCalls, didReceiveIncomingCall call: ConvoHopCall) {
+    func relayCalls(_ calls: RelayCalls, didReceiveIncomingCall call: RelayCall) {
         report("incoming", call.uuid) { $0.state == .ringing }
     }
 
-    func convoHopCalls(_ calls: ConvoHopCalls, didStartOutgoing call: ConvoHopCall) {
+    func relayCalls(_ calls: RelayCalls, didStartOutgoing call: RelayCall) {
         report("outgoing", call.uuid) { !$0.isEnded }
     }
 
-    func convoHopCalls(_ calls: ConvoHopCalls, didAnswer call: ConvoHopCall) {
+    func relayCalls(_ calls: RelayCalls, didAnswer call: RelayCall) {
         report("answered", call.uuid)
     }
 
-    func convoHopCalls(_ calls: ConvoHopCalls, didActivate audioSession: AVAudioSession) {
+    func relayCalls(_ calls: RelayCalls, didActivate audioSession: AVAudioSession) {
         setAudioSession(true)
     }
 
-    func convoHopCalls(_ calls: ConvoHopCalls, didDeactivate audioSession: AVAudioSession) {
+    func relayCalls(_ calls: RelayCalls, didDeactivate audioSession: AVAudioSession) {
         setAudioSession(false)
     }
 
-    func convoHopCallsDidReset(_ calls: ConvoHopCalls) {
+    func relayCallsDidReset(_ calls: RelayCalls) {
         setAudioSession(false)
     }
 
@@ -221,7 +221,7 @@ final class Hub: ConvoHopCallsDelegate {
     }
 
     func didRegister(deviceToken: Data) {
-        apnsToken = ConvoHopPushToken.hex(deviceToken)
+        apnsToken = RelayPushToken.hex(deviceToken)
         guard let registration = apnsRegistration() else { return }
         for emitter in pushEmitters { emitter.emitOnPushRegistration(registration) }
     }
@@ -232,39 +232,39 @@ final class Hub: ConvoHopCallsDelegate {
         for emitter in pushEmitters { emitter.emitOnPushRegistrationError(event) }
     }
 
-    /// A ConvoHop push that arrived in the foreground: emits messages, rings calls and stops rings. Returns how it
+    /// A Relay push that arrived in the foreground: emits messages, rings calls and stops rings. Returns how it
     /// shows.
     func willPresent(_ push: NotificationCenterDelegate.Push) -> UNNotificationPresentationOptions {
         guard let options, case .notification(let notification, let payload) = push,
-            ConvoHopCalls.shared.recipient.accepts(notification)
+            RelayCalls.shared.recipient.accepts(notification)
         else { return [] }
         switch notification.kind {
         case .message:
             emitNotification("received", payload)
             return options.foregroundPresentation
         case .call:
-            ConvoHopCalls.shared.handle(notification)
+            RelayCalls.shared.handle(notification)
             return []
         case .callCancelled(let alert, let reason):
             if reason == .expired, call(alert.uuid)?.state == .ringing { serverExpired.insert(alert.uuid) }
-            ConvoHopCalls.shared.handle(notification)
+            RelayCalls.shared.handle(notification)
             return reason.isMissedCall ? options.foregroundPresentation : []
         }
     }
 
-    /// The user opened a ConvoHop push: rings or stops its call, then hands it to JavaScript.
+    /// The user opened a Relay push: rings or stops its call, then hands it to JavaScript.
     func opened(_ push: NotificationCenterDelegate.Push) {
         guard isConfigured, case .notification(let notification, let payload) = push,
-            ConvoHopCalls.shared.recipient.accepts(notification)
+            RelayCalls.shared.recipient.accepts(notification)
         else { return }
         switch notification.kind {
         case .message:
             break
         case .call:
-            ConvoHopCalls.shared.handle(notification)
+            RelayCalls.shared.handle(notification)
         case .callCancelled(let alert, let reason):
             if reason == .expired, call(alert.uuid)?.state == .ringing { serverExpired.insert(alert.uuid) }
-            ConvoHopCalls.shared.handle(notification)
+            RelayCalls.shared.handle(notification)
         }
         if initialTaken {
             emitNotification("opened", payload)
@@ -351,7 +351,7 @@ final class Hub: ConvoHopCallsDelegate {
     }
 }
 
-/// A call as JavaScript sees it: the `CallSnapshot` of the `ConvoHopCalls` spec.
+/// A call as JavaScript sees it: the `CallSnapshot` of the `RelayCalls` spec.
 struct CallView: Equatable {
     var id: String
     var alertId: String?

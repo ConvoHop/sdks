@@ -77,8 +77,8 @@ mutation ManagementCredentialPermit($context: RequestContextInput!, $input: Cred
 
 | Language | Members |
 | --- | --- |
-| [TypeScript](../../typescript/reference/operations.md) | [`ConvoHopManagementClient.deliveryPermit`](../../typescript/reference/server.md#convohopmanagementclientdeliverypermit-method) |
-| [Python](../../python/reference/operations.md) | [`ConvoHopManagement.credential_permit`](../../python/reference/convohop.md#convohopmanagementcredential_permit-method), [`AsyncConvoHopManagement.credential_permit`](../../python/reference/convohop.md#asyncconvohopmanagementcredential_permit-method) |
-| [.NET](../../dotnet/reference/operations.md) | [`ConvoHopManagementClient.GetDeliveryPermitAsync`](../../dotnet/reference/convohop.md#convohopmanagementclientgetdeliverypermitasync-method), [`ManagementApi.CredentialPermitAsync`](../../dotnet/reference/api.md#managementapicredentialpermitasync-method) |
+| [TypeScript](../../typescript/reference/operations.md) | [`RelayManagementClient.deliveryPermit`](../../typescript/reference/server.md#relaymanagementclientdeliverypermit-method) |
+| [Python](../../python/reference/operations.md) | [`RelayManagement.credential_permit`](../../python/reference/instantrelay.md#relaymanagementcredential_permit-method), [`AsyncRelayManagement.credential_permit`](../../python/reference/instantrelay.md#asyncrelaymanagementcredential_permit-method) |
+| [.NET](../../dotnet/reference/operations.md) | [`RelayManagementClient.GetDeliveryPermitAsync`](../../dotnet/reference/relay.md#relaymanagementclientgetdeliverypermitasync-method), [`ManagementApi.CredentialPermitAsync`](../../dotnet/reference/api.md#managementapicredentialpermitasync-method) |
 | [Java and Kotlin](../../jvm/reference/operations.md) | [`ManagementApi.credentialPermit`](../../jvm/reference/server.md#managementapicredentialpermit-method), [`ManagementSuspendApi.credentialPermit`](../../jvm/reference/server-kotlin.md#managementsuspendapicredentialpermit-method) |
-| [Go](../../go/reference/operations.md) | [`ManagementClient.CredentialPermit`](../../go/reference/convohop.md#managementclientcredentialpermit-method) |
+| [Go](../../go/reference/operations.md) | [`ManagementClient.CredentialPermit`](../../go/reference/relay.md#managementclientcredentialpermit-method) |

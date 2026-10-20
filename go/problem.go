@@ -1,4 +1,4 @@
-package convohop
+package relay
 
 import (
 	"fmt"
@@ -12,7 +12,7 @@ import (
 type ErrorCode string
 
 // Error returns the code as an error message.
-func (c ErrorCode) Error() string { return "convohop: " + string(c) }
+func (c ErrorCode) Error() string { return "relay: " + string(c) }
 
 // Outcome reports what is known about the effect of a failed request.
 type Outcome string
@@ -72,7 +72,7 @@ type Problem struct {
 
 // Error describes the problem without credentials.
 func (p *Problem) Error() string {
-	return fmt.Sprintf("convohop: %s (status %d, outcome %s, request %s): %s", string(p.Code), p.Status, p.Outcome, p.RequestID, p.Message)
+	return fmt.Sprintf("relay: %s (status %d, outcome %s, request %s): %s", string(p.Code), p.Status, p.Outcome, p.RequestID, p.Message)
 }
 
 // Unwrap returns the underlying cause, such as a context error, if any.

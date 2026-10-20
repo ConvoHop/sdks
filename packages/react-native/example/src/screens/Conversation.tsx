@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Alert, FlatList, KeyboardAvoidingView, Platform, Pressable, StyleSheet, Text, TextInput, View } from "react-native";
-import type { ConversationMessage, OutboxEntry } from "@convohop/client";
-import { useConversation, useTyping } from "@convohop/react";
+import type { ConversationMessage, OutboxEntry } from "@instantrelay/client";
+import { useConversation, useTyping } from "@instantrelay/react";
 import type { ProjectFeatures, Session } from "../session";
 import { Banner, Busy, Button, colors, errorMessage, MessageText, useForeground } from "../ui";
 

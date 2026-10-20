@@ -1,9 +1,9 @@
-import type { ConvoHopClient } from "@convohop/client";
+import type { RelayClient } from "@instantrelay/client";
 import { getCalls, onCallEvent, stopRinging, type Call } from "./calls.js";
 import { report } from "./native.js";
 
 /** The client methods {@link watchRingingCalls} uses. */
-export type RingingClient = Pick<ConvoHopClient, "liveAlerts" | "liveSession">;
+export type RingingClient = Pick<RelayClient, "liveAlerts" | "liveSession">;
 export interface WatchRingingOptions {
   /** How often to check while an incoming call rings, in milliseconds: 1000 to 60000. Defaults to 3000. */
   intervalMs?: number;
@@ -55,7 +55,7 @@ async function currentAlerts(client: RingingClient, stopped: () => boolean): Pro
  */
 export function watchRingingCalls(client: RingingClient, options: WatchRingingOptions = {}): () => void {
   if (typeof client?.liveAlerts?.list !== "function" || typeof client.liveSession !== "function")
-    throw new TypeError("client must be a ConvoHopClient");
+    throw new TypeError("client must be a RelayClient");
   if (typeof options !== "object" || options === null) throw new TypeError("options must be an object");
   const { intervalMs = 3000, onError = report } = options;
   if (!Number.isSafeInteger(intervalMs) || intervalMs < 1000 || intervalMs > 60000)

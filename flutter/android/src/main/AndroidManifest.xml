@@ -8,16 +8,16 @@
 
     <application>
         <!-- Receives FCM messages. An app with another FCM service extends
-             this one, or removes it and calls ConvoHopMessaging. -->
+             this one, or removes it and calls RelayMessaging. -->
         <service
-            android:name="com.convohop.flutter.ConvoHopMessagingService"
+            android:name="dev.instantrelay.flutter.RelayMessagingService"
             android:exported="false">
             <intent-filter>
                 <action android:name="com.google.firebase.MESSAGING_EVENT" />
             </intent-filter>
         </service>
         <receiver
-            android:name="com.convohop.flutter.ConvoHopCallReceiver"
+            android:name="dev.instantrelay.flutter.RelayCallReceiver"
             android:exported="false" />
     </application>
 </manifest>

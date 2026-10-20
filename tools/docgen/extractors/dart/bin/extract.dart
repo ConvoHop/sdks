@@ -1,7 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:convohop_docgen_dart/convohop_docgen_dart.dart';
+import 'package:relay_docgen_dart/relay_docgen_dart.dart';
 
 /// Prints the surface JSON of the packages a language file documents:
 ///

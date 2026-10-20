@@ -12,10 +12,10 @@ enum Code {
     static let callKit = "E_CALLKIT"
 
     static let notConfiguredMessage =
-        "Call ConvoHopReactNative.configure in application(_:didFinishLaunchingWithOptions:)"
+        "Call RelayReactNative.configure in application(_:didFinishLaunchingWithOptions:)"
 }
 
-/// The JavaScript contract's ID rules, the same as the ConvoHop Swift package applies to pushes.
+/// The JavaScript contract's ID rules, the same as the Relay Swift package applies to pushes.
 enum Validate {
     /// A lowercase, hyphenated, non-nil UUID.
     static func isUUID(_ text: String) -> Bool {

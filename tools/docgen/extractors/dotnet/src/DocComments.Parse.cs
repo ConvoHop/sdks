@@ -6,7 +6,7 @@ using System.Xml;
 using System.Xml.Linq;
 using Microsoft.CodeAnalysis;
 
-namespace ConvoHop.Docgen;
+namespace Relay.Docgen;
 
 internal sealed partial class DocComments
 {

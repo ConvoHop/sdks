@@ -1,6 +1,6 @@
 # Go webhooks quickstart
 
-Receive ConvoHop events in your Go backend with the `webhooks` package: verify each signed delivery, acknowledge it quickly, and handle its event in a queue worker.
+Receive Relay events in your Go backend with the `webhooks` package: verify each signed delivery, acknowledge it quickly, and handle its event in a queue worker.
 
 ## Before you start
 
@@ -23,7 +23,7 @@ import (
 
 ## Verify deliveries
 
-ConvoHop signs each delivery with the [Standard Webhooks](https://www.standardwebhooks.com) scheme. `webhooks.Verify` checks the signature and timestamp against the raw body, and returns the delivery's webhook ID and event. It takes the request's `http.Header`, so it works in any `net/http` handler.
+Relay signs each delivery with the [Standard Webhooks](https://www.standardwebhooks.com) scheme. `webhooks.Verify` checks the signature and timestamp against the raw body, and returns the delivery's webhook ID and event. It takes the request's `http.Header`, so it works in any `net/http` handler.
 
 ```go snippet=docs/languages/go/examples/webhooks.go#receive
 // ReceiveWebhook is your webhook endpoint. secrets are the endpoint's whsec_
@@ -61,7 +61,7 @@ func ReceiveWebhook(secrets []string, enqueue func(webhookID string, event webho
 }
 ```
 
-- Pass every secret you hold. While a rotation is pending, ConvoHop signs with both the current and the next secret, and it signs with the replaced secret for 24 hours after the rotation.
+- Pass every secret you hold. While a rotation is pending, Relay signs with both the current and the next secret, and it signs with the replaced secret for 24 hours after the rotation.
 - Verify the exact bytes you received, never re-encoded JSON. A body over 4096 bytes fails.
 - Answer within 5 seconds, and process the event afterwards.
 - Delivery is at least once, and retries keep the webhook ID, so deduplicate on it.
@@ -74,7 +74,7 @@ Events carry IDs and metadata, not content, so read the current state through th
 ```go snippet=docs/languages/go/examples/webhooks.go#handle
 // Handlers is what your app does with the events it subscribes to.
 type Handlers interface {
-	ConversationChanged(ctx context.Context, conversation *convohop.Conversation) error
+	ConversationChanged(ctx context.Context, conversation *relay.Conversation) error
 	// Notify pushes to the recipient's devices.
 	Notify(ctx context.Context, notification *webhooks.Notification) error
 	// EndpointDisabled reports that another of your endpoints kept failing.
@@ -83,7 +83,7 @@ type Handlers interface {
 
 // HandleEvent is your queue worker. Events arrive at least once and in any
 // order.
-func HandleEvent(ctx context.Context, client *convohop.ProjectClient, event webhooks.Event, handlers Handlers) error {
+func HandleEvent(ctx context.Context, client *relay.ProjectClient, event webhooks.Event, handlers Handlers) error {
 	switch {
 	case !event.Known:
 		// A type this SDK doesn't know yet, or an event that doesn't match
@@ -93,7 +93,7 @@ func HandleEvent(ctx context.Context, client *convohop.ProjectClient, event webh
 		return handlers.Notify(ctx, event.Notification)
 	case event.EventType == webhooks.EventConversationCreated || event.EventType == webhooks.EventConversationUpdated:
 		// Events carry only IDs. Read the current state through the API.
-		conversation, err := client.GetConversation(ctx, convohop.GetConversationRequestInput{ConversationID: event.SubjectRef.ID})
+		conversation, err := client.GetConversation(ctx, relay.GetConversationRequestInput{ConversationID: event.SubjectRef.ID})
 		if err != nil {
 			return err
 		}

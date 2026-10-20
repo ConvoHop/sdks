@@ -1,128 +1,128 @@
 {
   "$schema": "../../../../spec/docs/reference.schema.json",
   "language": "swift",
-  "package": "ConvoHopCalls",
+  "package": "RelayCalls",
   "layer": "client",
   "page": "calls.md",
   "symbols": [
     {
-      "name": "ConvoHopCalls",
+      "name": "RelayCalls",
       "kind": "class",
-      "ref": "ConvoHopCalls#ConvoHopCalls",
-      "anchor": "convohopcalls-class",
+      "ref": "RelayCalls#RelayCalls",
+      "anchor": "relaycalls-class",
       "signatures": [
-        "@MainActor\npublic final class ConvoHopCalls: NSObject",
-        "extension ConvoHopCalls: PKPushRegistryDelegate",
-        "extension ConvoHopCalls: CXProviderDelegate"
+        "@MainActor\npublic final class RelayCalls: NSObject",
+        "extension RelayCalls: PKPushRegistryDelegate",
+        "extension RelayCalls: CXProviderDelegate"
       ],
-      "docs": "Reports ConvoHop calls to CallKit and receives VoIP pushes through PushKit.\n\nCall `start(configuration:delegate:)` in `application(_:didFinishLaunchingWithOptions:)`: iOS can launch your\napp for a VoIP push, and terminates an app that doesn't report each one to CallKit. This class reports every VoIP\npush. A push it doesn't ring for, such as one for someone other than `recipient`, is reported and ended at once.\n\nAnswered and declined rings get no push. When realtime or `ConvoHopClient.ringStopReason(_:)` shows that a ringing\ncall stopped, call `end(_:reason:)` with the reason.\n\nAvailable on iOS only.",
+      "docs": "Reports Relay calls to CallKit and receives VoIP pushes through PushKit.\n\nCall `start(configuration:delegate:)` in `application(_:didFinishLaunchingWithOptions:)`: iOS can launch your\napp for a VoIP push, and terminates an app that doesn't report each one to CallKit. This class reports every VoIP\npush. A push it doesn't ring for, such as one for someone other than `recipient`, is reported and ended at once.\n\nAnswered and declined rings get no push. When realtime or `RelayClient.ringStopReason(_:)` shows that a ringing\ncall stopped, call `end(_:reason:)` with the reason.\n\nAvailable on iOS only.",
       "members": [
         {
           "name": "shared",
           "kind": "property",
-          "ref": "ConvoHopCalls#ConvoHopCalls.shared:static",
-          "anchor": "convohopcallsshared-static-property",
-          "signatures": ["public static let shared = ConvoHopCalls()"],
+          "ref": "RelayCalls#RelayCalls.shared:static",
+          "anchor": "relaycallsshared-static-property",
+          "signatures": ["public static let shared = RelayCalls()"],
           "docs": "",
           "static": true
         },
         {
           "name": "delegate",
           "kind": "property",
-          "ref": "ConvoHopCalls#ConvoHopCalls.delegate",
-          "anchor": "convohopcallsdelegate-property",
-          "signatures": ["public private(set) weak var delegate: ConvoHopCallsDelegate?"],
+          "ref": "RelayCalls#RelayCalls.delegate",
+          "anchor": "relaycallsdelegate-property",
+          "signatures": ["public private(set) weak var delegate: RelayCallsDelegate?"],
           "docs": ""
         },
         {
           "name": "configuration",
           "kind": "property",
-          "ref": "ConvoHopCalls#ConvoHopCalls.configuration",
-          "anchor": "convohopcallsconfiguration-property",
-          "signatures": ["public private(set) var configuration: ConvoHopCallsConfiguration"],
+          "ref": "RelayCalls#RelayCalls.configuration",
+          "anchor": "relaycallsconfiguration-property",
+          "signatures": ["public private(set) var configuration: RelayCallsConfiguration"],
           "docs": ""
         },
         {
           "name": "ledger",
           "kind": "property",
-          "ref": "ConvoHopCalls#ConvoHopCalls.ledger",
-          "anchor": "convohopcallsledger-property",
-          "signatures": ["public private(set) var ledger: ConvoHopNotificationLedger"],
+          "ref": "RelayCalls#RelayCalls.ledger",
+          "anchor": "relaycallsledger-property",
+          "signatures": ["public private(set) var ledger: RelayNotificationLedger"],
           "docs": "Remembers handled pushes and stopped rings. Share its suite with your Notification Service Extension."
         },
         {
           "name": "voipToken",
           "kind": "property",
-          "ref": "ConvoHopCalls#ConvoHopCalls.voipToken",
-          "anchor": "convohopcallsvoiptoken-property",
+          "ref": "RelayCalls#RelayCalls.voipToken",
+          "anchor": "relaycallsvoiptoken-property",
           "signatures": ["public private(set) var voipToken: Data?"],
           "docs": "The PushKit VoIP token, once iOS issued one."
         },
         {
           "name": "recipient",
           "kind": "property",
-          "ref": "ConvoHopCalls#ConvoHopCalls.recipient",
-          "anchor": "convohopcallsrecipient-property",
-          "signatures": ["public var recipient: ConvoHopPushRecipient { get set }"],
-          "docs": "Whose calls ring. `ConvoHopPushRecipient.any` until you set one.\n\nSet `.only(projectId:recipientId:)` at sign-in and `ConvoHopPushRecipient.nobody` at sign-out. It's\nstored in the ledger's suite, so it holds when iOS relaunches your app for a VoIP push, and a Notification\nService Extension on the same suite hides the text of other users' pushes."
+          "ref": "RelayCalls#RelayCalls.recipient",
+          "anchor": "relaycallsrecipient-property",
+          "signatures": ["public var recipient: RelayPushRecipient { get set }"],
+          "docs": "Whose calls ring. `RelayPushRecipient.any` until you set one.\n\nSet `.only(projectId:recipientId:)` at sign-in and `RelayPushRecipient.nobody` at sign-out. It's\nstored in the ledger's suite, so it holds when iOS relaunches your app for a VoIP push, and a Notification\nService Extension on the same suite hides the text of other users' pushes."
         },
         {
           "name": "calls",
           "kind": "property",
-          "ref": "ConvoHopCalls#ConvoHopCalls.calls",
-          "anchor": "convohopcallscalls-property",
-          "signatures": ["public var calls: [ConvoHopCall] { get }"],
+          "ref": "RelayCalls#RelayCalls.calls",
+          "anchor": "relaycallscalls-property",
+          "signatures": ["public var calls: [RelayCall] { get }"],
           "docs": "The calls, oldest first. An ended call stays for a minute."
         },
         {
           "name": "start",
           "kind": "method",
-          "ref": "ConvoHopCalls#ConvoHopCalls.start",
-          "anchor": "convohopcallsstart-method",
+          "ref": "RelayCalls#RelayCalls.start",
+          "anchor": "relaycallsstart-method",
           "signatures": [
-            "public func start(\n    configuration: ConvoHopCallsConfiguration = ConvoHopCallsConfiguration(),\n    delegate: ConvoHopCallsDelegate?\n)"
+            "public func start(\n    configuration: RelayCallsConfiguration = RelayCallsConfiguration(),\n    delegate: RelayCallsDelegate?\n)"
           ],
           "docs": "Sets up CallKit and PushKit. Call it again to change the configuration or delegate."
         },
         {
           "name": "handle",
           "kind": "method",
-          "ref": "ConvoHopCalls#ConvoHopCalls.handle",
-          "anchor": "convohopcallshandle-method",
-          "signatures": ["public func handle(_ notification: ConvoHopNotification)"],
-          "docs": "Handles a ConvoHop notification that arrived outside PushKit, such as an alert push.\n\nA ring rings in CallKit unless it already rang, stopped or expired. A cancellation ends the ringing call,\nrecords the stop and removes delivered notifications for the ring."
+          "ref": "RelayCalls#RelayCalls.handle",
+          "anchor": "relaycallshandle-method",
+          "signatures": ["public func handle(_ notification: RelayNotification)"],
+          "docs": "Handles a Relay notification that arrived outside PushKit, such as an alert push.\n\nA ring rings in CallKit unless it already rang, stopped or expired. A cancellation ends the ringing call,\nrecords the stop and removes delivered notifications for the ring."
         },
         {
           "name": "startOutgoingCall",
           "kind": "method",
-          "ref": "ConvoHopCalls#ConvoHopCalls.startOutgoingCall",
-          "anchor": "convohopcallsstartoutgoingcall-method",
+          "ref": "RelayCalls#RelayCalls.startOutgoingCall",
+          "anchor": "relaycallsstartoutgoingcall-method",
           "signatures": [
             "@discardableResult\npublic func startOutgoingCall(\n    liveSessionId: String,\n    conversationId: String,\n    handle: String? = nil,\n    displayName: String? = nil,\n    hasVideo: Bool = false\n) async throws -> UUID"
           ],
-          "docs": "Starts an outgoing call in CallKit. Start the live session with ConvoHop first.\n\nParameters:\n\n- `handle`: What CallKit shows and stores in Recents. Defaults to the conversation ID.\n\nReturns: The CallKit UUID."
+          "docs": "Starts an outgoing call in CallKit. Start the live session with Relay first.\n\nParameters:\n\n- `handle`: What CallKit shows and stores in Recents. Defaults to the conversation ID.\n\nReturns: The CallKit UUID."
         },
         {
           "name": "reportConnecting",
           "kind": "method",
-          "ref": "ConvoHopCalls#ConvoHopCalls.reportConnecting",
-          "anchor": "convohopcallsreportconnecting-method",
+          "ref": "RelayCalls#RelayCalls.reportConnecting",
+          "anchor": "relaycallsreportconnecting-method",
           "signatures": ["public func reportConnecting(_ uuid: UUID)"],
           "docs": "Reports that media connects for an answered or outgoing call."
         },
         {
           "name": "reportConnected",
           "kind": "method",
-          "ref": "ConvoHopCalls#ConvoHopCalls.reportConnected",
-          "anchor": "convohopcallsreportconnected-method",
+          "ref": "RelayCalls#RelayCalls.reportConnected",
+          "anchor": "relaycallsreportconnected-method",
           "signatures": ["public func reportConnected(_ uuid: UUID)"],
           "docs": "Reports that media connected for an answered or outgoing call."
         },
         {
           "name": "update",
           "kind": "method",
-          "ref": "ConvoHopCalls#ConvoHopCalls.update",
-          "anchor": "convohopcallsupdate-method",
+          "ref": "RelayCalls#RelayCalls.update",
+          "anchor": "relaycallsupdate-method",
           "signatures": [
             "public func update(_ uuid: UUID, localizedCallerName: String? = nil, hasVideo: Bool? = nil)"
           ],
@@ -131,60 +131,60 @@
         {
           "name": "answer",
           "kind": "method",
-          "ref": "ConvoHopCalls#ConvoHopCalls.answer",
-          "anchor": "convohopcallsanswer-method",
+          "ref": "RelayCalls#RelayCalls.answer",
+          "anchor": "relaycallsanswer-method",
           "signatures": ["public func answer(_ uuid: UUID) async throws"],
-          "docs": "Asks CallKit to answer a ringing call, for example from an in-app Answer button.\n`ConvoHopCallsDelegate.convoHopCalls(_:didAnswer:)` follows, as when the user answers in the system UI.\n\nThrows: `CXErrorCodeRequestTransactionError.unknownCallUUID` for a call ConvoHop didn't report, or\n`.invalidAction` for a call that isn't ringing, before asking CallKit."
+          "docs": "Asks CallKit to answer a ringing call, for example from an in-app Answer button.\n`RelayCallsDelegate.relayCalls(_:didAnswer:)` follows, as when the user answers in the system UI.\n\nThrows: `CXErrorCodeRequestTransactionError.unknownCallUUID` for a call Relay didn't report, or\n`.invalidAction` for a call that isn't ringing, before asking CallKit."
         },
         {
           "name": "setMuted",
           "kind": "method",
-          "ref": "ConvoHopCalls#ConvoHopCalls.setMuted",
-          "anchor": "convohopcallssetmuted-method",
+          "ref": "RelayCalls#RelayCalls.setMuted",
+          "anchor": "relaycallssetmuted-method",
           "signatures": ["public func setMuted(_ muted: Bool, for uuid: UUID) async throws"],
-          "docs": "Asks CallKit to mute or unmute. `ConvoHopCallsDelegate.convoHopCalls(_:didSetMuted:for:)` applies it."
+          "docs": "Asks CallKit to mute or unmute. `RelayCallsDelegate.relayCalls(_:didSetMuted:for:)` applies it."
         },
         {
           "name": "setHeld",
           "kind": "method",
-          "ref": "ConvoHopCalls#ConvoHopCalls.setHeld",
-          "anchor": "convohopcallssetheld-method",
+          "ref": "RelayCalls#RelayCalls.setHeld",
+          "anchor": "relaycallssetheld-method",
           "signatures": ["public func setHeld(_ onHold: Bool, for uuid: UUID) async throws"],
-          "docs": "Asks CallKit to hold or resume. `ConvoHopCallsDelegate.convoHopCalls(_:didSetHeld:for:)` applies it."
+          "docs": "Asks CallKit to hold or resume. `RelayCallsDelegate.relayCalls(_:didSetHeld:for:)` applies it."
         },
         {
           "name": "end",
           "kind": "method",
-          "ref": "ConvoHopCalls#ConvoHopCalls.end",
-          "anchor": "convohopcallsend-method",
+          "ref": "RelayCalls#RelayCalls.end",
+          "anchor": "relaycallsend-method",
           "signatures": [
-            "public func end(_ uuid: UUID, reason: ConvoHopCallEndReason? = nil) async throws"
+            "public func end(_ uuid: UUID, reason: RelayCallEndReason? = nil) async throws"
           ],
           "docs": "Ends a call.\n\nParameters:\n\n- `reason`: `nil` when the user ends the call in your app, which asks CallKit to end it. Otherwise\n  why the call stopped elsewhere, for example `answered` when another device answered the ring."
         },
         {
           "name": "forget",
           "kind": "method",
-          "ref": "ConvoHopCalls#ConvoHopCalls.forget",
-          "anchor": "convohopcallsforget-method",
+          "ref": "RelayCalls#RelayCalls.forget",
+          "anchor": "relaycallsforget-method",
           "signatures": ["@discardableResult\npublic func forget(_ uuid: UUID) -> Bool"],
           "docs": "Forgets an ended call before its minute is up. Returns `false` for a call that hasn't ended."
         },
         {
           "name": "addObserver",
           "kind": "method",
-          "ref": "ConvoHopCalls#ConvoHopCalls.addObserver",
-          "anchor": "convohopcallsaddobserver-method",
+          "ref": "RelayCalls#RelayCalls.addObserver",
+          "anchor": "relaycallsaddobserver-method",
           "signatures": [
-            "public func addObserver(\n    _ handler: @escaping @MainActor ([ConvoHopCall]) -> Void\n) -> ConvoHopCallsObservation"
+            "public func addObserver(\n    _ handler: @escaping @MainActor ([RelayCall]) -> Void\n) -> RelayCallsObservation"
           ],
           "docs": "Calls `handler` with `calls` now and whenever they change, until you cancel or release the observation."
         },
         {
           "name": "pushRegistry(_:didUpdate:for:)",
           "kind": "method",
-          "ref": "ConvoHopCalls#ConvoHopCalls.pushRegistry(_:didUpdate:for:)",
-          "anchor": "convohopcallspushregistry_didupdatefor-method",
+          "ref": "RelayCalls#RelayCalls.pushRegistry(_:didUpdate:for:)",
+          "anchor": "relaycallspushregistry_didupdatefor-method",
           "signatures": [
             "nonisolated public func pushRegistry(\n    _ registry: PKPushRegistry,\n    didUpdate pushCredentials: PKPushCredentials,\n    for type: PKPushType\n)"
           ],
@@ -193,8 +193,8 @@
         {
           "name": "pushRegistry(_:didInvalidatePushTokenFor:)",
           "kind": "method",
-          "ref": "ConvoHopCalls#ConvoHopCalls.pushRegistry(_:didInvalidatePushTokenFor:)",
-          "anchor": "convohopcallspushregistry_didinvalidatepushtokenfor-method",
+          "ref": "RelayCalls#RelayCalls.pushRegistry(_:didInvalidatePushTokenFor:)",
+          "anchor": "relaycallspushregistry_didinvalidatepushtokenfor-method",
           "signatures": [
             "nonisolated public func pushRegistry(\n    _ registry: PKPushRegistry,\n    didInvalidatePushTokenFor type: PKPushType\n)"
           ],
@@ -203,8 +203,8 @@
         {
           "name": "pushRegistry(_:didReceiveIncomingPushWith:for:completion:)",
           "kind": "method",
-          "ref": "ConvoHopCalls#ConvoHopCalls.pushRegistry(_:didReceiveIncomingPushWith:for:completion:)",
-          "anchor": "convohopcallspushregistry_didreceiveincomingpushwithforcompletion-method",
+          "ref": "RelayCalls#RelayCalls.pushRegistry(_:didReceiveIncomingPushWith:for:completion:)",
+          "anchor": "relaycallspushregistry_didreceiveincomingpushwithforcompletion-method",
           "signatures": [
             "nonisolated public func pushRegistry(\n    _ registry: PKPushRegistry,\n    didReceiveIncomingPushWith payload: PKPushPayload,\n    for type: PKPushType,\n    completion: @escaping () -> Void\n)"
           ],
@@ -213,16 +213,16 @@
         {
           "name": "providerDidReset",
           "kind": "method",
-          "ref": "ConvoHopCalls#ConvoHopCalls.providerDidReset",
-          "anchor": "convohopcallsproviderdidreset-method",
+          "ref": "RelayCalls#RelayCalls.providerDidReset",
+          "anchor": "relaycallsproviderdidreset-method",
           "signatures": ["nonisolated public func providerDidReset(_ provider: CXProvider)"],
           "docs": ""
         },
         {
           "name": "provider(_:perform:)",
           "kind": "method",
-          "ref": "ConvoHopCalls#ConvoHopCalls.provider(_:perform:)",
-          "anchor": "convohopcallsprovider_perform-method",
+          "ref": "RelayCalls#RelayCalls.provider(_:perform:)",
+          "anchor": "relaycallsprovider_perform-method",
           "signatures": [
             "nonisolated public func provider(_ provider: CXProvider, perform action: CXAnswerCallAction)",
             "nonisolated public func provider(_ provider: CXProvider, perform action: CXEndCallAction)",
@@ -235,8 +235,8 @@
         {
           "name": "provider(_:didActivate:)",
           "kind": "method",
-          "ref": "ConvoHopCalls#ConvoHopCalls.provider(_:didActivate:)",
-          "anchor": "convohopcallsprovider_didactivate-method",
+          "ref": "RelayCalls#RelayCalls.provider(_:didActivate:)",
+          "anchor": "relaycallsprovider_didactivate-method",
           "signatures": [
             "nonisolated public func provider(_ provider: CXProvider, didActivate audioSession: AVAudioSession)"
           ],
@@ -245,8 +245,8 @@
         {
           "name": "provider(_:didDeactivate:)",
           "kind": "method",
-          "ref": "ConvoHopCalls#ConvoHopCalls.provider(_:didDeactivate:)",
-          "anchor": "convohopcallsprovider_diddeactivate-method",
+          "ref": "RelayCalls#RelayCalls.provider(_:didDeactivate:)",
+          "anchor": "relaycallsprovider_diddeactivate-method",
           "signatures": [
             "nonisolated public func provider(_ provider: CXProvider, didDeactivate audioSession: AVAudioSession)"
           ],
@@ -255,421 +255,417 @@
       ]
     },
     {
-      "name": "ConvoHopCallsObservation",
+      "name": "RelayCallsObservation",
       "kind": "class",
-      "ref": "ConvoHopCalls#ConvoHopCallsObservation",
-      "anchor": "convohopcallsobservation-class",
-      "signatures": ["public final class ConvoHopCallsObservation: @unchecked Sendable"],
+      "ref": "RelayCalls#RelayCallsObservation",
+      "anchor": "relaycallsobservation-class",
+      "signatures": ["public final class RelayCallsObservation: @unchecked Sendable"],
       "docs": "Keeps a `addObserver(_:)` handler running. Cancel or release it to stop.\n\nAvailable on iOS only.",
       "members": [
         {
           "name": "cancel",
           "kind": "method",
-          "ref": "ConvoHopCalls#ConvoHopCallsObservation.cancel",
-          "anchor": "convohopcallsobservationcancel-method",
+          "ref": "RelayCalls#RelayCallsObservation.cancel",
+          "anchor": "relaycallsobservationcancel-method",
           "signatures": ["public func cancel()"],
           "docs": ""
         }
       ]
     },
     {
-      "name": "ConvoHopCall",
+      "name": "RelayCall",
       "kind": "struct",
-      "ref": "ConvoHopCalls#ConvoHopCall",
-      "anchor": "convohopcall-struct",
-      "signatures": ["public struct ConvoHopCall: Identifiable, Hashable, Sendable"],
-      "docs": "A call that ConvoHop reported to CallKit.",
+      "ref": "RelayCalls#RelayCall",
+      "anchor": "relaycall-struct",
+      "signatures": ["public struct RelayCall: Identifiable, Hashable, Sendable"],
+      "docs": "A call that Relay reported to CallKit.",
       "members": [
         {
           "name": "uuid",
           "kind": "property",
-          "ref": "ConvoHopCalls#ConvoHopCall.uuid",
-          "anchor": "convohopcalluuid-property",
+          "ref": "RelayCalls#RelayCall.uuid",
+          "anchor": "relaycalluuid-property",
           "signatures": ["public let uuid: UUID"],
           "docs": "The CallKit UUID. For an incoming call, the ring's `alertId`."
         },
         {
           "name": "id",
           "kind": "property",
-          "ref": "ConvoHopCalls#ConvoHopCall.id",
-          "anchor": "convohopcallid-property",
+          "ref": "RelayCalls#RelayCall.id",
+          "anchor": "relaycallid-property",
           "signatures": ["public var id: UUID { get }"],
           "docs": ""
         },
         {
           "name": "isOutgoing",
           "kind": "property",
-          "ref": "ConvoHopCalls#ConvoHopCall.isOutgoing",
-          "anchor": "convohopcallisoutgoing-property",
+          "ref": "RelayCalls#RelayCall.isOutgoing",
+          "anchor": "relaycallisoutgoing-property",
           "signatures": ["public let isOutgoing: Bool"],
           "docs": ""
         },
         {
           "name": "conversationId",
           "kind": "property",
-          "ref": "ConvoHopCalls#ConvoHopCall.conversationId",
-          "anchor": "convohopcallconversationid-property",
+          "ref": "RelayCalls#RelayCall.conversationId",
+          "anchor": "relaycallconversationid-property",
           "signatures": ["public let conversationId: String"],
           "docs": ""
         },
         {
           "name": "liveSessionId",
           "kind": "property",
-          "ref": "ConvoHopCalls#ConvoHopCall.liveSessionId",
-          "anchor": "convohopcalllivesessionid-property",
+          "ref": "RelayCalls#RelayCall.liveSessionId",
+          "anchor": "relaycalllivesessionid-property",
           "signatures": ["public let liveSessionId: String"],
           "docs": ""
         },
         {
           "name": "handle",
           "kind": "property",
-          "ref": "ConvoHopCalls#ConvoHopCall.handle",
-          "anchor": "convohopcallhandle-property",
+          "ref": "RelayCalls#RelayCall.handle",
+          "anchor": "relaycallhandle-property",
           "signatures": ["public let handle: String"],
           "docs": "The CallKit handle: the conversation ID unless you started the call with another."
         },
         {
           "name": "alert",
           "kind": "property",
-          "ref": "ConvoHopCalls#ConvoHopCall.alert",
-          "anchor": "convohopcallalert-property",
-          "signatures": ["public let alert: ConvoHopCallAlert?"],
+          "ref": "RelayCalls#RelayCall.alert",
+          "anchor": "relaycallalert-property",
+          "signatures": ["public let alert: RelayCallAlert?"],
           "docs": "The ring, for an incoming call."
         },
         {
           "name": "eventId",
           "kind": "property",
-          "ref": "ConvoHopCalls#ConvoHopCall.eventId",
-          "anchor": "convohopcalleventid-property",
+          "ref": "RelayCalls#RelayCall.eventId",
+          "anchor": "relaycalleventid-property",
           "signatures": ["public let eventId: String?"],
           "docs": "The push event that rang the call."
         },
         {
           "name": "callerId",
           "kind": "property",
-          "ref": "ConvoHopCalls#ConvoHopCall.callerId",
-          "anchor": "convohopcallcallerid-property",
+          "ref": "RelayCalls#RelayCall.callerId",
+          "anchor": "relaycallcallerid-property",
           "signatures": ["public let callerId: String?"],
           "docs": "Who started the ringing, for an incoming call."
         },
         {
           "name": "mediaProfile",
           "kind": "property",
-          "ref": "ConvoHopCalls#ConvoHopCall.mediaProfile",
-          "anchor": "convohopcallmediaprofile-property",
+          "ref": "RelayCalls#RelayCall.mediaProfile",
+          "anchor": "relaycallmediaprofile-property",
           "signatures": ["public let mediaProfile: String"],
           "docs": "`AUDIO_ONLY`, `AUDIO_VIDEO` or a later profile."
         },
         {
           "name": "callerName",
           "kind": "property",
-          "ref": "ConvoHopCalls#ConvoHopCall.callerName",
-          "anchor": "convohopcallcallername-property",
+          "ref": "RelayCalls#RelayCall.callerName",
+          "anchor": "relaycallcallername-property",
           "signatures": ["public internal(set) var callerName: String?"],
           "docs": ""
         },
         {
           "name": "hasVideo",
           "kind": "property",
-          "ref": "ConvoHopCalls#ConvoHopCall.hasVideo",
-          "anchor": "convohopcallhasvideo-property",
+          "ref": "RelayCalls#RelayCall.hasVideo",
+          "anchor": "relaycallhasvideo-property",
           "signatures": ["public internal(set) var hasVideo: Bool"],
           "docs": ""
         },
         {
           "name": "isMuted",
           "kind": "property",
-          "ref": "ConvoHopCalls#ConvoHopCall.isMuted",
-          "anchor": "convohopcallismuted-property",
+          "ref": "RelayCalls#RelayCall.isMuted",
+          "anchor": "relaycallismuted-property",
           "signatures": ["public internal(set) var isMuted: Bool"],
           "docs": ""
         },
         {
           "name": "isOnHold",
           "kind": "property",
-          "ref": "ConvoHopCalls#ConvoHopCall.isOnHold",
-          "anchor": "convohopcallisonhold-property",
+          "ref": "RelayCalls#RelayCall.isOnHold",
+          "anchor": "relaycallisonhold-property",
           "signatures": ["public internal(set) var isOnHold: Bool"],
           "docs": ""
         },
         {
           "name": "state",
           "kind": "property",
-          "ref": "ConvoHopCalls#ConvoHopCall.state",
-          "anchor": "convohopcallstate-property",
+          "ref": "RelayCalls#RelayCall.state",
+          "anchor": "relaycallstate-property",
           "signatures": ["public internal(set) var state: State"],
           "docs": ""
         },
         {
           "name": "endedAt",
           "kind": "property",
-          "ref": "ConvoHopCalls#ConvoHopCall.endedAt",
-          "anchor": "convohopcallendedat-property",
+          "ref": "RelayCalls#RelayCall.endedAt",
+          "anchor": "relaycallendedat-property",
           "signatures": ["public internal(set) var endedAt: Date?"],
           "docs": ""
         },
         {
           "name": "expiresAt",
           "kind": "property",
-          "ref": "ConvoHopCalls#ConvoHopCall.expiresAt",
-          "anchor": "convohopcallexpiresat-property",
+          "ref": "RelayCalls#RelayCall.expiresAt",
+          "anchor": "relaycallexpiresat-property",
           "signatures": ["public var expiresAt: Date? { get }"],
           "docs": "When an incoming ring stops if nobody answers."
         },
         {
           "name": "isEnded",
           "kind": "property",
-          "ref": "ConvoHopCalls#ConvoHopCall.isEnded",
-          "anchor": "convohopcallisended-property",
+          "ref": "RelayCalls#RelayCall.isEnded",
+          "anchor": "relaycallisended-property",
           "signatures": ["public var isEnded: Bool { get }"],
           "docs": ""
         }
       ]
     },
     {
-      "name": "ConvoHopCallsConfiguration",
+      "name": "RelayCallsConfiguration",
       "kind": "struct",
-      "ref": "ConvoHopCalls#ConvoHopCallsConfiguration",
-      "anchor": "convohopcallsconfiguration-struct",
-      "signatures": ["public struct ConvoHopCallsConfiguration: Sendable"],
-      "docs": "How `ConvoHopCalls` sets up CallKit.\n\nAvailable on iOS only.",
+      "ref": "RelayCalls#RelayCallsConfiguration",
+      "anchor": "relaycallsconfiguration-struct",
+      "signatures": ["public struct RelayCallsConfiguration: Sendable"],
+      "docs": "How `RelayCalls` sets up CallKit.\n\nAvailable on iOS only.",
       "members": [
         {
           "name": "supportsVideo",
           "kind": "property",
-          "ref": "ConvoHopCalls#ConvoHopCallsConfiguration.supportsVideo",
-          "anchor": "convohopcallsconfigurationsupportsvideo-property",
+          "ref": "RelayCalls#RelayCallsConfiguration.supportsVideo",
+          "anchor": "relaycallsconfigurationsupportsvideo-property",
           "signatures": ["public var supportsVideo: Bool"],
           "docs": ""
         },
         {
           "name": "supportsHolding",
           "kind": "property",
-          "ref": "ConvoHopCalls#ConvoHopCallsConfiguration.supportsHolding",
-          "anchor": "convohopcallsconfigurationsupportsholding-property",
+          "ref": "RelayCalls#RelayCallsConfiguration.supportsHolding",
+          "anchor": "relaycallsconfigurationsupportsholding-property",
           "signatures": ["public var supportsHolding: Bool"],
           "docs": ""
         },
         {
           "name": "maximumCallGroups",
           "kind": "property",
-          "ref": "ConvoHopCalls#ConvoHopCallsConfiguration.maximumCallGroups",
-          "anchor": "convohopcallsconfigurationmaximumcallgroups-property",
+          "ref": "RelayCalls#RelayCallsConfiguration.maximumCallGroups",
+          "anchor": "relaycallsconfigurationmaximumcallgroups-property",
           "signatures": ["public var maximumCallGroups: Int"],
           "docs": ""
         },
         {
           "name": "maximumCallsPerCallGroup",
           "kind": "property",
-          "ref": "ConvoHopCalls#ConvoHopCallsConfiguration.maximumCallsPerCallGroup",
-          "anchor": "convohopcallsconfigurationmaximumcallspercallgroup-property",
+          "ref": "RelayCalls#RelayCallsConfiguration.maximumCallsPerCallGroup",
+          "anchor": "relaycallsconfigurationmaximumcallspercallgroup-property",
           "signatures": ["public var maximumCallsPerCallGroup: Int"],
           "docs": ""
         },
         {
           "name": "includesCallsInRecents",
           "kind": "property",
-          "ref": "ConvoHopCalls#ConvoHopCallsConfiguration.includesCallsInRecents",
-          "anchor": "convohopcallsconfigurationincludescallsinrecents-property",
+          "ref": "RelayCalls#RelayCallsConfiguration.includesCallsInRecents",
+          "anchor": "relaycallsconfigurationincludescallsinrecents-property",
           "signatures": ["public var includesCallsInRecents: Bool"],
           "docs": ""
         },
         {
           "name": "ringtoneSound",
           "kind": "property",
-          "ref": "ConvoHopCalls#ConvoHopCallsConfiguration.ringtoneSound",
-          "anchor": "convohopcallsconfigurationringtonesound-property",
+          "ref": "RelayCalls#RelayCallsConfiguration.ringtoneSound",
+          "anchor": "relaycallsconfigurationringtonesound-property",
           "signatures": ["public var ringtoneSound: String?"],
           "docs": "A sound file in your app bundle, or `nil` for the system ringtone."
         },
         {
           "name": "iconTemplateImageData",
           "kind": "property",
-          "ref": "ConvoHopCalls#ConvoHopCallsConfiguration.iconTemplateImageData",
-          "anchor": "convohopcallsconfigurationicontemplateimagedata-property",
+          "ref": "RelayCalls#RelayCallsConfiguration.iconTemplateImageData",
+          "anchor": "relaycallsconfigurationicontemplateimagedata-property",
           "signatures": ["public var iconTemplateImageData: Data?"],
           "docs": "A 40 × 40 pt template image, in PNG data, for the in-call button that opens your app."
         },
         {
           "name": "ledgerSuiteName",
           "kind": "property",
-          "ref": "ConvoHopCalls#ConvoHopCallsConfiguration.ledgerSuiteName",
-          "anchor": "convohopcallsconfigurationledgersuitename-property",
+          "ref": "RelayCalls#RelayCallsConfiguration.ledgerSuiteName",
+          "anchor": "relaycallsconfigurationledgersuitename-property",
           "signatures": ["public var ledgerSuiteName: String?"],
           "docs": "The App Group suite your Notification Service Extension shares, or `nil` for the app's own defaults. It stores\nthe ledger and `recipient`."
         },
         {
           "name": "callerName",
           "kind": "property",
-          "ref": "ConvoHopCalls#ConvoHopCallsConfiguration.callerName",
-          "anchor": "convohopcallsconfigurationcallername-property",
-          "signatures": ["public var callerName: @Sendable (ConvoHopNotification) -> String?"],
+          "ref": "RelayCalls#RelayCallsConfiguration.callerName",
+          "anchor": "relaycallsconfigurationcallername-property",
+          "signatures": ["public var callerName: @Sendable (RelayNotification) -> String?"],
           "docs": "The caller name CallKit shows. Defaults to the push `title`, which the server sends only when the project\nopts in to previews."
         },
         {
           "name": "init",
           "kind": "constructor",
-          "ref": "ConvoHopCalls#ConvoHopCallsConfiguration.init",
-          "anchor": "convohopcallsconfiguration-constructor",
+          "ref": "RelayCalls#RelayCallsConfiguration.init",
+          "anchor": "relaycallsconfiguration-constructor",
           "signatures": [
-            "public init(\n    supportsVideo: Bool = true,\n    supportsHolding: Bool = false,\n    maximumCallGroups: Int = 1,\n    maximumCallsPerCallGroup: Int = 1,\n    includesCallsInRecents: Bool = true,\n    ringtoneSound: String? = nil,\n    iconTemplateImageData: Data? = nil,\n    ledgerSuiteName: String? = nil,\n    callerName: @escaping @Sendable (ConvoHopNotification) -> String? = { $0.title }\n)"
+            "public init(\n    supportsVideo: Bool = true,\n    supportsHolding: Bool = false,\n    maximumCallGroups: Int = 1,\n    maximumCallsPerCallGroup: Int = 1,\n    includesCallsInRecents: Bool = true,\n    ringtoneSound: String? = nil,\n    iconTemplateImageData: Data? = nil,\n    ledgerSuiteName: String? = nil,\n    callerName: @escaping @Sendable (RelayNotification) -> String? = { $0.title }\n)"
           ],
           "docs": ""
         }
       ]
     },
     {
-      "name": "ConvoHopCallsDelegate",
+      "name": "RelayCallsDelegate",
       "kind": "interface",
-      "ref": "ConvoHopCalls#ConvoHopCallsDelegate",
-      "anchor": "convohopcallsdelegate-interface",
-      "signatures": ["@MainActor\npublic protocol ConvoHopCallsDelegate: AnyObject"],
+      "ref": "RelayCalls#RelayCallsDelegate",
+      "anchor": "relaycallsdelegate-interface",
+      "signatures": ["@MainActor\npublic protocol RelayCallsDelegate: AnyObject"],
       "docs": "Receives what CallKit and PushKit report. Every method has an empty default.\n\nAvailable on iOS only.",
       "members": [
         {
-          "name": "convoHopCalls(_:didUpdateVoIPToken:)",
+          "name": "relayCalls(_:didUpdateVoIPToken:)",
           "kind": "method",
-          "ref": "ConvoHopCalls#ConvoHopCallsDelegate.convoHopCalls(_:didUpdateVoIPToken:)",
-          "anchor": "convohopcallsdelegateconvohopcalls_didupdatevoiptoken-method",
-          "signatures": [
-            "func convoHopCalls(_ calls: ConvoHopCalls, didUpdateVoIPToken token: Data?)"
-          ],
-          "docs": "Send the VoIP token, as `ConvoHopPushToken.hex(_:)`, to your backend, which sends VoIP pushes for calls.\nConvoHop never stores device tokens. `nil` means iOS invalidated the token: remove it from your backend.\n\nHas a default implementation, so conforming types may omit it."
+          "ref": "RelayCalls#RelayCallsDelegate.relayCalls(_:didUpdateVoIPToken:)",
+          "anchor": "relaycallsdelegaterelaycalls_didupdatevoiptoken-method",
+          "signatures": ["func relayCalls(_ calls: RelayCalls, didUpdateVoIPToken token: Data?)"],
+          "docs": "Send the VoIP token, as `RelayPushToken.hex(_:)`, to your backend, which sends VoIP pushes for calls.\nRelay never stores device tokens. `nil` means iOS invalidated the token: remove it from your backend.\n\nHas a default implementation, so conforming types may omit it."
         },
         {
-          "name": "convoHopCalls(_:didReceiveIncomingCall:)",
+          "name": "relayCalls(_:didReceiveIncomingCall:)",
           "kind": "method",
-          "ref": "ConvoHopCalls#ConvoHopCallsDelegate.convoHopCalls(_:didReceiveIncomingCall:)",
-          "anchor": "convohopcallsdelegateconvohopcalls_didreceiveincomingcall-method",
+          "ref": "RelayCalls#RelayCallsDelegate.relayCalls(_:didReceiveIncomingCall:)",
+          "anchor": "relaycallsdelegaterelaycalls_didreceiveincomingcall-method",
           "signatures": [
-            "func convoHopCalls(_ calls: ConvoHopCalls, didReceiveIncomingCall call: ConvoHopCall)"
+            "func relayCalls(_ calls: RelayCalls, didReceiveIncomingCall call: RelayCall)"
           ],
           "docs": "A call rings in CallKit.\n\nHas a default implementation, so conforming types may omit it."
         },
         {
-          "name": "convoHopCalls(_:didAnswer:)",
+          "name": "relayCalls(_:didAnswer:)",
           "kind": "method",
-          "ref": "ConvoHopCalls#ConvoHopCallsDelegate.convoHopCalls(_:didAnswer:)",
-          "anchor": "convohopcallsdelegateconvohopcalls_didanswer-method",
-          "signatures": ["func convoHopCalls(_ calls: ConvoHopCalls, didAnswer call: ConvoHopCall)"],
+          "ref": "RelayCalls#RelayCallsDelegate.relayCalls(_:didAnswer:)",
+          "anchor": "relaycallsdelegaterelaycalls_didanswer-method",
+          "signatures": ["func relayCalls(_ calls: RelayCalls, didAnswer call: RelayCall)"],
           "docs": "The user answered. Join the live session, connect media and call `reportConnected(_:)`.\n\nHas a default implementation, so conforming types may omit it."
         },
         {
-          "name": "convoHopCalls(_:didStartOutgoing:)",
+          "name": "relayCalls(_:didStartOutgoing:)",
           "kind": "method",
-          "ref": "ConvoHopCalls#ConvoHopCallsDelegate.convoHopCalls(_:didStartOutgoing:)",
-          "anchor": "convohopcallsdelegateconvohopcalls_didstartoutgoing-method",
-          "signatures": [
-            "func convoHopCalls(_ calls: ConvoHopCalls, didStartOutgoing call: ConvoHopCall)"
-          ],
+          "ref": "RelayCalls#RelayCallsDelegate.relayCalls(_:didStartOutgoing:)",
+          "anchor": "relaycallsdelegaterelaycalls_didstartoutgoing-method",
+          "signatures": ["func relayCalls(_ calls: RelayCalls, didStartOutgoing call: RelayCall)"],
           "docs": "CallKit started the call from `startOutgoingCall(liveSessionId:conversationId:handle:displayName:hasVideo:)`.\n\nHas a default implementation, so conforming types may omit it."
         },
         {
-          "name": "convoHopCalls(_:didEnd:reason:)",
+          "name": "relayCalls(_:didEnd:reason:)",
           "kind": "method",
-          "ref": "ConvoHopCalls#ConvoHopCallsDelegate.convoHopCalls(_:didEnd:reason:)",
-          "anchor": "convohopcallsdelegateconvohopcalls_didendreason-method",
+          "ref": "RelayCalls#RelayCallsDelegate.relayCalls(_:didEnd:reason:)",
+          "anchor": "relaycallsdelegaterelaycalls_didendreason-method",
           "signatures": [
-            "func convoHopCalls(\n    _ calls: ConvoHopCalls,\n    didEnd call: ConvoHopCall,\n    reason: ConvoHopCallEndReason?\n)"
+            "func relayCalls(_ calls: RelayCalls, didEnd call: RelayCall, reason: RelayCallEndReason?)"
           ],
           "docs": "The call ended. `reason` is `nil` when the user ended or declined it. Leave the call and disconnect media.\n\nHas a default implementation, so conforming types may omit it."
         },
         {
-          "name": "convoHopCalls(_:didSetMuted:for:)",
+          "name": "relayCalls(_:didSetMuted:for:)",
           "kind": "method",
-          "ref": "ConvoHopCalls#ConvoHopCallsDelegate.convoHopCalls(_:didSetMuted:for:)",
-          "anchor": "convohopcallsdelegateconvohopcalls_didsetmutedfor-method",
+          "ref": "RelayCalls#RelayCallsDelegate.relayCalls(_:didSetMuted:for:)",
+          "anchor": "relaycallsdelegaterelaycalls_didsetmutedfor-method",
           "signatures": [
-            "func convoHopCalls(_ calls: ConvoHopCalls, didSetMuted muted: Bool, for call: ConvoHopCall)"
+            "func relayCalls(_ calls: RelayCalls, didSetMuted muted: Bool, for call: RelayCall)"
           ],
           "docs": "Mute or unmute the microphone. This is the only place to do it, for the system UI and for your app.\n\nHas a default implementation, so conforming types may omit it."
         },
         {
-          "name": "convoHopCalls(_:didSetHeld:for:)",
+          "name": "relayCalls(_:didSetHeld:for:)",
           "kind": "method",
-          "ref": "ConvoHopCalls#ConvoHopCallsDelegate.convoHopCalls(_:didSetHeld:for:)",
-          "anchor": "convohopcallsdelegateconvohopcalls_didsetheldfor-method",
+          "ref": "RelayCalls#RelayCallsDelegate.relayCalls(_:didSetHeld:for:)",
+          "anchor": "relaycallsdelegaterelaycalls_didsetheldfor-method",
           "signatures": [
-            "func convoHopCalls(_ calls: ConvoHopCalls, didSetHeld onHold: Bool, for call: ConvoHopCall)"
+            "func relayCalls(_ calls: RelayCalls, didSetHeld onHold: Bool, for call: RelayCall)"
           ],
           "docs": "Hold or resume the call.\n\nHas a default implementation, so conforming types may omit it."
         },
         {
-          "name": "convoHopCalls(_:didActivate:)",
+          "name": "relayCalls(_:didActivate:)",
           "kind": "method",
-          "ref": "ConvoHopCalls#ConvoHopCallsDelegate.convoHopCalls(_:didActivate:)",
-          "anchor": "convohopcallsdelegateconvohopcalls_didactivate-method",
+          "ref": "RelayCalls#RelayCallsDelegate.relayCalls(_:didActivate:)",
+          "anchor": "relaycallsdelegaterelaycalls_didactivate-method",
           "signatures": [
-            "func convoHopCalls(_ calls: ConvoHopCalls, didActivate audioSession: AVAudioSession)"
+            "func relayCalls(_ calls: RelayCalls, didActivate audioSession: AVAudioSession)"
           ],
           "docs": "CallKit activated the audio session. Start call audio now, not before.\n\nHas a default implementation, so conforming types may omit it."
         },
         {
-          "name": "convoHopCalls(_:didDeactivate:)",
+          "name": "relayCalls(_:didDeactivate:)",
           "kind": "method",
-          "ref": "ConvoHopCalls#ConvoHopCallsDelegate.convoHopCalls(_:didDeactivate:)",
-          "anchor": "convohopcallsdelegateconvohopcalls_diddeactivate-method",
+          "ref": "RelayCalls#RelayCallsDelegate.relayCalls(_:didDeactivate:)",
+          "anchor": "relaycallsdelegaterelaycalls_diddeactivate-method",
           "signatures": [
-            "func convoHopCalls(_ calls: ConvoHopCalls, didDeactivate audioSession: AVAudioSession)"
+            "func relayCalls(_ calls: RelayCalls, didDeactivate audioSession: AVAudioSession)"
           ],
           "docs": "CallKit deactivated the audio session.\n\nHas a default implementation, so conforming types may omit it."
         },
         {
-          "name": "convoHopCallsDidReset",
+          "name": "relayCallsDidReset",
           "kind": "method",
-          "ref": "ConvoHopCalls#ConvoHopCallsDelegate.convoHopCallsDidReset",
-          "anchor": "convohopcallsdelegateconvohopcallsdidreset-method",
-          "signatures": ["func convoHopCallsDidReset(_ calls: ConvoHopCalls)"],
-          "docs": "CallKit reset. Every call ended as `failed`, and `convoHopCalls(_:didEnd:reason:)` ran for each.\n\nHas a default implementation, so conforming types may omit it."
+          "ref": "RelayCalls#RelayCallsDelegate.relayCallsDidReset",
+          "anchor": "relaycallsdelegaterelaycallsdidreset-method",
+          "signatures": ["func relayCallsDidReset(_ calls: RelayCalls)"],
+          "docs": "CallKit reset. Every call ended as `failed`, and `relayCalls(_:didEnd:reason:)` ran for each.\n\nHas a default implementation, so conforming types may omit it."
         }
       ]
     },
     {
-      "name": "ConvoHopCall.State",
+      "name": "RelayCall.State",
       "kind": "enum",
-      "ref": "ConvoHopCalls#ConvoHopCall.State",
-      "anchor": "convohopcallstate-enum",
+      "ref": "RelayCalls#RelayCall.State",
+      "anchor": "relaycallstate-enum",
       "signatures": ["public enum State: Hashable, Sendable"],
       "docs": "",
       "members": [
         {
           "name": "ringing",
           "kind": "case",
-          "ref": "ConvoHopCalls#ConvoHopCall.State.ringing",
-          "anchor": "convohopcallstateringing-case",
+          "ref": "RelayCalls#RelayCall.State.ringing",
+          "anchor": "relaycallstateringing-case",
           "signatures": ["case ringing"],
           "docs": "An incoming call rings."
         },
         {
           "name": "answered",
           "kind": "case",
-          "ref": "ConvoHopCalls#ConvoHopCall.State.answered",
-          "anchor": "convohopcallstateanswered-case",
+          "ref": "RelayCalls#RelayCall.State.answered",
+          "anchor": "relaycallstateanswered-case",
           "signatures": ["case answered"],
           "docs": "The user answered. Join the call and connect media, then report it connected."
         },
         {
           "name": "connecting",
           "kind": "case",
-          "ref": "ConvoHopCalls#ConvoHopCall.State.connecting",
-          "anchor": "convohopcallstateconnecting-case",
+          "ref": "RelayCalls#RelayCall.State.connecting",
+          "anchor": "relaycallstateconnecting-case",
           "signatures": ["case connecting"],
           "docs": "Media connects."
         },
         {
           "name": "connected",
           "kind": "case",
-          "ref": "ConvoHopCalls#ConvoHopCall.State.connected",
-          "anchor": "convohopcallstateconnected-case",
+          "ref": "RelayCalls#RelayCall.State.connected",
+          "anchor": "relaycallstateconnected-case",
           "signatures": ["case connected"],
           "docs": ""
         },
         {
           "name": "ended",
           "kind": "case",
-          "ref": "ConvoHopCalls#ConvoHopCall.State.ended",
-          "anchor": "convohopcallstateended-case",
-          "signatures": ["case ended(ConvoHopCallEndReason?)"],
+          "ref": "RelayCalls#RelayCall.State.ended",
+          "anchor": "relaycallstateended-case",
+          "signatures": ["case ended(RelayCallEndReason?)"],
           "docs": "The call ended. `nil` means the user ended or declined it; otherwise why the call stopped."
         }
       ]

@@ -93,7 +93,7 @@ query ManagementDeploymentUsage($context: RequestContextInput!, $input: Deployme
 | Language | Members |
 | --- | --- |
 | [TypeScript](../../typescript/reference/operations.md) | Not wrapped by a method |
-| [Python](../../python/reference/operations.md) | [`ConvoHopManagement.deployment_usage`](../../python/reference/convohop.md#convohopmanagementdeployment_usage-method), [`AsyncConvoHopManagement.deployment_usage`](../../python/reference/convohop.md#asyncconvohopmanagementdeployment_usage-method) |
+| [Python](../../python/reference/operations.md) | [`RelayManagement.deployment_usage`](../../python/reference/instantrelay.md#relaymanagementdeployment_usage-method), [`AsyncRelayManagement.deployment_usage`](../../python/reference/instantrelay.md#asyncrelaymanagementdeployment_usage-method) |
 | [.NET](../../dotnet/reference/operations.md) | [`ManagementApi.DeploymentUsageAsync`](../../dotnet/reference/api.md#managementapideploymentusageasync-method) |
 | [Java and Kotlin](../../jvm/reference/operations.md) | [`ManagementApi.deploymentUsage`](../../jvm/reference/server.md#managementapideploymentusage-method), [`ManagementSuspendApi.deploymentUsage`](../../jvm/reference/server-kotlin.md#managementsuspendapideploymentusage-method) |
-| [Go](../../go/reference/operations.md) | [`ManagementClient.DeploymentUsage`](../../go/reference/convohop.md#managementclientdeploymentusage-method) |
+| [Go](../../go/reference/operations.md) | [`ManagementClient.DeploymentUsage`](../../go/reference/relay.md#managementclientdeploymentusage-method) |

@@ -1,9 +1,9 @@
 import 'dart:async';
 import 'dart:io';
 
-import 'package:convohop/convohop.dart';
-import 'package:convohop_docs_examples/client.dart';
-import 'package:convohop_docs_examples/push.dart' show pushText;
+import 'package:instantrelay/instantrelay.dart';
+import 'package:relay_docs_examples/client.dart';
+import 'package:relay_docs_examples/push.dart' show pushText;
 import 'package:flutter_test/flutter_test.dart';
 
 import 'backend.dart';
@@ -66,7 +66,7 @@ void main() {
       // A request ID belongs to one draft. Changed text needs a new one.
       await expectLater(
         sendMessage(bob, conversationId, 'Still there??', requestId),
-        throwsA(isA<ConvoHopProblem>().having((problem) => problem.code, 'code', 'IDEMPOTENCY_CONFLICT')),
+        throwsA(isA<RelayProblem>().having((problem) => problem.code, 'code', 'IDEMPOTENCY_CONFLICT')),
       );
     });
 
@@ -89,7 +89,7 @@ void main() {
     });
   }
 
-  test('a conversation store shows a draft at once, then the messages ConvoHop committed', () async {
+  test('a conversation store shows a draft at once, then the messages Relay committed', () async {
     final (:aliceLogin, :bobLogin, :conversationId) = await twoMembers('Store');
     final alice = await connect(aliceLogin);
     final bob = await connect(bobLogin);
@@ -139,7 +139,7 @@ void main() {
         (snapshot) => snapshot.pending.isEmpty && snapshot.messages.isNotEmpty,
       );
       expect([for (final message in snapshot.messages) message.text], ['Still there?']);
-      // The outbox looks up the request's outcome, and sends it again with the same request ID only if ConvoHop
+      // The outbox looks up the request's outcome, and sends it again with the same request ID only if Relay
       // hadn't committed it.
       expect(
         await target.attempts('sendMessage', item.requestId),
@@ -242,7 +242,7 @@ Future<({Map<String, Object?> aliceLogin, Map<String, Object?> bobLogin, String 
 }
 
 Future<Directory> temporaryStorage() async {
-  final directory = await Directory.systemTemp.createTemp('convohop_docs_');
+  final directory = await Directory.systemTemp.createTemp('relay_docs_');
   addTearDown(() async {
     if (await directory.exists()) await directory.delete(recursive: true);
   });
@@ -250,21 +250,21 @@ Future<Directory> temporaryStorage() async {
 }
 
 // Closed after the test, before its storage is deleted.
-Future<ConvoHopClient> connect(Map<String, Object?> login, [Directory? storage]) async {
+Future<RelayClient> connect(Map<String, Object?> login, [Directory? storage]) async {
   final client = await connectUser(login, storage ?? await temporaryStorage());
   addTearDown(client.close);
   return client;
 }
 
-Future<ConvoHopOutbox> outboxFor(ConvoHopClient client) async {
+Future<RelayOutbox> outboxFor(RelayClient client) async {
   final outbox = await openOutbox(client);
   addTearDown(outbox.close);
   return outbox;
 }
 
 ConversationStore storeFor(
-  ConvoHopClient client,
-  ConvoHopOutbox outbox,
+  RelayClient client,
+  RelayOutbox outbox,
   String conversationId,
   void Function(ConversationSnapshot snapshot) render,
 ) {
@@ -273,7 +273,7 @@ ConversationStore storeFor(
   return store;
 }
 
-final Matcher unknownOutcome = isA<ConvoHopProblem>().having((problem) => problem.outcome, 'outcome', 'unknown');
+final Matcher unknownOutcome = isA<RelayProblem>().having((problem) => problem.outcome, 'outcome', 'unknown');
 
 // Resolves with the store's first snapshot that passes check.
 Future<ConversationSnapshot> snapshotWhere(

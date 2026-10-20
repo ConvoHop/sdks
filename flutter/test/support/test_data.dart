@@ -1,8 +1,8 @@
 import 'dart:async';
 import 'dart:convert';
 
-import 'package:convohop/convohop.dart';
-import 'package:convohop/src/generated/generated.dart' as generated;
+import 'package:instantrelay/instantrelay.dart';
+import 'package:instantrelay/src/generated/generated.dart' as generated;
 import 'package:http/http.dart' as http;
 import 'package:http/testing.dart';
 
@@ -229,7 +229,7 @@ Map<String, Object?> grant({String token = 'fake-connect-token'}) => <String, Ob
   'liveSessionId': liveSessionId,
   'participationId': participationId,
   'generation': '1',
-  'roomName': 'convohop-room',
+  'roomName': 'relay-room',
   'participantIdentity': principalId,
   'livekitUrl': 'wss://media.example/rtc',
   'transportToken': 'fake-transport-token',
@@ -320,12 +320,12 @@ MockClient mockGraphQL(RequestHandler handler, {List<Map<String, Object?>>? bodi
   return handler(request, body);
 });
 
-ConvoHopClient clientWith(
+RelayClient clientWith(
   http.Client httpClient, {
   RecoveryStorage? storage,
   RealtimeConnector? realtime,
   int Function() clock = fixedClock,
-}) => ConvoHopClient(
+}) => RelayClient(
   baseUrl: 'https://authority.example',
   projectId: projectId,
   principalId: principalId,

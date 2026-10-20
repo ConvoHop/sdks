@@ -178,7 +178,7 @@
           "xunit.extensibility.core": "[2.9.3]"
         }
       },
-      "convohop": {
+      "InstantRelay": {
         "type": "Project"
       }
     },
@@ -383,7 +383,7 @@
           "xunit.extensibility.core": "[2.9.3]"
         }
       },
-      "convohop": {
+      "InstantRelay": {
         "type": "Project",
         "dependencies": {
           "Microsoft.Bcl.AsyncInterfaces": "[10.0.12, )",

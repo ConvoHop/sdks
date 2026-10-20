@@ -1,6 +1,6 @@
 # `github.com/ConvoHop/sdks/go/push`
 
-Builds APNs, FCM and Web Push requests from ConvoHop push notification events.
+Builds APNs, FCM and Web Push requests from Relay push notification events.
 
 **Layer:** Server. **Runtime:** Go 1.26 or later. **Source:** `go/push`.
 

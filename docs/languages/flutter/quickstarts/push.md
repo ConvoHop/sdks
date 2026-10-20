@@ -1,10 +1,10 @@
 # Flutter push notifications quickstart
 
-Show ConvoHop push notifications in your users' Flutter apps with `package:convohop/push.dart`: register the device for FCM or APNs, open conversations from notifications, and ring for calls with the system call UI.
+Show Relay push notifications in your users' Flutter apps with `package:instantrelay/push.dart`: register the device for FCM or APNs, open conversations from notifications, and ring for calls with the system call UI.
 
 ## Before you start
 
-ConvoHop doesn't send push notifications itself. Your backend receives `notification.message`, `notification.call` and `notification.callCancelled` webhook events, builds an FCM or APNs request for each of the user's devices with a server SDK, and sends it with your own push credentials, as each server SDK's [push notifications quickstart](../../index.md#quickstarts) shows.
+Relay doesn't send push notifications itself. Your backend receives `notification.message`, `notification.call` and `notification.callCancelled` webhook events, builds an FCM or APNs request for each of the user's devices with a server SDK, and sends it with your own push credentials, as each server SDK's [push notifications quickstart](../../index.md#quickstarts) shows.
 
 The package's own Android and iOS code shows those pushes, even while Dart isn't running. On Android, its Firebase messaging service builds a notification for each FCM data message and rings with a full-screen call notification. On iOS, the system shows APNs alerts, and VoIP pushes ring through CallKit. Set up the app as the README's [Android setup](https://github.com/ConvoHop/sdks/blob/main/flutter/README.md#android-setup) and [iOS setup](https://github.com/ConvoHop/sdks/blob/main/flutter/README.md#ios-setup) describe.
 
@@ -62,15 +62,15 @@ Call it before you close the client. The package's Android and iOS code keeps sh
 
 ## Other push plugins
 
-Android delivers each FCM message to one messaging service. If the app uses another one, such as `firebase_messaging`'s, remove ConvoHop's service from the merged manifest and pass each message's data to `push.showNotification(message.data)`, as [the README](https://github.com/ConvoHop/sdks/blob/main/flutter/README.md#other-push-plugins) shows. `handleNotification(payload)` records a payload that reached Dart another way, such as APNs `userInfo`, FCM data or a Web Push payload, and reports it on `received`.
+Android delivers each FCM message to one messaging service. If the app uses another one, such as `firebase_messaging`'s, remove Relay's service from the merged manifest and pass each message's data to `push.showNotification(message.data)`, as [the README](https://github.com/ConvoHop/sdks/blob/main/flutter/README.md#other-push-plugins) shows. `handleNotification(payload)` records a payload that reached Dart another way, such as APNs `userInfo`, FCM data or a Web Push payload, and reports it on `received`.
 
 ## How the samples are tested
 
-The push samples run against mocked platform channels that answer the way the package's Android and iOS code does. The tests register with FCM, by token and by FID, and with APNs and PushKit, open notifications for this user and for another, answer a ring that the user can't join, and sign out. `pushText` runs against the conformance mock, with a message preview and without one. Joining an answered call needs a ConvoHop project with calls and a LiveKit media server, so CI only analyzes it. The tests don't deliver pushes through FCM or APNs, and don't show the system call UI.
+The push samples run against mocked platform channels that answer the way the package's Android and iOS code does. The tests register with FCM, by token and by FID, and with APNs and PushKit, open notifications for this user and for another, answer a ring that the user can't join, and sign out. `pushText` runs against the conformance mock, with a message preview and without one. Joining an answered call needs a Relay project with calls and a LiveKit media server, so CI only analyzes it. The tests don't deliver pushes through FCM or APNs, and don't show the system call UI.
 
 ## Next steps
 
-- [`ConvoHopPush` reference](../reference/push.md#convohoppush-class): registering, notifications and the system call UI.
-- [`ConvoHopNotifications` reference](../reference/push.md#convohopnotifications-class): de-duplicating pushes and tracking rings.
+- [`RelayPush` reference](../reference/push.md#relaypush-class): registering, notifications and the system call UI.
+- [`RelayNotifications` reference](../reference/push.md#relaynotifications-class): de-duplicating pushes and tracking rings.
 - [Push payload contract](https://github.com/ConvoHop/sdks/blob/main/spec/push-payload/README.md): the payloads that your backend sends and the package reads.
 - [Calling quickstart](calling.md): the calls that these notifications ring.

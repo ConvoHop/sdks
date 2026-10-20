@@ -1,10 +1,10 @@
 # React Native client quickstart
 
-Use ConvoHop in your users' React Native apps with `@convohop/client` and `@convohop/react-native`: connect with the session your backend issued, show a conversation and keep it current, and send messages that survive dropped connections and the app's restarts. `@convohop/react` offers the same as React hooks.
+Use Relay in your users' React Native apps with `@instantrelay/client` and `@instantrelay/react-native`: connect with the session your backend issued, show a conversation and keep it current, and send messages that survive dropped connections and the app's restarts. `@instantrelay/react` offers the same as React hooks.
 
 ## Before you start
 
-Your backend signs the user in and returns a session, as each [server quickstart](../../index.md#quickstarts) shows. The app never holds a backend key. Install `@convohop/client` and `@convohop/react-native` as the [overview](../index.md#install) describes. The samples also use AsyncStorage 3, `@react-native-async-storage/async-storage`, and NetInfo, `@react-native-community/netinfo`. `@convohop/react` needs React 18 or later.
+Your backend signs the user in and returns a session, as each [server quickstart](../../index.md#quickstarts) shows. The app never holds a backend key. Install `@instantrelay/client` and `@instantrelay/react-native` as the [overview](../index.md#install) describes. The samples also use AsyncStorage 3, `@react-native-async-storage/async-storage`, and NetInfo, `@react-native-community/netinfo`. `@instantrelay/react` needs React 18 or later.
 
 ## Connect
 
@@ -24,7 +24,7 @@ Sessions expire, after 15 minutes by default. To renew the user's session before
 
 The renewal endpoint is your backend's, behind your app's own sign-in. It renews the session with the server SDK, as with [`sessions.renew`](../../typescript/reference/server.md#projectserverclientsessionsrenew-property) in TypeScript, taking the principal and device from that sign-in rather than from the request, and returns the `SessionBootstrap` that the renewal resolves with.
 
-The client pauses its streams and lets its requests finish before it calls `sessionRefresh`, and checks the renewed session with ConvoHop before it uses it. Don't call the client from `sessionRefresh`: the call would wait for the renewal. While the app is in the background, a renewal can come due without running, so the client checks for one when the app returns to the foreground. [Session credential lifetime](https://github.com/ConvoHop/sdks/blob/main/packages/client/README.md#session-credential-lifetime) covers what your endpoint must check, and what happens when a renewal fails.
+The client pauses its streams and lets its requests finish before it calls `sessionRefresh`, and checks the renewed session with Relay before it uses it. Don't call the client from `sessionRefresh`: the call would wait for the renewal. While the app is in the background, a renewal can come due without running, so the client checks for one when the app returns to the foreground. [Session credential lifetime](https://github.com/ConvoHop/sdks/blob/main/packages/client/README.md#session-credential-lifetime) covers what your endpoint must check, and what happens when a renewal fails.
 
 ## Show a conversation
 
@@ -54,7 +54,7 @@ With push notifications or calls, stop them before you call `signOut`, as the [p
 
 ## Use React
 
-`@convohop/react` imports only `react` and `@convohop/client`, so its hooks work in React Native. Give its provider the user's client and outbox:
+`@instantrelay/react` imports only `react` and `@instantrelay/client`, so its hooks work in React Native. Give its provider the user's client and outbox:
 
 ```tsx include=examples/src/react.tsx#provider
 ```
@@ -86,13 +86,13 @@ Close the stream when the screen goes away. If the saved cursor can't be used an
 ```ts include=examples/src/client.ts#send
 ```
 
-Create the request ID when the user writes the message, for example with `platform.randomUUID()`, and keep it with the draft. If the connection drops during a send, `client.send` throws a `ConvoHopProblem` whose `outcome` is `unknown`. Sending the same text again with the same request ID posts it once, whether or not the first attempt reached the authority. The SDK sends a request at most three times, within 60 seconds of the first attempt. Reusing a request ID with different text throws `IDEMPOTENCY_CONFLICT`.
+Create the request ID when the user writes the message, for example with `platform.randomUUID()`, and keep it with the draft. If the connection drops during a send, `client.send` throws a `RelayProblem` whose `outcome` is `unknown`. Sending the same text again with the same request ID posts it once, whether or not the first attempt reached the authority. The SDK sends a request at most three times, within 60 seconds of the first attempt. Reusing a request ID with different text throws `IDEMPOTENCY_CONFLICT`.
 
 ## How the samples are tested
 
-The samples run on Node.js against the conformance mock, a local stand-in for the ConvoHop API, with stand-ins for React Native, AsyncStorage's native module and NetInfo. The tests check:
+The samples run on Node.js against the conformance mock, a local stand-in for the Relay API, with stand-ins for React Native, AsyncStorage's native module and NetInfo. The tests check:
 
-- that a watching user sees another user's message, and that a conversation store shows a draft at once, then the message that ConvoHop committed;
+- that a watching user sees another user's message, and that a conversation store shows a draft at once, then the message that Relay committed;
 - that a draft sent again with its request ID, or through the outbox while the connection drops, posts once, and that `recoverSends` finishes a send that an earlier launch left unconfirmed;
 - that the outbox waits while the device is offline, and sends what it saved before the app stopped;
 - that another user's sign-in deletes what the previous user left, and that signing out during a send leaves the storage empty;
@@ -104,6 +104,6 @@ The React samples need React Native's renderer, so CI only typechecks them. The 
 
 - [Push notifications quickstart](push.md): register the device and open conversations from notifications.
 - [Calling quickstart](calling.md): start, answer and join calls in a conversation.
-- [`ConvoHopClient` reference](../reference/client.md#convohopclient-class): every method, with the operation it sends.
+- [`RelayClient` reference](../reference/client.md#relayclient-class): every method, with the operation it sends.
 - [`createPlatform` reference](../reference/react-native.md#createplatform-function): the platform that the client runs on.
-- [`@convohop/react` reference](../reference/react.md): every hook.
+- [`@instantrelay/react` reference](../reference/react.md): every hook.
