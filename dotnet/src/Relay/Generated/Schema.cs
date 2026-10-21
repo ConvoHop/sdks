@@ -51,96 +51,6 @@ namespace Relay.Generated
                     new global::Relay.Internal.FieldShape("replayed", "Boolean!"),
                     new global::Relay.Internal.FieldShape("result", "ConversationMemberBatch!"),
                 }),
-            ["AgentAuditEvent"] = global::Relay.Internal.TypeShape.Object(new global::Relay.Internal.FieldShape[]
-                {
-                    new global::Relay.Internal.FieldShape("eventId", "UUID!"),
-                    new global::Relay.Internal.FieldShape("orgId", "UUID!"),
-                    new global::Relay.Internal.FieldShape("grantId", "UUID"),
-                    new global::Relay.Internal.FieldShape("actorKind", "String!"),
-                    new global::Relay.Internal.FieldShape("actorId", "UUID"),
-                    new global::Relay.Internal.FieldShape("kind", "String!"),
-                    new global::Relay.Internal.FieldShape("details", "Properties"),
-                    new global::Relay.Internal.FieldShape("occurredAt", "String!"),
-                }),
-            ["AgentAuditEventPage"] = global::Relay.Internal.TypeShape.Object(new global::Relay.Internal.FieldShape[]
-                {
-                    new global::Relay.Internal.FieldShape("items", "[AgentAuditEvent!]!"),
-                    new global::Relay.Internal.FieldShape("complete", "Boolean!"),
-                    new global::Relay.Internal.FieldShape("refreshRequired", "Boolean!"),
-                    new global::Relay.Internal.FieldShape("nextCursor", "String"),
-                }),
-            ["AgentGrant"] = global::Relay.Internal.TypeShape.Object(new global::Relay.Internal.FieldShape[]
-                {
-                    new global::Relay.Internal.FieldShape("grantId", "UUID!"),
-                    new global::Relay.Internal.FieldShape("orgId", "UUID!"),
-                    new global::Relay.Internal.FieldShape("signupId", "UUID!"),
-                    new global::Relay.Internal.FieldShape("agentActorId", "UUID!"),
-                    new global::Relay.Internal.FieldShape("projectId", "UUID"),
-                    new global::Relay.Internal.FieldShape("scopes", "[String!]!"),
-                    new global::Relay.Internal.FieldShape("expiresAt", "String!"),
-                    new global::Relay.Internal.FieldShape("revokedAt", "String"),
-                    new global::Relay.Internal.FieldShape("createdAt", "String!"),
-                    new global::Relay.Internal.FieldShape("keys", "[AgentKey!]!"),
-                }),
-            ["AgentGrantPage"] = global::Relay.Internal.TypeShape.Object(new global::Relay.Internal.FieldShape[]
-                {
-                    new global::Relay.Internal.FieldShape("items", "[AgentGrant!]!"),
-                    new global::Relay.Internal.FieldShape("complete", "Boolean!"),
-                    new global::Relay.Internal.FieldShape("refreshRequired", "Boolean!"),
-                    new global::Relay.Internal.FieldShape("nextCursor", "String"),
-                }),
-            ["AgentKey"] = global::Relay.Internal.TypeShape.Object(new global::Relay.Internal.FieldShape[]
-                {
-                    new global::Relay.Internal.FieldShape("operationId", "UUID!"),
-                    new global::Relay.Internal.FieldShape("state", "String!"),
-                    new global::Relay.Internal.FieldShape("scopes", "[String!]!"),
-                    new global::Relay.Internal.FieldShape("expiresAt", "String!"),
-                    new global::Relay.Internal.FieldShape("keyId", "String"),
-                    new global::Relay.Internal.FieldShape("deliveryId", "UUID"),
-                    new global::Relay.Internal.FieldShape("deliveryExpiresAt", "String"),
-                }),
-            ["AgentPayment"] = global::Relay.Internal.TypeShape.Object(new global::Relay.Internal.FieldShape[]
-                {
-                    new global::Relay.Internal.FieldShape("paymentId", "UUID!"),
-                    new global::Relay.Internal.FieldShape("amount", "String!"),
-                    new global::Relay.Internal.FieldShape("currency", "String!"),
-                    new global::Relay.Internal.FieldShape("state", "String!"),
-                }),
-            ["AgentSignupReview"] = global::Relay.Internal.TypeShape.Object(new global::Relay.Internal.FieldShape[]
-                {
-                    new global::Relay.Internal.FieldShape("signupId", "UUID!"),
-                    new global::Relay.Internal.FieldShape("ownerEmail", "String!"),
-                    new global::Relay.Internal.FieldShape("organizationName", "String!"),
-                    new global::Relay.Internal.FieldShape("agentName", "String!"),
-                    new global::Relay.Internal.FieldShape("purpose", "String"),
-                    new global::Relay.Internal.FieldShape("suggestedPlan", "String"),
-                    new global::Relay.Internal.FieldShape("suggestedScopes", "[String!]!"),
-                    new global::Relay.Internal.FieldShape("suggestedMonthlySpendCap", "String"),
-                    new global::Relay.Internal.FieldShape("currency", "String!"),
-                    new global::Relay.Internal.FieldShape("expiresAt", "String!"),
-                }),
-            ["AgentSignupStatus"] = global::Relay.Internal.TypeShape.Object(new global::Relay.Internal.FieldShape[]
-                {
-                    new global::Relay.Internal.FieldShape("signupId", "UUID!"),
-                    new global::Relay.Internal.FieldShape("state", "String!"),
-                    new global::Relay.Internal.FieldShape("orgId", "UUID"),
-                    new global::Relay.Internal.FieldShape("deploymentId", "UUID"),
-                    new global::Relay.Internal.FieldShape("projectId", "UUID"),
-                    new global::Relay.Internal.FieldShape("nextStep", "String"),
-                    new global::Relay.Internal.FieldShape("scopes", "[String!]!"),
-                    new global::Relay.Internal.FieldShape("grantExpiresAt", "String"),
-                    new global::Relay.Internal.FieldShape("keys", "[AgentKey!]!"),
-                    new global::Relay.Internal.FieldShape("incarnation", "UUID"),
-                    new global::Relay.Internal.FieldShape("servingEpoch", "Decimal"),
-                }),
-            ["AgentSignupTicket"] = global::Relay.Internal.TypeShape.Object(new global::Relay.Internal.FieldShape[]
-                {
-                    new global::Relay.Internal.FieldShape("signupId", "UUID!"),
-                    new global::Relay.Internal.FieldShape("confirmationCode", "String!"),
-                    new global::Relay.Internal.FieldShape("expiresAt", "String!"),
-                    new global::Relay.Internal.FieldShape("pollAfterSeconds", "Int!"),
-                }),
-            ["Int"] = global::Relay.Internal.TypeShape.Scalar("integer"),
             ["AlertLiveSessionPayload"] = global::Relay.Internal.TypeShape.Object(new global::Relay.Internal.FieldShape[]
                 {
                     new global::Relay.Internal.FieldShape("status", "String!"),
@@ -803,6 +713,7 @@ namespace Relay.Generated
                     new global::Relay.Internal.FieldShape("skippedDeliveries", "Int"),
                     new global::Relay.Internal.FieldShape("messagePreview", "Boolean"),
                 }),
+            ["Int"] = global::Relay.Internal.TypeShape.Scalar("integer"),
             ["OperationStep"] = global::Relay.Internal.TypeShape.Object(new global::Relay.Internal.FieldShape[]
                 {
                     new global::Relay.Internal.FieldShape("stepId", "String!"),
@@ -834,29 +745,6 @@ namespace Relay.Generated
                     new global::Relay.Internal.FieldShape("complete", "Boolean!"),
                     new global::Relay.Internal.FieldShape("refreshRequired", "Boolean!"),
                     new global::Relay.Internal.FieldShape("nextCursor", "String"),
-                }),
-            ["OrganizationSpend"] = global::Relay.Internal.TypeShape.Object(new global::Relay.Internal.FieldShape[]
-                {
-                    new global::Relay.Internal.FieldShape("orgId", "UUID!"),
-                    new global::Relay.Internal.FieldShape("planId", "String!"),
-                    new global::Relay.Internal.FieldShape("currency", "String!"),
-                    new global::Relay.Internal.FieldShape("catalogVersion", "String!"),
-                    new global::Relay.Internal.FieldShape("monthlySpendCap", "String"),
-                    new global::Relay.Internal.FieldShape("agentPurchaseLimit", "String"),
-                    new global::Relay.Internal.FieldShape("updatedAt", "String"),
-                    new global::Relay.Internal.FieldShape("monthlyMinimum", "String"),
-                    new global::Relay.Internal.FieldShape("periodStart", "String"),
-                    new global::Relay.Internal.FieldShape("periodEnd", "String"),
-                    new global::Relay.Internal.FieldShape("credits", "String"),
-                    new global::Relay.Internal.FieldShape("charges", "String"),
-                    new global::Relay.Internal.FieldShape("margin", "String"),
-                    new global::Relay.Internal.FieldShape("stop", "String"),
-                    new global::Relay.Internal.FieldShape("refusedMeters", "[String!]!"),
-                    new global::Relay.Internal.FieldShape("evaluatedAt", "String"),
-                    new global::Relay.Internal.FieldShape("usageThrough", "String"),
-                    new global::Relay.Internal.FieldShape("validUntil", "String"),
-                    new global::Relay.Internal.FieldShape("minimumCredit", "String"),
-                    new global::Relay.Internal.FieldShape("chargeLimit", "String"),
                 }),
             ["OrganizationUsage"] = global::Relay.Internal.TypeShape.Object(new global::Relay.Internal.FieldShape[]
                 {
@@ -989,8 +877,6 @@ namespace Relay.Generated
                 }),
             ["RetainedResult"] = global::Relay.Internal.TypeShape.Object(new global::Relay.Internal.FieldShape[]
                 {
-                    new global::Relay.Internal.FieldShape("agentGrant", "AgentGrant"),
-                    new global::Relay.Internal.FieldShape("agentSignupStatus", "AgentSignupStatus"),
                     new global::Relay.Internal.FieldShape("billingCheckoutSession", "BillingCheckoutSession"),
                     new global::Relay.Internal.FieldShape("billingPortalSession", "BillingPortalSession"),
                     new global::Relay.Internal.FieldShape("broadcastPermissionChanged", "BroadcastPermissionChanged"),
@@ -1009,7 +895,6 @@ namespace Relay.Generated
                     new global::Relay.Internal.FieldShape("message", "Message"),
                     new global::Relay.Internal.FieldShape("messageAck", "MessageAck"),
                     new global::Relay.Internal.FieldShape("organization", "Organization"),
-                    new global::Relay.Internal.FieldShape("organizationSpend", "OrganizationSpend"),
                     new global::Relay.Internal.FieldShape("principal", "Principal"),
                     new global::Relay.Internal.FieldShape("readReceipt", "ReadReceipt"),
                     new global::Relay.Internal.FieldShape("sessionBootstrap", "SessionBootstrap"),
@@ -1218,78 +1103,6 @@ namespace Relay.Generated
                     new global::Relay.Internal.FieldShape("observedAt", "String"),
                     new global::Relay.Internal.FieldShape("partialReason", "String"),
                 }),
-            ["AgentAuditEventsReply"] = global::Relay.Internal.TypeShape.Object(new global::Relay.Internal.FieldShape[]
-                {
-                    new global::Relay.Internal.FieldShape("status", "String!"),
-                    new global::Relay.Internal.FieldShape("requestId", "UUID!"),
-                    new global::Relay.Internal.FieldShape("serverTime", "String"),
-                    new global::Relay.Internal.FieldShape("receiptId", "UUID"),
-                    new global::Relay.Internal.FieldShape("committedAt", "String"),
-                    new global::Relay.Internal.FieldShape("replayed", "Boolean"),
-                    new global::Relay.Internal.FieldShape("operation", "OperationRef"),
-                    new global::Relay.Internal.FieldShape("resourceRef", "ResourceRef"),
-                    new global::Relay.Internal.FieldShape("result", "AgentAuditEventPage"),
-                }),
-            ["AgentCredentialPermitReply"] = global::Relay.Internal.TypeShape.Object(new global::Relay.Internal.FieldShape[]
-                {
-                    new global::Relay.Internal.FieldShape("status", "String!"),
-                    new global::Relay.Internal.FieldShape("requestId", "UUID!"),
-                    new global::Relay.Internal.FieldShape("serverTime", "String"),
-                    new global::Relay.Internal.FieldShape("receiptId", "UUID"),
-                    new global::Relay.Internal.FieldShape("committedAt", "String"),
-                    new global::Relay.Internal.FieldShape("replayed", "Boolean"),
-                    new global::Relay.Internal.FieldShape("operation", "OperationRef"),
-                    new global::Relay.Internal.FieldShape("resourceRef", "ResourceRef"),
-                    new global::Relay.Internal.FieldShape("result", "SignedProof"),
-                }),
-            ["AgentGrantsReply"] = global::Relay.Internal.TypeShape.Object(new global::Relay.Internal.FieldShape[]
-                {
-                    new global::Relay.Internal.FieldShape("status", "String!"),
-                    new global::Relay.Internal.FieldShape("requestId", "UUID!"),
-                    new global::Relay.Internal.FieldShape("serverTime", "String"),
-                    new global::Relay.Internal.FieldShape("receiptId", "UUID"),
-                    new global::Relay.Internal.FieldShape("committedAt", "String"),
-                    new global::Relay.Internal.FieldShape("replayed", "Boolean"),
-                    new global::Relay.Internal.FieldShape("operation", "OperationRef"),
-                    new global::Relay.Internal.FieldShape("resourceRef", "ResourceRef"),
-                    new global::Relay.Internal.FieldShape("result", "AgentGrantPage"),
-                }),
-            ["AgentSignupForApprovalReply"] = global::Relay.Internal.TypeShape.Object(new global::Relay.Internal.FieldShape[]
-                {
-                    new global::Relay.Internal.FieldShape("status", "String!"),
-                    new global::Relay.Internal.FieldShape("requestId", "UUID!"),
-                    new global::Relay.Internal.FieldShape("serverTime", "String"),
-                    new global::Relay.Internal.FieldShape("receiptId", "UUID"),
-                    new global::Relay.Internal.FieldShape("committedAt", "String"),
-                    new global::Relay.Internal.FieldShape("replayed", "Boolean"),
-                    new global::Relay.Internal.FieldShape("operation", "OperationRef"),
-                    new global::Relay.Internal.FieldShape("resourceRef", "ResourceRef"),
-                    new global::Relay.Internal.FieldShape("result", "AgentSignupReview"),
-                }),
-            ["AgentSignupReply"] = global::Relay.Internal.TypeShape.Object(new global::Relay.Internal.FieldShape[]
-                {
-                    new global::Relay.Internal.FieldShape("status", "String!"),
-                    new global::Relay.Internal.FieldShape("requestId", "UUID!"),
-                    new global::Relay.Internal.FieldShape("serverTime", "String"),
-                    new global::Relay.Internal.FieldShape("receiptId", "UUID"),
-                    new global::Relay.Internal.FieldShape("committedAt", "String"),
-                    new global::Relay.Internal.FieldShape("replayed", "Boolean"),
-                    new global::Relay.Internal.FieldShape("operation", "OperationRef"),
-                    new global::Relay.Internal.FieldShape("resourceRef", "ResourceRef"),
-                    new global::Relay.Internal.FieldShape("result", "AgentSignupStatus"),
-                }),
-            ["ApproveAgentSignupReply"] = global::Relay.Internal.TypeShape.Object(new global::Relay.Internal.FieldShape[]
-                {
-                    new global::Relay.Internal.FieldShape("status", "String!"),
-                    new global::Relay.Internal.FieldShape("requestId", "UUID!"),
-                    new global::Relay.Internal.FieldShape("serverTime", "String"),
-                    new global::Relay.Internal.FieldShape("receiptId", "UUID"),
-                    new global::Relay.Internal.FieldShape("committedAt", "String"),
-                    new global::Relay.Internal.FieldShape("replayed", "Boolean"),
-                    new global::Relay.Internal.FieldShape("operation", "OperationRef"),
-                    new global::Relay.Internal.FieldShape("resourceRef", "ResourceRef"),
-                    new global::Relay.Internal.FieldShape("result", "AgentSignupStatus"),
-                }),
             ["ConfigureWebhookReply"] = global::Relay.Internal.TypeShape.Object(new global::Relay.Internal.FieldShape[]
                 {
                     new global::Relay.Internal.FieldShape("status", "String!"),
@@ -1446,18 +1259,6 @@ namespace Relay.Generated
                     new global::Relay.Internal.FieldShape("resourceRef", "ResourceRef"),
                     new global::Relay.Internal.FieldShape("result", "Project"),
                 }),
-            ["IssueAgentKeyReply"] = global::Relay.Internal.TypeShape.Object(new global::Relay.Internal.FieldShape[]
-                {
-                    new global::Relay.Internal.FieldShape("status", "String!"),
-                    new global::Relay.Internal.FieldShape("requestId", "UUID!"),
-                    new global::Relay.Internal.FieldShape("serverTime", "String"),
-                    new global::Relay.Internal.FieldShape("receiptId", "UUID"),
-                    new global::Relay.Internal.FieldShape("committedAt", "String"),
-                    new global::Relay.Internal.FieldShape("replayed", "Boolean"),
-                    new global::Relay.Internal.FieldShape("operation", "OperationRef"),
-                    new global::Relay.Internal.FieldShape("resourceRef", "ResourceRef"),
-                    new global::Relay.Internal.FieldShape("result", "AgentKey"),
-                }),
             ["IssueBackendKeyReply"] = global::Relay.Internal.TypeShape.Object(new global::Relay.Internal.FieldShape[]
                 {
                     new global::Relay.Internal.FieldShape("status", "String!"),
@@ -1481,18 +1282,6 @@ namespace Relay.Generated
                     new global::Relay.Internal.FieldShape("operation", "OperationRef"),
                     new global::Relay.Internal.FieldShape("resourceRef", "ResourceRef"),
                     new global::Relay.Internal.FieldShape("result", "OrganizationBilling"),
-                }),
-            ["OrganizationSpendReply"] = global::Relay.Internal.TypeShape.Object(new global::Relay.Internal.FieldShape[]
-                {
-                    new global::Relay.Internal.FieldShape("status", "String!"),
-                    new global::Relay.Internal.FieldShape("requestId", "UUID!"),
-                    new global::Relay.Internal.FieldShape("serverTime", "String"),
-                    new global::Relay.Internal.FieldShape("receiptId", "UUID"),
-                    new global::Relay.Internal.FieldShape("committedAt", "String"),
-                    new global::Relay.Internal.FieldShape("replayed", "Boolean"),
-                    new global::Relay.Internal.FieldShape("operation", "OperationRef"),
-                    new global::Relay.Internal.FieldShape("resourceRef", "ResourceRef"),
-                    new global::Relay.Internal.FieldShape("result", "OrganizationSpend"),
                 }),
             ["OrganizationUsageReply"] = global::Relay.Internal.TypeShape.Object(new global::Relay.Internal.FieldShape[]
                 {
@@ -1554,30 +1343,6 @@ namespace Relay.Generated
                     new global::Relay.Internal.FieldShape("resourceRef", "ResourceRef"),
                     new global::Relay.Internal.FieldShape("result", "ProjectUsage"),
                 }),
-            ["PurchaseAgentCreditsReply"] = global::Relay.Internal.TypeShape.Object(new global::Relay.Internal.FieldShape[]
-                {
-                    new global::Relay.Internal.FieldShape("status", "String!"),
-                    new global::Relay.Internal.FieldShape("requestId", "UUID!"),
-                    new global::Relay.Internal.FieldShape("serverTime", "String"),
-                    new global::Relay.Internal.FieldShape("receiptId", "UUID"),
-                    new global::Relay.Internal.FieldShape("committedAt", "String"),
-                    new global::Relay.Internal.FieldShape("replayed", "Boolean"),
-                    new global::Relay.Internal.FieldShape("operation", "OperationRef"),
-                    new global::Relay.Internal.FieldShape("resourceRef", "ResourceRef"),
-                    new global::Relay.Internal.FieldShape("result", "AgentPayment"),
-                }),
-            ["RejectAgentSignupReply"] = global::Relay.Internal.TypeShape.Object(new global::Relay.Internal.FieldShape[]
-                {
-                    new global::Relay.Internal.FieldShape("status", "String!"),
-                    new global::Relay.Internal.FieldShape("requestId", "UUID!"),
-                    new global::Relay.Internal.FieldShape("serverTime", "String"),
-                    new global::Relay.Internal.FieldShape("receiptId", "UUID"),
-                    new global::Relay.Internal.FieldShape("committedAt", "String"),
-                    new global::Relay.Internal.FieldShape("replayed", "Boolean"),
-                    new global::Relay.Internal.FieldShape("operation", "OperationRef"),
-                    new global::Relay.Internal.FieldShape("resourceRef", "ResourceRef"),
-                    new global::Relay.Internal.FieldShape("result", "AgentSignupStatus"),
-                }),
             ["ReplayWebhookDeliveriesReply"] = global::Relay.Internal.TypeShape.Object(new global::Relay.Internal.FieldShape[]
                 {
                     new global::Relay.Internal.FieldShape("status", "String!"),
@@ -1590,18 +1355,6 @@ namespace Relay.Generated
                     new global::Relay.Internal.FieldShape("resourceRef", "ResourceRef"),
                     new global::Relay.Internal.FieldShape("result", "OperationResult"),
                 }),
-            ["RequestAgentSignupReply"] = global::Relay.Internal.TypeShape.Object(new global::Relay.Internal.FieldShape[]
-                {
-                    new global::Relay.Internal.FieldShape("status", "String!"),
-                    new global::Relay.Internal.FieldShape("requestId", "UUID!"),
-                    new global::Relay.Internal.FieldShape("serverTime", "String"),
-                    new global::Relay.Internal.FieldShape("receiptId", "UUID"),
-                    new global::Relay.Internal.FieldShape("committedAt", "String"),
-                    new global::Relay.Internal.FieldShape("replayed", "Boolean"),
-                    new global::Relay.Internal.FieldShape("operation", "OperationRef"),
-                    new global::Relay.Internal.FieldShape("resourceRef", "ResourceRef"),
-                    new global::Relay.Internal.FieldShape("result", "AgentSignupTicket"),
-                }),
             ["ResumeOperationReply"] = global::Relay.Internal.TypeShape.Object(new global::Relay.Internal.FieldShape[]
                 {
                     new global::Relay.Internal.FieldShape("status", "String!"),
@@ -1613,18 +1366,6 @@ namespace Relay.Generated
                     new global::Relay.Internal.FieldShape("operation", "OperationRef"),
                     new global::Relay.Internal.FieldShape("resourceRef", "ResourceRef"),
                     new global::Relay.Internal.FieldShape("result", "Operation"),
-                }),
-            ["RevokeAgentGrantReply"] = global::Relay.Internal.TypeShape.Object(new global::Relay.Internal.FieldShape[]
-                {
-                    new global::Relay.Internal.FieldShape("status", "String!"),
-                    new global::Relay.Internal.FieldShape("requestId", "UUID!"),
-                    new global::Relay.Internal.FieldShape("serverTime", "String"),
-                    new global::Relay.Internal.FieldShape("receiptId", "UUID"),
-                    new global::Relay.Internal.FieldShape("committedAt", "String"),
-                    new global::Relay.Internal.FieldShape("replayed", "Boolean"),
-                    new global::Relay.Internal.FieldShape("operation", "OperationRef"),
-                    new global::Relay.Internal.FieldShape("resourceRef", "ResourceRef"),
-                    new global::Relay.Internal.FieldShape("result", "AgentGrant"),
                 }),
             ["RevokeBackendKeyReply"] = global::Relay.Internal.TypeShape.Object(new global::Relay.Internal.FieldShape[]
                 {
@@ -1649,18 +1390,6 @@ namespace Relay.Generated
                     new global::Relay.Internal.FieldShape("operation", "OperationRef"),
                     new global::Relay.Internal.FieldShape("resourceRef", "ResourceRef"),
                     new global::Relay.Internal.FieldShape("result", "OperationResult"),
-                }),
-            ["SetSpendControlsReply"] = global::Relay.Internal.TypeShape.Object(new global::Relay.Internal.FieldShape[]
-                {
-                    new global::Relay.Internal.FieldShape("status", "String!"),
-                    new global::Relay.Internal.FieldShape("requestId", "UUID!"),
-                    new global::Relay.Internal.FieldShape("serverTime", "String"),
-                    new global::Relay.Internal.FieldShape("receiptId", "UUID"),
-                    new global::Relay.Internal.FieldShape("committedAt", "String"),
-                    new global::Relay.Internal.FieldShape("replayed", "Boolean"),
-                    new global::Relay.Internal.FieldShape("operation", "OperationRef"),
-                    new global::Relay.Internal.FieldShape("resourceRef", "ResourceRef"),
-                    new global::Relay.Internal.FieldShape("result", "OrganizationSpend"),
                 }),
             ["UpdateWebhookReply"] = global::Relay.Internal.TypeShape.Object(new global::Relay.Internal.FieldShape[]
                 {

@@ -923,47 +923,6 @@ enum GraphQLCatalog {
                       id
                     }
                     result {
-                      agentGrant {
-                        grantId
-                        orgId
-                        signupId
-                        agentActorId
-                        projectId
-                        scopes
-                        expiresAt
-                        revokedAt
-                        createdAt
-                        keys {
-                          operationId
-                          state
-                          scopes
-                          expiresAt
-                          keyId
-                          deliveryId
-                          deliveryExpiresAt
-                        }
-                      }
-                      agentSignupStatus {
-                        signupId
-                        state
-                        orgId
-                        deploymentId
-                        projectId
-                        nextStep
-                        scopes
-                        grantExpiresAt
-                        keys {
-                          operationId
-                          state
-                          scopes
-                          expiresAt
-                          keyId
-                          deliveryId
-                          deliveryExpiresAt
-                        }
-                        incarnation
-                        servingEpoch
-                      }
                       billingCheckoutSession {
                         orgId
                         planId
@@ -1168,28 +1127,6 @@ enum GraphQLCatalog {
                         name
                         status
                         revision
-                      }
-                      organizationSpend {
-                        orgId
-                        planId
-                        currency
-                        catalogVersion
-                        monthlySpendCap
-                        agentPurchaseLimit
-                        updatedAt
-                        monthlyMinimum
-                        periodStart
-                        periodEnd
-                        credits
-                        charges
-                        margin
-                        stop
-                        refusedMeters
-                        evaluatedAt
-                        usageThrough
-                        validUntil
-                        minimumCredit
-                        chargeLimit
                       }
                       principal {
                         principalId
@@ -2506,40 +2443,6 @@ enum GraphQLCatalog {
             GraphQLOutputField(name: "tenantId", type: "String!"),
             GraphQLOutputField(name: "objectId", type: "String!"),
         ]),
-        "AgentGrant": .object([
-            GraphQLOutputField(name: "grantId", type: "UUID!"),
-            GraphQLOutputField(name: "orgId", type: "UUID!"),
-            GraphQLOutputField(name: "signupId", type: "UUID!"),
-            GraphQLOutputField(name: "agentActorId", type: "UUID!"),
-            GraphQLOutputField(name: "projectId", type: "UUID"),
-            GraphQLOutputField(name: "scopes", type: "[String!]!"),
-            GraphQLOutputField(name: "expiresAt", type: "String!"),
-            GraphQLOutputField(name: "revokedAt", type: "String"),
-            GraphQLOutputField(name: "createdAt", type: "String!"),
-            GraphQLOutputField(name: "keys", type: "[AgentKey!]!"),
-        ]),
-        "AgentKey": .object([
-            GraphQLOutputField(name: "operationId", type: "UUID!"),
-            GraphQLOutputField(name: "state", type: "String!"),
-            GraphQLOutputField(name: "scopes", type: "[String!]!"),
-            GraphQLOutputField(name: "expiresAt", type: "String!"),
-            GraphQLOutputField(name: "keyId", type: "String"),
-            GraphQLOutputField(name: "deliveryId", type: "UUID"),
-            GraphQLOutputField(name: "deliveryExpiresAt", type: "String"),
-        ]),
-        "AgentSignupStatus": .object([
-            GraphQLOutputField(name: "signupId", type: "UUID!"),
-            GraphQLOutputField(name: "state", type: "String!"),
-            GraphQLOutputField(name: "orgId", type: "UUID"),
-            GraphQLOutputField(name: "deploymentId", type: "UUID"),
-            GraphQLOutputField(name: "projectId", type: "UUID"),
-            GraphQLOutputField(name: "nextStep", type: "String"),
-            GraphQLOutputField(name: "scopes", type: "[String!]!"),
-            GraphQLOutputField(name: "grantExpiresAt", type: "String"),
-            GraphQLOutputField(name: "keys", type: "[AgentKey!]!"),
-            GraphQLOutputField(name: "incarnation", type: "UUID"),
-            GraphQLOutputField(name: "servingEpoch", type: "Decimal"),
-        ]),
         "AlertLiveSessionPayload": .object([
             GraphQLOutputField(name: "status", type: "String!"),
             GraphQLOutputField(name: "requestId", type: "UUID!"),
@@ -3147,28 +3050,6 @@ enum GraphQLCatalog {
             GraphQLOutputField(name: "status", type: "String!"),
             GraphQLOutputField(name: "revision", type: "Decimal!"),
         ]),
-        "OrganizationSpend": .object([
-            GraphQLOutputField(name: "orgId", type: "UUID!"),
-            GraphQLOutputField(name: "planId", type: "String!"),
-            GraphQLOutputField(name: "currency", type: "String!"),
-            GraphQLOutputField(name: "catalogVersion", type: "String!"),
-            GraphQLOutputField(name: "monthlySpendCap", type: "String"),
-            GraphQLOutputField(name: "agentPurchaseLimit", type: "String"),
-            GraphQLOutputField(name: "updatedAt", type: "String"),
-            GraphQLOutputField(name: "monthlyMinimum", type: "String"),
-            GraphQLOutputField(name: "periodStart", type: "String"),
-            GraphQLOutputField(name: "periodEnd", type: "String"),
-            GraphQLOutputField(name: "credits", type: "String"),
-            GraphQLOutputField(name: "charges", type: "String"),
-            GraphQLOutputField(name: "margin", type: "String"),
-            GraphQLOutputField(name: "stop", type: "String"),
-            GraphQLOutputField(name: "refusedMeters", type: "[String!]!"),
-            GraphQLOutputField(name: "evaluatedAt", type: "String"),
-            GraphQLOutputField(name: "usageThrough", type: "String"),
-            GraphQLOutputField(name: "validUntil", type: "String"),
-            GraphQLOutputField(name: "minimumCredit", type: "String"),
-            GraphQLOutputField(name: "chargeLimit", type: "String"),
-        ]),
         "Principal": .object([
             GraphQLOutputField(name: "principalId", type: "UUID!"),
             GraphQLOutputField(name: "externalUserId", type: "String!"),
@@ -3246,8 +3127,6 @@ enum GraphQLCatalog {
             GraphQLOutputField(name: "id", type: "String!"),
         ]),
         "RetainedResult": .object([
-            GraphQLOutputField(name: "agentGrant", type: "AgentGrant"),
-            GraphQLOutputField(name: "agentSignupStatus", type: "AgentSignupStatus"),
             GraphQLOutputField(name: "billingCheckoutSession", type: "BillingCheckoutSession"),
             GraphQLOutputField(name: "billingPortalSession", type: "BillingPortalSession"),
             GraphQLOutputField(name: "broadcastPermissionChanged", type: "BroadcastPermissionChanged"),
@@ -3266,7 +3145,6 @@ enum GraphQLCatalog {
             GraphQLOutputField(name: "message", type: "Message"),
             GraphQLOutputField(name: "messageAck", type: "MessageAck"),
             GraphQLOutputField(name: "organization", type: "Organization"),
-            GraphQLOutputField(name: "organizationSpend", type: "OrganizationSpend"),
             GraphQLOutputField(name: "principal", type: "Principal"),
             GraphQLOutputField(name: "readReceipt", type: "ReadReceipt"),
             GraphQLOutputField(name: "sessionBootstrap", type: "SessionBootstrap"),

@@ -17,13 +17,39 @@ export function reply(request, fields) {
   }) } });
 }
 
+// Pin the authority's receipt shape; generated defaults could hide incompatible selections.
 export function resolution(requestId, state, retainedResult = null) {
   const now = new Date().toISOString();
   return full("RequestResolution", {
     state, requestId, checkedAt: now, resultWithheld: false,
     receipt: state === "notObservedYet" ? null : full("ResolvedReceipt", {
       status: state, requestId, receiptId: crypto.randomUUID(), committedAt: now,
-      replayed: false, result: retainedResult == null ? null : full("RetainedResult", retainedResult),
+      replayed: false, result: retainedResult == null ? null : {
+        billingCheckoutSession: null,
+        billingPortalSession: null,
+        broadcastPermissionChanged: null,
+        conversation: null,
+        conversationMemberBatch: null,
+        conversationMute: null,
+        credentialDeliveryReceipt: null,
+        deliveryAck: null,
+        liveAlertBatch: null,
+        liveCredentialIssuance: null,
+        liveSessionEndRequested: null,
+        liveSessionJoined: null,
+        liveSessionLeft: null,
+        liveSessionStarted: null,
+        member: null,
+        message: null,
+        messageAck: null,
+        organization: null,
+        principal: null,
+        readReceipt: null,
+        sessionBootstrap: null,
+        sessionRevocation: null,
+        signedProof: null,
+        ...retainedResult,
+      },
     }),
   });
 }

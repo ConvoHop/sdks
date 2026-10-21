@@ -2036,46 +2036,6 @@ public static readonly OperationDescriptor<GetOperationRequestInput, GetOperatio
 
 Read the state of a long-running management operation.
 
-#### `Operations.Management.AgentSignupForApproval` static property
-
-```cs
-public static readonly OperationDescriptor<AgentSignupForApprovalRequestInput, AgentSignupForApprovalReply> AgentSignupForApproval;
-```
-
-Read a pending agent signup request for its approval page, with the agent's suggested plan, scopes and monthly spend cap.
-
-#### `Operations.Management.AgentSignup` static property
-
-```cs
-public static readonly OperationDescriptor<NoInput, AgentSignupReply> AgentSignup;
-```
-
-Read the agent's own signup: its state and, once approved, the organization, project, grant scopes and expiry, and keys. Poll no more often than the ticket's pollAfterSeconds.
-
-#### `Operations.Management.AgentGrants` static property
-
-```cs
-public static readonly OperationDescriptor<AgentGrantsRequestInput, AgentGrantsReply> AgentGrants;
-```
-
-List an organization's agent grants with their keys, newest first.
-
-#### `Operations.Management.AgentAuditEvents` static property
-
-```cs
-public static readonly OperationDescriptor<AgentAuditEventsRequestInput, AgentAuditEventsReply> AgentAuditEvents;
-```
-
-List an organization's agent audit trail, newest first: the approval, provisioning, keys, revocations, spend-control changes and purchases.
-
-#### `Operations.Management.OrganizationSpend` static property
-
-```cs
-public static readonly OperationDescriptor<OrganizationSpendRequestInput, OrganizationSpendReply> OrganizationSpend;
-```
-
-Read the organization's spend this month: its cap, credits, minimum credit, charge limit, charges, margin, spend stop and the freshness of its usage.
-
 #### `Operations.Management.CreateOrganization` static property
 
 ```cs
@@ -2203,70 +2163,6 @@ public static readonly OperationDescriptor<ReplayWebhookDeliveriesRequestInput, 
 ```
 
 Redeliver one webhook delivery, or the deliveries of an endpoint in a time range, with their original event IDs.
-
-#### `Operations.Management.RequestAgentSignup` static property
-
-```cs
-public static readonly OperationDescriptor<RequestAgentSignupRequestInput, RequestAgentSignupReply> RequestAgentSignup;
-```
-
-Request an organization for a named human owner, who approves it from an emailed link. Nothing is usable before approval.
-
-#### `Operations.Management.RejectAgentSignup` static property
-
-```cs
-public static readonly OperationDescriptor<RejectAgentSignupRequestInput, RejectAgentSignupReply> RejectAgentSignup;
-```
-
-Reject a signup request from its approval link, optionally suppressing future requests to the email.
-
-#### `Operations.Management.ApproveAgentSignup` static property
-
-```cs
-public static readonly OperationDescriptor<ApproveAgentSignupRequestInput, ApproveAgentSignupReply> ApproveAgentSignup;
-```
-
-Approve a signup request with its approval token and the agent's confirmation code, choosing the plan, scopes, monthly spend cap, agent purchase limit and grant expiry. The signed-in approver becomes the owner.
-
-#### `Operations.Management.IssueAgentKey` static property
-
-```cs
-public static readonly OperationDescriptor<IssueAgentKeyRequestInput, IssueAgentKeyReply> IssueAgentKey;
-```
-
-Issue a backend key for the agent within its grant's scopes and expiry. The result is the pending key; poll agentSignup until it shows the key's delivery, then redeem it with agentCredentialPermit.
-
-#### `Operations.Management.AgentCredentialPermit` static property
-
-```cs
-public static readonly OperationDescriptor<AgentCredentialPermitRequestInput, AgentCredentialPermitReply> AgentCredentialPermit;
-```
-
-Issue a permit that authorizes the agent to redeem one of its key deliveries.
-
-#### `Operations.Management.RevokeAgentGrant` static property
-
-```cs
-public static readonly OperationDescriptor<RevokeAgentGrantRequestInput, RevokeAgentGrantReply> RevokeAgentGrant;
-```
-
-Revoke an agent grant and every key issued under it.
-
-#### `Operations.Management.SetSpendControls` static property
-
-```cs
-public static readonly OperationDescriptor<SetSpendControlsRequestInput, SetSpendControlsReply> SetSpendControls;
-```
-
-Set the organization's monthly spend cap and agent purchase limit.
-
-#### `Operations.Management.PurchaseAgentCredits` static property
-
-```cs
-public static readonly OperationDescriptor<PurchaseAgentCreditsRequestInput, PurchaseAgentCreditsReply> PurchaseAgentCredits;
-```
-
-Buy prepaid credits with a Shared Payment Token, within the owner's agent purchase limit.
 
 ### `ProjectOptions` class
 

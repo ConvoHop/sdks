@@ -78,15 +78,18 @@ No tool runs:
 - subscriptions, client-only and deprecated operations;
 - operations whose results are credentials (`withheldOperations`):
   `communication.issueSession`, `communication.renewSession`,
-  `management.credentialPermit`, `management.agentCredentialPermit`, and the
+  `management.credentialPermit`, and the
   hosted billing links of `management.createBillingCheckoutSession` and
   `management.createBillingPortalSession`;
-- operations that record a person's consent (also in `withheldOperations`):
-  `management.approveAgentSignup`. Only the owner approves an agent's signup,
-  from the emailed approval link; an agent holding the portal credential
-  can't approve its own;
+- operations that record a person's consent, if a later authority export
+  adds them; possession of a portal credential never grants that consent;
 - operations that a delivery permit authorizes instead of a bearer
   credential, such as `communication.redeemCredential`.
+
+The generated launch catalog has 61 operation tools and five withheld
+operations, all from the 79-operation launch contract. The server also
+provides `retry_request`. Agent signup and spend-management operations are
+not included.
 
 Each tool carries the operation's annotations:
 

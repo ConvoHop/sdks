@@ -4,7 +4,7 @@ import { spawnSync } from "node:child_process";
 import { mkdtempSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import mcpTools, { DIRECTORY, META_KEY, RETRY_TOOL, WITHHELD, mcpToolDefinitions, toolOperations } from "../emitters/mcp-tools.mjs";
+import mcpTools, { DIRECTORY, META_KEY, RETRY_TOOL, WITHHELD, mcpToolDefinitions, renderTools, toolOperations } from "../emitters/mcp-tools.mjs";
 import { EmitterError, renderEmitters } from "../lib/emitter.mjs";
 import { buildIr } from "../lib/ir.mjs";
 import { REPO_ROOT, fixtureSources, repoSources } from "./helpers.mjs";
@@ -145,15 +145,22 @@ test("unsupported inputs and ambiguous tool names are rejected", () => {
 test("the repository catalog withholds credential-returning and consent operations and marks destructive ones", () => {
   const ir = buildIr(repoSources());
   const ids = new Set(ir.operations.map(operation => operation.id));
-  for (const id of Object.keys(WITHHELD)) assert.ok(ids.has(id), `withheld operation ${id} no longer exists; update WITHHELD`);
+  const withheld = Object.keys(WITHHELD).filter(id => ids.has(id)).sort();
+  assert.deepEqual(withheld, [
+    "communication.issueSession", "communication.renewSession", "management.createBillingCheckoutSession",
+    "management.createBillingPortalSession", "management.credentialPermit",
+  ]);
   const tools = mcpToolDefinitions(ir);
+  assert.equal(tools.length, 61);
   const toolIds = new Set(tools.map(tool => tool.operation.id));
-  for (const id of Object.keys(WITHHELD)) assert.ok(!toolIds.has(id), `${id} must not be a tool`);
+  for (const id of withheld) assert.ok(!toolIds.has(id), `${id} must not be a tool`);
+  assert.doesNotMatch(renderTools(ir), /management\.(?:agentCredentialPermit|approveAgentSignup)/);
+  assert.match(renderTools(buildIr(fixtureSources())), /withheldOperations: Readonly<Record<string, string>> = \{\};/);
   assert.deepEqual(toolOperations(ir).map(operation => operation.id), tools.map(tool => tool.operation.id));
   assert.ok(tools.every(tool => tool.operation.credential === (tool.operation.plane === "management" ? "portalCredential" : "backendKey")));
   assert.deepEqual(tools.filter(tool => tool.annotations.destructiveHint).map(tool => tool.operation.id).sort(), [
     "communication.deleteMessage", "communication.disablePrincipal", "communication.endLiveSession", "communication.removeMember",
-    "communication.revokeSession", "management.disableWebhook", "management.revokeAgentGrant", "management.revokeBackendKey",
+    "communication.revokeSession", "management.disableWebhook", "management.revokeBackendKey",
     "management.rotateWebhookSecret", "management.updateWebhook",
   ]);
   const revoke = byName(tools).management_revoke_backend_key;

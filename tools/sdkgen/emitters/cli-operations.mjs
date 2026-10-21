@@ -3,7 +3,7 @@ import { byName, namedTypeRef, printTypeRef, requireType } from "../lib/ir-model
 import { formatJson } from "../lib/json.mjs";
 import { codeUnitCompare } from "../lib/naming.mjs";
 import {
-  WITHHELD_OPERATIONS, authText, oneLine, paginationText, serverCredential, serverOperations,
+  WITHHELD_OPERATIONS, authText, oneLine, paginationText, serverCredential, serverOperations, withheldOperations,
 } from "../lib/server-operations.mjs";
 
 /**
@@ -148,7 +148,7 @@ export function renderOperations(ir) {
   const operations = cliOperationList(ir);
   return NOTICE + DECLARATIONS +
     `/** Operations \`relay call\` never runs, because their results are credentials or they record a person's consent. */\n` +
-    `export const withheldOperations: Readonly<Record<string, string>> = ${formatJson(WITHHELD).trimEnd()};\n` +
+    `export const withheldOperations: Readonly<Record<string, string>> = ${formatJson(withheldOperations(ir)).trimEnd()};\n` +
     `/** The scopes a backend key can grant, by wire name, with what each allows. */\n` +
     `export const cliScopes: Readonly<Record<string, string>> = ${formatJson(cliScopeEntries(ir)).trimEnd()};\n` +
     `export const cliTypes: Readonly<Record<string, CliType>> = ${formatJson(cliTypeEntries(ir, operations)).trimEnd()};\n` +

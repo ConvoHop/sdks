@@ -31,6 +31,11 @@ export const CONSENT_OPERATIONS = Object.freeze({
 /** The operations server tooling never offers, with the reason for each: CREDENTIAL_OPERATIONS and CONSENT_OPERATIONS. */
 export const WITHHELD_OPERATIONS = Object.freeze({ ...CREDENTIAL_OPERATIONS, ...CONSENT_OPERATIONS });
 
+export function withheldOperations(ir) {
+  const ids = new Set(ir.operations.map(operation => operation.id));
+  return Object.fromEntries(Object.entries(WITHHELD_OPERATIONS).filter(([id]) => ids.has(id)));
+}
+
 export const oneLine = text => text.replace(/\s+/g, " ").trim();
 export const list = items => (items.length < 2 ? items.join("") : `${items.slice(0, -1).join(", ")} and ${items.at(-1)}`);
 

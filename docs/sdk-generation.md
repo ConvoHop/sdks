@@ -59,6 +59,83 @@ byte-identical files.
   and by cross-checks against the schemas. See
   [Annotating operations](../CONTRIBUTING.md#annotating-operations).
 
+### Launch contract
+
+The first-launch input unit is the authority export already preserved in SDK
+commit `d11bae63e3496f1b17e5041e3d45424cdc9a5c7c`. Import its complete
+plane files through the [existing schema update process](../CONTRIBUTING.md#annotating-operations),
+not selected generated documents or models:
+
+| Input path | Git blob |
+| --- | --- |
+| `schema/communication.graphql` | `dd1adea9765fa75a4b42ff6de0f352b5b4fef885` |
+| `schema/management.graphql` | `c15a786b6275e6de1c76a9e28ed669428df81448` |
+
+The authority owns the schema exporter; this SDK repository has no exporter
+for backend implementation source. This import reuses existing exported
+inputs and requires no backend checkout, export execution or network fetch.
+`schema/annotations.json` stays hand-maintained: remove the 13 absent
+operation entries and their unused credentials/conditions, but retain Relay
+branding and existing error, authorization, retry and recovery policies.
+The resulting contract has exactly 49 Communication and 30 Management
+operations. Both planes' `RetainedResult` has the same 23 nullable fields;
+`agentGrant`, `agentSignupStatus` and `organizationSpend` are absent.
+
+The historical 92-operation candidate and its generated evidence remain
+bound to `7018879a644bdab5f7ae110b8a8069d3747adbfe`. They do not
+qualify these corrected inputs. Do not hand-edit its generated artifacts or
+reuse their qualification as evidence for the launch contract.
+
+After execution is admitted, run this generator and TypeScript regression
+sequence from the repository root:
+
+```sh
+npm run generate:graphql &&
+UPDATE_GOLDEN=1 npm run test:sdkgen &&
+npm run check:annotations &&
+npm run check:graphql &&
+npm test -w packages/core -w packages/client -w packages/server -w packages/cli -w packages/mcp &&
+npm run build
+```
+
+The shared generator updates every emitter, including both recovery
+documents and their response shapes, and deletes obsolete owned files.
+Review the golden diff: withholding metadata now lists only operations
+present in the input contract, while credential and consent exclusion rules
+remain enforced. The launch CLI and MCP catalogs each contain 61 operations
+and five withheld operations. No schema negotiation or fallback is added.
+
+Then refresh all nine documentation surfaces sequentially and render once:
+
+```sh
+npm run extract:docs -- typescript &&
+npm run extract:docs -- python &&
+npm run extract:docs -- react-native &&
+npm run extract:docs -- dotnet &&
+npm run extract:docs -- jvm &&
+GOTOOLCHAIN=local GOMAXPROCS=2 GOFLAGS=-p=2 npm run extract:docs -- go &&
+npm run extract:docs -- swift &&
+npm run extract:docs -- android &&
+npm run extract:docs -- flutter &&
+npm run generate:docs &&
+npm run check:docs
+```
+
+These commands require Node 22 or later and the root lockfile's dependencies.
+Extraction also requires the existing language toolchains, parser dependencies
+and Android SDK described in the [documentation pipeline](docs-pipeline.md).
+The maintained wrappers may restore their normal parser dependencies and
+write compiler caches. Missing or incompatible tools require separate
+admission; do not install an SDK or change locks as an extraction fallback.
+The three accepted .NET parser/example locks need no contract-driven change.
+Each `&&` stops subsequent stages on failure; partial surfaces are not a
+complete generated candidate.
+
+Review all emitter outputs, intended fixture goldens, nine
+`docs/languages/*/surface.json` files and `docs/site/` together. The commands
+above do not replace language SDK runtime tests, native plugin builds,
+upgrade/device checks or deployment qualification.
+
 ## Generated files
 
 Don't edit generated files by hand. Change the inputs and run
@@ -86,9 +163,9 @@ so they can settle an unknown outcome of any request they send. They leave
 out subscriptions, client-only and deprecated operations, the operations that
 don't accept that credential, such as anonymous ones, the operations whose
 results are credentials, such as `communication.issueSession`, and the
-operations that record a person's consent, such as
-`management.approveAgentSignup`. The shared
-rules are in
+operations that record a person's consent. Withheld-operation metadata names
+only operations in the current input contract; exclusion rules remain
+available if a later authority export adds a consent operation. The shared rules are in
 [`tools/sdkgen/lib/server-operations.mjs`](../tools/sdkgen/lib/server-operations.mjs).
 
 ## The IR

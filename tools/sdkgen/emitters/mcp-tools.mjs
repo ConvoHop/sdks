@@ -3,7 +3,7 @@ import { byName, requireType } from "../lib/ir-model.mjs";
 import { formatJson } from "../lib/json.mjs";
 import { capitalize, snakeCase, words } from "../lib/naming.mjs";
 import {
-  WITHHELD_OPERATIONS, authText, oneLine, paginationText, serverCredential, serverOperations,
+  WITHHELD_OPERATIONS, authText, oneLine, paginationText, serverCredential, serverOperations, withheldOperations,
 } from "../lib/server-operations.mjs";
 
 /**
@@ -250,7 +250,7 @@ export function renderTools(ir) {
   return NOTICE + DECLARATIONS +
     `export const retryToolName = ${JSON.stringify(RETRY_TOOL)};\n` +
     `export const operationMetaKey = ${JSON.stringify(META_KEY)};\n` +
-    `export const withheldOperations: Readonly<Record<string, string>> = ${formatJson(WITHHELD).trimEnd()};\n` +
+    `export const withheldOperations: Readonly<Record<string, string>> = ${formatJson(withheldOperations(ir)).trimEnd()};\n` +
     `export const mcpTools: readonly McpToolDefinition[] = ${tools};\n`;
 }
 

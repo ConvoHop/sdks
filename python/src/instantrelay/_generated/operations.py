@@ -695,47 +695,6 @@ OPERATIONS: Mapping[str, OperationSpec] = {
             "          id\n"
             "        }\n"
             "        result {\n"
-            "          agentGrant {\n"
-            "            grantId\n"
-            "            orgId\n"
-            "            signupId\n"
-            "            agentActorId\n"
-            "            projectId\n"
-            "            scopes\n"
-            "            expiresAt\n"
-            "            revokedAt\n"
-            "            createdAt\n"
-            "            keys {\n"
-            "              operationId\n"
-            "              state\n"
-            "              scopes\n"
-            "              expiresAt\n"
-            "              keyId\n"
-            "              deliveryId\n"
-            "              deliveryExpiresAt\n"
-            "            }\n"
-            "          }\n"
-            "          agentSignupStatus {\n"
-            "            signupId\n"
-            "            state\n"
-            "            orgId\n"
-            "            deploymentId\n"
-            "            projectId\n"
-            "            nextStep\n"
-            "            scopes\n"
-            "            grantExpiresAt\n"
-            "            keys {\n"
-            "              operationId\n"
-            "              state\n"
-            "              scopes\n"
-            "              expiresAt\n"
-            "              keyId\n"
-            "              deliveryId\n"
-            "              deliveryExpiresAt\n"
-            "            }\n"
-            "            incarnation\n"
-            "            servingEpoch\n"
-            "          }\n"
             "          billingCheckoutSession {\n"
             "            orgId\n"
             "            planId\n"
@@ -940,28 +899,6 @@ OPERATIONS: Mapping[str, OperationSpec] = {
             "            name\n"
             "            status\n"
             "            revision\n"
-            "          }\n"
-            "          organizationSpend {\n"
-            "            orgId\n"
-            "            planId\n"
-            "            currency\n"
-            "            catalogVersion\n"
-            "            monthlySpendCap\n"
-            "            agentPurchaseLimit\n"
-            "            updatedAt\n"
-            "            monthlyMinimum\n"
-            "            periodStart\n"
-            "            periodEnd\n"
-            "            credits\n"
-            "            charges\n"
-            "            margin\n"
-            "            stop\n"
-            "            refusedMeters\n"
-            "            evaluatedAt\n"
-            "            usageThrough\n"
-            "            validUntil\n"
-            "            minimumCredit\n"
-            "            chargeLimit\n"
             "          }\n"
             "          principal {\n"
             "            principalId\n"
@@ -3202,47 +3139,6 @@ OPERATIONS: Mapping[str, OperationSpec] = {
             "          id\n"
             "        }\n"
             "        result {\n"
-            "          agentGrant {\n"
-            "            grantId\n"
-            "            orgId\n"
-            "            signupId\n"
-            "            agentActorId\n"
-            "            projectId\n"
-            "            scopes\n"
-            "            expiresAt\n"
-            "            revokedAt\n"
-            "            createdAt\n"
-            "            keys {\n"
-            "              operationId\n"
-            "              state\n"
-            "              scopes\n"
-            "              expiresAt\n"
-            "              keyId\n"
-            "              deliveryId\n"
-            "              deliveryExpiresAt\n"
-            "            }\n"
-            "          }\n"
-            "          agentSignupStatus {\n"
-            "            signupId\n"
-            "            state\n"
-            "            orgId\n"
-            "            deploymentId\n"
-            "            projectId\n"
-            "            nextStep\n"
-            "            scopes\n"
-            "            grantExpiresAt\n"
-            "            keys {\n"
-            "              operationId\n"
-            "              state\n"
-            "              scopes\n"
-            "              expiresAt\n"
-            "              keyId\n"
-            "              deliveryId\n"
-            "              deliveryExpiresAt\n"
-            "            }\n"
-            "            incarnation\n"
-            "            servingEpoch\n"
-            "          }\n"
             "          billingCheckoutSession {\n"
             "            orgId\n"
             "            planId\n"
@@ -3448,28 +3344,6 @@ OPERATIONS: Mapping[str, OperationSpec] = {
             "            status\n"
             "            revision\n"
             "          }\n"
-            "          organizationSpend {\n"
-            "            orgId\n"
-            "            planId\n"
-            "            currency\n"
-            "            catalogVersion\n"
-            "            monthlySpendCap\n"
-            "            agentPurchaseLimit\n"
-            "            updatedAt\n"
-            "            monthlyMinimum\n"
-            "            periodStart\n"
-            "            periodEnd\n"
-            "            credits\n"
-            "            charges\n"
-            "            margin\n"
-            "            stop\n"
-            "            refusedMeters\n"
-            "            evaluatedAt\n"
-            "            usageThrough\n"
-            "            validUntil\n"
-            "            minimumCredit\n"
-            "            chargeLimit\n"
-            "          }\n"
             "          principal {\n"
             "            principalId\n"
             "            externalUserId\n"
@@ -3641,301 +3515,6 @@ OPERATIONS: Mapping[str, OperationSpec] = {
         pagination=None,
         long_running=None,
         errors=("ADMISSION_LIMIT", "AUTHORITY_UNAVAILABLE", "FEATURE_UNSUPPORTED", "FORBIDDEN", "GRAPHQL_ERROR", "GRAPHQL_INVALID_REQUEST", "GRAPHQL_QUERY_LIMIT", "GRAPHQL_RESPONSE_LIMIT", "HTTP_FAILURE", "INVALID_REQUEST", "INVALID_RESPONSE", "NOT_FOUND", "REQUEST_TOO_LARGE", "RESPONSE_TOO_LARGE", "RETRY_EXHAUSTED", "TRANSPORT_UNKNOWN", "UNAUTHENTICATED"),
-    ),
-    "management.agentSignupForApproval": OperationSpec(
-        id="management.agentSignupForApproval",
-        plane="management",
-        kind="query",
-        field="agentSignupForApproval",
-        operation_name="ManagementAgentSignupForApproval",
-        document=(
-            "query ManagementAgentSignupForApproval($context: RequestContextInput!, $input: AgentSignupForApprovalRequestInput!) {\n"
-            "  agentSignupForApproval(context: $context, input: $input) {\n"
-            "    status\n"
-            "    requestId\n"
-            "    serverTime\n"
-            "    receiptId\n"
-            "    committedAt\n"
-            "    replayed\n"
-            "    operation {\n"
-            "      operationId\n"
-            "      owner\n"
-            "      href\n"
-            "      state\n"
-            "    }\n"
-            "    resourceRef {\n"
-            "      kind\n"
-            "      id\n"
-            "    }\n"
-            "    result {\n"
-            "      signupId\n"
-            "      ownerEmail\n"
-            "      organizationName\n"
-            "      agentName\n"
-            "      purpose\n"
-            "      suggestedPlan\n"
-            "      suggestedScopes\n"
-            "      suggestedMonthlySpendCap\n"
-            "      currency\n"
-            "      expiresAt\n"
-            "    }\n"
-            "  }\n"
-            "}"
-        ),
-        input_type="AgentSignupForApprovalRequestInput",
-        result_type="AgentSignupForApprovalReply!",
-        returns="result",
-        idempotency="safe",
-        context={"requestId": "required", "projectId": "forbidden", "incarnation": "optional", "observedServingEpoch": "optional", "credentialDeliveryPermit": "forbidden"},
-        echo_path=("result",),
-        echo=(),
-        item_echo=(),
-        pagination=None,
-        long_running=None,
-        errors=("ADMISSION_LIMIT", "AGENTIC_NOT_CONFIGURED", "AGENT_SIGNUP_CLOSED", "AUTHORITY_UNAVAILABLE", "FEATURE_UNSUPPORTED", "FORBIDDEN", "GRAPHQL_ERROR", "GRAPHQL_INVALID_REQUEST", "GRAPHQL_QUERY_LIMIT", "GRAPHQL_RESPONSE_LIMIT", "HTTP_FAILURE", "INVALID_REQUEST", "INVALID_RESPONSE", "RATE_LIMITED", "REQUEST_TOO_LARGE", "RESPONSE_TOO_LARGE", "RETRY_EXHAUSTED", "TRANSPORT_UNKNOWN", "UNAUTHENTICATED"),
-    ),
-    "management.agentSignup": OperationSpec(
-        id="management.agentSignup",
-        plane="management",
-        kind="query",
-        field="agentSignup",
-        operation_name="ManagementAgentSignup",
-        document=(
-            "query ManagementAgentSignup($context: RequestContextInput!) {\n"
-            "  agentSignup(context: $context) {\n"
-            "    status\n"
-            "    requestId\n"
-            "    serverTime\n"
-            "    receiptId\n"
-            "    committedAt\n"
-            "    replayed\n"
-            "    operation {\n"
-            "      operationId\n"
-            "      owner\n"
-            "      href\n"
-            "      state\n"
-            "    }\n"
-            "    resourceRef {\n"
-            "      kind\n"
-            "      id\n"
-            "    }\n"
-            "    result {\n"
-            "      signupId\n"
-            "      state\n"
-            "      orgId\n"
-            "      deploymentId\n"
-            "      projectId\n"
-            "      nextStep\n"
-            "      scopes\n"
-            "      grantExpiresAt\n"
-            "      keys {\n"
-            "        operationId\n"
-            "        state\n"
-            "        scopes\n"
-            "        expiresAt\n"
-            "        keyId\n"
-            "        deliveryId\n"
-            "        deliveryExpiresAt\n"
-            "      }\n"
-            "      incarnation\n"
-            "      servingEpoch\n"
-            "    }\n"
-            "  }\n"
-            "}"
-        ),
-        input_type=None,
-        result_type="AgentSignupReply!",
-        returns="result",
-        idempotency="safe",
-        context={"requestId": "required", "projectId": "forbidden", "incarnation": "optional", "observedServingEpoch": "optional", "credentialDeliveryPermit": "forbidden"},
-        echo_path=("result",),
-        echo=(),
-        item_echo=(),
-        pagination=None,
-        long_running=None,
-        errors=("ADMISSION_LIMIT", "AGENTIC_NOT_CONFIGURED", "AGENT_GRANT_EXPIRED", "AGENT_GRANT_REVOKED", "AUTHORITY_UNAVAILABLE", "FEATURE_UNSUPPORTED", "FORBIDDEN", "GRAPHQL_ERROR", "GRAPHQL_INVALID_REQUEST", "GRAPHQL_QUERY_LIMIT", "GRAPHQL_RESPONSE_LIMIT", "HTTP_FAILURE", "INVALID_REQUEST", "INVALID_RESPONSE", "RATE_LIMITED", "REQUEST_TOO_LARGE", "RESPONSE_TOO_LARGE", "RETRY_EXHAUSTED", "TRANSPORT_UNKNOWN", "UNAUTHENTICATED"),
-    ),
-    "management.agentGrants": OperationSpec(
-        id="management.agentGrants",
-        plane="management",
-        kind="query",
-        field="agentGrants",
-        operation_name="ManagementAgentGrants",
-        document=(
-            "query ManagementAgentGrants($context: RequestContextInput!, $input: AgentGrantsRequestInput!) {\n"
-            "  agentGrants(context: $context, input: $input) {\n"
-            "    status\n"
-            "    requestId\n"
-            "    serverTime\n"
-            "    receiptId\n"
-            "    committedAt\n"
-            "    replayed\n"
-            "    operation {\n"
-            "      operationId\n"
-            "      owner\n"
-            "      href\n"
-            "      state\n"
-            "    }\n"
-            "    resourceRef {\n"
-            "      kind\n"
-            "      id\n"
-            "    }\n"
-            "    result {\n"
-            "      items {\n"
-            "        grantId\n"
-            "        orgId\n"
-            "        signupId\n"
-            "        agentActorId\n"
-            "        projectId\n"
-            "        scopes\n"
-            "        expiresAt\n"
-            "        revokedAt\n"
-            "        createdAt\n"
-            "        keys {\n"
-            "          operationId\n"
-            "          state\n"
-            "          scopes\n"
-            "          expiresAt\n"
-            "          keyId\n"
-            "          deliveryId\n"
-            "          deliveryExpiresAt\n"
-            "        }\n"
-            "      }\n"
-            "      complete\n"
-            "      refreshRequired\n"
-            "      nextCursor\n"
-            "    }\n"
-            "  }\n"
-            "}"
-        ),
-        input_type="AgentGrantsRequestInput",
-        result_type="AgentGrantsReply!",
-        returns="result",
-        idempotency="safe",
-        context={"requestId": "required", "projectId": "forbidden", "incarnation": "optional", "observedServingEpoch": "optional", "credentialDeliveryPermit": "forbidden"},
-        echo_path=("result",),
-        echo=(),
-        item_echo=("orgId",),
-        pagination=PaginationSpec(style="cursor", page_path=("result",), page_type="AgentGrantPage", item_type="AgentGrant", limit_field="limit", cursor_field="cursor"),
-        long_running=None,
-        errors=("ADMISSION_LIMIT", "AUTHORITY_UNAVAILABLE", "CURSOR_SCOPE_MISMATCH", "FEATURE_UNSUPPORTED", "FORBIDDEN", "GRAPHQL_ERROR", "GRAPHQL_INVALID_REQUEST", "GRAPHQL_QUERY_LIMIT", "GRAPHQL_RESPONSE_LIMIT", "HTTP_FAILURE", "INVALID_REQUEST", "INVALID_RESPONSE", "NOT_FOUND", "REQUEST_TOO_LARGE", "RESPONSE_TOO_LARGE", "RETRY_EXHAUSTED", "TRANSPORT_UNKNOWN", "UNAUTHENTICATED"),
-    ),
-    "management.agentAuditEvents": OperationSpec(
-        id="management.agentAuditEvents",
-        plane="management",
-        kind="query",
-        field="agentAuditEvents",
-        operation_name="ManagementAgentAuditEvents",
-        document=(
-            "query ManagementAgentAuditEvents($context: RequestContextInput!, $input: AgentAuditEventsRequestInput!) {\n"
-            "  agentAuditEvents(context: $context, input: $input) {\n"
-            "    status\n"
-            "    requestId\n"
-            "    serverTime\n"
-            "    receiptId\n"
-            "    committedAt\n"
-            "    replayed\n"
-            "    operation {\n"
-            "      operationId\n"
-            "      owner\n"
-            "      href\n"
-            "      state\n"
-            "    }\n"
-            "    resourceRef {\n"
-            "      kind\n"
-            "      id\n"
-            "    }\n"
-            "    result {\n"
-            "      items {\n"
-            "        eventId\n"
-            "        orgId\n"
-            "        grantId\n"
-            "        actorKind\n"
-            "        actorId\n"
-            "        kind\n"
-            "        details\n"
-            "        occurredAt\n"
-            "      }\n"
-            "      complete\n"
-            "      refreshRequired\n"
-            "      nextCursor\n"
-            "    }\n"
-            "  }\n"
-            "}"
-        ),
-        input_type="AgentAuditEventsRequestInput",
-        result_type="AgentAuditEventsReply!",
-        returns="result",
-        idempotency="safe",
-        context={"requestId": "required", "projectId": "forbidden", "incarnation": "optional", "observedServingEpoch": "optional", "credentialDeliveryPermit": "forbidden"},
-        echo_path=("result",),
-        echo=(),
-        item_echo=("orgId",),
-        pagination=PaginationSpec(style="cursor", page_path=("result",), page_type="AgentAuditEventPage", item_type="AgentAuditEvent", limit_field="limit", cursor_field="cursor"),
-        long_running=None,
-        errors=("ADMISSION_LIMIT", "AUTHORITY_UNAVAILABLE", "CURSOR_SCOPE_MISMATCH", "FEATURE_UNSUPPORTED", "FORBIDDEN", "GRAPHQL_ERROR", "GRAPHQL_INVALID_REQUEST", "GRAPHQL_QUERY_LIMIT", "GRAPHQL_RESPONSE_LIMIT", "HTTP_FAILURE", "INVALID_REQUEST", "INVALID_RESPONSE", "NOT_FOUND", "REQUEST_TOO_LARGE", "RESPONSE_TOO_LARGE", "RETRY_EXHAUSTED", "TRANSPORT_UNKNOWN", "UNAUTHENTICATED"),
-    ),
-    "management.organizationSpend": OperationSpec(
-        id="management.organizationSpend",
-        plane="management",
-        kind="query",
-        field="organizationSpend",
-        operation_name="ManagementOrganizationSpend",
-        document=(
-            "query ManagementOrganizationSpend($context: RequestContextInput!, $input: OrganizationSpendRequestInput!) {\n"
-            "  organizationSpend(context: $context, input: $input) {\n"
-            "    status\n"
-            "    requestId\n"
-            "    serverTime\n"
-            "    receiptId\n"
-            "    committedAt\n"
-            "    replayed\n"
-            "    operation {\n"
-            "      operationId\n"
-            "      owner\n"
-            "      href\n"
-            "      state\n"
-            "    }\n"
-            "    resourceRef {\n"
-            "      kind\n"
-            "      id\n"
-            "    }\n"
-            "    result {\n"
-            "      orgId\n"
-            "      planId\n"
-            "      currency\n"
-            "      catalogVersion\n"
-            "      monthlySpendCap\n"
-            "      agentPurchaseLimit\n"
-            "      updatedAt\n"
-            "      monthlyMinimum\n"
-            "      periodStart\n"
-            "      periodEnd\n"
-            "      credits\n"
-            "      charges\n"
-            "      margin\n"
-            "      stop\n"
-            "      refusedMeters\n"
-            "      evaluatedAt\n"
-            "      usageThrough\n"
-            "      validUntil\n"
-            "      minimumCredit\n"
-            "      chargeLimit\n"
-            "    }\n"
-            "  }\n"
-            "}"
-        ),
-        input_type="OrganizationSpendRequestInput",
-        result_type="OrganizationSpendReply!",
-        returns="result",
-        idempotency="safe",
-        context={"requestId": "required", "projectId": "forbidden", "incarnation": "optional", "observedServingEpoch": "optional", "credentialDeliveryPermit": "forbidden"},
-        echo_path=("result",),
-        echo=("orgId",),
-        item_echo=(),
-        pagination=None,
-        long_running=None,
-        errors=("ADMISSION_LIMIT", "AUTHORITY_UNAVAILABLE", "BILLING_NOT_CONFIGURED", "FEATURE_UNSUPPORTED", "FORBIDDEN", "GRAPHQL_ERROR", "GRAPHQL_INVALID_REQUEST", "GRAPHQL_QUERY_LIMIT", "GRAPHQL_RESPONSE_LIMIT", "HTTP_FAILURE", "INVALID_REQUEST", "INVALID_RESPONSE", "NOT_FOUND", "REQUEST_TOO_LARGE", "RESPONSE_TOO_LARGE", "RETRY_EXHAUSTED", "TRANSPORT_UNKNOWN", "UNAUTHENTICATED"),
     ),
     "management.createOrganization": OperationSpec(
         id="management.createOrganization",
@@ -5289,432 +4868,6 @@ OPERATIONS: Mapping[str, OperationSpec] = {
         long_running="management.getOperation",
         errors=("ADMISSION_LIMIT", "AUTHORITY_UNAVAILABLE", "FEATURE_UNSUPPORTED", "FORBIDDEN", "GRAPHQL_ERROR", "GRAPHQL_INVALID_REQUEST", "GRAPHQL_QUERY_LIMIT", "GRAPHQL_RESPONSE_LIMIT", "HTTP_FAILURE", "IDEMPOTENCY_CONFLICT", "INVALID_REQUEST", "INVALID_RESPONSE", "NOT_FOUND", "OUTCOME_UNKNOWN", "RECOVERY_LIMIT", "RECOVERY_STORAGE_FAILURE", "REQUEST_TOO_LARGE", "RESOLUTION_REQUIRED", "RESPONSE_TOO_LARGE", "RETRY_EXHAUSTED", "TRANSPORT_UNKNOWN", "UNAUTHENTICATED", "WEBHOOK_ENDPOINT_DISABLED"),
     ),
-    "management.requestAgentSignup": OperationSpec(
-        id="management.requestAgentSignup",
-        plane="management",
-        kind="mutation",
-        field="requestAgentSignup",
-        operation_name="ManagementRequestAgentSignup",
-        document=(
-            "mutation ManagementRequestAgentSignup($context: RequestContextInput!, $input: RequestAgentSignupRequestInput!) {\n"
-            "  requestAgentSignup(context: $context, input: $input) {\n"
-            "    status\n"
-            "    requestId\n"
-            "    serverTime\n"
-            "    receiptId\n"
-            "    committedAt\n"
-            "    replayed\n"
-            "    operation {\n"
-            "      operationId\n"
-            "      owner\n"
-            "      href\n"
-            "      state\n"
-            "    }\n"
-            "    resourceRef {\n"
-            "      kind\n"
-            "      id\n"
-            "    }\n"
-            "    result {\n"
-            "      signupId\n"
-            "      confirmationCode\n"
-            "      expiresAt\n"
-            "      pollAfterSeconds\n"
-            "    }\n"
-            "  }\n"
-            "}"
-        ),
-        input_type="RequestAgentSignupRequestInput",
-        result_type="RequestAgentSignupReply!",
-        returns="result",
-        idempotency="replayOnly",
-        context={"requestId": "required", "projectId": "forbidden", "incarnation": "optional", "observedServingEpoch": "optional", "credentialDeliveryPermit": "forbidden"},
-        echo_path=("result",),
-        echo=(),
-        item_echo=(),
-        pagination=None,
-        long_running=None,
-        errors=("ADMISSION_LIMIT", "AGENTIC_NOT_CONFIGURED", "AGENT_SIGNUP_EMAIL_REJECTED", "AGENT_SIGNUP_SUPPRESSED", "AUTHORITY_UNAVAILABLE", "BILLING_PLAN_UNAVAILABLE", "FEATURE_UNSUPPORTED", "FORBIDDEN", "GRAPHQL_ERROR", "GRAPHQL_INVALID_REQUEST", "GRAPHQL_QUERY_LIMIT", "GRAPHQL_RESPONSE_LIMIT", "HTTP_FAILURE", "IDEMPOTENCY_CONFLICT", "INVALID_REQUEST", "INVALID_RESPONSE", "OUTCOME_UNKNOWN", "RATE_LIMITED", "RECOVERY_LIMIT", "RECOVERY_STORAGE_FAILURE", "REQUEST_TOO_LARGE", "RESOLUTION_REQUIRED", "RESPONSE_TOO_LARGE", "RETRY_EXHAUSTED", "TRANSPORT_UNKNOWN", "UNAUTHENTICATED"),
-    ),
-    "management.rejectAgentSignup": OperationSpec(
-        id="management.rejectAgentSignup",
-        plane="management",
-        kind="mutation",
-        field="rejectAgentSignup",
-        operation_name="ManagementRejectAgentSignup",
-        document=(
-            "mutation ManagementRejectAgentSignup($context: RequestContextInput!, $input: RejectAgentSignupRequestInput!) {\n"
-            "  rejectAgentSignup(context: $context, input: $input) {\n"
-            "    status\n"
-            "    requestId\n"
-            "    serverTime\n"
-            "    receiptId\n"
-            "    committedAt\n"
-            "    replayed\n"
-            "    operation {\n"
-            "      operationId\n"
-            "      owner\n"
-            "      href\n"
-            "      state\n"
-            "    }\n"
-            "    resourceRef {\n"
-            "      kind\n"
-            "      id\n"
-            "    }\n"
-            "    result {\n"
-            "      signupId\n"
-            "      state\n"
-            "      orgId\n"
-            "      deploymentId\n"
-            "      projectId\n"
-            "      nextStep\n"
-            "      scopes\n"
-            "      grantExpiresAt\n"
-            "      keys {\n"
-            "        operationId\n"
-            "        state\n"
-            "        scopes\n"
-            "        expiresAt\n"
-            "        keyId\n"
-            "        deliveryId\n"
-            "        deliveryExpiresAt\n"
-            "      }\n"
-            "      incarnation\n"
-            "      servingEpoch\n"
-            "    }\n"
-            "  }\n"
-            "}"
-        ),
-        input_type="RejectAgentSignupRequestInput",
-        result_type="RejectAgentSignupReply!",
-        returns="result",
-        idempotency="replayOnly",
-        context={"requestId": "required", "projectId": "forbidden", "incarnation": "optional", "observedServingEpoch": "optional", "credentialDeliveryPermit": "forbidden"},
-        echo_path=("result",),
-        echo=(),
-        item_echo=(),
-        pagination=None,
-        long_running=None,
-        errors=("ADMISSION_LIMIT", "AGENTIC_NOT_CONFIGURED", "AGENT_SIGNUP_CLOSED", "AUTHORITY_UNAVAILABLE", "FEATURE_UNSUPPORTED", "FORBIDDEN", "GRAPHQL_ERROR", "GRAPHQL_INVALID_REQUEST", "GRAPHQL_QUERY_LIMIT", "GRAPHQL_RESPONSE_LIMIT", "HTTP_FAILURE", "IDEMPOTENCY_CONFLICT", "INVALID_REQUEST", "INVALID_RESPONSE", "OUTCOME_UNKNOWN", "RATE_LIMITED", "RECOVERY_LIMIT", "RECOVERY_STORAGE_FAILURE", "REQUEST_TOO_LARGE", "RESOLUTION_REQUIRED", "RESPONSE_TOO_LARGE", "RETRY_EXHAUSTED", "TRANSPORT_UNKNOWN", "UNAUTHENTICATED"),
-    ),
-    "management.approveAgentSignup": OperationSpec(
-        id="management.approveAgentSignup",
-        plane="management",
-        kind="mutation",
-        field="approveAgentSignup",
-        operation_name="ManagementApproveAgentSignup",
-        document=(
-            "mutation ManagementApproveAgentSignup($context: RequestContextInput!, $input: ApproveAgentSignupRequestInput!) {\n"
-            "  approveAgentSignup(context: $context, input: $input) {\n"
-            "    status\n"
-            "    requestId\n"
-            "    serverTime\n"
-            "    receiptId\n"
-            "    committedAt\n"
-            "    replayed\n"
-            "    operation {\n"
-            "      operationId\n"
-            "      owner\n"
-            "      href\n"
-            "      state\n"
-            "    }\n"
-            "    resourceRef {\n"
-            "      kind\n"
-            "      id\n"
-            "    }\n"
-            "    result {\n"
-            "      signupId\n"
-            "      state\n"
-            "      orgId\n"
-            "      deploymentId\n"
-            "      projectId\n"
-            "      nextStep\n"
-            "      scopes\n"
-            "      grantExpiresAt\n"
-            "      keys {\n"
-            "        operationId\n"
-            "        state\n"
-            "        scopes\n"
-            "        expiresAt\n"
-            "        keyId\n"
-            "        deliveryId\n"
-            "        deliveryExpiresAt\n"
-            "      }\n"
-            "      incarnation\n"
-            "      servingEpoch\n"
-            "    }\n"
-            "  }\n"
-            "}"
-        ),
-        input_type="ApproveAgentSignupRequestInput",
-        result_type="ApproveAgentSignupReply!",
-        returns="result",
-        idempotency="idempotent",
-        context={"requestId": "required", "projectId": "forbidden", "incarnation": "optional", "observedServingEpoch": "optional", "credentialDeliveryPermit": "forbidden"},
-        echo_path=("result",),
-        echo=(),
-        item_echo=(),
-        pagination=None,
-        long_running=None,
-        errors=("ADMISSION_LIMIT", "AGENTIC_NOT_CONFIGURED", "AGENT_CONFIRMATION_CODE_INVALID", "AGENT_SIGNUP_CLOSED", "AUTHORITY_UNAVAILABLE", "BILLING_PLAN_UNAVAILABLE", "FEATURE_UNSUPPORTED", "FORBIDDEN", "GRAPHQL_ERROR", "GRAPHQL_INVALID_REQUEST", "GRAPHQL_QUERY_LIMIT", "GRAPHQL_RESPONSE_LIMIT", "HTTP_FAILURE", "IDEMPOTENCY_CONFLICT", "INVALID_REQUEST", "INVALID_RESPONSE", "OUTCOME_UNKNOWN", "RECOVERY_LIMIT", "RECOVERY_STORAGE_FAILURE", "REQUEST_TOO_LARGE", "RESOLUTION_REQUIRED", "RESPONSE_TOO_LARGE", "RETRY_EXHAUSTED", "TRANSPORT_UNKNOWN", "UNAUTHENTICATED"),
-    ),
-    "management.issueAgentKey": OperationSpec(
-        id="management.issueAgentKey",
-        plane="management",
-        kind="mutation",
-        field="issueAgentKey",
-        operation_name="ManagementIssueAgentKey",
-        document=(
-            "mutation ManagementIssueAgentKey($context: RequestContextInput!, $input: IssueAgentKeyRequestInput!) {\n"
-            "  issueAgentKey(context: $context, input: $input) {\n"
-            "    status\n"
-            "    requestId\n"
-            "    serverTime\n"
-            "    receiptId\n"
-            "    committedAt\n"
-            "    replayed\n"
-            "    operation {\n"
-            "      operationId\n"
-            "      owner\n"
-            "      href\n"
-            "      state\n"
-            "    }\n"
-            "    resourceRef {\n"
-            "      kind\n"
-            "      id\n"
-            "    }\n"
-            "    result {\n"
-            "      operationId\n"
-            "      state\n"
-            "      scopes\n"
-            "      expiresAt\n"
-            "      keyId\n"
-            "      deliveryId\n"
-            "      deliveryExpiresAt\n"
-            "    }\n"
-            "  }\n"
-            "}"
-        ),
-        input_type="IssueAgentKeyRequestInput",
-        result_type="IssueAgentKeyReply!",
-        returns="result",
-        idempotency="replayOnly",
-        context={"requestId": "required", "projectId": "forbidden", "incarnation": "optional", "observedServingEpoch": "optional", "credentialDeliveryPermit": "forbidden"},
-        echo_path=("result",),
-        echo=(),
-        item_echo=(),
-        pagination=None,
-        long_running=None,
-        errors=("ADMISSION_LIMIT", "AGENTIC_NOT_CONFIGURED", "AGENT_GRANT_EXPIRED", "AGENT_GRANT_REVOKED", "AGENT_KEY_LIMIT", "AGENT_SCOPE_NOT_GRANTED", "AGENT_SIGNUP_NOT_READY", "AUTHORITY_UNAVAILABLE", "FEATURE_UNSUPPORTED", "FORBIDDEN", "GRAPHQL_ERROR", "GRAPHQL_INVALID_REQUEST", "GRAPHQL_QUERY_LIMIT", "GRAPHQL_RESPONSE_LIMIT", "HTTP_FAILURE", "IDEMPOTENCY_CONFLICT", "INVALID_REQUEST", "INVALID_RESPONSE", "OUTCOME_UNKNOWN", "RATE_LIMITED", "RECOVERY_LIMIT", "RECOVERY_STORAGE_FAILURE", "REQUEST_TOO_LARGE", "RESOLUTION_REQUIRED", "RESPONSE_TOO_LARGE", "RETRY_EXHAUSTED", "TRANSPORT_UNKNOWN", "UNAUTHENTICATED"),
-    ),
-    "management.agentCredentialPermit": OperationSpec(
-        id="management.agentCredentialPermit",
-        plane="management",
-        kind="mutation",
-        field="agentCredentialPermit",
-        operation_name="ManagementAgentCredentialPermit",
-        document=(
-            "mutation ManagementAgentCredentialPermit($context: RequestContextInput!, $input: AgentCredentialPermitRequestInput!) {\n"
-            "  agentCredentialPermit(context: $context, input: $input) {\n"
-            "    status\n"
-            "    requestId\n"
-            "    serverTime\n"
-            "    receiptId\n"
-            "    committedAt\n"
-            "    replayed\n"
-            "    operation {\n"
-            "      operationId\n"
-            "      owner\n"
-            "      href\n"
-            "      state\n"
-            "    }\n"
-            "    resourceRef {\n"
-            "      kind\n"
-            "      id\n"
-            "    }\n"
-            "    result\n"
-            "  }\n"
-            "}"
-        ),
-        input_type="AgentCredentialPermitRequestInput",
-        result_type="AgentCredentialPermitReply!",
-        returns="result",
-        idempotency="replayOnly",
-        context={"requestId": "required", "projectId": "forbidden", "incarnation": "optional", "observedServingEpoch": "optional", "credentialDeliveryPermit": "forbidden"},
-        echo_path=("result",),
-        echo=(),
-        item_echo=(),
-        pagination=None,
-        long_running=None,
-        errors=("ADMISSION_LIMIT", "AGENTIC_NOT_CONFIGURED", "AGENT_GRANT_EXPIRED", "AGENT_GRANT_REVOKED", "AGENT_SIGNUP_NOT_READY", "AUTHORITY_UNAVAILABLE", "CREDENTIAL_DELIVERY_EXPIRED", "FEATURE_UNSUPPORTED", "FORBIDDEN", "GRAPHQL_ERROR", "GRAPHQL_INVALID_REQUEST", "GRAPHQL_QUERY_LIMIT", "GRAPHQL_RESPONSE_LIMIT", "HTTP_FAILURE", "IDEMPOTENCY_CONFLICT", "INVALID_REQUEST", "INVALID_RESPONSE", "NOT_FOUND", "OUTCOME_UNKNOWN", "PERMIT_EXPIRED", "RATE_LIMITED", "RECOVERY_LIMIT", "RECOVERY_STORAGE_FAILURE", "REQUEST_TOO_LARGE", "RESOLUTION_REQUIRED", "RESPONSE_TOO_LARGE", "RETRY_EXHAUSTED", "TRANSPORT_UNKNOWN", "UNAUTHENTICATED"),
-    ),
-    "management.revokeAgentGrant": OperationSpec(
-        id="management.revokeAgentGrant",
-        plane="management",
-        kind="mutation",
-        field="revokeAgentGrant",
-        operation_name="ManagementRevokeAgentGrant",
-        document=(
-            "mutation ManagementRevokeAgentGrant($context: RequestContextInput!, $input: RevokeAgentGrantRequestInput!) {\n"
-            "  revokeAgentGrant(context: $context, input: $input) {\n"
-            "    status\n"
-            "    requestId\n"
-            "    serverTime\n"
-            "    receiptId\n"
-            "    committedAt\n"
-            "    replayed\n"
-            "    operation {\n"
-            "      operationId\n"
-            "      owner\n"
-            "      href\n"
-            "      state\n"
-            "    }\n"
-            "    resourceRef {\n"
-            "      kind\n"
-            "      id\n"
-            "    }\n"
-            "    result {\n"
-            "      grantId\n"
-            "      orgId\n"
-            "      signupId\n"
-            "      agentActorId\n"
-            "      projectId\n"
-            "      scopes\n"
-            "      expiresAt\n"
-            "      revokedAt\n"
-            "      createdAt\n"
-            "      keys {\n"
-            "        operationId\n"
-            "        state\n"
-            "        scopes\n"
-            "        expiresAt\n"
-            "        keyId\n"
-            "        deliveryId\n"
-            "        deliveryExpiresAt\n"
-            "      }\n"
-            "    }\n"
-            "  }\n"
-            "}"
-        ),
-        input_type="RevokeAgentGrantRequestInput",
-        result_type="RevokeAgentGrantReply!",
-        returns="result",
-        idempotency="idempotent",
-        context={"requestId": "required", "projectId": "forbidden", "incarnation": "optional", "observedServingEpoch": "optional", "credentialDeliveryPermit": "forbidden"},
-        echo_path=("result",),
-        echo=("grantId",),
-        item_echo=(),
-        pagination=None,
-        long_running=None,
-        errors=("ADMISSION_LIMIT", "AUTHORITY_UNAVAILABLE", "FEATURE_UNSUPPORTED", "FORBIDDEN", "GRAPHQL_ERROR", "GRAPHQL_INVALID_REQUEST", "GRAPHQL_QUERY_LIMIT", "GRAPHQL_RESPONSE_LIMIT", "HTTP_FAILURE", "IDEMPOTENCY_CONFLICT", "INVALID_REQUEST", "INVALID_RESPONSE", "NOT_FOUND", "OUTCOME_UNKNOWN", "RECOVERY_LIMIT", "RECOVERY_STORAGE_FAILURE", "REQUEST_TOO_LARGE", "RESOLUTION_REQUIRED", "RESPONSE_TOO_LARGE", "RETRY_EXHAUSTED", "TRANSPORT_UNKNOWN", "UNAUTHENTICATED"),
-    ),
-    "management.setSpendControls": OperationSpec(
-        id="management.setSpendControls",
-        plane="management",
-        kind="mutation",
-        field="setSpendControls",
-        operation_name="ManagementSetSpendControls",
-        document=(
-            "mutation ManagementSetSpendControls($context: RequestContextInput!, $input: SetSpendControlsRequestInput!) {\n"
-            "  setSpendControls(context: $context, input: $input) {\n"
-            "    status\n"
-            "    requestId\n"
-            "    serverTime\n"
-            "    receiptId\n"
-            "    committedAt\n"
-            "    replayed\n"
-            "    operation {\n"
-            "      operationId\n"
-            "      owner\n"
-            "      href\n"
-            "      state\n"
-            "    }\n"
-            "    resourceRef {\n"
-            "      kind\n"
-            "      id\n"
-            "    }\n"
-            "    result {\n"
-            "      orgId\n"
-            "      planId\n"
-            "      currency\n"
-            "      catalogVersion\n"
-            "      monthlySpendCap\n"
-            "      agentPurchaseLimit\n"
-            "      updatedAt\n"
-            "      monthlyMinimum\n"
-            "      periodStart\n"
-            "      periodEnd\n"
-            "      credits\n"
-            "      charges\n"
-            "      margin\n"
-            "      stop\n"
-            "      refusedMeters\n"
-            "      evaluatedAt\n"
-            "      usageThrough\n"
-            "      validUntil\n"
-            "      minimumCredit\n"
-            "      chargeLimit\n"
-            "    }\n"
-            "  }\n"
-            "}"
-        ),
-        input_type="SetSpendControlsRequestInput",
-        result_type="SetSpendControlsReply!",
-        returns="result",
-        idempotency="idempotent",
-        context={"requestId": "required", "projectId": "forbidden", "incarnation": "optional", "observedServingEpoch": "optional", "credentialDeliveryPermit": "forbidden"},
-        echo_path=("result",),
-        echo=("orgId",),
-        item_echo=(),
-        pagination=None,
-        long_running=None,
-        errors=("ADMISSION_LIMIT", "AUTHORITY_UNAVAILABLE", "BILLING_NOT_CONFIGURED", "BILLING_PLAN_UNAVAILABLE", "FEATURE_UNSUPPORTED", "FORBIDDEN", "GRAPHQL_ERROR", "GRAPHQL_INVALID_REQUEST", "GRAPHQL_QUERY_LIMIT", "GRAPHQL_RESPONSE_LIMIT", "HTTP_FAILURE", "IDEMPOTENCY_CONFLICT", "INVALID_REQUEST", "INVALID_RESPONSE", "NOT_FOUND", "OUTCOME_UNKNOWN", "RECOVERY_LIMIT", "RECOVERY_STORAGE_FAILURE", "REQUEST_TOO_LARGE", "RESOLUTION_REQUIRED", "RESPONSE_TOO_LARGE", "RETRY_EXHAUSTED", "TRANSPORT_UNKNOWN", "UNAUTHENTICATED"),
-    ),
-    "management.purchaseAgentCredits": OperationSpec(
-        id="management.purchaseAgentCredits",
-        plane="management",
-        kind="mutation",
-        field="purchaseAgentCredits",
-        operation_name="ManagementPurchaseAgentCredits",
-        document=(
-            "mutation ManagementPurchaseAgentCredits($context: RequestContextInput!, $input: PurchaseAgentCreditsRequestInput!) {\n"
-            "  purchaseAgentCredits(context: $context, input: $input) {\n"
-            "    status\n"
-            "    requestId\n"
-            "    serverTime\n"
-            "    receiptId\n"
-            "    committedAt\n"
-            "    replayed\n"
-            "    operation {\n"
-            "      operationId\n"
-            "      owner\n"
-            "      href\n"
-            "      state\n"
-            "    }\n"
-            "    resourceRef {\n"
-            "      kind\n"
-            "      id\n"
-            "    }\n"
-            "    result {\n"
-            "      paymentId\n"
-            "      amount\n"
-            "      currency\n"
-            "      state\n"
-            "    }\n"
-            "  }\n"
-            "}"
-        ),
-        input_type="PurchaseAgentCreditsRequestInput",
-        result_type="PurchaseAgentCreditsReply!",
-        returns="result",
-        idempotency="replayOnly",
-        context={"requestId": "required", "projectId": "forbidden", "incarnation": "optional", "observedServingEpoch": "optional", "credentialDeliveryPermit": "forbidden"},
-        echo_path=("result",),
-        echo=(),
-        item_echo=(),
-        pagination=None,
-        long_running=None,
-        errors=("ADMISSION_LIMIT", "AGENTIC_NOT_CONFIGURED", "AGENT_GRANT_EXPIRED", "AGENT_GRANT_REVOKED", "AGENT_PURCHASE_LIMIT_EXCEEDED", "AGENT_SIGNUP_NOT_READY", "AUTHORITY_UNAVAILABLE", "BILLING_CUSTOMER_MISSING", "BILLING_PROVIDER_REJECTED", "BILLING_SUSPENDED", "CREDITS_REQUIRE_METERED_PLAN", "CREDIT_AMOUNT_OUT_OF_RANGE", "CREDIT_GRANT_LIMIT_REACHED", "FEATURE_UNSUPPORTED", "FORBIDDEN", "GRAPHQL_ERROR", "GRAPHQL_INVALID_REQUEST", "GRAPHQL_QUERY_LIMIT", "GRAPHQL_RESPONSE_LIMIT", "HTTP_FAILURE", "IDEMPOTENCY_CONFLICT", "INVALID_REQUEST", "INVALID_RESPONSE", "OUTCOME_UNKNOWN", "PAYMENT_DECLINED", "PAYMENT_RAIL_NOT_CONFIGURED", "RATE_LIMITED", "RECOVERY_LIMIT", "RECOVERY_STORAGE_FAILURE", "REQUEST_TOO_LARGE", "RESOLUTION_REQUIRED", "RESPONSE_TOO_LARGE", "RETRY_EXHAUSTED", "TRANSPORT_UNKNOWN", "UNAUTHENTICATED"),
-    ),
 }
 """Operations a server runtime calls with a bearer credential or without a credential, by IR id."""
 
@@ -5742,86 +4895,6 @@ OBJECTS: Mapping[str, Mapping[str, str]] = {
         "committedAt": "String!",
         "replayed": "Boolean!",
         "result": "ConversationMemberBatch!",
-    },
-    "AgentAuditEvent": {
-        "eventId": "UUID!",
-        "orgId": "UUID!",
-        "grantId": "UUID",
-        "actorKind": "String!",
-        "actorId": "UUID",
-        "kind": "String!",
-        "details": "Properties",
-        "occurredAt": "String!",
-    },
-    "AgentAuditEventPage": {
-        "items": "[AgentAuditEvent!]!",
-        "complete": "Boolean!",
-        "refreshRequired": "Boolean!",
-        "nextCursor": "String",
-    },
-    "AgentGrant": {
-        "grantId": "UUID!",
-        "orgId": "UUID!",
-        "signupId": "UUID!",
-        "agentActorId": "UUID!",
-        "projectId": "UUID",
-        "scopes": "[String!]!",
-        "expiresAt": "String!",
-        "revokedAt": "String",
-        "createdAt": "String!",
-        "keys": "[AgentKey!]!",
-    },
-    "AgentGrantPage": {
-        "items": "[AgentGrant!]!",
-        "complete": "Boolean!",
-        "refreshRequired": "Boolean!",
-        "nextCursor": "String",
-    },
-    "AgentKey": {
-        "operationId": "UUID!",
-        "state": "String!",
-        "scopes": "[String!]!",
-        "expiresAt": "String!",
-        "keyId": "String",
-        "deliveryId": "UUID",
-        "deliveryExpiresAt": "String",
-    },
-    "AgentPayment": {
-        "paymentId": "UUID!",
-        "amount": "String!",
-        "currency": "String!",
-        "state": "String!",
-    },
-    "AgentSignupReview": {
-        "signupId": "UUID!",
-        "ownerEmail": "String!",
-        "organizationName": "String!",
-        "agentName": "String!",
-        "purpose": "String",
-        "suggestedPlan": "String",
-        "suggestedScopes": "[String!]!",
-        "suggestedMonthlySpendCap": "String",
-        "currency": "String!",
-        "expiresAt": "String!",
-    },
-    "AgentSignupStatus": {
-        "signupId": "UUID!",
-        "state": "String!",
-        "orgId": "UUID",
-        "deploymentId": "UUID",
-        "projectId": "UUID",
-        "nextStep": "String",
-        "scopes": "[String!]!",
-        "grantExpiresAt": "String",
-        "keys": "[AgentKey!]!",
-        "incarnation": "UUID",
-        "servingEpoch": "Decimal",
-    },
-    "AgentSignupTicket": {
-        "signupId": "UUID!",
-        "confirmationCode": "String!",
-        "expiresAt": "String!",
-        "pollAfterSeconds": "Int!",
     },
     "AlertLiveSessionPayload": {
         "status": "String!",
@@ -6421,28 +5494,6 @@ OBJECTS: Mapping[str, Mapping[str, str]] = {
         "refreshRequired": "Boolean!",
         "nextCursor": "String",
     },
-    "OrganizationSpend": {
-        "orgId": "UUID!",
-        "planId": "String!",
-        "currency": "String!",
-        "catalogVersion": "String!",
-        "monthlySpendCap": "String",
-        "agentPurchaseLimit": "String",
-        "updatedAt": "String",
-        "monthlyMinimum": "String",
-        "periodStart": "String",
-        "periodEnd": "String",
-        "credits": "String",
-        "charges": "String",
-        "margin": "String",
-        "stop": "String",
-        "refusedMeters": "[String!]!",
-        "evaluatedAt": "String",
-        "usageThrough": "String",
-        "validUntil": "String",
-        "minimumCredit": "String",
-        "chargeLimit": "String",
-    },
     "OrganizationUsage": {
         "orgId": "UUID!",
         "source": "String!",
@@ -6548,8 +5599,6 @@ OBJECTS: Mapping[str, Mapping[str, str]] = {
         "id": "String!",
     },
     "RetainedResult": {
-        "agentGrant": "AgentGrant",
-        "agentSignupStatus": "AgentSignupStatus",
         "billingCheckoutSession": "BillingCheckoutSession",
         "billingPortalSession": "BillingPortalSession",
         "broadcastPermissionChanged": "BroadcastPermissionChanged",
@@ -6568,7 +5617,6 @@ OBJECTS: Mapping[str, Mapping[str, str]] = {
         "message": "Message",
         "messageAck": "MessageAck",
         "organization": "Organization",
-        "organizationSpend": "OrganizationSpend",
         "principal": "Principal",
         "readReceipt": "ReadReceipt",
         "sessionBootstrap": "SessionBootstrap",
@@ -6754,72 +5802,6 @@ OBJECTS: Mapping[str, Mapping[str, str]] = {
         "observedAt": "String",
         "partialReason": "String",
     },
-    "AgentAuditEventsReply": {
-        "status": "String!",
-        "requestId": "UUID!",
-        "serverTime": "String",
-        "receiptId": "UUID",
-        "committedAt": "String",
-        "replayed": "Boolean",
-        "operation": "OperationRef",
-        "resourceRef": "ResourceRef",
-        "result": "AgentAuditEventPage",
-    },
-    "AgentCredentialPermitReply": {
-        "status": "String!",
-        "requestId": "UUID!",
-        "serverTime": "String",
-        "receiptId": "UUID",
-        "committedAt": "String",
-        "replayed": "Boolean",
-        "operation": "OperationRef",
-        "resourceRef": "ResourceRef",
-        "result": "SignedProof",
-    },
-    "AgentGrantsReply": {
-        "status": "String!",
-        "requestId": "UUID!",
-        "serverTime": "String",
-        "receiptId": "UUID",
-        "committedAt": "String",
-        "replayed": "Boolean",
-        "operation": "OperationRef",
-        "resourceRef": "ResourceRef",
-        "result": "AgentGrantPage",
-    },
-    "AgentSignupForApprovalReply": {
-        "status": "String!",
-        "requestId": "UUID!",
-        "serverTime": "String",
-        "receiptId": "UUID",
-        "committedAt": "String",
-        "replayed": "Boolean",
-        "operation": "OperationRef",
-        "resourceRef": "ResourceRef",
-        "result": "AgentSignupReview",
-    },
-    "AgentSignupReply": {
-        "status": "String!",
-        "requestId": "UUID!",
-        "serverTime": "String",
-        "receiptId": "UUID",
-        "committedAt": "String",
-        "replayed": "Boolean",
-        "operation": "OperationRef",
-        "resourceRef": "ResourceRef",
-        "result": "AgentSignupStatus",
-    },
-    "ApproveAgentSignupReply": {
-        "status": "String!",
-        "requestId": "UUID!",
-        "serverTime": "String",
-        "receiptId": "UUID",
-        "committedAt": "String",
-        "replayed": "Boolean",
-        "operation": "OperationRef",
-        "resourceRef": "ResourceRef",
-        "result": "AgentSignupStatus",
-    },
     "ConfigureWebhookReply": {
         "status": "String!",
         "requestId": "UUID!",
@@ -6963,17 +5945,6 @@ OBJECTS: Mapping[str, Mapping[str, str]] = {
         "resourceRef": "ResourceRef",
         "result": "Project",
     },
-    "IssueAgentKeyReply": {
-        "status": "String!",
-        "requestId": "UUID!",
-        "serverTime": "String",
-        "receiptId": "UUID",
-        "committedAt": "String",
-        "replayed": "Boolean",
-        "operation": "OperationRef",
-        "resourceRef": "ResourceRef",
-        "result": "AgentKey",
-    },
     "IssueBackendKeyReply": {
         "status": "String!",
         "requestId": "UUID!",
@@ -6995,17 +5966,6 @@ OBJECTS: Mapping[str, Mapping[str, str]] = {
         "operation": "OperationRef",
         "resourceRef": "ResourceRef",
         "result": "OrganizationBilling",
-    },
-    "OrganizationSpendReply": {
-        "status": "String!",
-        "requestId": "UUID!",
-        "serverTime": "String",
-        "receiptId": "UUID",
-        "committedAt": "String",
-        "replayed": "Boolean",
-        "operation": "OperationRef",
-        "resourceRef": "ResourceRef",
-        "result": "OrganizationSpend",
     },
     "OrganizationUsageReply": {
         "status": "String!",
@@ -7062,28 +6022,6 @@ OBJECTS: Mapping[str, Mapping[str, str]] = {
         "resourceRef": "ResourceRef",
         "result": "ProjectUsage",
     },
-    "PurchaseAgentCreditsReply": {
-        "status": "String!",
-        "requestId": "UUID!",
-        "serverTime": "String",
-        "receiptId": "UUID",
-        "committedAt": "String",
-        "replayed": "Boolean",
-        "operation": "OperationRef",
-        "resourceRef": "ResourceRef",
-        "result": "AgentPayment",
-    },
-    "RejectAgentSignupReply": {
-        "status": "String!",
-        "requestId": "UUID!",
-        "serverTime": "String",
-        "receiptId": "UUID",
-        "committedAt": "String",
-        "replayed": "Boolean",
-        "operation": "OperationRef",
-        "resourceRef": "ResourceRef",
-        "result": "AgentSignupStatus",
-    },
     "ReplayWebhookDeliveriesReply": {
         "status": "String!",
         "requestId": "UUID!",
@@ -7095,17 +6033,6 @@ OBJECTS: Mapping[str, Mapping[str, str]] = {
         "resourceRef": "ResourceRef",
         "result": "OperationResult",
     },
-    "RequestAgentSignupReply": {
-        "status": "String!",
-        "requestId": "UUID!",
-        "serverTime": "String",
-        "receiptId": "UUID",
-        "committedAt": "String",
-        "replayed": "Boolean",
-        "operation": "OperationRef",
-        "resourceRef": "ResourceRef",
-        "result": "AgentSignupTicket",
-    },
     "ResumeOperationReply": {
         "status": "String!",
         "requestId": "UUID!",
@@ -7116,17 +6043,6 @@ OBJECTS: Mapping[str, Mapping[str, str]] = {
         "operation": "OperationRef",
         "resourceRef": "ResourceRef",
         "result": "Operation",
-    },
-    "RevokeAgentGrantReply": {
-        "status": "String!",
-        "requestId": "UUID!",
-        "serverTime": "String",
-        "receiptId": "UUID",
-        "committedAt": "String",
-        "replayed": "Boolean",
-        "operation": "OperationRef",
-        "resourceRef": "ResourceRef",
-        "result": "AgentGrant",
     },
     "RevokeBackendKeyReply": {
         "status": "String!",
@@ -7149,17 +6065,6 @@ OBJECTS: Mapping[str, Mapping[str, str]] = {
         "operation": "OperationRef",
         "resourceRef": "ResourceRef",
         "result": "OperationResult",
-    },
-    "SetSpendControlsReply": {
-        "status": "String!",
-        "requestId": "UUID!",
-        "serverTime": "String",
-        "receiptId": "UUID",
-        "committedAt": "String",
-        "replayed": "Boolean",
-        "operation": "OperationRef",
-        "resourceRef": "ResourceRef",
-        "result": "OrganizationSpend",
     },
     "UpdateWebhookReply": {
         "status": "String!",
@@ -7394,33 +6299,6 @@ INPUTS: Mapping[str, Mapping[str, tuple[str, bool]]] = {
         "title": ("String", False),
         "props": ("Properties", False),
     },
-    "AgentAuditEventsRequestInput": {
-        "orgId": ("UUID!", False),
-        "limit": ("PageSize!", True),
-        "cursor": ("String", False),
-    },
-    "AgentCredentialPermitRequestInput": {
-        "deliveryId": ("UUID!", False),
-        "redemptionRequestId": ("UUID!", False),
-    },
-    "AgentGrantsRequestInput": {
-        "orgId": ("UUID!", False),
-        "limit": ("PageSize!", True),
-        "cursor": ("String", False),
-    },
-    "AgentSignupForApprovalRequestInput": {
-        "approvalToken": ("String!", False),
-    },
-    "ApproveAgentSignupRequestInput": {
-        "approvalToken": ("String!", False),
-        "confirmationCode": ("String!", False),
-        "termsRef": ("String!", False),
-        "plan": ("String!", False),
-        "scopes": ("[String!]!", False),
-        "monthlySpendCap": ("String!", False),
-        "agentPurchaseLimit": ("String", False),
-        "grantExpiresAt": ("String", False),
-    },
     "ConfigureWebhookRequestInput": {
         "projectId": ("UUID!", False),
         "url": ("String!", False),
@@ -7478,10 +6356,6 @@ INPUTS: Mapping[str, Mapping[str, tuple[str, bool]]] = {
     "GetProjectRequestInput": {
         "projectId": ("UUID!", False),
     },
-    "IssueAgentKeyRequestInput": {
-        "scopes": ("[String!]!", False),
-        "expiresAt": ("String", False),
-    },
     "IssueBackendKeyRequestInput": {
         "projectId": ("UUID!", False),
         "name": ("String!", False),
@@ -7489,9 +6363,6 @@ INPUTS: Mapping[str, Mapping[str, tuple[str, bool]]] = {
         "expiresAt": ("String!", False),
     },
     "OrganizationBillingRequestInput": {
-        "orgId": ("UUID!", False),
-    },
-    "OrganizationSpendRequestInput": {
         "orgId": ("UUID!", False),
     },
     "OrganizationUsageRequestInput": {
@@ -7513,14 +6384,6 @@ INPUTS: Mapping[str, Mapping[str, tuple[str, bool]]] = {
         "from": ("String", False),
         "to": ("String", False),
     },
-    "PurchaseAgentCreditsRequestInput": {
-        "amount": ("String!", False),
-        "sharedPaymentToken": ("String!", False),
-    },
-    "RejectAgentSignupRequestInput": {
-        "approvalToken": ("String!", False),
-        "suppressFutureRequests": ("Boolean!", False),
-    },
     "ReplayWebhookDeliveriesRequestInput": {
         "projectId": ("UUID!", False),
         "endpointId": ("UUID!", False),
@@ -7528,23 +6391,9 @@ INPUTS: Mapping[str, Mapping[str, tuple[str, bool]]] = {
         "since": ("String", False),
         "until": ("String", False),
     },
-    "RequestAgentSignupRequestInput": {
-        "ownerEmail": ("String!", False),
-        "pollChallenge": ("String!", False),
-        "organizationName": ("String!", False),
-        "agentName": ("String!", False),
-        "purpose": ("String", False),
-        "suggestedPlan": ("String", False),
-        "suggestedScopes": ("[String!]!", False),
-        "suggestedMonthlySpendCap": ("String", False),
-    },
     "ResumeOperationRequestInput": {
         "operationId": ("UUID!", False),
         "expectedRevision": ("Decimal!", False),
-    },
-    "RevokeAgentGrantRequestInput": {
-        "grantId": ("UUID!", False),
-        "revokeIssuedSessions": ("Boolean!", False),
     },
     "RevokeBackendKeyRequestInput": {
         "projectId": ("UUID!", False),
@@ -7556,11 +6405,6 @@ INPUTS: Mapping[str, Mapping[str, tuple[str, bool]]] = {
         "projectId": ("UUID!", False),
         "endpointId": ("UUID!", False),
         "expectedRevision": ("Decimal!", False),
-    },
-    "SetSpendControlsRequestInput": {
-        "orgId": ("UUID!", False),
-        "monthlySpendCap": ("String!", False),
-        "agentPurchaseLimit": ("String", False),
     },
     "UpdateWebhookRequestInput": {
         "projectId": ("UUID!", False),
@@ -7583,8 +6427,8 @@ INPUTS: Mapping[str, Mapping[str, tuple[str, bool]]] = {
 SCALARS: Mapping[str, ScalarSpec] = {
     "String": ScalarSpec(representation="string"),
     "Boolean": ScalarSpec(representation="boolean"),
-    "Int": ScalarSpec(representation="integer"),
     "Decimal": ScalarSpec(representation="string", pattern="^(0|[1-9][0-9]*)$", maximum_decimal="9223372036854775807"),
+    "Int": ScalarSpec(representation="integer"),
     "PageSize": ScalarSpec(representation="integer", minimum=1, maximum=100),
     "Properties": ScalarSpec(representation="object", max_canonical_json_bytes=8192),
     "SignedProof": ScalarSpec(representation="object", max_canonical_json_bytes=32768, required_string_properties=("signature",)),

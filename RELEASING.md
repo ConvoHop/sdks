@@ -410,15 +410,25 @@ For npm:
    Provenance needs a CI identity, so these first versions don't have it.
 3. Configure a trusted publisher for each package: owner `ConvoHop`,
    repository `sdks`, workflow filename `release.yml`, environment `npm`.
-   Grant permission for **direct `npm publish`**, not staged publishing
-   only. Set publishing access to require two-factor authentication and
-   disallow tokens. Configure trust close to the next approved release:
-   current npm policy expires new trust without a first successful publish
-   within two days.
+   Each published package's `repository.url` must match this repository:
+   `git+https://github.com/ConvoHop/sdks.git`. The product domain and a
+   consumer's repository are not substitutes for that identity.
+   Configurations created after 2026-09-03 default to allowing
+   `npm stage publish`; explicitly allow **direct `npm publish`** for this
+   workflow. Set publishing access to require two-factor authentication
+   and disallow tokens. Saving the configuration does not verify its
+   settings. Wait until package ownership, the reviewed candidate,
+   environment protection and publication approval are ready before
+   creating trust: its first successful publish must validate the new
+   configuration within two days or it expires. Do not configure trust
+   while those prerequisites remain held.
 4. Protect the `npm` environment before use, then set repository variable
    `NPM_PUBLISH_ENABLED=true`. No source edit or stored npm token is needed.
-   The existing workflow requires npm 11.5.1+ and Node 22.14+; it uses Node 24
-   on a GitHub-hosted runner. Approve the next tagged version explicitly:
+   Trusted publishing requires npm CLI 11.5.1+ and Node 22.14.0+ on a
+   GitHub-hosted runner, not a self-hosted runner. The existing workflow uses
+   Node 24 and checks the npm CLI minimum before contacting the registry.
+   Generic `id-token: write` permission alone does not establish npm trust.
+   Approve the next tagged version explicitly:
 
    ```sh
    gh workflow run release.yml --repo ConvoHop/sdks --ref core-v0.2.0 \
@@ -511,13 +521,30 @@ authentication, production service compatibility or real native media.
 
 ### Source and deployment compatibility
 
-The source catalog contains 92 operations. The last confirmed backend
-consumer pins public SDK commit
-`d11bae63e3496f1b17e5041e3d45424cdc9a5c7c`, whose catalog has 79.
-The additional 13 agent/spend-management fields are not confirmed deployed.
-Generated methods do not establish runtime parity; qualify the intended
-deployment before release and record its supported operations. No backend
-pin, authority schema or business contract is changed by this branding work.
+The first-launch contract uses the authority-exported inputs preserved at
+public SDK commit `d11bae63e3496f1b17e5041e3d45424cdc9a5c7c`:
+49 Communication operations and 30 Management operations. The historical
+92-operation candidate at `7018879a644bdab5f7ae110b8a8069d3747adbfe`
+and its evidence remain future-contract work, not launch qualification.
+Its 13 additional agent/spend-management operations must not enter launch
+catalogs, generated models, CLI/MCP listings or API documentation.
+
+This is also a recovery boundary. Both historical `resolveRequest` documents
+select `agentGrant`, `agentSignupStatus` and `organizationSpend`, which are
+absent from the launch schema. An authority with that schema rejects the
+whole query, including lookups of ordinary chat requests. Regenerate both
+documents and response shapes from the complete launch inputs; never remove
+only methods, trim emitted queries, weaken nullable-field validation or skip
+read-before-resend.
+
+Follow the [contract update sequence](docs/sdk-generation.md#launch-contract).
+Do not freeze or publish an input-only correction with stale generated code,
+goldens, language surfaces or site files. Existing error policies, credential
+rules, request identity, retry budgets and recovery protections remain in
+place. Known error codes alone do not establish feature availability.
+Generated methods do not establish runtime parity; independently qualify the
+intended deployment before release. This SDK correction changes no backend
+pin, deployed authority or business implementation.
 
 The product/API prefix is `Relay`; registry names use `instantrelay` or
 `dev.instantrelay` to avoid occupied plain `relay` names. Update source

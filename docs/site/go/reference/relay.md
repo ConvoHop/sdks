@@ -102,284 +102,6 @@ type AddMembersPayload struct {
 
 AddMembersPayload is the GraphQL object AddMembersPayload.
 
-### `AgentAuditEvent` struct
-
-```go
-type AgentAuditEvent struct {
-	EventID    UUID       `json:"eventId"`
-	OrgID      UUID       `json:"orgId"`
-	GrantID    *UUID      `json:"grantId"`
-	ActorKind  string     `json:"actorKind"`
-	ActorID    *UUID      `json:"actorId"`
-	Kind       string     `json:"kind"`
-	Details    Properties `json:"details"`
-	OccurredAt string     `json:"occurredAt"`
-}
-```
-
-AgentAuditEvent is the GraphQL object AgentAuditEvent.
-
-### `AgentAuditEventPage` struct
-
-```go
-type AgentAuditEventPage struct {
-	Items           []AgentAuditEvent `json:"items"`
-	Complete        bool              `json:"complete"`
-	RefreshRequired bool              `json:"refreshRequired"`
-	NextCursor      *string           `json:"nextCursor"`
-}
-```
-
-AgentAuditEventPage is the GraphQL object AgentAuditEventPage.
-
-### `AgentAuditEventsReply` struct
-
-```go
-type AgentAuditEventsReply struct {
-	Status      string               `json:"status"`
-	RequestID   UUID                 `json:"requestId"`
-	ServerTime  *string              `json:"serverTime"`
-	ReceiptID   *UUID                `json:"receiptId"`
-	CommittedAt *string              `json:"committedAt"`
-	Replayed    *bool                `json:"replayed"`
-	Operation   *OperationRef        `json:"operation"`
-	ResourceRef *ResourceRef         `json:"resourceRef"`
-	Result      *AgentAuditEventPage `json:"result"`
-}
-```
-
-AgentAuditEventsReply is the GraphQL object AgentAuditEventsReply.
-
-### `AgentAuditEventsRequestInput` struct
-
-```go
-type AgentAuditEventsRequestInput struct {
-	OrgID  UUID      `json:"orgId"`
-	Limit  *PageSize `json:"limit,omitzero"`
-	Cursor *string   `json:"cursor,omitzero"`
-}
-```
-
-AgentAuditEventsRequestInput is the GraphQL input AgentAuditEventsRequestInput.
-
-### `AgentCredentialPermitReply` struct
-
-```go
-type AgentCredentialPermitReply struct {
-	Status      string        `json:"status"`
-	RequestID   UUID          `json:"requestId"`
-	ServerTime  *string       `json:"serverTime"`
-	ReceiptID   *UUID         `json:"receiptId"`
-	CommittedAt *string       `json:"committedAt"`
-	Replayed    *bool         `json:"replayed"`
-	Operation   *OperationRef `json:"operation"`
-	ResourceRef *ResourceRef  `json:"resourceRef"`
-	Result      SignedProof   `json:"result"`
-}
-```
-
-AgentCredentialPermitReply is the GraphQL object AgentCredentialPermitReply.
-
-### `AgentCredentialPermitRequestInput` struct
-
-```go
-type AgentCredentialPermitRequestInput struct {
-	DeliveryID          UUID `json:"deliveryId"`
-	RedemptionRequestID UUID `json:"redemptionRequestId"`
-}
-```
-
-AgentCredentialPermitRequestInput is the GraphQL input AgentCredentialPermitRequestInput.
-
-### `AgentGrant` struct
-
-```go
-type AgentGrant struct {
-	GrantID      UUID       `json:"grantId"`
-	OrgID        UUID       `json:"orgId"`
-	SignupID     UUID       `json:"signupId"`
-	AgentActorID UUID       `json:"agentActorId"`
-	ProjectID    *UUID      `json:"projectId"`
-	Scopes       []string   `json:"scopes"`
-	ExpiresAt    string     `json:"expiresAt"`
-	RevokedAt    *string    `json:"revokedAt"`
-	CreatedAt    string     `json:"createdAt"`
-	Keys         []AgentKey `json:"keys"`
-}
-```
-
-AgentGrant is the GraphQL object AgentGrant.
-
-### `AgentGrantPage` struct
-
-```go
-type AgentGrantPage struct {
-	Items           []AgentGrant `json:"items"`
-	Complete        bool         `json:"complete"`
-	RefreshRequired bool         `json:"refreshRequired"`
-	NextCursor      *string      `json:"nextCursor"`
-}
-```
-
-AgentGrantPage is the GraphQL object AgentGrantPage.
-
-### `AgentGrantsReply` struct
-
-```go
-type AgentGrantsReply struct {
-	Status      string          `json:"status"`
-	RequestID   UUID            `json:"requestId"`
-	ServerTime  *string         `json:"serverTime"`
-	ReceiptID   *UUID           `json:"receiptId"`
-	CommittedAt *string         `json:"committedAt"`
-	Replayed    *bool           `json:"replayed"`
-	Operation   *OperationRef   `json:"operation"`
-	ResourceRef *ResourceRef    `json:"resourceRef"`
-	Result      *AgentGrantPage `json:"result"`
-}
-```
-
-AgentGrantsReply is the GraphQL object AgentGrantsReply.
-
-### `AgentGrantsRequestInput` struct
-
-```go
-type AgentGrantsRequestInput struct {
-	OrgID  UUID      `json:"orgId"`
-	Limit  *PageSize `json:"limit,omitzero"`
-	Cursor *string   `json:"cursor,omitzero"`
-}
-```
-
-AgentGrantsRequestInput is the GraphQL input AgentGrantsRequestInput.
-
-### `AgentKey` struct
-
-```go
-type AgentKey struct {
-	OperationID       UUID     `json:"operationId"`
-	State             string   `json:"state"`
-	Scopes            []string `json:"scopes"`
-	ExpiresAt         string   `json:"expiresAt"`
-	KeyID             *string  `json:"keyId"`
-	DeliveryID        *UUID    `json:"deliveryId"`
-	DeliveryExpiresAt *string  `json:"deliveryExpiresAt"`
-}
-```
-
-AgentKey is the GraphQL object AgentKey.
-
-### `AgentPayment` struct
-
-```go
-type AgentPayment struct {
-	PaymentID UUID   `json:"paymentId"`
-	Amount    string `json:"amount"`
-	Currency  string `json:"currency"`
-	State     string `json:"state"`
-}
-```
-
-AgentPayment is the GraphQL object AgentPayment.
-
-### `AgentSignupForApprovalReply` struct
-
-```go
-type AgentSignupForApprovalReply struct {
-	Status      string             `json:"status"`
-	RequestID   UUID               `json:"requestId"`
-	ServerTime  *string            `json:"serverTime"`
-	ReceiptID   *UUID              `json:"receiptId"`
-	CommittedAt *string            `json:"committedAt"`
-	Replayed    *bool              `json:"replayed"`
-	Operation   *OperationRef      `json:"operation"`
-	ResourceRef *ResourceRef       `json:"resourceRef"`
-	Result      *AgentSignupReview `json:"result"`
-}
-```
-
-AgentSignupForApprovalReply is the GraphQL object AgentSignupForApprovalReply.
-
-### `AgentSignupForApprovalRequestInput` struct
-
-```go
-type AgentSignupForApprovalRequestInput struct {
-	ApprovalToken string `json:"approvalToken"`
-}
-```
-
-AgentSignupForApprovalRequestInput is the GraphQL input AgentSignupForApprovalRequestInput.
-
-### `AgentSignupReply` struct
-
-```go
-type AgentSignupReply struct {
-	Status      string             `json:"status"`
-	RequestID   UUID               `json:"requestId"`
-	ServerTime  *string            `json:"serverTime"`
-	ReceiptID   *UUID              `json:"receiptId"`
-	CommittedAt *string            `json:"committedAt"`
-	Replayed    *bool              `json:"replayed"`
-	Operation   *OperationRef      `json:"operation"`
-	ResourceRef *ResourceRef       `json:"resourceRef"`
-	Result      *AgentSignupStatus `json:"result"`
-}
-```
-
-AgentSignupReply is the GraphQL object AgentSignupReply.
-
-### `AgentSignupReview` struct
-
-```go
-type AgentSignupReview struct {
-	SignupID                 UUID     `json:"signupId"`
-	OwnerEmail               string   `json:"ownerEmail"`
-	OrganizationName         string   `json:"organizationName"`
-	AgentName                string   `json:"agentName"`
-	Purpose                  *string  `json:"purpose"`
-	SuggestedPlan            *string  `json:"suggestedPlan"`
-	SuggestedScopes          []string `json:"suggestedScopes"`
-	SuggestedMonthlySpendCap *string  `json:"suggestedMonthlySpendCap"`
-	Currency                 string   `json:"currency"`
-	ExpiresAt                string   `json:"expiresAt"`
-}
-```
-
-AgentSignupReview is the GraphQL object AgentSignupReview.
-
-### `AgentSignupStatus` struct
-
-```go
-type AgentSignupStatus struct {
-	SignupID       UUID       `json:"signupId"`
-	State          string     `json:"state"`
-	OrgID          *UUID      `json:"orgId"`
-	DeploymentID   *UUID      `json:"deploymentId"`
-	ProjectID      *UUID      `json:"projectId"`
-	NextStep       *string    `json:"nextStep"`
-	Scopes         []string   `json:"scopes"`
-	GrantExpiresAt *string    `json:"grantExpiresAt"`
-	Keys           []AgentKey `json:"keys"`
-	Incarnation    *UUID      `json:"incarnation"`
-	ServingEpoch   *Decimal   `json:"servingEpoch"`
-}
-```
-
-AgentSignupStatus is the GraphQL object AgentSignupStatus.
-
-### `AgentSignupTicket` struct
-
-```go
-type AgentSignupTicket struct {
-	SignupID         UUID   `json:"signupId"`
-	ConfirmationCode string `json:"confirmationCode"`
-	ExpiresAt        string `json:"expiresAt"`
-	PollAfterSeconds int64  `json:"pollAfterSeconds"`
-}
-```
-
-AgentSignupTicket is the GraphQL object AgentSignupTicket.
-
 ### `AlertLiveSessionInput` struct
 
 ```go
@@ -406,41 +128,6 @@ type AlertLiveSessionPayload struct {
 ```
 
 AlertLiveSessionPayload is the GraphQL object AlertLiveSessionPayload.
-
-### `ApproveAgentSignupReply` struct
-
-```go
-type ApproveAgentSignupReply struct {
-	Status      string             `json:"status"`
-	RequestID   UUID               `json:"requestId"`
-	ServerTime  *string            `json:"serverTime"`
-	ReceiptID   *UUID              `json:"receiptId"`
-	CommittedAt *string            `json:"committedAt"`
-	Replayed    *bool              `json:"replayed"`
-	Operation   *OperationRef      `json:"operation"`
-	ResourceRef *ResourceRef       `json:"resourceRef"`
-	Result      *AgentSignupStatus `json:"result"`
-}
-```
-
-ApproveAgentSignupReply is the GraphQL object ApproveAgentSignupReply.
-
-### `ApproveAgentSignupRequestInput` struct
-
-```go
-type ApproveAgentSignupRequestInput struct {
-	ApprovalToken      string   `json:"approvalToken"`
-	ConfirmationCode   string   `json:"confirmationCode"`
-	TermsRef           string   `json:"termsRef"`
-	Plan               string   `json:"plan"`
-	Scopes             []string `json:"scopes"`
-	MonthlySpendCap    string   `json:"monthlySpendCap"`
-	AgentPurchaseLimit *string  `json:"agentPurchaseLimit,omitzero"`
-	GrantExpiresAt     *string  `json:"grantExpiresAt,omitzero"`
-}
-```
-
-ApproveAgentSignupRequestInput is the GraphQL input ApproveAgentSignupRequestInput.
 
 ### `BillingCheckoutSession` struct
 
@@ -1515,35 +1202,6 @@ type InboxRequestInput struct {
 
 InboxRequestInput is the GraphQL input InboxRequestInput.
 
-### `IssueAgentKeyReply` struct
-
-```go
-type IssueAgentKeyReply struct {
-	Status      string        `json:"status"`
-	RequestID   UUID          `json:"requestId"`
-	ServerTime  *string       `json:"serverTime"`
-	ReceiptID   *UUID         `json:"receiptId"`
-	CommittedAt *string       `json:"committedAt"`
-	Replayed    *bool         `json:"replayed"`
-	Operation   *OperationRef `json:"operation"`
-	ResourceRef *ResourceRef  `json:"resourceRef"`
-	Result      *AgentKey     `json:"result"`
-}
-```
-
-IssueAgentKeyReply is the GraphQL object IssueAgentKeyReply.
-
-### `IssueAgentKeyRequestInput` struct
-
-```go
-type IssueAgentKeyRequestInput struct {
-	Scopes    []string `json:"scopes"`
-	ExpiresAt *string  `json:"expiresAt,omitzero"`
-}
-```
-
-IssueAgentKeyRequestInput is the GraphQL input IssueAgentKeyRequestInput.
-
 ### `IssueBackendKeyReply` struct
 
 ```go
@@ -1966,7 +1624,7 @@ type ManagementClient struct {
 
 ManagementClient calls the management plane. Organizations, deployments, projects, backend keys and webhooks.
 
-Bearer credential: portalCredential. Operator credential for the management plane. Server runtimes only. Anonymous credential: anonymous. No credential. The edge limits the caller by its network address, and the operation's input carries the capability. Bearer credential: agentVerifier. Secret verifier an agent generates before requestAgentSignup: ag\_ followed by 32 random bytes in base64url, whose base64url SHA-256 digest is the request's pollChallenge. It authenticates the agent to its own signup and grant on the management plane only; the communication plane refuses it. Server runtimes only.
+Bearer credential: portalCredential. Operator credential for the management plane. Server runtimes only.
 
 #### `ManagementClient.Retry` method
 
@@ -2151,72 +1809,6 @@ GetOperation calls the management.getOperation query. Read the state of a long-r
 Idempotency: safe. Read-only. Repeat freely; each attempt may use a new requestId. Authorized by portalCredential (condition: owner).
 
 Sends [`management.getOperation`](../../operations/management/getOperation.md).
-
-#### `ManagementClient.AgentSignupForApproval` method
-
-```go
-func (c *ManagementClient) AgentSignupForApproval(ctx context.Context, input AgentSignupForApprovalRequestInput, opts ...CallOption) (*AgentSignupForApprovalReply, error)
-```
-
-AgentSignupForApproval calls the management.agentSignupForApproval query. Read a pending agent signup request for its approval page, with the agent's suggested plan, scopes and monthly spend cap.
-
-Idempotency: safe. Read-only. Repeat freely; each attempt may use a new requestId. Sent without a bearer token as anonymous (condition: approvalToken).
-
-#### `ManagementClient.AgentSignup` method
-
-```go
-func (c *ManagementClient) AgentSignup(ctx context.Context, opts ...CallOption) (*AgentSignupReply, error)
-```
-
-AgentSignup calls the management.agentSignup query. Read the agent's own signup: its state and, once approved, the organization, project, grant scopes and expiry, and keys. Poll no more often than the ticket's pollAfterSeconds.
-
-Idempotency: safe. Read-only. Repeat freely; each attempt may use a new requestId. Authorized by agentVerifier (condition: ownSignup).
-
-#### `ManagementClient.AgentGrants` method
-
-```go
-func (c *ManagementClient) AgentGrants(ctx context.Context, input AgentGrantsRequestInput, opts ...CallOption) (*AgentGrantsReply, error)
-```
-
-AgentGrants calls the management.agentGrants query. List an organization's agent grants with their keys, newest first.
-
-Idempotency: safe. Read-only. Repeat freely; each attempt may use a new requestId. Pagination: cursor. Server-ordered pages. Pass nextCursor back as the cursor input until complete is true. `ManagementClient.AgentGrantsPages` iterates over the pages. Authorized by portalCredential (condition: owner).
-
-#### `ManagementClient.AgentGrantsPages` method
-
-```go
-func (c *ManagementClient) AgentGrantsPages(ctx context.Context, input AgentGrantsRequestInput) iter.Seq2[*AgentGrantPage, error]
-```
-
-AgentGrantsPages iterates over the pages of `ManagementClient.AgentGrants`, starting at input.Cursor. Each page is a new request with a new request ID. Iteration stops after the complete page or at the first error. A page that requires a refresh yields `ErrRefreshRequired` and stops. An incomplete page whose next cursor is missing, malformed or doesn't advance yields an INVALID_RESPONSE `Problem` in place of the page and stops.
-
-#### `ManagementClient.AgentAuditEvents` method
-
-```go
-func (c *ManagementClient) AgentAuditEvents(ctx context.Context, input AgentAuditEventsRequestInput, opts ...CallOption) (*AgentAuditEventsReply, error)
-```
-
-AgentAuditEvents calls the management.agentAuditEvents query. List an organization's agent audit trail, newest first: the approval, provisioning, keys, revocations, spend-control changes and purchases.
-
-Idempotency: safe. Read-only. Repeat freely; each attempt may use a new requestId. Pagination: cursor. Server-ordered pages. Pass nextCursor back as the cursor input until complete is true. `ManagementClient.AgentAuditEventsPages` iterates over the pages. Authorized by portalCredential (condition: owner).
-
-#### `ManagementClient.AgentAuditEventsPages` method
-
-```go
-func (c *ManagementClient) AgentAuditEventsPages(ctx context.Context, input AgentAuditEventsRequestInput) iter.Seq2[*AgentAuditEventPage, error]
-```
-
-AgentAuditEventsPages iterates over the pages of `ManagementClient.AgentAuditEvents`, starting at input.Cursor. Each page is a new request with a new request ID. Iteration stops after the complete page or at the first error. A page that requires a refresh yields `ErrRefreshRequired` and stops. An incomplete page whose next cursor is missing, malformed or doesn't advance yields an INVALID_RESPONSE `Problem` in place of the page and stops.
-
-#### `ManagementClient.OrganizationSpend` method
-
-```go
-func (c *ManagementClient) OrganizationSpend(ctx context.Context, input OrganizationSpendRequestInput, opts ...CallOption) (*OrganizationSpendReply, error)
-```
-
-OrganizationSpend calls the management.organizationSpend query. Read the organization's spend this month: its cap, credits, minimum credit, charge limit, charges, margin, spend stop and the freshness of its usage.
-
-Idempotency: safe. Read-only. Repeat freely; each attempt may use a new requestId. Authorized by portalCredential (condition: owner).
 
 #### `ManagementClient.CreateOrganization` method
 
@@ -2405,86 +1997,6 @@ ReplayWebhookDeliveries calls the management.replayWebhookDeliveries mutation. R
 Idempotency: idempotent. Retry with the same requestId and identical input within the retry budget. The authority deduplicates by requestId; resolve an unknown outcome with resolveRequest. Retry budget: 3 attempts within 60 seconds. Long-running: poll `ManagementClient.GetOperation` with the reply's Operation reference until the work completes. Authorized by portalCredential (condition: owner).
 
 Sends [`management.replayWebhookDeliveries`](../../operations/management/replayWebhookDeliveries.md).
-
-#### `ManagementClient.RequestAgentSignup` method
-
-```go
-func (c *ManagementClient) RequestAgentSignup(ctx context.Context, input RequestAgentSignupRequestInput, opts ...CallOption) (*RequestAgentSignupReply, error)
-```
-
-RequestAgentSignup calls the management.requestAgentSignup mutation. Request an organization for a named human owner, who approves it from an emailed link. Nothing is usable before approval.
-
-Idempotency: replayOnly. Retry with the same requestId and identical input within the retry budget; the authority answers a repeat with the original outcome. Outcomes cannot be resolved by lookup, so settle an unknown outcome by sending the same request again. Retry budget: 3 attempts within 60 seconds. Sent without a bearer token as anonymous.
-
-#### `ManagementClient.RejectAgentSignup` method
-
-```go
-func (c *ManagementClient) RejectAgentSignup(ctx context.Context, input RejectAgentSignupRequestInput, opts ...CallOption) (*RejectAgentSignupReply, error)
-```
-
-RejectAgentSignup calls the management.rejectAgentSignup mutation. Reject a signup request from its approval link, optionally suppressing future requests to the email.
-
-Idempotency: replayOnly. Retry with the same requestId and identical input within the retry budget; the authority answers a repeat with the original outcome. Outcomes cannot be resolved by lookup, so settle an unknown outcome by sending the same request again. Retry budget: 3 attempts within 60 seconds. Sent without a bearer token as anonymous (condition: approvalToken).
-
-#### `ManagementClient.ApproveAgentSignup` method
-
-```go
-func (c *ManagementClient) ApproveAgentSignup(ctx context.Context, input ApproveAgentSignupRequestInput, opts ...CallOption) (*ApproveAgentSignupReply, error)
-```
-
-ApproveAgentSignup calls the management.approveAgentSignup mutation. Approve a signup request with its approval token and the agent's confirmation code, choosing the plan, scopes, monthly spend cap, agent purchase limit and grant expiry. The signed-in approver becomes the owner.
-
-Idempotency: idempotent. Retry with the same requestId and identical input within the retry budget. The authority deduplicates by requestId; resolve an unknown outcome with resolveRequest. Retry budget: 3 attempts within 60 seconds. Authorized by portalCredential (condition: approvalToken).
-
-#### `ManagementClient.IssueAgentKey` method
-
-```go
-func (c *ManagementClient) IssueAgentKey(ctx context.Context, input IssueAgentKeyRequestInput, opts ...CallOption) (*IssueAgentKeyReply, error)
-```
-
-IssueAgentKey calls the management.issueAgentKey mutation. Issue a backend key for the agent within its grant's scopes and expiry. The result is the pending key; poll agentSignup until it shows the key's delivery, then redeem it with agentCredentialPermit.
-
-Idempotency: replayOnly. Retry with the same requestId and identical input within the retry budget; the authority answers a repeat with the original outcome. Outcomes cannot be resolved by lookup, so settle an unknown outcome by sending the same request again. Retry budget: 3 attempts within 60 seconds. Authorized by agentVerifier (condition: activeGrant).
-
-#### `ManagementClient.AgentCredentialPermit` method
-
-```go
-func (c *ManagementClient) AgentCredentialPermit(ctx context.Context, input AgentCredentialPermitRequestInput, opts ...CallOption) (*AgentCredentialPermitReply, error)
-```
-
-AgentCredentialPermit calls the management.agentCredentialPermit mutation. Issue a permit that authorizes the agent to redeem one of its key deliveries.
-
-Idempotency: replayOnly. Retry with the same requestId and identical input within the retry budget; the authority answers a repeat with the original outcome. Outcomes cannot be resolved by lookup, so settle an unknown outcome by sending the same request again. Retry budget: 3 attempts within 60 seconds. Authorized by agentVerifier (condition: activeGrant).
-
-#### `ManagementClient.RevokeAgentGrant` method
-
-```go
-func (c *ManagementClient) RevokeAgentGrant(ctx context.Context, input RevokeAgentGrantRequestInput, opts ...CallOption) (*RevokeAgentGrantReply, error)
-```
-
-RevokeAgentGrant calls the management.revokeAgentGrant mutation. Revoke an agent grant and every key issued under it.
-
-Idempotency: idempotent. Retry with the same requestId and identical input within the retry budget. The authority deduplicates by requestId; resolve an unknown outcome with resolveRequest. Retry budget: 3 attempts within 60 seconds. Authorized by portalCredential (condition: owner).
-
-#### `ManagementClient.SetSpendControls` method
-
-```go
-func (c *ManagementClient) SetSpendControls(ctx context.Context, input SetSpendControlsRequestInput, opts ...CallOption) (*SetSpendControlsReply, error)
-```
-
-SetSpendControls calls the management.setSpendControls mutation. Set the organization's monthly spend cap and agent purchase limit.
-
-Idempotency: idempotent. Retry with the same requestId and identical input within the retry budget. The authority deduplicates by requestId; resolve an unknown outcome with resolveRequest. Retry budget: 3 attempts within 60 seconds. Authorized by portalCredential (condition: owner).
-
-#### `ManagementClient.PurchaseAgentCredits` method
-
-```go
-func (c *ManagementClient) PurchaseAgentCredits(ctx context.Context, input PurchaseAgentCreditsRequestInput, opts ...CallOption) (*PurchaseAgentCreditsReply, error)
-```
-
-PurchaseAgentCredits calls the management.purchaseAgentCredits mutation. Buy prepaid credits with a Shared Payment Token, within the owner's agent purchase limit.
-
-Idempotency: replayOnly. Retry with the same requestId and identical input within the retry budget; the authority answers a repeat with the original outcome. Outcomes cannot be resolved by lookup, so settle an unknown outcome by sending the same request again. Retry budget: 3 attempts within 60 seconds. Authorized by agentVerifier (condition: activeGrant).
 
 ### `ManagementConfig` struct
 
@@ -2878,63 +2390,6 @@ type OrganizationPage struct {
 ```
 
 OrganizationPage is the GraphQL object OrganizationPage.
-
-### `OrganizationSpend` struct
-
-```go
-type OrganizationSpend struct {
-	OrgID              UUID     `json:"orgId"`
-	PlanID             string   `json:"planId"`
-	Currency           string   `json:"currency"`
-	CatalogVersion     string   `json:"catalogVersion"`
-	MonthlySpendCap    *string  `json:"monthlySpendCap"`
-	AgentPurchaseLimit *string  `json:"agentPurchaseLimit"`
-	UpdatedAt          *string  `json:"updatedAt"`
-	MonthlyMinimum     *string  `json:"monthlyMinimum"`
-	PeriodStart        *string  `json:"periodStart"`
-	PeriodEnd          *string  `json:"periodEnd"`
-	Credits            *string  `json:"credits"`
-	Charges            *string  `json:"charges"`
-	Margin             *string  `json:"margin"`
-	Stop               *string  `json:"stop"`
-	RefusedMeters      []string `json:"refusedMeters"`
-	EvaluatedAt        *string  `json:"evaluatedAt"`
-	UsageThrough       *string  `json:"usageThrough"`
-	ValidUntil         *string  `json:"validUntil"`
-	MinimumCredit      *string  `json:"minimumCredit"`
-	ChargeLimit        *string  `json:"chargeLimit"`
-}
-```
-
-OrganizationSpend is the GraphQL object OrganizationSpend.
-
-### `OrganizationSpendReply` struct
-
-```go
-type OrganizationSpendReply struct {
-	Status      string             `json:"status"`
-	RequestID   UUID               `json:"requestId"`
-	ServerTime  *string            `json:"serverTime"`
-	ReceiptID   *UUID              `json:"receiptId"`
-	CommittedAt *string            `json:"committedAt"`
-	Replayed    *bool              `json:"replayed"`
-	Operation   *OperationRef      `json:"operation"`
-	ResourceRef *ResourceRef       `json:"resourceRef"`
-	Result      *OrganizationSpend `json:"result"`
-}
-```
-
-OrganizationSpendReply is the GraphQL object OrganizationSpendReply.
-
-### `OrganizationSpendRequestInput` struct
-
-```go
-type OrganizationSpendRequestInput struct {
-	OrgID UUID `json:"orgId"`
-}
-```
-
-OrganizationSpendRequestInput is the GraphQL input OrganizationSpendRequestInput.
 
 ### `OrganizationUsage` struct
 
@@ -3850,35 +3305,6 @@ type ProjectUsageRequestInput struct {
 
 ProjectUsageRequestInput is the GraphQL input ProjectUsageRequestInput.
 
-### `PurchaseAgentCreditsReply` struct
-
-```go
-type PurchaseAgentCreditsReply struct {
-	Status      string        `json:"status"`
-	RequestID   UUID          `json:"requestId"`
-	ServerTime  *string       `json:"serverTime"`
-	ReceiptID   *UUID         `json:"receiptId"`
-	CommittedAt *string       `json:"committedAt"`
-	Replayed    *bool         `json:"replayed"`
-	Operation   *OperationRef `json:"operation"`
-	ResourceRef *ResourceRef  `json:"resourceRef"`
-	Result      *AgentPayment `json:"result"`
-}
-```
-
-PurchaseAgentCreditsReply is the GraphQL object PurchaseAgentCreditsReply.
-
-### `PurchaseAgentCreditsRequestInput` struct
-
-```go
-type PurchaseAgentCreditsRequestInput struct {
-	Amount             string `json:"amount"`
-	SharedPaymentToken string `json:"sharedPaymentToken"`
-}
-```
-
-PurchaseAgentCreditsRequestInput is the GraphQL input PurchaseAgentCreditsRequestInput.
-
 ### `ReadReceipt` struct
 
 ```go
@@ -4048,35 +3474,6 @@ type RedeemCredentialRequestInput struct {
 
 RedeemCredentialRequestInput is the GraphQL input RedeemCredentialRequestInput.
 
-### `RejectAgentSignupReply` struct
-
-```go
-type RejectAgentSignupReply struct {
-	Status      string             `json:"status"`
-	RequestID   UUID               `json:"requestId"`
-	ServerTime  *string            `json:"serverTime"`
-	ReceiptID   *UUID              `json:"receiptId"`
-	CommittedAt *string            `json:"committedAt"`
-	Replayed    *bool              `json:"replayed"`
-	Operation   *OperationRef      `json:"operation"`
-	ResourceRef *ResourceRef       `json:"resourceRef"`
-	Result      *AgentSignupStatus `json:"result"`
-}
-```
-
-RejectAgentSignupReply is the GraphQL object RejectAgentSignupReply.
-
-### `RejectAgentSignupRequestInput` struct
-
-```go
-type RejectAgentSignupRequestInput struct {
-	ApprovalToken          string `json:"approvalToken"`
-	SuppressFutureRequests bool   `json:"suppressFutureRequests"`
-}
-```
-
-RejectAgentSignupRequestInput is the GraphQL input RejectAgentSignupRequestInput.
-
 ### `RemoveMemberReply` struct
 
 ```go
@@ -4170,41 +3567,6 @@ type ReplayWebhookDeliveriesRequestInput struct {
 ```
 
 ReplayWebhookDeliveriesRequestInput is the GraphQL input ReplayWebhookDeliveriesRequestInput.
-
-### `RequestAgentSignupReply` struct
-
-```go
-type RequestAgentSignupReply struct {
-	Status      string             `json:"status"`
-	RequestID   UUID               `json:"requestId"`
-	ServerTime  *string            `json:"serverTime"`
-	ReceiptID   *UUID              `json:"receiptId"`
-	CommittedAt *string            `json:"committedAt"`
-	Replayed    *bool              `json:"replayed"`
-	Operation   *OperationRef      `json:"operation"`
-	ResourceRef *ResourceRef       `json:"resourceRef"`
-	Result      *AgentSignupTicket `json:"result"`
-}
-```
-
-RequestAgentSignupReply is the GraphQL object RequestAgentSignupReply.
-
-### `RequestAgentSignupRequestInput` struct
-
-```go
-type RequestAgentSignupRequestInput struct {
-	OwnerEmail               string   `json:"ownerEmail"`
-	PollChallenge            string   `json:"pollChallenge"`
-	OrganizationName         string   `json:"organizationName"`
-	AgentName                string   `json:"agentName"`
-	Purpose                  *string  `json:"purpose,omitzero"`
-	SuggestedPlan            *string  `json:"suggestedPlan,omitzero"`
-	SuggestedScopes          []string `json:"suggestedScopes"`
-	SuggestedMonthlySpendCap *string  `json:"suggestedMonthlySpendCap,omitzero"`
-}
-```
-
-RequestAgentSignupRequestInput is the GraphQL input RequestAgentSignupRequestInput.
 
 ### `RequestResolution` struct
 
@@ -4310,8 +3672,6 @@ ResumeOperationRequestInput is the GraphQL input ResumeOperationRequestInput.
 
 ```go
 type RetainedResult struct {
-	AgentGrant                 *AgentGrant                 `json:"agentGrant"`
-	AgentSignupStatus          *AgentSignupStatus          `json:"agentSignupStatus"`
 	BillingCheckoutSession     *BillingCheckoutSession     `json:"billingCheckoutSession"`
 	BillingPortalSession       *BillingPortalSession       `json:"billingPortalSession"`
 	BroadcastPermissionChanged *BroadcastPermissionChanged `json:"broadcastPermissionChanged"`
@@ -4330,7 +3690,6 @@ type RetainedResult struct {
 	Message                    *Message                    `json:"message"`
 	MessageAck                 *MessageAck                 `json:"messageAck"`
 	Organization               *Organization               `json:"organization"`
-	OrganizationSpend          *OrganizationSpend          `json:"organizationSpend"`
 	Principal                  *Principal                  `json:"principal"`
 	ReadReceipt                *ReadReceipt                `json:"readReceipt"`
 	SessionBootstrap           *SessionBootstrap           `json:"sessionBootstrap"`
@@ -4340,35 +3699,6 @@ type RetainedResult struct {
 ```
 
 RetainedResult is the GraphQL object RetainedResult. Exactly one typed field contains the retained, currently authorized receipt result.
-
-### `RevokeAgentGrantReply` struct
-
-```go
-type RevokeAgentGrantReply struct {
-	Status      string        `json:"status"`
-	RequestID   UUID          `json:"requestId"`
-	ServerTime  *string       `json:"serverTime"`
-	ReceiptID   *UUID         `json:"receiptId"`
-	CommittedAt *string       `json:"committedAt"`
-	Replayed    *bool         `json:"replayed"`
-	Operation   *OperationRef `json:"operation"`
-	ResourceRef *ResourceRef  `json:"resourceRef"`
-	Result      *AgentGrant   `json:"result"`
-}
-```
-
-RevokeAgentGrantReply is the GraphQL object RevokeAgentGrantReply.
-
-### `RevokeAgentGrantRequestInput` struct
-
-```go
-type RevokeAgentGrantRequestInput struct {
-	GrantID              UUID `json:"grantId"`
-	RevokeIssuedSessions bool `json:"revokeIssuedSessions"`
-}
-```
-
-RevokeAgentGrantRequestInput is the GraphQL input RevokeAgentGrantRequestInput.
 
 ### `RevokeBackendKeyReply` struct
 
@@ -4733,36 +4063,6 @@ type SetConversationMutePayload struct {
 ```
 
 SetConversationMutePayload is the GraphQL object SetConversationMutePayload.
-
-### `SetSpendControlsReply` struct
-
-```go
-type SetSpendControlsReply struct {
-	Status      string             `json:"status"`
-	RequestID   UUID               `json:"requestId"`
-	ServerTime  *string            `json:"serverTime"`
-	ReceiptID   *UUID              `json:"receiptId"`
-	CommittedAt *string            `json:"committedAt"`
-	Replayed    *bool              `json:"replayed"`
-	Operation   *OperationRef      `json:"operation"`
-	ResourceRef *ResourceRef       `json:"resourceRef"`
-	Result      *OrganizationSpend `json:"result"`
-}
-```
-
-SetSpendControlsReply is the GraphQL object SetSpendControlsReply.
-
-### `SetSpendControlsRequestInput` struct
-
-```go
-type SetSpendControlsRequestInput struct {
-	OrgID              UUID    `json:"orgId"`
-	MonthlySpendCap    string  `json:"monthlySpendCap"`
-	AgentPurchaseLimit *string `json:"agentPurchaseLimit,omitzero"`
-}
-```
-
-SetSpendControlsRequestInput is the GraphQL input SetSpendControlsRequestInput.
 
 ### `UpdateConversationReply` struct
 

@@ -201,11 +201,19 @@ macOS runners. See [Build and test](swift/README.md#build-and-test).
 
 ## API contract
 
-Generated source is not proof of deployed support. This source catalog has
-92 operations; the last confirmed backend consumer pins SDK
-`d11bae63e3496f1b17e5041e3d45424cdc9a5c7c` with 79. The additional 13
-agent/spend-management fields need deployment qualification before use.
-This change does not advance that consumer's pin.
+The first-launch inputs use the 79-operation contract exported at SDK commit
+`d11bae63e3496f1b17e5041e3d45424cdc9a5c7c`: 49 Communication operations
+and 30 Management operations. The historical 92-operation candidate remains
+at `7018879a644bdab5f7ae110b8a8069d3747adbfe`; its 13 additional
+agent/spend-management operations are not part of this launch contract.
+
+Both `resolveRequest` documents and their generated response shapes must use
+the same 23-field retained-result contract. The historical candidate selects
+three additional nullable fields that the admitted export does not define,
+so avoiding its 13 new methods alone does not make recovery compatible.
+Regenerate and check every derived output before release; an input-only
+change is not a complete SDK. Generated source is not deployment evidence,
+and this correction does not advance a backend consumer's pin.
 
 - The Communication API and the Management API have separate origins. Each
   serves GraphQL at an unversioned `/graphql` path. Realtime uses the

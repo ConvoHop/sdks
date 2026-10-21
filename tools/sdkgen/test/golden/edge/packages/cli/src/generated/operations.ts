@@ -42,15 +42,7 @@ export interface CliOperation {
   readonly input?: string;
 }
 /** Operations `relay call` never runs, because their results are credentials or they record a person's consent. */
-export const withheldOperations: Readonly<Record<string, string>> = {
-  "communication.issueSession": "returns a user session token",
-  "communication.renewSession": "returns a user session token",
-  "management.credentialPermit": "returns a credential delivery permit",
-  "management.createBillingCheckoutSession": "returns a hosted billing link that grants access to whoever holds it",
-  "management.createBillingPortalSession": "returns a hosted billing link that grants access to whoever holds it",
-  "management.agentCredentialPermit": "returns a credential delivery permit",
-  "management.approveAgentSignup": "records an owner's consent to an agent signup; the owner gives it from the emailed approval link"
-};
+export const withheldOperations: Readonly<Record<string, string>> = {};
 /** The scopes a backend key can grant, by wire name, with what each allows. */
 export const cliScopes: Readonly<Record<string, string>> = {"itemRead": "Read items and jobs.", "widgetWrite": "Create widgets and start jobs."};
 export const cliTypes: Readonly<Record<string, CliType>> = {

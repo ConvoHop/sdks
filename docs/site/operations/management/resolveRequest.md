@@ -89,47 +89,6 @@ query ManagementResolveRequest($context: RequestContextInput!, $input: ResolveRe
           id
         }
         result {
-          agentGrant {
-            grantId
-            orgId
-            signupId
-            agentActorId
-            projectId
-            scopes
-            expiresAt
-            revokedAt
-            createdAt
-            keys {
-              operationId
-              state
-              scopes
-              expiresAt
-              keyId
-              deliveryId
-              deliveryExpiresAt
-            }
-          }
-          agentSignupStatus {
-            signupId
-            state
-            orgId
-            deploymentId
-            projectId
-            nextStep
-            scopes
-            grantExpiresAt
-            keys {
-              operationId
-              state
-              scopes
-              expiresAt
-              keyId
-              deliveryId
-              deliveryExpiresAt
-            }
-            incarnation
-            servingEpoch
-          }
           billingCheckoutSession {
             orgId
             planId
@@ -334,28 +293,6 @@ query ManagementResolveRequest($context: RequestContextInput!, $input: ResolveRe
             name
             status
             revision
-          }
-          organizationSpend {
-            orgId
-            planId
-            currency
-            catalogVersion
-            monthlySpendCap
-            agentPurchaseLimit
-            updatedAt
-            monthlyMinimum
-            periodStart
-            periodEnd
-            credits
-            charges
-            margin
-            stop
-            refusedMeters
-            evaluatedAt
-            usageThrough
-            validUntil
-            minimumCredit
-            chargeLimit
           }
           principal {
             principalId

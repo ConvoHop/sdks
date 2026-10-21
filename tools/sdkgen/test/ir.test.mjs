@@ -2,6 +2,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync, rmSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
+import { parse, validate } from "graphql";
 import { checkAnnotations, formatAnnotationReport } from "../lib/annotations.mjs";
 import { IrBuildError, buildIr } from "../lib/ir.mjs";
 import { createValidator } from "../lib/json-schema.mjs";
@@ -24,6 +25,75 @@ test("the committed repository IR is current, complete and valid", () => {
   assert.deepEqual(ir.operations.map(operation => operation.id).sort(), Object.keys(sources.annotations.operations).sort());
   assert.deepEqual(ir.realtime.events.map(event => event.type).sort(), Object.keys(sources.annotations.realtime.events).sort());
   assert.ok(ir.realtime.events.length > 0 && ir.realtime.channels.length > 0);
+});
+
+test("the launch contract contains exactly the admitted communication and management operations", () => {
+  const fields = {
+    communication: [
+      "capabilities", "route", "currentSession", "getPrincipal", "getConversation", "members", "messages", "getMessage",
+      "events", "receipts", "inbox", "search", "resolveRequest", "getOperation", "conversationMute", "currentLiveSession",
+      "liveSession", "liveSessions", "liveSessionParticipants", "liveSessionAlerts", "liveSessionOperation",
+      "sessionRequestOutcome", "createPrincipal", "disablePrincipal", "issueSession", "renewSession", "revokeSession",
+      "createConversation", "updateConversation", "addMember", "addMembers", "removeMember", "historyGrant", "sendMessage",
+      "editMessage", "deleteMessage", "reportReceipt", "typing", "setBroadcastPermission", "setConversationMute",
+      "startLiveSession", "joinLiveSession", "alertLiveSession", "leaveLiveSession", "endLiveSession",
+      "liveSessionCredentials", "redeemCredential", "acknowledgeCredential", "conversationEvents",
+    ],
+    management: [
+      "capabilities", "organizations", "getOrganization", "getDeployment", "getProject", "deploymentHealth",
+      "deploymentUsage", "projectUsage", "organizationUsage", "organizationBilling", "webhookEndpoints", "webhookDeliveries",
+      "resolveRequest", "getOperation", "createOrganization", "createDeployment", "createProject", "issueBackendKey",
+      "revokeBackendKey", "projectPolicy", "credentialPermit", "pauseOperation", "resumeOperation",
+      "createBillingCheckoutSession", "createBillingPortalSession", "configureWebhook", "updateWebhook",
+      "rotateWebhookSecret", "disableWebhook", "replayWebhookDeliveries",
+    ],
+  };
+  const ids = Object.entries(fields).flatMap(([plane, names]) => names.map(name => `${plane}.${name}`)).sort();
+  const sources = repoSources();
+  assert.equal(ids.length, 79);
+  assert.deepEqual(buildIr(sources).operations.map(operation => operation.id).sort(), ids);
+  assert.deepEqual(Object.keys(sources.annotations.operations).sort(), ids);
+});
+
+test("both launch recovery documents and result shapes match the admitted retained receipt contract", () => {
+  const fields = [
+    ["billingCheckoutSession", "BillingCheckoutSession"],
+    ["billingPortalSession", "BillingPortalSession"],
+    ["broadcastPermissionChanged", "BroadcastPermissionChanged"],
+    ["conversation", "Conversation"],
+    ["conversationMemberBatch", "ConversationMemberBatch"],
+    ["conversationMute", "ConversationMute"],
+    ["credentialDeliveryReceipt", "CredentialDeliveryReceipt"],
+    ["deliveryAck", "DeliveryAck"],
+    ["liveAlertBatch", "LiveAlertBatch"],
+    ["liveCredentialIssuance", "LiveCredentialIssuance"],
+    ["liveSessionEndRequested", "LiveSessionEndRequested"],
+    ["liveSessionJoined", "LiveSessionJoined"],
+    ["liveSessionLeft", "LiveSessionLeft"],
+    ["liveSessionStarted", "LiveSessionStarted"],
+    ["member", "Member"],
+    ["message", "Message"],
+    ["messageAck", "MessageAck"],
+    ["organization", "Organization"],
+    ["principal", "Principal"],
+    ["readReceipt", "ReadReceipt"],
+    ["sessionBootstrap", "SessionBootstrap"],
+    ["sessionRevocation", "SessionRevocation"],
+    ["signedProof", "SignedProof"],
+  ];
+  const sources = repoSources();
+  const ir = buildIr(sources);
+  const retained = find(ir.types, "name", "RetainedResult");
+  assert.deepEqual(retained.planes, ["communication", "management"]);
+  assert.deepEqual(retained.fields.map(field => [field.name, field.type]), fields.map(([name, type]) =>
+    [name, { kind: type === "SignedProof" ? "scalar" : "object", name: type, nullable: true }]));
+  for (const plane of sources.planes) {
+    assert.deepEqual(Object.values(plane.schema.getType("RetainedResult").getFields()).map(field =>
+      [field.name, String(field.type)]), fields, plane.name);
+    const operation = find(ir.operations, "id", `${plane.name}.resolveRequest`);
+    assert.deepEqual(validate(plane.schema, parse(operation.document.text)), [], operation.id);
+    assert.doesNotMatch(operation.document.text, /\b(?:agentGrant|agentSignupStatus|organizationSpend)\b/);
+  }
 });
 
 test("the IR schema accepts the built IR and reports each violation by path", () => {

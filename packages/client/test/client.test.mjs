@@ -817,14 +817,18 @@ test("a managed replay whose incomplete page stops advancing fails closed instea
   assert.equal(sockets.length, 0);
 });
 
-test("read-only resolution and explicit retry preserve typed committed evidence without another mutation", async () => {
+test("launch chat recovery accepts retained evidence without future-only result arms and never resends a commit", async () => {
   const projectId = id(), incarnation = id(), conversationId = id(), requestId = id();
   const ack = messageAck(conversationId, incarnation), requests = [];
+  const retained = resolution(requestId, "committed", { messageAck: ack });
+  assert.equal(Object.keys(retained.receipt.result).length, 23);
+  for (const field of ["agentGrant", "agentSignupStatus", "organizationSpend"])
+    assert.equal(Object.hasOwn(retained.receipt.result, field), false, field);
   const client = new RelayClient({ baseUrl: "http://localhost:18080", projectId, incarnation,
     principalId: id(), sessionToken: "fixture", fetch: async (_url, options) => {
       const request = JSON.parse(options.body); requests.push(request);
       if (request.operationName === "CommunicationSendMessage") throw new Error("unknown commit");
-      return reply(request, { result: resolution(requestId, "committed", { messageAck: ack }) });
+      return reply(request, { result: retained });
     } });
   await assert.rejects(client.send(conversationId, "original", requestId), { code: "TRANSPORT_UNKNOWN" });
   const original = client.http.recoveryStates[0];
@@ -832,8 +836,19 @@ test("read-only resolution and explicit retry preserve typed committed evidence 
   assert.equal(resolved.receipt.result.messageAck.messageId, ack.messageId);
   assert.equal((await client.requests.retry(requestId)).state, "committed");
   assert.equal(requests.filter(value => value.operationName === "CommunicationSendMessage").length, 1);
+  for (const request of requests.slice(1)) {
+    assert.equal(request.operationName, "CommunicationResolveRequest");
+    assert.deepEqual(request.variables.input, { requestId });
+    assert.equal(request.variables.context.projectId, projectId);
+    assert.equal(request.variables.context.incarnation, incarnation);
+    assert.doesNotMatch(request.query, /\b(?:agentGrant|agentSignupStatus|organizationSpend)\b/);
+  }
+  const current = client.http.recoveryStates[0];
+  for (const field of ["operation", "requestId", "projectId", "incarnation", "input", "payloadFingerprint",
+    "attemptCount", "firstSubmittedAt", "retryDeadline"])
+    assert.deepEqual(current[field], original[field], field);
+  assert.deepEqual(current.input, { conversationId, props: {}, text: "original" });
   assert.equal(client.http.recoveryStates[0].attemptCount, 1);
-  assert.equal(client.http.recoveryStates[0].retryDeadline, original.retryDeadline);
 });
 
 test("malformed or differently scoped resolutions cannot change recovery evidence", async () => {
@@ -907,29 +922,25 @@ test(`unknown ${operation} needs a fresh permit without unauthorized request loo
   assert.ok([...saved.values.values()].every(value => !value.includes("never-persist")));
 });
 
-test("an unknown replay-only request is never looked up; only an explicit resend of the same request settles it", async () => {
-  const requestId = id(), sent = [], input = { scopes: ["messageRead"], expiresAt: "2026-12-01T00:00:00.000Z" };
-  let lose = true;
-  const transport = new RelayTransport({ baseUrl: "http://localhost:18080", credential: "fixture-agent-verifier",
-    namespace: "replay-only", recoveryStorage: storage(),
-    fetch: async (_url, options) => {
-      const request = JSON.parse(options.body);
-      sent.push([request.operationName, request.variables.context.requestId]);
-      if (lose) { lose = false; throw new Error("response lost"); }
-      return response("committed", { operationId: id(), state: "pending", scopes: input.scopes, expiresAt: input.expiresAt,
-        keyId: null, deliveryId: null, deliveryExpiresAt: null }, options, { replayed: true });
-    } });
-  assert.equal(operationCatalog["management.issueAgentKey"].idempotency, "replayOnly");
-  await assert.rejects(transport.execute("management.issueAgentKey", undefined, input, requestId), { code: "TRANSPORT_UNKNOWN", requestId });
-  await assert.rejects(transport.retry(requestId), { code: "INVALID_REQUEST", requestId, outcome: "unknown", status: 400,
-    message: /cannot be looked up; send the same request ID and payload again explicitly/ });
-  assert.deepEqual(sent, [["ManagementIssueAgentKey", requestId]], "retry sends no request lookup");
-  await assert.rejects(transport.execute("management.issueAgentKey", undefined, { ...input, scopes: ["callRead"] }, requestId),
-    { code: "IDEMPOTENCY_CONFLICT", requestId });
-  const settled = await transport.execute("management.issueAgentKey", undefined, input, requestId);
-  assert.equal(settled.status, "committed");
-  assert.equal(settled.result.state, "pending");
-  assert.deepEqual(sent, [["ManagementIssueAgentKey", requestId], ["ManagementIssueAgentKey", requestId]]);
+test("future-only management operations reject before transport or recovery persistence", async () => {
+  const saved = storage();
+  let fetches = 0;
+  const transport = new RelayTransport({ baseUrl: "http://localhost:18080", credential: "fixture-operator",
+    namespace: "launch-contract", recoveryStorage: saved, fetch: async () => { fetches++; } });
+  for (const field of [
+    "agentSignupForApproval", "agentSignup", "agentGrants", "agentAuditEvents", "organizationSpend",
+    "requestAgentSignup", "rejectAgentSignup", "approveAgentSignup", "issueAgentKey", "agentCredentialPermit",
+    "revokeAgentGrant", "setSpendControls", "purchaseAgentCredits",
+  ]) {
+    const key = `management.${field}`, requestId = id();
+    assert.equal(Object.hasOwn(operationCatalog, key), false, key);
+    await assert.rejects(transport.execute(key, undefined, {}, requestId), {
+      code: "INVALID_REQUEST", requestId, outcome: "rejected", status: 400, message: /Unknown generated GraphQL operation/,
+    });
+  }
+  assert.equal(fetches, 0);
+  assert.deepEqual(transport.recoveryStates, []);
+  assert.equal(saved.values.size, 0);
 });
 
 test("missing committed receipt metadata stays unknown despite a complete result object", async () => {

@@ -16,7 +16,7 @@ const BACKEND_KEY = "fixture-backend-key-never-in-output", PORTAL_TOKEN = "fixtu
 const DESTRUCTIVE = [
   "communication_delete_message", "communication_disable_principal", "communication_end_live_session",
   "communication_remove_member", "communication_revoke_session", "management_disable_webhook",
-  "management_revoke_agent_grant", "management_revoke_backend_key", "management_rotate_webhook_secret",
+  "management_revoke_backend_key", "management_rotate_webhook_secret",
   "management_update_webhook",
 ];
 
@@ -113,7 +113,7 @@ test("the server lists every generated tool with its hints and operation annotat
 });
 
 test("each tool runs the SDK catalog operation with the same plane, kind and input fields", () => {
-  assert.equal(mcpTools.length, 66);
+  assert.equal(mcpTools.length, 61);
   for (const tool of mcpTools) {
     const entry = operationCatalog[tool.operation.id];
     assert.ok(entry, tool.operation.id);
@@ -125,8 +125,7 @@ test("each tool runs the SDK catalog operation with the same plane, kind and inp
     assert.equal(tool.annotations.destructiveHint, tool.operation.destructive);
   }
   assert.deepEqual(Object.keys(withheldOperations).sort(),
-    ["communication.issueSession", "communication.renewSession", "management.agentCredentialPermit",
-      "management.approveAgentSignup", "management.createBillingCheckoutSession",
+    ["communication.issueSession", "communication.renewSession", "management.createBillingCheckoutSession",
       "management.createBillingPortalSession", "management.credentialPermit"]);
   for (const id of Object.keys(withheldOperations)) {
     assert.ok(operationCatalog[id], id);

@@ -5315,61 +5315,6 @@ public data class ActorRef(public val tenantId: String, public val objectId: Str
 
 Package: `dev.instantrelay.android.generated`.
 
-### `AgentGrant` type
-
-```kotlin
-public data class AgentGrant(
-    public val grantId: String,
-    public val orgId: String,
-    public val signupId: String,
-    public val agentActorId: String,
-    public val projectId: String? = null,
-    public val scopes: List<String>,
-    public val expiresAt: String,
-    public val revokedAt: String? = null,
-    public val createdAt: String,
-    public val keys: List<AgentKey>,
-)
-```
-
-Package: `dev.instantrelay.android.generated`.
-
-### `AgentKey` type
-
-```kotlin
-public data class AgentKey(
-    public val operationId: String,
-    public val state: String,
-    public val scopes: List<String>,
-    public val expiresAt: String,
-    public val keyId: String? = null,
-    public val deliveryId: String? = null,
-    public val deliveryExpiresAt: String? = null,
-)
-```
-
-Package: `dev.instantrelay.android.generated`.
-
-### `AgentSignupStatus` type
-
-```kotlin
-public data class AgentSignupStatus(
-    public val signupId: String,
-    public val state: String,
-    public val orgId: String? = null,
-    public val deploymentId: String? = null,
-    public val projectId: String? = null,
-    public val nextStep: String? = null,
-    public val scopes: List<String>,
-    public val grantExpiresAt: String? = null,
-    public val keys: List<AgentKey>,
-    public val incarnation: String? = null,
-    public val servingEpoch: String? = null,
-)
-```
-
-Package: `dev.instantrelay.android.generated`.
-
 ### `AlertLiveSessionInput` type
 
 ```kotlin
@@ -6705,35 +6650,6 @@ public data class Organization(
 
 Package: `dev.instantrelay.android.generated`.
 
-### `OrganizationSpend` type
-
-```kotlin
-public data class OrganizationSpend(
-    public val orgId: String,
-    public val planId: String,
-    public val currency: String,
-    public val catalogVersion: String,
-    public val monthlySpendCap: String? = null,
-    public val agentPurchaseLimit: String? = null,
-    public val updatedAt: String? = null,
-    public val monthlyMinimum: String? = null,
-    public val periodStart: String? = null,
-    public val periodEnd: String? = null,
-    public val credits: String? = null,
-    public val charges: String? = null,
-    public val margin: String? = null,
-    public val stop: String? = null,
-    public val refusedMeters: List<String>,
-    public val evaluatedAt: String? = null,
-    public val usageThrough: String? = null,
-    public val validUntil: String? = null,
-    public val minimumCredit: String? = null,
-    public val chargeLimit: String? = null,
-)
-```
-
-Package: `dev.instantrelay.android.generated`.
-
 ### `Principal` type
 
 ```kotlin
@@ -6921,8 +6837,6 @@ Package: `dev.instantrelay.android.generated`.
 
 ```kotlin
 public data class RetainedResult(
-    public val agentGrant: AgentGrant? = null,
-    public val agentSignupStatus: AgentSignupStatus? = null,
     public val billingCheckoutSession: BillingCheckoutSession? = null,
     public val billingPortalSession: BillingPortalSession? = null,
     public val broadcastPermissionChanged: BroadcastPermissionChanged? = null,
@@ -6941,7 +6855,6 @@ public data class RetainedResult(
     public val message: Message? = null,
     public val messageAck: MessageAck? = null,
     public val organization: Organization? = null,
-    public val organizationSpend: OrganizationSpend? = null,
     public val principal: Principal? = null,
     public val readReceipt: ReadReceipt? = null,
     public val sessionBootstrap: SessionBootstrap? = null,

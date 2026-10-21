@@ -509,196 +509,6 @@ type AddMembersPayload struct {
 	Result      ConversationMemberBatch `json:"result"`
 }
 
-// AgentAuditEvent is the GraphQL object AgentAuditEvent.
-type AgentAuditEvent struct {
-	EventID    UUID       `json:"eventId"`
-	OrgID      UUID       `json:"orgId"`
-	GrantID    *UUID      `json:"grantId"`
-	ActorKind  string     `json:"actorKind"`
-	ActorID    *UUID      `json:"actorId"`
-	Kind       string     `json:"kind"`
-	Details    Properties `json:"details"`
-	OccurredAt string     `json:"occurredAt"`
-}
-
-// AgentAuditEventPage is the GraphQL object AgentAuditEventPage.
-type AgentAuditEventPage struct {
-	Items           []AgentAuditEvent `json:"items"`
-	Complete        bool              `json:"complete"`
-	RefreshRequired bool              `json:"refreshRequired"`
-	NextCursor      *string           `json:"nextCursor"`
-}
-
-// AgentAuditEventsReply is the GraphQL object AgentAuditEventsReply.
-type AgentAuditEventsReply struct {
-	Status      string               `json:"status"`
-	RequestID   UUID                 `json:"requestId"`
-	ServerTime  *string              `json:"serverTime"`
-	ReceiptID   *UUID                `json:"receiptId"`
-	CommittedAt *string              `json:"committedAt"`
-	Replayed    *bool                `json:"replayed"`
-	Operation   *OperationRef        `json:"operation"`
-	ResourceRef *ResourceRef         `json:"resourceRef"`
-	Result      *AgentAuditEventPage `json:"result"`
-}
-
-// AgentAuditEventsRequestInput is the GraphQL input AgentAuditEventsRequestInput.
-type AgentAuditEventsRequestInput struct {
-	OrgID UUID `json:"orgId"`
-	// Default: 50.
-	Limit  *PageSize `json:"limit,omitzero"`
-	Cursor *string   `json:"cursor,omitzero"`
-}
-
-// AgentCredentialPermitReply is the GraphQL object AgentCredentialPermitReply.
-type AgentCredentialPermitReply struct {
-	Status      string        `json:"status"`
-	RequestID   UUID          `json:"requestId"`
-	ServerTime  *string       `json:"serverTime"`
-	ReceiptID   *UUID         `json:"receiptId"`
-	CommittedAt *string       `json:"committedAt"`
-	Replayed    *bool         `json:"replayed"`
-	Operation   *OperationRef `json:"operation"`
-	ResourceRef *ResourceRef  `json:"resourceRef"`
-	Result      SignedProof   `json:"result"`
-}
-
-// AgentCredentialPermitRequestInput is the GraphQL input AgentCredentialPermitRequestInput.
-type AgentCredentialPermitRequestInput struct {
-	DeliveryID          UUID `json:"deliveryId"`
-	RedemptionRequestID UUID `json:"redemptionRequestId"`
-}
-
-// AgentGrant is the GraphQL object AgentGrant.
-type AgentGrant struct {
-	GrantID      UUID       `json:"grantId"`
-	OrgID        UUID       `json:"orgId"`
-	SignupID     UUID       `json:"signupId"`
-	AgentActorID UUID       `json:"agentActorId"`
-	ProjectID    *UUID      `json:"projectId"`
-	Scopes       []string   `json:"scopes"`
-	ExpiresAt    string     `json:"expiresAt"`
-	RevokedAt    *string    `json:"revokedAt"`
-	CreatedAt    string     `json:"createdAt"`
-	Keys         []AgentKey `json:"keys"`
-}
-
-// AgentGrantPage is the GraphQL object AgentGrantPage.
-type AgentGrantPage struct {
-	Items           []AgentGrant `json:"items"`
-	Complete        bool         `json:"complete"`
-	RefreshRequired bool         `json:"refreshRequired"`
-	NextCursor      *string      `json:"nextCursor"`
-}
-
-// AgentGrantsReply is the GraphQL object AgentGrantsReply.
-type AgentGrantsReply struct {
-	Status      string          `json:"status"`
-	RequestID   UUID            `json:"requestId"`
-	ServerTime  *string         `json:"serverTime"`
-	ReceiptID   *UUID           `json:"receiptId"`
-	CommittedAt *string         `json:"committedAt"`
-	Replayed    *bool           `json:"replayed"`
-	Operation   *OperationRef   `json:"operation"`
-	ResourceRef *ResourceRef    `json:"resourceRef"`
-	Result      *AgentGrantPage `json:"result"`
-}
-
-// AgentGrantsRequestInput is the GraphQL input AgentGrantsRequestInput.
-type AgentGrantsRequestInput struct {
-	OrgID UUID `json:"orgId"`
-	// Default: 50.
-	Limit  *PageSize `json:"limit,omitzero"`
-	Cursor *string   `json:"cursor,omitzero"`
-}
-
-// AgentKey is the GraphQL object AgentKey.
-type AgentKey struct {
-	OperationID       UUID     `json:"operationId"`
-	State             string   `json:"state"`
-	Scopes            []string `json:"scopes"`
-	ExpiresAt         string   `json:"expiresAt"`
-	KeyID             *string  `json:"keyId"`
-	DeliveryID        *UUID    `json:"deliveryId"`
-	DeliveryExpiresAt *string  `json:"deliveryExpiresAt"`
-}
-
-// AgentPayment is the GraphQL object AgentPayment.
-type AgentPayment struct {
-	PaymentID UUID   `json:"paymentId"`
-	Amount    string `json:"amount"`
-	Currency  string `json:"currency"`
-	State     string `json:"state"`
-}
-
-// AgentSignupForApprovalReply is the GraphQL object AgentSignupForApprovalReply.
-type AgentSignupForApprovalReply struct {
-	Status      string             `json:"status"`
-	RequestID   UUID               `json:"requestId"`
-	ServerTime  *string            `json:"serverTime"`
-	ReceiptID   *UUID              `json:"receiptId"`
-	CommittedAt *string            `json:"committedAt"`
-	Replayed    *bool              `json:"replayed"`
-	Operation   *OperationRef      `json:"operation"`
-	ResourceRef *ResourceRef       `json:"resourceRef"`
-	Result      *AgentSignupReview `json:"result"`
-}
-
-// AgentSignupForApprovalRequestInput is the GraphQL input AgentSignupForApprovalRequestInput.
-type AgentSignupForApprovalRequestInput struct {
-	ApprovalToken string `json:"approvalToken"`
-}
-
-// AgentSignupReply is the GraphQL object AgentSignupReply.
-type AgentSignupReply struct {
-	Status      string             `json:"status"`
-	RequestID   UUID               `json:"requestId"`
-	ServerTime  *string            `json:"serverTime"`
-	ReceiptID   *UUID              `json:"receiptId"`
-	CommittedAt *string            `json:"committedAt"`
-	Replayed    *bool              `json:"replayed"`
-	Operation   *OperationRef      `json:"operation"`
-	ResourceRef *ResourceRef       `json:"resourceRef"`
-	Result      *AgentSignupStatus `json:"result"`
-}
-
-// AgentSignupReview is the GraphQL object AgentSignupReview.
-type AgentSignupReview struct {
-	SignupID                 UUID     `json:"signupId"`
-	OwnerEmail               string   `json:"ownerEmail"`
-	OrganizationName         string   `json:"organizationName"`
-	AgentName                string   `json:"agentName"`
-	Purpose                  *string  `json:"purpose"`
-	SuggestedPlan            *string  `json:"suggestedPlan"`
-	SuggestedScopes          []string `json:"suggestedScopes"`
-	SuggestedMonthlySpendCap *string  `json:"suggestedMonthlySpendCap"`
-	Currency                 string   `json:"currency"`
-	ExpiresAt                string   `json:"expiresAt"`
-}
-
-// AgentSignupStatus is the GraphQL object AgentSignupStatus.
-type AgentSignupStatus struct {
-	SignupID       UUID       `json:"signupId"`
-	State          string     `json:"state"`
-	OrgID          *UUID      `json:"orgId"`
-	DeploymentID   *UUID      `json:"deploymentId"`
-	ProjectID      *UUID      `json:"projectId"`
-	NextStep       *string    `json:"nextStep"`
-	Scopes         []string   `json:"scopes"`
-	GrantExpiresAt *string    `json:"grantExpiresAt"`
-	Keys           []AgentKey `json:"keys"`
-	Incarnation    *UUID      `json:"incarnation"`
-	ServingEpoch   *Decimal   `json:"servingEpoch"`
-}
-
-// AgentSignupTicket is the GraphQL object AgentSignupTicket.
-type AgentSignupTicket struct {
-	SignupID         UUID   `json:"signupId"`
-	ConfirmationCode string `json:"confirmationCode"`
-	ExpiresAt        string `json:"expiresAt"`
-	PollAfterSeconds int64  `json:"pollAfterSeconds"`
-}
-
 // AlertLiveSessionInput is the GraphQL input AlertLiveSessionInput.
 type AlertLiveSessionInput struct {
 	LiveSessionID      UUID    `json:"liveSessionId"`
@@ -714,31 +524,6 @@ type AlertLiveSessionPayload struct {
 	CommittedAt string         `json:"committedAt"`
 	Replayed    bool           `json:"replayed"`
 	Result      LiveAlertBatch `json:"result"`
-}
-
-// ApproveAgentSignupReply is the GraphQL object ApproveAgentSignupReply.
-type ApproveAgentSignupReply struct {
-	Status      string             `json:"status"`
-	RequestID   UUID               `json:"requestId"`
-	ServerTime  *string            `json:"serverTime"`
-	ReceiptID   *UUID              `json:"receiptId"`
-	CommittedAt *string            `json:"committedAt"`
-	Replayed    *bool              `json:"replayed"`
-	Operation   *OperationRef      `json:"operation"`
-	ResourceRef *ResourceRef       `json:"resourceRef"`
-	Result      *AgentSignupStatus `json:"result"`
-}
-
-// ApproveAgentSignupRequestInput is the GraphQL input ApproveAgentSignupRequestInput.
-type ApproveAgentSignupRequestInput struct {
-	ApprovalToken      string   `json:"approvalToken"`
-	ConfirmationCode   string   `json:"confirmationCode"`
-	TermsRef           string   `json:"termsRef"`
-	Plan               string   `json:"plan"`
-	Scopes             []string `json:"scopes"`
-	MonthlySpendCap    string   `json:"monthlySpendCap"`
-	AgentPurchaseLimit *string  `json:"agentPurchaseLimit,omitzero"`
-	GrantExpiresAt     *string  `json:"grantExpiresAt,omitzero"`
 }
 
 // BillingCheckoutSession is the GraphQL object BillingCheckoutSession.
@@ -1444,25 +1229,6 @@ type InboxRequestInput struct {
 	ActAsPrincipalID *UUID    `json:"actAsPrincipalId,omitzero"`
 }
 
-// IssueAgentKeyReply is the GraphQL object IssueAgentKeyReply.
-type IssueAgentKeyReply struct {
-	Status      string        `json:"status"`
-	RequestID   UUID          `json:"requestId"`
-	ServerTime  *string       `json:"serverTime"`
-	ReceiptID   *UUID         `json:"receiptId"`
-	CommittedAt *string       `json:"committedAt"`
-	Replayed    *bool         `json:"replayed"`
-	Operation   *OperationRef `json:"operation"`
-	ResourceRef *ResourceRef  `json:"resourceRef"`
-	Result      *AgentKey     `json:"result"`
-}
-
-// IssueAgentKeyRequestInput is the GraphQL input IssueAgentKeyRequestInput.
-type IssueAgentKeyRequestInput struct {
-	Scopes    []string `json:"scopes"`
-	ExpiresAt *string  `json:"expiresAt,omitzero"`
-}
-
 // IssueBackendKeyReply is the GraphQL object IssueBackendKeyReply.
 type IssueBackendKeyReply struct {
 	Status      string           `json:"status"`
@@ -2069,48 +1835,6 @@ type OrganizationPage struct {
 	NextCursor      *string        `json:"nextCursor"`
 }
 
-// OrganizationSpend is the GraphQL object OrganizationSpend.
-type OrganizationSpend struct {
-	OrgID              UUID     `json:"orgId"`
-	PlanID             string   `json:"planId"`
-	Currency           string   `json:"currency"`
-	CatalogVersion     string   `json:"catalogVersion"`
-	MonthlySpendCap    *string  `json:"monthlySpendCap"`
-	AgentPurchaseLimit *string  `json:"agentPurchaseLimit"`
-	UpdatedAt          *string  `json:"updatedAt"`
-	MonthlyMinimum     *string  `json:"monthlyMinimum"`
-	PeriodStart        *string  `json:"periodStart"`
-	PeriodEnd          *string  `json:"periodEnd"`
-	Credits            *string  `json:"credits"`
-	Charges            *string  `json:"charges"`
-	Margin             *string  `json:"margin"`
-	Stop               *string  `json:"stop"`
-	RefusedMeters      []string `json:"refusedMeters"`
-	EvaluatedAt        *string  `json:"evaluatedAt"`
-	UsageThrough       *string  `json:"usageThrough"`
-	ValidUntil         *string  `json:"validUntil"`
-	MinimumCredit      *string  `json:"minimumCredit"`
-	ChargeLimit        *string  `json:"chargeLimit"`
-}
-
-// OrganizationSpendReply is the GraphQL object OrganizationSpendReply.
-type OrganizationSpendReply struct {
-	Status      string             `json:"status"`
-	RequestID   UUID               `json:"requestId"`
-	ServerTime  *string            `json:"serverTime"`
-	ReceiptID   *UUID              `json:"receiptId"`
-	CommittedAt *string            `json:"committedAt"`
-	Replayed    *bool              `json:"replayed"`
-	Operation   *OperationRef      `json:"operation"`
-	ResourceRef *ResourceRef       `json:"resourceRef"`
-	Result      *OrganizationSpend `json:"result"`
-}
-
-// OrganizationSpendRequestInput is the GraphQL input OrganizationSpendRequestInput.
-type OrganizationSpendRequestInput struct {
-	OrgID UUID `json:"orgId"`
-}
-
 // OrganizationUsage is the GraphQL object OrganizationUsage.
 type OrganizationUsage struct {
 	OrgID             UUID         `json:"orgId"`
@@ -2259,25 +1983,6 @@ type ProjectUsageRequestInput struct {
 	To        *string `json:"to,omitzero"`
 }
 
-// PurchaseAgentCreditsReply is the GraphQL object PurchaseAgentCreditsReply.
-type PurchaseAgentCreditsReply struct {
-	Status      string        `json:"status"`
-	RequestID   UUID          `json:"requestId"`
-	ServerTime  *string       `json:"serverTime"`
-	ReceiptID   *UUID         `json:"receiptId"`
-	CommittedAt *string       `json:"committedAt"`
-	Replayed    *bool         `json:"replayed"`
-	Operation   *OperationRef `json:"operation"`
-	ResourceRef *ResourceRef  `json:"resourceRef"`
-	Result      *AgentPayment `json:"result"`
-}
-
-// PurchaseAgentCreditsRequestInput is the GraphQL input PurchaseAgentCreditsRequestInput.
-type PurchaseAgentCreditsRequestInput struct {
-	Amount             string `json:"amount"`
-	SharedPaymentToken string `json:"sharedPaymentToken"`
-}
-
 // ReadReceipt is the GraphQL object ReadReceipt.
 type ReadReceipt struct {
 	PrincipalID              UUID     `json:"principalId"`
@@ -2304,25 +2009,6 @@ type RedeemCredentialReply struct {
 // RedeemCredentialRequestInput is the GraphQL input RedeemCredentialRequestInput.
 type RedeemCredentialRequestInput struct {
 	DeliveryID UUID `json:"deliveryId"`
-}
-
-// RejectAgentSignupReply is the GraphQL object RejectAgentSignupReply.
-type RejectAgentSignupReply struct {
-	Status      string             `json:"status"`
-	RequestID   UUID               `json:"requestId"`
-	ServerTime  *string            `json:"serverTime"`
-	ReceiptID   *UUID              `json:"receiptId"`
-	CommittedAt *string            `json:"committedAt"`
-	Replayed    *bool              `json:"replayed"`
-	Operation   *OperationRef      `json:"operation"`
-	ResourceRef *ResourceRef       `json:"resourceRef"`
-	Result      *AgentSignupStatus `json:"result"`
-}
-
-// RejectAgentSignupRequestInput is the GraphQL input RejectAgentSignupRequestInput.
-type RejectAgentSignupRequestInput struct {
-	ApprovalToken          string `json:"approvalToken"`
-	SuppressFutureRequests bool   `json:"suppressFutureRequests"`
 }
 
 // RemoveMemberReply is the GraphQL object RemoveMemberReply.
@@ -2387,31 +2073,6 @@ type ReplayWebhookDeliveriesRequestInput struct {
 	EffectID   *UUID   `json:"effectId,omitzero"`
 	Since      *string `json:"since,omitzero"`
 	Until      *string `json:"until,omitzero"`
-}
-
-// RequestAgentSignupReply is the GraphQL object RequestAgentSignupReply.
-type RequestAgentSignupReply struct {
-	Status      string             `json:"status"`
-	RequestID   UUID               `json:"requestId"`
-	ServerTime  *string            `json:"serverTime"`
-	ReceiptID   *UUID              `json:"receiptId"`
-	CommittedAt *string            `json:"committedAt"`
-	Replayed    *bool              `json:"replayed"`
-	Operation   *OperationRef      `json:"operation"`
-	ResourceRef *ResourceRef       `json:"resourceRef"`
-	Result      *AgentSignupTicket `json:"result"`
-}
-
-// RequestAgentSignupRequestInput is the GraphQL input RequestAgentSignupRequestInput.
-type RequestAgentSignupRequestInput struct {
-	OwnerEmail               string   `json:"ownerEmail"`
-	PollChallenge            string   `json:"pollChallenge"`
-	OrganizationName         string   `json:"organizationName"`
-	AgentName                string   `json:"agentName"`
-	Purpose                  *string  `json:"purpose,omitzero"`
-	SuggestedPlan            *string  `json:"suggestedPlan,omitzero"`
-	SuggestedScopes          []string `json:"suggestedScopes"`
-	SuggestedMonthlySpendCap *string  `json:"suggestedMonthlySpendCap,omitzero"`
 }
 
 // RequestResolution is the GraphQL object RequestResolution.
@@ -2482,8 +2143,6 @@ type ResumeOperationRequestInput struct {
 // RetainedResult is the GraphQL object RetainedResult.
 // Exactly one typed field contains the retained, currently authorized receipt result.
 type RetainedResult struct {
-	AgentGrant                 *AgentGrant                 `json:"agentGrant"`
-	AgentSignupStatus          *AgentSignupStatus          `json:"agentSignupStatus"`
 	BillingCheckoutSession     *BillingCheckoutSession     `json:"billingCheckoutSession"`
 	BillingPortalSession       *BillingPortalSession       `json:"billingPortalSession"`
 	BroadcastPermissionChanged *BroadcastPermissionChanged `json:"broadcastPermissionChanged"`
@@ -2502,31 +2161,11 @@ type RetainedResult struct {
 	Message                    *Message                    `json:"message"`
 	MessageAck                 *MessageAck                 `json:"messageAck"`
 	Organization               *Organization               `json:"organization"`
-	OrganizationSpend          *OrganizationSpend          `json:"organizationSpend"`
 	Principal                  *Principal                  `json:"principal"`
 	ReadReceipt                *ReadReceipt                `json:"readReceipt"`
 	SessionBootstrap           *SessionBootstrap           `json:"sessionBootstrap"`
 	SessionRevocation          *SessionRevocation          `json:"sessionRevocation"`
 	SignedProof                SignedProof                 `json:"signedProof"`
-}
-
-// RevokeAgentGrantReply is the GraphQL object RevokeAgentGrantReply.
-type RevokeAgentGrantReply struct {
-	Status      string        `json:"status"`
-	RequestID   UUID          `json:"requestId"`
-	ServerTime  *string       `json:"serverTime"`
-	ReceiptID   *UUID         `json:"receiptId"`
-	CommittedAt *string       `json:"committedAt"`
-	Replayed    *bool         `json:"replayed"`
-	Operation   *OperationRef `json:"operation"`
-	ResourceRef *ResourceRef  `json:"resourceRef"`
-	Result      *AgentGrant   `json:"result"`
-}
-
-// RevokeAgentGrantRequestInput is the GraphQL input RevokeAgentGrantRequestInput.
-type RevokeAgentGrantRequestInput struct {
-	GrantID              UUID `json:"grantId"`
-	RevokeIssuedSessions bool `json:"revokeIssuedSessions"`
 }
 
 // RevokeBackendKeyReply is the GraphQL object RevokeBackendKeyReply.
@@ -2761,26 +2400,6 @@ type SetConversationMutePayload struct {
 	CommittedAt string           `json:"committedAt"`
 	Replayed    bool             `json:"replayed"`
 	Result      ConversationMute `json:"result"`
-}
-
-// SetSpendControlsReply is the GraphQL object SetSpendControlsReply.
-type SetSpendControlsReply struct {
-	Status      string             `json:"status"`
-	RequestID   UUID               `json:"requestId"`
-	ServerTime  *string            `json:"serverTime"`
-	ReceiptID   *UUID              `json:"receiptId"`
-	CommittedAt *string            `json:"committedAt"`
-	Replayed    *bool              `json:"replayed"`
-	Operation   *OperationRef      `json:"operation"`
-	ResourceRef *ResourceRef       `json:"resourceRef"`
-	Result      *OrganizationSpend `json:"result"`
-}
-
-// SetSpendControlsRequestInput is the GraphQL input SetSpendControlsRequestInput.
-type SetSpendControlsRequestInput struct {
-	OrgID              UUID    `json:"orgId"`
-	MonthlySpendCap    string  `json:"monthlySpendCap"`
-	AgentPurchaseLimit *string `json:"agentPurchaseLimit,omitzero"`
 }
 
 // UpdateConversationReply is the GraphQL object UpdateConversationReply.

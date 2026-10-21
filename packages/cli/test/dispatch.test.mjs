@@ -112,11 +112,11 @@ test("call --list lists every operation call can run, with its plane, kind and w
   const operations = JSON.parse(result.stdout);
   assert.deepEqual(operations, Object.values(cliOperations).map(({ id, plane, kind, destructive, summary }) =>
     ({ id, plane, kind, destructive, summary })));
-  assert.equal(operations.length, 66);
+  assert.equal(operations.length, 61);
   assert.deepEqual(operations.filter(op => op.destructive).map(op => op.id).sort(), [
     "communication.deleteMessage", "communication.disablePrincipal", "communication.endLiveSession",
     "communication.removeMember", "communication.revokeSession", "management.disableWebhook",
-    "management.revokeAgentGrant", "management.revokeBackendKey", "management.rotateWebhookSecret",
+    "management.revokeBackendKey", "management.rotateWebhookSecret",
     "management.updateWebhook",
   ]);
   for (const id of Object.keys(withheldOperations)) assert.ok(!operations.some(op => op.id === id), id);

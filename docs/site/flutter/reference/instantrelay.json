@@ -16,36 +16,6 @@
       "docs": ""
     },
     {
-      "name": "AgentGrant",
-      "kind": "class",
-      "ref": "package:instantrelay/instantrelay.dart#AgentGrant",
-      "anchor": "agentgrant-class",
-      "signatures": [
-        "final class AgentGrant {\n  const AgentGrant({\n    required String grantId,\n    required String orgId,\n    required String signupId,\n    required String agentActorId,\n    String? projectId,\n    required List<String> scopes,\n    required String expiresAt,\n    String? revokedAt,\n    required String createdAt,\n    required List<AgentKey> keys,\n  });\n  factory AgentGrant.fromJson(Object? json);\n  final String grantId;\n  final String orgId;\n  final String signupId;\n  final String agentActorId;\n  final String? projectId;\n  final List<String> scopes;\n  final String expiresAt;\n  final String? revokedAt;\n  final String createdAt;\n  final List<AgentKey> keys;\n  Map<String, Object?> toJson();\n}"
-      ],
-      "docs": ""
-    },
-    {
-      "name": "AgentKey",
-      "kind": "class",
-      "ref": "package:instantrelay/instantrelay.dart#AgentKey",
-      "anchor": "agentkey-class",
-      "signatures": [
-        "final class AgentKey {\n  const AgentKey({\n    required String operationId,\n    required String state,\n    required List<String> scopes,\n    required String expiresAt,\n    String? keyId,\n    String? deliveryId,\n    String? deliveryExpiresAt,\n  });\n  factory AgentKey.fromJson(Object? json);\n  final String operationId;\n  final String state;\n  final List<String> scopes;\n  final String expiresAt;\n  final String? keyId;\n  final String? deliveryId;\n  final String? deliveryExpiresAt;\n  Map<String, Object?> toJson();\n}"
-      ],
-      "docs": ""
-    },
-    {
-      "name": "AgentSignupStatus",
-      "kind": "class",
-      "ref": "package:instantrelay/instantrelay.dart#AgentSignupStatus",
-      "anchor": "agentsignupstatus-class",
-      "signatures": [
-        "final class AgentSignupStatus {\n  const AgentSignupStatus({\n    required String signupId,\n    required String state,\n    String? orgId,\n    String? deploymentId,\n    String? projectId,\n    String? nextStep,\n    required List<String> scopes,\n    String? grantExpiresAt,\n    required List<AgentKey> keys,\n    String? incarnation,\n    String? servingEpoch,\n  });\n  factory AgentSignupStatus.fromJson(Object? json);\n  final String signupId;\n  final String state;\n  final String? orgId;\n  final String? deploymentId;\n  final String? projectId;\n  final String? nextStep;\n  final List<String> scopes;\n  final String? grantExpiresAt;\n  final List<AgentKey> keys;\n  final String? incarnation;\n  final String? servingEpoch;\n  Map<String, Object?> toJson();\n}"
-      ],
-      "docs": ""
-    },
-    {
       "name": "AggregateFailure",
       "kind": "class",
       "ref": "package:instantrelay/instantrelay.dart#AggregateFailure",
@@ -3561,16 +3531,6 @@
       "docs": ""
     },
     {
-      "name": "OrganizationSpend",
-      "kind": "class",
-      "ref": "package:instantrelay/instantrelay.dart#OrganizationSpend",
-      "anchor": "organizationspend-class",
-      "signatures": [
-        "final class OrganizationSpend {\n  const OrganizationSpend({\n    required String orgId,\n    required String planId,\n    required String currency,\n    required String catalogVersion,\n    String? monthlySpendCap,\n    String? agentPurchaseLimit,\n    String? updatedAt,\n    String? monthlyMinimum,\n    String? periodStart,\n    String? periodEnd,\n    String? credits,\n    String? charges,\n    String? margin,\n    String? stop,\n    required List<String> refusedMeters,\n    String? evaluatedAt,\n    String? usageThrough,\n    String? validUntil,\n    String? minimumCredit,\n    String? chargeLimit,\n  });\n  factory OrganizationSpend.fromJson(Object? json);\n  final String orgId;\n  final String planId;\n  final String currency;\n  final String catalogVersion;\n  final String? monthlySpendCap;\n  final String? agentPurchaseLimit;\n  final String? updatedAt;\n  final String? monthlyMinimum;\n  final String? periodStart;\n  final String? periodEnd;\n  final String? credits;\n  final String? charges;\n  final String? margin;\n  final String? stop;\n  final List<String> refusedMeters;\n  final String? evaluatedAt;\n  final String? usageThrough;\n  final String? validUntil;\n  final String? minimumCredit;\n  final String? chargeLimit;\n  Map<String, Object?> toJson();\n}"
-      ],
-      "docs": ""
-    },
-    {
       "name": "OutboxItem",
       "kind": "class",
       "ref": "package:instantrelay/instantrelay.dart#OutboxItem",
@@ -4902,7 +4862,7 @@
       "ref": "package:instantrelay/instantrelay.dart#RetainedResult",
       "anchor": "retainedresult-class",
       "signatures": [
-        "final class RetainedResult {\n  const RetainedResult({\n    AgentGrant? agentGrant,\n    AgentSignupStatus? agentSignupStatus,\n    BillingCheckoutSession? billingCheckoutSession,\n    BillingPortalSession? billingPortalSession,\n    BroadcastPermissionChanged? broadcastPermissionChanged,\n    Conversation? conversation,\n    ConversationMemberBatch? conversationMemberBatch,\n    ConversationMute? conversationMute,\n    CredentialDeliveryReceipt? credentialDeliveryReceipt,\n    DeliveryAck? deliveryAck,\n    LiveAlertBatch? liveAlertBatch,\n    LiveCredentialIssuance? liveCredentialIssuance,\n    LiveSessionEndRequested? liveSessionEndRequested,\n    LiveSessionJoined? liveSessionJoined,\n    LiveSessionLeft? liveSessionLeft,\n    LiveSessionStarted? liveSessionStarted,\n    Member? member,\n    Message? message,\n    MessageAck? messageAck,\n    Organization? organization,\n    OrganizationSpend? organizationSpend,\n    Principal? principal,\n    ReadReceipt? readReceipt,\n    SessionBootstrap? sessionBootstrap,\n    SessionRevocation? sessionRevocation,\n    Map<String, Object?>? signedProof,\n  });\n  factory RetainedResult.fromJson(Object? json);\n  final AgentGrant? agentGrant;\n  final AgentSignupStatus? agentSignupStatus;\n  final BillingCheckoutSession? billingCheckoutSession;\n  final BillingPortalSession? billingPortalSession;\n  final BroadcastPermissionChanged? broadcastPermissionChanged;\n  final Conversation? conversation;\n  final ConversationMemberBatch? conversationMemberBatch;\n  final ConversationMute? conversationMute;\n  final CredentialDeliveryReceipt? credentialDeliveryReceipt;\n  final DeliveryAck? deliveryAck;\n  final LiveAlertBatch? liveAlertBatch;\n  final LiveCredentialIssuance? liveCredentialIssuance;\n  final LiveSessionEndRequested? liveSessionEndRequested;\n  final LiveSessionJoined? liveSessionJoined;\n  final LiveSessionLeft? liveSessionLeft;\n  final LiveSessionStarted? liveSessionStarted;\n  final Member? member;\n  final Message? message;\n  final MessageAck? messageAck;\n  final Organization? organization;\n  final OrganizationSpend? organizationSpend;\n  final Principal? principal;\n  final ReadReceipt? readReceipt;\n  final SessionBootstrap? sessionBootstrap;\n  final SessionRevocation? sessionRevocation;\n  final Map<String, Object?>? signedProof;\n  Map<String, Object?> toJson();\n}"
+        "final class RetainedResult {\n  const RetainedResult({\n    BillingCheckoutSession? billingCheckoutSession,\n    BillingPortalSession? billingPortalSession,\n    BroadcastPermissionChanged? broadcastPermissionChanged,\n    Conversation? conversation,\n    ConversationMemberBatch? conversationMemberBatch,\n    ConversationMute? conversationMute,\n    CredentialDeliveryReceipt? credentialDeliveryReceipt,\n    DeliveryAck? deliveryAck,\n    LiveAlertBatch? liveAlertBatch,\n    LiveCredentialIssuance? liveCredentialIssuance,\n    LiveSessionEndRequested? liveSessionEndRequested,\n    LiveSessionJoined? liveSessionJoined,\n    LiveSessionLeft? liveSessionLeft,\n    LiveSessionStarted? liveSessionStarted,\n    Member? member,\n    Message? message,\n    MessageAck? messageAck,\n    Organization? organization,\n    Principal? principal,\n    ReadReceipt? readReceipt,\n    SessionBootstrap? sessionBootstrap,\n    SessionRevocation? sessionRevocation,\n    Map<String, Object?>? signedProof,\n  });\n  factory RetainedResult.fromJson(Object? json);\n  final BillingCheckoutSession? billingCheckoutSession;\n  final BillingPortalSession? billingPortalSession;\n  final BroadcastPermissionChanged? broadcastPermissionChanged;\n  final Conversation? conversation;\n  final ConversationMemberBatch? conversationMemberBatch;\n  final ConversationMute? conversationMute;\n  final CredentialDeliveryReceipt? credentialDeliveryReceipt;\n  final DeliveryAck? deliveryAck;\n  final LiveAlertBatch? liveAlertBatch;\n  final LiveCredentialIssuance? liveCredentialIssuance;\n  final LiveSessionEndRequested? liveSessionEndRequested;\n  final LiveSessionJoined? liveSessionJoined;\n  final LiveSessionLeft? liveSessionLeft;\n  final LiveSessionStarted? liveSessionStarted;\n  final Member? member;\n  final Message? message;\n  final MessageAck? messageAck;\n  final Organization? organization;\n  final Principal? principal;\n  final ReadReceipt? readReceipt;\n  final SessionBootstrap? sessionBootstrap;\n  final SessionRevocation? sessionRevocation;\n  final Map<String, Object?>? signedProof;\n  Map<String, Object?> toJson();\n}"
       ],
       "docs": "Exactly one typed field contains the retained, currently authorized receipt result."
     },

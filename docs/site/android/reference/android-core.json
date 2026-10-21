@@ -6122,36 +6122,6 @@
       "docs": "Package: `dev.instantrelay.android.generated`."
     },
     {
-      "name": "AgentGrant",
-      "kind": "type",
-      "ref": "dev.instantrelay:relay-android-core#AgentGrant",
-      "anchor": "agentgrant-type",
-      "signatures": [
-        "public data class AgentGrant(\n    public val grantId: String,\n    public val orgId: String,\n    public val signupId: String,\n    public val agentActorId: String,\n    public val projectId: String? = null,\n    public val scopes: List<String>,\n    public val expiresAt: String,\n    public val revokedAt: String? = null,\n    public val createdAt: String,\n    public val keys: List<AgentKey>,\n)"
-      ],
-      "docs": "Package: `dev.instantrelay.android.generated`."
-    },
-    {
-      "name": "AgentKey",
-      "kind": "type",
-      "ref": "dev.instantrelay:relay-android-core#AgentKey",
-      "anchor": "agentkey-type",
-      "signatures": [
-        "public data class AgentKey(\n    public val operationId: String,\n    public val state: String,\n    public val scopes: List<String>,\n    public val expiresAt: String,\n    public val keyId: String? = null,\n    public val deliveryId: String? = null,\n    public val deliveryExpiresAt: String? = null,\n)"
-      ],
-      "docs": "Package: `dev.instantrelay.android.generated`."
-    },
-    {
-      "name": "AgentSignupStatus",
-      "kind": "type",
-      "ref": "dev.instantrelay:relay-android-core#AgentSignupStatus",
-      "anchor": "agentsignupstatus-type",
-      "signatures": [
-        "public data class AgentSignupStatus(\n    public val signupId: String,\n    public val state: String,\n    public val orgId: String? = null,\n    public val deploymentId: String? = null,\n    public val projectId: String? = null,\n    public val nextStep: String? = null,\n    public val scopes: List<String>,\n    public val grantExpiresAt: String? = null,\n    public val keys: List<AgentKey>,\n    public val incarnation: String? = null,\n    public val servingEpoch: String? = null,\n)"
-      ],
-      "docs": "Package: `dev.instantrelay.android.generated`."
-    },
-    {
       "name": "AlertLiveSessionInput",
       "kind": "type",
       "ref": "dev.instantrelay:relay-android-core#AlertLiveSessionInput",
@@ -7100,16 +7070,6 @@
       "docs": "Package: `dev.instantrelay.android.generated`."
     },
     {
-      "name": "OrganizationSpend",
-      "kind": "type",
-      "ref": "dev.instantrelay:relay-android-core#OrganizationSpend",
-      "anchor": "organizationspend-type",
-      "signatures": [
-        "public data class OrganizationSpend(\n    public val orgId: String,\n    public val planId: String,\n    public val currency: String,\n    public val catalogVersion: String,\n    public val monthlySpendCap: String? = null,\n    public val agentPurchaseLimit: String? = null,\n    public val updatedAt: String? = null,\n    public val monthlyMinimum: String? = null,\n    public val periodStart: String? = null,\n    public val periodEnd: String? = null,\n    public val credits: String? = null,\n    public val charges: String? = null,\n    public val margin: String? = null,\n    public val stop: String? = null,\n    public val refusedMeters: List<String>,\n    public val evaluatedAt: String? = null,\n    public val usageThrough: String? = null,\n    public val validUntil: String? = null,\n    public val minimumCredit: String? = null,\n    public val chargeLimit: String? = null,\n)"
-      ],
-      "docs": "Package: `dev.instantrelay.android.generated`."
-    },
-    {
       "name": "Principal",
       "kind": "type",
       "ref": "dev.instantrelay:relay-android-core#Principal",
@@ -7243,7 +7203,7 @@
       "ref": "dev.instantrelay:relay-android-core#RetainedResult",
       "anchor": "retainedresult-type",
       "signatures": [
-        "public data class RetainedResult(\n    public val agentGrant: AgentGrant? = null,\n    public val agentSignupStatus: AgentSignupStatus? = null,\n    public val billingCheckoutSession: BillingCheckoutSession? = null,\n    public val billingPortalSession: BillingPortalSession? = null,\n    public val broadcastPermissionChanged: BroadcastPermissionChanged? = null,\n    public val conversation: Conversation? = null,\n    public val conversationMemberBatch: ConversationMemberBatch? = null,\n    public val conversationMute: ConversationMute? = null,\n    public val credentialDeliveryReceipt: CredentialDeliveryReceipt? = null,\n    public val deliveryAck: DeliveryAck? = null,\n    public val liveAlertBatch: LiveAlertBatch? = null,\n    public val liveCredentialIssuance: LiveCredentialIssuance? = null,\n    public val liveSessionEndRequested: LiveSessionEndRequested? = null,\n    public val liveSessionJoined: LiveSessionJoined? = null,\n    public val liveSessionLeft: LiveSessionLeft? = null,\n    public val liveSessionStarted: LiveSessionStarted? = null,\n    public val member: Member? = null,\n    public val message: Message? = null,\n    public val messageAck: MessageAck? = null,\n    public val organization: Organization? = null,\n    public val organizationSpend: OrganizationSpend? = null,\n    public val principal: Principal? = null,\n    public val readReceipt: ReadReceipt? = null,\n    public val sessionBootstrap: SessionBootstrap? = null,\n    public val sessionRevocation: SessionRevocation? = null,\n    public val signedProof: JsonObject? = null,\n)"
+        "public data class RetainedResult(\n    public val billingCheckoutSession: BillingCheckoutSession? = null,\n    public val billingPortalSession: BillingPortalSession? = null,\n    public val broadcastPermissionChanged: BroadcastPermissionChanged? = null,\n    public val conversation: Conversation? = null,\n    public val conversationMemberBatch: ConversationMemberBatch? = null,\n    public val conversationMute: ConversationMute? = null,\n    public val credentialDeliveryReceipt: CredentialDeliveryReceipt? = null,\n    public val deliveryAck: DeliveryAck? = null,\n    public val liveAlertBatch: LiveAlertBatch? = null,\n    public val liveCredentialIssuance: LiveCredentialIssuance? = null,\n    public val liveSessionEndRequested: LiveSessionEndRequested? = null,\n    public val liveSessionJoined: LiveSessionJoined? = null,\n    public val liveSessionLeft: LiveSessionLeft? = null,\n    public val liveSessionStarted: LiveSessionStarted? = null,\n    public val member: Member? = null,\n    public val message: Message? = null,\n    public val messageAck: MessageAck? = null,\n    public val organization: Organization? = null,\n    public val principal: Principal? = null,\n    public val readReceipt: ReadReceipt? = null,\n    public val sessionBootstrap: SessionBootstrap? = null,\n    public val sessionRevocation: SessionRevocation? = null,\n    public val signedProof: JsonObject? = null,\n)"
       ],
       "docs": "Exactly one typed field contains the retained, currently authorized receipt result.\n\nPackage: `dev.instantrelay.android.generated`."
     },

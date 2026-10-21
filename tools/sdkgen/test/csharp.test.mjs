@@ -122,10 +122,8 @@ test("the C# emitter renders a plane API per plane with lazy pages methods for c
   assert.ok(repo.includes(pages("MembersPagesAsync", "MemberPage", "MembersRequestInput", "MembersReply", "Communication", "Members",
     "cursor", "String", "Opaque", "reply => reply.Result")));
   const management = repo.slice(repo.indexOf("public sealed class ManagementApi"));
-  assert.ok(management.includes(pages("AgentGrantsPagesAsync", "AgentGrantPage", "AgentGrantsRequestInput", "AgentGrantsReply", "Management",
-    "AgentGrants", "cursor", "String", "Opaque", "reply => reply.Result")), "management's cursor-paginated queries page too");
-  assert.deepEqual(management.match(/\w+PagesAsync(?=\()/g), ["AgentGrantsPagesAsync", "AgentAuditEventsPagesAsync"],
-    "bounded and unpaginated queries get no pages method");
+  assert.doesNotMatch(management, /\w+PagesAsync\(/,
+    "the launch management queries are bounded or unpaginated and get no pages method");
   assert.ok(repo.includes(block([
     "public global::System.Threading.Tasks.Task<global::Relay.Models.RedeemCredentialReply> RedeemCredentialAsync(global::Relay.Models.RedeemCredentialRequestInput input, global::System.Text.Json.JsonElement credentialDeliveryPermit, string? requestId = null, global::System.Threading.CancellationToken cancellationToken = default)",
     "{",

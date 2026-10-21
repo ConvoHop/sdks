@@ -2,6 +2,8 @@
 // the extract task, which parses the SDK's Kotlin sources and writes their public API in the docs pipeline's
 // surface format.
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+import org.jetbrains.kotlin.gradle.tasks.KotlinCompilerExecutionStrategy
 
 plugins {
     alias(libs.plugins.kotlin.jvm)
@@ -19,6 +21,10 @@ kotlin {
         jvmTarget.set(JvmTarget.JVM_17)
         allWarningsAsErrors.set(true)
     }
+}
+
+tasks.named<KotlinCompile>("compileKotlin") {
+    compilerExecutionStrategy.set(KotlinCompilerExecutionStrategy.IN_PROCESS)
 }
 
 dependencies {
