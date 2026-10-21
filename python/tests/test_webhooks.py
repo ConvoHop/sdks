@@ -16,8 +16,8 @@ from typing import Any, Literal, get_args, get_origin
 import httpx
 import pytest
 
-from convohop import webhooks
-from convohop.webhooks import (
+from instantrelay import webhooks
+from instantrelay.webhooks import (
     WebhookCallCancelledNotificationEvent,
     WebhookCallNotificationEvent,
     WebhookDelivery,
@@ -48,7 +48,7 @@ SHARED_CODES = {
     "WEBHOOK_TIMESTAMP_INVALID": "INVALID_TIMESTAMP",
     "WEBHOOK_HEADERS_MISSING": "MISSING_HEADER",
 }
-# The event types in the webhook contract (ConvoHop/ConveHop docs/webhooks.md, "Events").
+# The event types in the webhook contract (Relay/ConveHop docs/webhooks.md, "Events").
 CONTRACT_EVENT_TYPES = [
     "conversation.created",
     "conversation.updated",
@@ -643,7 +643,7 @@ def test_malformed_secrets_are_configuration_errors_reported_before_the_delivery
     for secrets in cases:
         rejects("INVALID_SECRET", {**delivery(body), "secrets": secrets})
     rejects("INVALID_SECRET", {"headers": {}, "body": body, "secrets": "whsec_", "now": NOW})
-    # Standard Webhooks secrets are 24 to 64 bytes; ConvoHop issues 32-byte secrets.
+    # Standard Webhooks secrets are 24 to 64 bytes; Relay issues 32-byte secrets.
     for size in (24, 32, 64):
         secret = new_secret(size)
         assert webhooks.verify(**delivery(body, secrets=secret, signers=[secret])), size

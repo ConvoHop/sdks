@@ -1,9 +1,9 @@
 import 'dart:async';
 
-import 'package:convohop/convohop.dart';
-import 'package:convohop/push.dart';
-import 'package:convohop_docs_examples/calling.dart';
-import 'package:convohop_docs_examples/push.dart';
+import 'package:instantrelay/instantrelay.dart';
+import 'package:instantrelay/push.dart';
+import 'package:relay_docs_examples/calling.dart';
+import 'package:relay_docs_examples/push.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -24,7 +24,7 @@ void main() {
   late List<String> logs;
   late FakeScreens screens;
   late List<Map<String, String>> saved;
-  late ConvoHopClient client;
+  late RelayClient client;
 
   setUp(() {
     calls = [];
@@ -60,7 +60,7 @@ void main() {
     debugDefaultTargetPlatformOverride = null;
   });
 
-  Future<ConvoHopPush> start({Future<void> Function(Map<String, String> registration)? save}) async {
+  Future<RelayPush> start({Future<void> Function(Map<String, String> registration)? save}) async {
     final push = await startPush(
       client,
       screens,
@@ -206,10 +206,10 @@ final class FakeScreens implements AppScreens {
   void closeCall(JoinedCall call) => shown.add('closed call');
 }
 
-// The user whom the vectors' pushes are for. Push makes no ConvoHop requests, so the client stays offline.
-ConvoHopClient recipient() {
+// The user whom the vectors' pushes are for. Push makes no Relay requests, so the client stays offline.
+RelayClient recipient() {
   final push = parseNotificationPayload(fcmData('message-preview'))!;
-  final client = ConvoHopClient(
+  final client = RelayClient(
     baseUrl: 'https://convohop.invalid',
     projectId: push.projectId,
     incarnation: newRequestId(),

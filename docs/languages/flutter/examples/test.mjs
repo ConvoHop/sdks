@@ -16,7 +16,7 @@ for (const [command, args] of steps) {
     cwd,
     stdio: "inherit",
     // The tests start the mock with this Node.js.
-    env: { ...process.env, CONVOHOP_NODE: process.execPath },
+    env: { ...process.env, RELAY_NODE: process.execPath },
   });
   if (result.error) throw result.error;
   if (result.status !== 0) process.exit(result.status ?? 1);

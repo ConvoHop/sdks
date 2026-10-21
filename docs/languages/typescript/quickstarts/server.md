@@ -1,10 +1,10 @@
 # TypeScript server quickstart
 
-Call ConvoHop from your Node.js backend with `@convohop/server`: connect with a backend key, sign in your users, create a conversation, send and read messages as a member, and recover a send whose response was lost.
+Call Relay from your Node.js backend with `@instantrelay/server`: connect with a backend key, sign in your users, create a conversation, send and read messages as a member, and recover a send whose response was lost.
 
 ## Before you start
 
-You need Node.js 22 or later and `@convohop/server` ([install](../index.md#install)). For your project, you need the Communication API's base URL, the project ID, the project's incarnation and a backend key, which the [`management.issueBackendKey`](../../operations/management/issueBackendKey.md) operation delivers once.
+You need Node.js 22 or later and `@instantrelay/server` ([install](../index.md#install)). For your project, you need the Communication API's base URL, the project ID, the project's incarnation and a backend key, which the [`management.issueBackendKey`](../../operations/management/issueBackendKey.md) operation delivers once.
 
 Keep the backend key in your secret store. Its scopes limit what it can do. This quickstart needs `principalManage`, `sessionIssue`, `conversationManage`, `messageRead` and `messageWrite`.
 
@@ -17,7 +17,7 @@ Keep the backend key in your secret store. Its scopes limit what it can do. This
 
 ## Sign in a user
 
-ConvoHop doesn't authenticate your users. After your own login succeeds, map the user to a principal and issue a session for the device. Return the result to the user's app, which passes it to `@convohop/client`, as the [client quickstart](client.md) shows.
+Relay doesn't authenticate your users. After your own login succeeds, map the user to a principal and issue a session for the device. Return the result to the user's app, which passes it to `@instantrelay/client`, as the [client quickstart](client.md) shows.
 
 ```ts include=examples/src/server.ts#bootstrap
 ```
@@ -43,7 +43,7 @@ Your backend isn't a member of the conversation. To send or read as a member, pa
 
 ## Recover a lost response
 
-When a connection drops after a command is sent, the SDK can't tell whether the authority committed it, so it throws a `ConvoHopProblem` whose `outcome` is `unknown`. Sending again with a new request ID could post the message twice. Instead, `requests.retry` asks the authority about the original request. It returns the committed result, or resends the original command if the authority never received it.
+When a connection drops after a command is sent, the SDK can't tell whether the authority committed it, so it throws a `RelayProblem` whose `outcome` is `unknown`. Sending again with a new request ID could post the message twice. Instead, `requests.retry` asks the authority about the original request. It returns the committed result, or resends the original command if the authority never received it.
 
 ```ts include=examples/src/server.ts#recover
 ```

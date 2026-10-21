@@ -22,7 +22,7 @@ final class MockTarget {
 
   // test.mjs passes the Node.js it runs on.
   static Future<MockTarget> start() async {
-    final process = await Process.start(Platform.environment['CONVOHOP_NODE'] ?? 'node', [
+    final process = await Process.start(Platform.environment['RELAY_NODE'] ?? 'node', [
       repositoryRoot.resolve('conformance/mock/cli.mjs').toFilePath(),
     ]);
     final errors = StringBuffer();

@@ -1,4 +1,4 @@
-package convohop
+package relay
 
 import (
 	"context"
@@ -22,7 +22,7 @@ type ManagementConfig struct {
 // nothing until a method is called.
 func NewManagementClient(config ManagementConfig, options ...Option) (*ManagementClient, error) {
 	if !isUUID(config.ActorID) {
-		return nil, errors.New("convohop: the actor ID must be a canonical lowercase UUID")
+		return nil, errors.New("relay: the actor ID must be a canonical lowercase UUID")
 	}
 	s, err := newSettings(options)
 	if err != nil {

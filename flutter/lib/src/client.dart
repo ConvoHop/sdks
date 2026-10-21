@@ -31,7 +31,7 @@ enum SessionRefreshState { disabled, uninitialized, ready, refreshing, blocked }
 
 /// The authority can't continue this history from the applied cursor, for
 /// example after the user's visible history changed. Call
-/// [ConvoHopClient.resyncAuthorizedHistory] to replay what is visible now.
+/// [RelayClient.resyncAuthorizedHistory] to replay what is visible now.
 final class HistoryResyncRequired implements Exception {
   const HistoryResyncRequired();
 
@@ -87,7 +87,7 @@ String _argumentCounter(String value, String name) {
 String _envelopeOutcome(String status) => status == 'committed' || status == 'accepted' ? status : 'unknown';
 
 T _result<T>(T? value, String requestId, String status, String what) =>
-    value ?? (throw ConvoHopProblem('INVALID_RESPONSE', requestId, _envelopeOutcome(status), 503, 'Missing $what'));
+    value ?? (throw RelayProblem('INVALID_RESPONSE', requestId, _envelopeOutcome(status), 503, 'Missing $what'));
 
 /// Waits for every future and returns the errors, in order.
 Future<List<Object>> _settle(Iterable<Future<Object?>> futures) async {
@@ -97,8 +97,8 @@ Future<List<Object>> _settle(Iterable<Future<Object?>> futures) async {
   return <Object>[for (final result in results) ?result];
 }
 
-ConvoHopProblem _refreshRequired(String message) =>
-    ConvoHopProblem('SESSION_REFRESH_REQUIRED', newRequestId(), 'rejected', 409, message);
+RelayProblem _refreshRequired(String message) =>
+    RelayProblem('SESSION_REFRESH_REQUIRED', newRequestId(), 'rejected', 409, message);
 
 final class _Quiescing {
   final Set<ConversationStream> replays = <ConversationStream>{};
@@ -108,7 +108,7 @@ final class _Quiescing {
 final class _ClientOperations extends CommunicationOperations {
   const _ClientOperations(this._client);
 
-  final ConvoHopClient _client;
+  final RelayClient _client;
 
   @override
   Future<T> execute<T>(OperationSpec<T> operation, Map<String, Object?> input, {String? requestId}) =>
@@ -120,13 +120,13 @@ final class _ClientOperations extends CommunicationOperations {
 /// It keeps mutation recovery, replays conversation history from a stored
 /// cursor, continues it over realtime and renews the session through
 /// [SessionRefresh]. Never give it a backend or operator key.
-final class ConvoHopClient {
+final class RelayClient {
   /// Creates a client for [principalId]'s session in [projectId].
   ///
   /// [baseUrl] is the authority origin (HTTPS, or loopback HTTP for local
   /// development). [recoveryStorage] keeps mutation recovery and replay
   /// cursors across restarts; it never receives tokens.
-  factory ConvoHopClient({
+  factory RelayClient({
     required String baseUrl,
     required String projectId,
     required String sessionToken,
@@ -142,9 +142,9 @@ final class ConvoHopClient {
     _argumentId(principalId, 'principalId');
     _argumentId(incarnation, 'incarnation');
     if (!_validToken(sessionToken)) throw ArgumentError('Invalid session token', 'sessionToken');
-    final ConvoHopTransport transport;
+    final RelayTransport transport;
     try {
-      transport = ConvoHopTransport(
+      transport = RelayTransport(
         baseUrl: baseUrl,
         namespace: '$projectId:$principalId',
         incarnation: incarnation,
@@ -156,7 +156,7 @@ final class ConvoHopClient {
     } on FormatException catch (error) {
       throw ArgumentError.value(baseUrl, 'baseUrl', error.message);
     }
-    return ConvoHopClient._(
+    return RelayClient._(
       projectId,
       principalId,
       sessionToken,
@@ -168,7 +168,7 @@ final class ConvoHopClient {
     );
   }
 
-  ConvoHopClient._(
+  RelayClient._(
     this.projectId,
     this.principalId,
     this._token,
@@ -183,7 +183,7 @@ final class ConvoHopClient {
   final String principalId;
 
   /// The transport that runs this client's operations and keeps recovery.
-  final ConvoHopTransport transport;
+  final RelayTransport transport;
 
   /// Where recovery records and replay cursors are kept, if anywhere.
   final RecoveryStorage? storage;
@@ -225,7 +225,7 @@ final class ConvoHopClient {
   ProjectRoute _validateRoute(Object? input) {
     final value = parseRoute(input);
     if (value.projectId != projectId || value.incarnation != transport.incarnation) {
-      throw ConvoHopProblem(
+      throw RelayProblem(
         'INCARNATION_MISMATCH',
         newRequestId(),
         'rejected',
@@ -251,7 +251,7 @@ final class ConvoHopClient {
   /// Reads and checks the signed route. With [SessionRefresh] configured, it
   /// also verifies the current session once.
   Future<ProjectRoute> initialize() async {
-    if (_closed) throw StateError('ConvoHop client is closed');
+    if (_closed) throw StateError('Relay client is closed');
     final value = _validateRoute((await transport.execute(Operations.communicationRoute, projectId, const {})).result);
     transport.servingEpoch = value.servingEpoch;
     if (_sessionRefresh != null) {
@@ -260,7 +260,7 @@ final class ConvoHopClient {
           .then((proof) {
             final binding = checkCurrentSession(proof, _clock());
             if (binding.principalId != principalId || binding.incarnation != transport.incarnation) {
-              throw ConvoHopProblem(
+              throw RelayProblem(
                 'SESSION_REFRESH_REJECTED',
                 proof.requestId,
                 'rejected',
@@ -325,7 +325,7 @@ final class ConvoHopClient {
     void Function()? release;
     Session? replacement;
     var invalidated = false;
-    ConvoHopProblem? failure;
+    RelayProblem? failure;
     var replayRoute = oldRoute;
     Future<void> drain() async {
       if (release == null) {
@@ -356,7 +356,7 @@ final class ConvoHopClient {
       try {
         supplied = await hook(binding);
       } on Object {
-        throw ConvoHopProblem(
+        throw RelayProblem(
           'SESSION_REFRESH_FAILED',
           newRequestId(),
           'unknown',
@@ -393,7 +393,7 @@ final class ConvoHopClient {
           !sameSessionMetadata(verified, candidate) ||
           tokenExpiresAt != verified.expiresAt ||
           timestampMillis(nextRoute.expiresAt) <= _clock()) {
-        throw ConvoHopProblem(
+        throw RelayProblem(
           'SESSION_REFRESH_REJECTED',
           proof.requestId,
           'unknown',
@@ -410,9 +410,9 @@ final class ConvoHopClient {
       transport.servingEpoch = nextRoute.servingEpoch;
       authentication.blocked = false;
     } on Object catch (error) {
-      final problem = error is ConvoHopProblem
+      final problem = error is RelayProblem
           ? error
-          : ConvoHopProblem(
+          : RelayProblem(
               'SESSION_REFRESH_REJECTED',
               newRequestId(),
               'unknown',
@@ -431,7 +431,7 @@ final class ConvoHopClient {
           if (!sameSessionMetadata(old, binding)) throw const FormatException('Original session authority changed');
           authentication.blocked = false;
         } on Object {
-          failure = ConvoHopProblem(
+          failure = RelayProblem(
             'SESSION_REFRESH_UNVERIFIED',
             problem.requestId,
             'unknown',
@@ -441,7 +441,7 @@ final class ConvoHopClient {
           );
         }
       } else {
-        failure = ConvoHopProblem(
+        failure = RelayProblem(
           'SESSION_REFRESH_UNVERIFIED',
           problem.requestId,
           'unknown',
@@ -694,7 +694,7 @@ final class ConvoHopClient {
   }
 
   void _checkReplayAdmission() {
-    if (_closed) throw StateError('ConvoHop client is closed');
+    if (_closed) throw StateError('Relay client is closed');
     if (_authentication.blocked || _quiescing != null) {
       throw _refreshRequired(
         'Session refresh holds replay admission; await verified refresh before opening or resynchronizing history',
@@ -775,7 +775,7 @@ const _transientClassifications = <String>{
 final class ClientRequests {
   ClientRequests._(this._client);
 
-  final ConvoHopClient _client;
+  final RelayClient _client;
 
   /// What the authority knows about [requestId] now.
   Future<RequestResolution> resolve(String requestId) async {
@@ -794,7 +794,7 @@ final class ClientRequests {
 final class LiveAlerts {
   LiveAlerts._(this._client);
 
-  final ConvoHopClient _client;
+  final RelayClient _client;
 
   Future<LiveAlertPage> list({int? limit, String? cursor}) async => (await _client.transport.execute(
     Operations.communicationLiveSessionAlerts,
@@ -829,7 +829,7 @@ final class ConversationStream {
   ) : _currentRoute = route,
       _storageKey = client._cursorKey(conversationId);
 
-  final ConvoHopClient client;
+  final RelayClient client;
   final String conversationId;
   final EventApplier _applyEvents;
   final ErrorListener _onError;
@@ -990,7 +990,7 @@ final class ConversationStream {
         if (_closed || _paused || !identical(_socket, socket)) return;
         // A connector that reads a refused upgrade's response reports its
         // problem, which is classified like any other.
-        if (error is ConvoHopProblem) {
+        if (error is RelayProblem) {
           _fail(error);
         } else {
           _onError(StateError('Realtime connection unavailable; current history remains authoritative'));
@@ -1005,7 +1005,7 @@ final class ConversationStream {
     try {
       if (data is! String) throw const FormatException('Expected a text frame');
       if (data.length > _events.maxFrameBytes) {
-        throw ConvoHopProblem(
+        throw RelayProblem(
           'ADMISSION_LIMIT',
           subscriptionId,
           'rejected',
@@ -1063,7 +1063,7 @@ final class ConversationStream {
         }
         _page(parseObject(payload['data'])['conversationEvents']);
       } else if (type == 'complete') {
-        throw ConvoHopProblem(
+        throw RelayProblem(
           'AUTHORITY_UNAVAILABLE',
           subscriptionId,
           'unknown',
@@ -1093,7 +1093,7 @@ final class ConversationStream {
 
   void _page(Object? value) {
     if (_pendingPages >= _events.maxPendingPages) {
-      throw ConvoHopProblem(
+      throw RelayProblem(
         'ADMISSION_LIMIT',
         newRequestId(),
         'unknown',
@@ -1207,7 +1207,7 @@ final class ConversationStream {
     }
     // Network, timeout, rate-limit and server failures reconnect; so does
     // WRONG_REGION, since reconnecting routes again.
-    if (error is ConvoHopProblem && reconnectAction(error) != ReconnectAction.stop) {
+    if (error is RelayProblem && reconnectAction(error) != ReconnectAction.stop) {
       _dropSocket()?.close(4000, 'Retrying authoritative connection');
       _onError(error);
       _retry(error.retryAfter);

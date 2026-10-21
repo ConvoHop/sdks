@@ -2,19 +2,19 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:convohop/calls.dart';
-import 'package:convohop/convohop.dart';
-import 'package:convohop/io.dart';
-import 'package:convohop/push.dart';
+import 'package:instantrelay/calls.dart';
+import 'package:instantrelay/instantrelay.dart';
+import 'package:instantrelay/io.dart';
+import 'package:instantrelay/push.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart' show PlatformException;
 import 'package:http/http.dart' as http;
 import 'package:path_provider/path_provider.dart';
 
-/// Your backend's ConvoHop session endpoint; see README.md. Your backend
+/// Your backend's Relay session endpoint; see README.md. Your backend
 /// signs the user in with your app's own authentication and keeps the
-/// ConvoHop backend key, which never belongs in the app.
-const sessionUrl = String.fromEnvironment('CONVOHOP_SESSION_URL');
+/// Relay backend key, which never belongs in the app.
+const sessionUrl = String.fromEnvironment('RELAY_SESSION_URL');
 
 final _navigator = GlobalKey<NavigatorState>();
 final _messenger = GlobalKey<ScaffoldMessengerState>();
@@ -30,7 +30,7 @@ class ExampleApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => MaterialApp(
-    title: 'ConvoHop example',
+    title: 'Relay example',
     navigatorKey: _navigator,
     scaffoldMessengerKey: _messenger,
     theme: ThemeData(colorSchemeSeed: Colors.indigo),
@@ -39,7 +39,7 @@ class ExampleApp extends StatelessWidget {
             body: Center(
               child: Padding(
                 padding: EdgeInsets.all(24),
-                child: Text('Run with --dart-define=CONVOHOP_SESSION_URL=<your backend session endpoint>.'),
+                child: Text('Run with --dart-define=RELAY_SESSION_URL=<your backend session endpoint>.'),
               ),
             ),
           )
@@ -64,7 +64,7 @@ final class AppBackend {
     return response.body.isEmpty ? null : jsonDecode(response.body);
   }
 
-  /// Signs the user in to ConvoHop. Your backend answers
+  /// Signs the user in to Relay. Your backend answers
   /// `{baseUrl, projectId, bootstrap}`, with the server SDK's `issueSession`
   /// result as `bootstrap`.
   Future<({String baseUrl, String projectId, SessionBootstrap bootstrap})> signIn() async {
@@ -87,7 +87,7 @@ final class AppBackend {
   );
 
   /// Keeps this device's push registration, so your backend can deliver
-  /// ConvoHop's notification events to it.
+  /// Relay's notification events to it.
   Future<void> registerPush(PushRegistration registration) async {
     await _post('/push-registration', registration.toJson());
   }
@@ -99,9 +99,9 @@ final class AppBackend {
 final class ChatSession {
   ChatSession._(this.client, this.outbox, this.push, this.refresher, this._subscriptions);
 
-  final ConvoHopClient client;
-  final ConvoHopOutbox outbox;
-  final ConvoHopPush push;
+  final RelayClient client;
+  final RelayOutbox outbox;
+  final RelayPush push;
   final SessionRefresher refresher;
   final List<StreamSubscription<Object?>> _subscriptions;
 
@@ -111,7 +111,7 @@ final class ChatSession {
     final (:baseUrl, :projectId, :bootstrap) = await backend.signIn();
     final session = bootstrap.session ?? (throw const FormatException('The bootstrap has no session'));
     final directory = await getApplicationSupportDirectory();
-    final client = ConvoHopClient(
+    final client = RelayClient(
       baseUrl: baseUrl,
       projectId: projectId,
       incarnation: session.incarnation,
@@ -122,10 +122,10 @@ final class ChatSession {
       recoveryStorage: FileRecoveryStorage(Directory('${directory.path}/convohop')),
       sessionRefresh: backend.renew,
     );
-    final push = ConvoHopPush(onError: _showError);
+    final push = RelayPush(onError: _showError);
     final subscriptions = <StreamSubscription<Object?>>[];
     SessionRefresher? refresher;
-    ConvoHopOutbox? outbox;
+    RelayOutbox? outbox;
     try {
       await client.initialize();
       refresher = SessionRefresher(
@@ -135,7 +135,7 @@ final class ChatSession {
           if (refresher?.active == false) onEnded();
         },
       );
-      outbox = ConvoHopOutbox(client, onError: _showError);
+      outbox = RelayOutbox(client, onError: _showError);
       await outbox.initialize();
       final chat = ChatSession._(client, outbox, push, refresher, subscriptions);
       subscriptions
@@ -174,7 +174,7 @@ final class ChatSession {
     }
   }
 
-  void _opened(ConvoHopNotification notification) {
+  void _opened(RelayNotification notification) {
     if (!notification.isFor(client)) return;
     switch (notification) {
       case MessageNotification(:final conversationId):
@@ -363,7 +363,7 @@ class _ConversationScreenState extends State<ConversationScreen> {
   late final StreamSubscription<Event> _events;
   final TextEditingController _draft = TextEditingController();
 
-  ConvoHopPush get _push => widget.chat.push;
+  RelayPush get _push => widget.chat.push;
 
   @override
   void initState() {
@@ -405,7 +405,7 @@ class _ConversationScreenState extends State<ConversationScreen> {
   @override
   Widget build(BuildContext context) {
     final snapshot = _snapshot;
-    // ConvoHop doesn't publish online status: this is who wrote or read here
+    // Relay doesn't publish online status: this is who wrote or read here
     // in the last five minutes.
     final active = snapshot.lastActive.keys
         .where((id) => id != snapshot.principalId && snapshot.isRecentlyActive(id))
@@ -421,7 +421,7 @@ class _ConversationScreenState extends State<ConversationScreen> {
           IconButton(
             icon: const Icon(Icons.call),
             tooltip: 'Voice call',
-            // ConvoHop rings the members you name, and any member can join
+            // Relay rings the members you name, and any member can join
             // without a ring. Your app knows the conversation's members; this
             // example rings the others the store has receipts for.
             onPressed: () => Navigator.of(context).push(

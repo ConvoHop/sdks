@@ -1,8 +1,8 @@
-# `convohop.push`
+# `instantrelay.push`
 
-Builds APNs, FCM and Web Push requests from ConvoHop push notification events.
+Builds APNs, FCM and Web Push requests from Relay push notification events.
 
-**Layer:** Server. **Runtime:** Python 3.11 or later. **Source:** `python/src/convohop`.
+**Layer:** Server. **Runtime:** Python 3.11 or later. **Source:** `python/src/instantrelay`.
 
 ## Classes
 

@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { randomUUID } from "node:crypto";
 import { after, before, test } from "node:test";
-import { WebhookVerificationError, type WebhookEvent } from "@convohop/server";
+import { WebhookVerificationError, type WebhookEvent } from "@instantrelay/server";
 import { bootstrapUser, connect, createConversation, type ServerConfig } from "../src/server.ts";
 import { handleEvent, webhookHandler, type EventHandlers } from "../src/webhooks.ts";
 import { newSecret, signDelivery } from "./deliveries.ts";
@@ -82,7 +82,7 @@ test("handleEvent reads changed conversations and routes notifications", async (
     envelope("message.created", { kind: "message", id: randomUUID() }),
     notification,
     envelope("webhook.endpointDisabled", { kind: "webhookEndpoint", id: "endpoint-orders" }),
-    envelope("thread.archived", { kind: "thread", id: randomUUID() }), // A type from a newer ConvoHop.
+    envelope("thread.archived", { kind: "thread", id: randomUUID() }), // A type from a newer Relay.
   ]) assert.equal((await handler(delivery(event, secret).request())).status, 204);
 
   const calls: unknown[] = [];

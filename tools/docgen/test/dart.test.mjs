@@ -27,7 +27,7 @@ test("the extractor gets its locked dependencies and runs on the language file f
 });
 
 test("the extractor package commits its lockfile and ignores what pub writes", () => {
-  assert.match(readFileSync(join(REPO_ROOT, PACKAGE, "pubspec.yaml"), "utf8"), /^name: convohop_docgen_dart$/m);
+  assert.match(readFileSync(join(REPO_ROOT, PACKAGE, "pubspec.yaml"), "utf8"), /^name: relay_docgen_dart$/m);
   assert.ok(existsSync(join(REPO_ROOT, PACKAGE, "pubspec.lock")));
   assert.ok(existsSync(join(REPO_ROOT, SCRIPT)));
   assert.equal(PACKAGE_CONFIG, `${PACKAGE}/.dart_tool/package_config.json`);

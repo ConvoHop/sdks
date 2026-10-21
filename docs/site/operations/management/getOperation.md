@@ -146,8 +146,8 @@ query ManagementGetOperation($context: RequestContextInput!, $input: GetOperatio
 
 | Language | Members |
 | --- | --- |
-| [TypeScript](../../typescript/reference/operations.md) | [`ConvoHopManagementClient.operation`](../../typescript/reference/server.md#convohopmanagementclientoperation-method) |
-| [Python](../../python/reference/operations.md) | [`ConvoHopManagement.get_operation`](../../python/reference/convohop.md#convohopmanagementget_operation-method), [`AsyncConvoHopManagement.get_operation`](../../python/reference/convohop.md#asyncconvohopmanagementget_operation-method) |
-| [.NET](../../dotnet/reference/operations.md) | [`ConvoHopManagementClient.GetOperationAsync`](../../dotnet/reference/convohop.md#convohopmanagementclientgetoperationasync-method), [`ManagementApi.GetOperationAsync`](../../dotnet/reference/api.md#managementapigetoperationasync-method) |
+| [TypeScript](../../typescript/reference/operations.md) | [`RelayManagementClient.operation`](../../typescript/reference/server.md#relaymanagementclientoperation-method) |
+| [Python](../../python/reference/operations.md) | [`RelayManagement.get_operation`](../../python/reference/instantrelay.md#relaymanagementget_operation-method), [`AsyncRelayManagement.get_operation`](../../python/reference/instantrelay.md#asyncrelaymanagementget_operation-method) |
+| [.NET](../../dotnet/reference/operations.md) | [`RelayManagementClient.GetOperationAsync`](../../dotnet/reference/relay.md#relaymanagementclientgetoperationasync-method), [`ManagementApi.GetOperationAsync`](../../dotnet/reference/api.md#managementapigetoperationasync-method) |
 | [Java and Kotlin](../../jvm/reference/operations.md) | [`ManagementApi.getOperation`](../../jvm/reference/server.md#managementapigetoperation-method), [`ManagementSuspendApi.getOperation`](../../jvm/reference/server-kotlin.md#managementsuspendapigetoperation-method) |
-| [Go](../../go/reference/operations.md) | [`ManagementClient.GetOperation`](../../go/reference/convohop.md#managementclientgetoperation-method) |
+| [Go](../../go/reference/operations.md) | [`ManagementClient.GetOperation`](../../go/reference/relay.md#managementclientgetoperation-method) |

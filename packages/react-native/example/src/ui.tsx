@@ -1,7 +1,7 @@
 // Small pieces the example's screens share.
 import { useSyncExternalStore } from "react";
 import { ActivityIndicator, Pressable, StyleSheet, Text, View } from "react-native";
-import type { ConversationMessage } from "@convohop/client";
+import type { ConversationMessage } from "@instantrelay/client";
 import { platform } from "./session";
 
 export const colors = {

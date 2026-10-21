@@ -1,4 +1,4 @@
-package convohop
+package relay
 
 import (
 	"errors"
@@ -23,7 +23,7 @@ type settings struct {
 
 func (s *settings) fail(message string) {
 	if s.err == nil {
-		s.err = errors.New("convohop: " + message)
+		s.err = errors.New("relay: " + message)
 	}
 }
 
@@ -44,7 +44,7 @@ func newSettings(options []Option) (*settings, error) {
 }
 
 func refuseRedirect(*http.Request, []*http.Request) error {
-	return errors.New("convohop: the authority must not redirect")
+	return errors.New("relay: the authority must not redirect")
 }
 
 // WithHTTPClient sends requests with a copy of client. The copy never follows

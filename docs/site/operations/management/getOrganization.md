@@ -81,7 +81,7 @@ query ManagementGetOrganization($context: RequestContextInput!, $input: GetOrgan
 | Language | Members |
 | --- | --- |
 | [TypeScript](../../typescript/reference/operations.md) | Not wrapped by a method |
-| [Python](../../python/reference/operations.md) | [`ConvoHopManagement.get_organization`](../../python/reference/convohop.md#convohopmanagementget_organization-method), [`AsyncConvoHopManagement.get_organization`](../../python/reference/convohop.md#asyncconvohopmanagementget_organization-method) |
+| [Python](../../python/reference/operations.md) | [`RelayManagement.get_organization`](../../python/reference/instantrelay.md#relaymanagementget_organization-method), [`AsyncRelayManagement.get_organization`](../../python/reference/instantrelay.md#asyncrelaymanagementget_organization-method) |
 | [.NET](../../dotnet/reference/operations.md) | [`ManagementApi.GetOrganizationAsync`](../../dotnet/reference/api.md#managementapigetorganizationasync-method) |
 | [Java and Kotlin](../../jvm/reference/operations.md) | [`ManagementApi.getOrganization`](../../jvm/reference/server.md#managementapigetorganization-method), [`ManagementSuspendApi.getOrganization`](../../jvm/reference/server-kotlin.md#managementsuspendapigetorganization-method) |
-| [Go](../../go/reference/operations.md) | [`ManagementClient.GetOrganization`](../../go/reference/convohop.md#managementclientgetorganization-method) |
+| [Go](../../go/reference/operations.md) | [`ManagementClient.GetOrganization`](../../go/reference/relay.md#managementclientgetorganization-method) |

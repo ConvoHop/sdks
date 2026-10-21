@@ -1,4 +1,4 @@
-package convohop
+package relay
 
 import (
 	"bytes"
@@ -515,7 +515,7 @@ func (t *transport) retry(ctx context.Context, requestID string) (map[string]any
 	}
 	t.mu.Unlock()
 	if state == nil {
-		return nil, errors.New("convohop: no recovery record exists; do not invent a replacement identity")
+		return nil, errors.New("relay: no recovery record exists; do not invent a replacement identity")
 	}
 	if record.Incarnation != t.incarnation {
 		return nil, incarnationMismatch(requestID)

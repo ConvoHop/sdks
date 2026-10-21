@@ -72,11 +72,11 @@ mutation CommunicationAlertLiveSession($context: RequestContextInput!, $input: A
 | Language | Members |
 | --- | --- |
 | [TypeScript](../../typescript/reference/operations.md) | [`ServerLiveSession.alert`](../../typescript/reference/server.md#serverlivesessionalert-method), [`LiveSessionHandle.alerts.send`](../../typescript/reference/client.md#livesessionhandlealertssend-property) |
-| [Python](../../python/reference/operations.md) | [`ConvoHop.alert_live_session`](../../python/reference/convohop.md#convohopalert_live_session-method), [`AsyncConvoHop.alert_live_session`](../../python/reference/convohop.md#asyncconvohopalert_live_session-method) |
-| [.NET](../../dotnet/reference/operations.md) | [`ServerLiveSession.AlertAsync`](../../dotnet/reference/convohop.md#serverlivesessionalertasync-method), [`CommunicationApi.AlertLiveSessionAsync`](../../dotnet/reference/api.md#communicationapialertlivesessionasync-method) |
+| [Python](../../python/reference/operations.md) | [`Relay.alert_live_session`](../../python/reference/instantrelay.md#relayalert_live_session-method), [`AsyncRelay.alert_live_session`](../../python/reference/instantrelay.md#asyncrelayalert_live_session-method) |
+| [.NET](../../dotnet/reference/operations.md) | [`ServerLiveSession.AlertAsync`](../../dotnet/reference/relay.md#serverlivesessionalertasync-method), [`CommunicationApi.AlertLiveSessionAsync`](../../dotnet/reference/api.md#communicationapialertlivesessionasync-method) |
 | [Java and Kotlin](../../jvm/reference/operations.md) | [`CommunicationApi.alertLiveSession`](../../jvm/reference/server.md#communicationapialertlivesession-method), [`CommunicationSuspendApi.alertLiveSession`](../../jvm/reference/server-kotlin.md#communicationsuspendapialertlivesession-method) |
-| [Go](../../go/reference/operations.md) | [`ProjectClient.AlertLiveSession`](../../go/reference/convohop.md#projectclientalertlivesession-method) |
-| [Swift](../../swift/reference/operations.md) | [`LiveSessionAlerts.send`](../../swift/reference/convohop.md#livesessionalertssend-method) |
+| [Go](../../go/reference/operations.md) | [`ProjectClient.AlertLiveSession`](../../go/reference/relay.md#projectclientalertlivesession-method) |
+| [Swift](../../swift/reference/operations.md) | [`LiveSessionAlerts.send`](../../swift/reference/relay.md#livesessionalertssend-method) |
 | [Android](../../android/reference/operations.md) | [`LiveSessionHandle.alerts.send`](../../android/reference/android-core.md#livesessionhandlealertssend-method) |
-| [Flutter](../../flutter/reference/operations.md) | [`LiveSessionAlerts.send`](../../flutter/reference/convohop.md#livesessionalertssend-method), [`CommunicationOperations.alertLiveSession`](../../flutter/reference/convohop.md#communicationoperationsalertlivesession-method) |
+| [Flutter](../../flutter/reference/operations.md) | [`LiveSessionAlerts.send`](../../flutter/reference/instantrelay.md#livesessionalertssend-method), [`CommunicationOperations.alertLiveSession`](../../flutter/reference/instantrelay.md#communicationoperationsalertlivesession-method) |
 | [React Native](../../react-native/reference/operations.md) | [`LiveSessionHandle.alerts.send`](../../react-native/reference/client.md#livesessionhandlealertssend-property) |

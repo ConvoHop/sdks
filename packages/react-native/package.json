@@ -1,8 +1,8 @@
 {
-  "name": "@convohop/react-native",
+  "name": "@instantrelay/react-native",
   "version": "0.0.0",
   "private": true,
-  "description": "ConvoHop client SDK for React Native: the platform adapter for @convohop/client, push and call bridges over the ConvoHop iOS and Android helpers, and LiveKit React Native media.",
+  "description": "Relay client SDK for React Native: the platform adapter for @instantrelay/client, push and call bridges over the Relay iOS and Android helpers, and LiveKit React Native media.",
   "license": "Apache-2.0",
   "repository": {
     "type": "git",
@@ -34,21 +34,21 @@
     "!android/build",
     "!android/src/test",
     "ios",
-    "ConvoHopReactNative.podspec",
+    "RelayReactNative.podspec",
     "NOTICE"
   ],
   "codegenConfig": {
-    "name": "RNConvoHopSpec",
+    "name": "RNRelaySpec",
     "type": "modules",
     "jsSrcsDir": "src/specs",
     "android": {
-      "javaPackageName": "com.convohop.reactnative"
+      "javaPackageName": "dev.instantrelay.reactnative"
     },
     "ios": {
       "modulesProvider": {
-        "ConvoHopCalls": "ConvoHopCallsModule",
-        "ConvoHopPlatform": "ConvoHopPlatformModule",
-        "ConvoHopPush": "ConvoHopPushModule"
+        "RelayCalls": "RelayCallsModule",
+        "RelayPlatform": "RelayPlatformModule",
+        "RelayPush": "RelayPushModule"
       }
     }
   },
@@ -62,7 +62,7 @@
     "whatwg-url-without-unicode": "8.0.0-3"
   },
   "peerDependencies": {
-    "@convohop/client": "*",
+    "@instantrelay/client": "*",
     "@livekit/react-native": "^3.0.0",
     "@livekit/react-native-webrtc": "^144.2.0",
     "livekit-client": "^2.22.3",
@@ -80,9 +80,9 @@
     }
   },
   "devDependencies": {
-    "@convohop/client": "*",
-    "@convohop/core": "*",
-    "@convohop/react": "*",
+    "@instantrelay/client": "*",
+    "@instantrelay/core": "*",
+    "@instantrelay/react": "*",
     "@livekit/react-native": "3.0.0",
     "@livekit/react-native-webrtc": "144.2.0",
     "@react-native-async-storage/async-storage": "3.1.1",

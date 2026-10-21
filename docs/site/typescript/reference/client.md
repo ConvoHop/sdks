@@ -1,4 +1,4 @@
-# `@convohop/client`
+# `@instantrelay/client`
 
 Client SDK for apps on end-user devices: one signed-in user's conversations, realtime events and calls.
 
@@ -15,7 +15,7 @@ class ConversationHandle
 #### `ConversationHandle.client` property
 
 ```ts
-readonly client: ConvoHopClient
+readonly client: RelayClient
 ```
 
 #### `ConversationHandle.conversationId` property
@@ -33,7 +33,7 @@ readonly live: ConversationLive
 #### `ConversationHandle` constructor
 
 ```ts
-constructor(client: ConvoHopClient, conversationId: string)
+constructor(client: RelayClient, conversationId: string)
 ```
 
 #### `ConversationHandle.get` method
@@ -92,7 +92,7 @@ Sends [`communication.sendMessage`](../../operations/communication/sendMessage.m
 ##### `ConversationHandle.messages.list` property
 
 ```ts
-list: (beforeSequence?: string) => Promise<import("@convohop/core").ItemPage<{
+list: (beforeSequence?: string) => Promise<import("@instantrelay/core").ItemPage<{
     messageId: string;
     conversationId: string;
     authorId: string;
@@ -272,7 +272,7 @@ Keep one store per conversation and client: stores of the same conversation shar
 #### `ConversationStore.client` property
 
 ```ts
-readonly client: ConvoHopClient
+readonly client: RelayClient
 ```
 
 #### `ConversationStore.conversationId` property
@@ -290,7 +290,7 @@ readonly outbox: Outbox
 #### `ConversationStore` constructor
 
 ```ts
-constructor(client: ConvoHopClient, conversationId: string, options?: ConversationStoreOptions)
+constructor(client: RelayClient, conversationId: string, options?: ConversationStoreOptions)
 ```
 
 #### `ConversationStore.snapshot` property
@@ -387,7 +387,7 @@ class ConversationStream
 #### `ConversationStream.client` property
 
 ```ts
-readonly client: ConvoHopClient
+readonly client: RelayClient
 ```
 
 #### `ConversationStream.conversationId` property
@@ -423,7 +423,7 @@ readonly onClose?: (() => void) | undefined
 #### `ConversationStream` constructor
 
 ```ts
-constructor(client: ConvoHopClient, conversationId: string, route: ProjectRoute, token: string, apply: (events: ProtocolObject[]) => Promise<void>, onError: (error: Error) => void, onClose?: (() => void) | undefined)
+constructor(client: RelayClient, conversationId: string, route: ProjectRoute, token: string, apply: (events: ProtocolObject[]) => Promise<void>, onError: (error: Error) => void, onClose?: (() => void) | undefined)
 ```
 
 #### `ConversationStream.cursor` property
@@ -468,418 +468,6 @@ reconcile(): Promise<void>
 close(): void
 ```
 
-### `ConvoHopClient` class
-
-```ts
-class ConvoHopClient
-```
-
-#### `ConvoHopClient.projectId` property
-
-```ts
-readonly projectId: string
-```
-
-#### `ConvoHopClient.principalId` property
-
-```ts
-readonly principalId: string
-```
-
-#### `ConvoHopClient.http` property
-
-```ts
-readonly http: ConvoHopTransport
-```
-
-#### `ConvoHopClient.storage` property
-
-```ts
-readonly storage: RecoveryStorage | undefined
-```
-
-#### `ConvoHopClient.asyncStorage` property
-
-```ts
-readonly asyncStorage: AsyncRecoveryStorage | undefined
-```
-
-The configured `asyncRecoveryStorage`, if any.
-
-#### `ConvoHopClient.platform` property
-
-```ts
-readonly platform: Readonly<ConvoHopPlatform>
-```
-
-The validated `platform` option, frozen. Empty when every service comes from globals.
-
-#### `ConvoHopClient` constructor
-
-```ts
-constructor(options: ConvoHopClientOptions)
-```
-
-#### `ConvoHopClient.sessionBinding` property
-
-```ts
-get sessionBinding(): Readonly<SessionMetadata> | undefined
-```
-
-#### `ConvoHopClient.sessionRefreshState` property
-
-```ts
-get sessionRefreshState(): SessionRefreshState
-```
-
-#### `ConvoHopClient.initialize` method
-
-```ts
-initialize(): Promise<ProjectRoute>
-```
-
-Sends [`communication.route`](../../operations/communication/route.md) and [`communication.currentSession`](../../operations/communication/currentSession.md).
-
-#### `ConvoHopClient.refreshSession` method
-
-```ts
-refreshSession(): Promise<SessionMetadata>
-```
-
-Sends [`communication.route`](../../operations/communication/route.md) and [`communication.currentSession`](../../operations/communication/currentSession.md).
-
-#### `ConvoHopClient.scheduleSessionRefresh` method
-
-```ts
-scheduleSessionRefresh(options?: SessionRefreshSchedule): () => void
-```
-
-Renews the session `leadMs` before it expires, and again after each renewal, until the returned function is
-called. A failed renewal that leaves the current session verified is retried with backoff before expiry, so the
-`sessionRefresh` hook can run again; any other failure stops the schedule. Every failure goes to `onError`.
-Returning to the foreground (`platform.lifecycle`) re-checks a waiting renewal at once, since suspended apps'
-timers can fire late.
-
-Sends [`communication.route`](../../operations/communication/route.md) and [`communication.currentSession`](../../operations/communication/currentSession.md).
-
-#### `ConvoHopClient.conversation` method
-
-```ts
-conversation(id: string): ConversationHandle
-```
-
-#### `ConvoHopClient.getConversation` method
-
-```ts
-getConversation(id: string): Promise<Conversation>
-```
-
-Sends [`communication.getConversation`](../../operations/communication/getConversation.md).
-
-#### `ConvoHopClient.requests` property
-
-```ts
-readonly requests: { … }
-```
-
-##### `ConvoHopClient.requests.resolve` property
-
-```ts
-resolve: (requestId: string) => Promise<NonNullable<OperationPayload<"communication.resolveRequest">["result"]>>
-```
-
-Sends [`communication.resolveRequest`](../../operations/communication/resolveRequest.md).
-
-##### `ConvoHopClient.requests.retry` property
-
-```ts
-retry: (requestId: string) => Promise<NonNullable<OperationPayload<"communication.resolveRequest">["result"]>>
-```
-
-Sends [`communication.resolveRequest`](../../operations/communication/resolveRequest.md).
-
-#### `ConvoHopClient.liveSession` method
-
-```ts
-liveSession(id: string): Promise<LiveSessionHandle>
-```
-
-Sends [`communication.liveSession`](../../operations/communication/liveSession.md).
-
-#### `ConvoHopClient.liveAlerts` property
-
-```ts
-readonly liveAlerts: { … }
-```
-
-##### `ConvoHopClient.liveAlerts.list` property
-
-```ts
-list: (options?: PageOptions) => Promise<OperationPayload<"communication.liveSessionAlerts">["result"]>
-```
-
-Sends [`communication.liveSessionAlerts`](../../operations/communication/liveSessionAlerts.md).
-
-#### `ConvoHopClient.messages` method
-
-```ts
-messages(id: string, beforeSequence?: string, limit?: number): Promise<ItemPage<ConversationMessage>>
-```
-
-Up to `limit` (1..100, default 100) messages before `beforeSequence` or the newest, newest first. Pages can hold fewer.
-
-Sends [`communication.messages`](../../operations/communication/messages.md).
-
-#### `ConvoHopClient.send` method
-
-```ts
-send(id: string, text: string, requestId?: string, props?: ProtocolObject): Promise<SendReceipt>
-```
-
-Sends [`communication.sendMessage`](../../operations/communication/sendMessage.md).
-
-#### `ConvoHopClient.edit` method
-
-```ts
-edit(message: ConversationMessage, text: string, requestId?: string): Promise<ConversationMessage>
-```
-
-Sends [`communication.editMessage`](../../operations/communication/editMessage.md).
-
-#### `ConvoHopClient.delete` method
-
-```ts
-delete(message: ConversationMessage, requestId?: string): Promise<ConversationMessage>
-```
-
-Sends [`communication.deleteMessage`](../../operations/communication/deleteMessage.md).
-
-#### `ConvoHopClient.events` method
-
-```ts
-events(id: string, after?: ConversationCursor): Promise<ItemPage<ProtocolObject> & {
-    nextCursor: ConversationCursor;
-}>
-```
-
-Sends [`communication.events`](../../operations/communication/events.md).
-
-#### `ConvoHopClient.reportRead` method
-
-```ts
-reportRead(id: string, membership: Membership, throughSequence: string): Promise<ReadReceipt>
-```
-
-Reports reading through a message's sequence, which also covers its delivery. Returns the user's current receipt.
-
-Sends [`communication.reportReceipt`](../../operations/communication/reportReceipt.md).
-
-#### `ConvoHopClient.reportDelivered` method
-
-```ts
-reportDelivered(id: string, membership: Membership, throughSequence: string): Promise<ReadReceipt>
-```
-
-Reports delivery through a message's sequence. Returns the user's current receipt.
-
-Sends [`communication.reportReceipt`](../../operations/communication/reportReceipt.md).
-
-#### `ConvoHopClient.receipts` method
-
-```ts
-receipts(id: string, cursor?: string): Promise<ItemPage<ReadReceipt>>
-```
-
-Sends [`communication.receipts`](../../operations/communication/receipts.md).
-
-#### `ConvoHopClient.getMessage` method
-
-```ts
-getMessage(id: string, messageId: string): Promise<ConversationMessage>
-```
-
-Sends [`communication.getMessage`](../../operations/communication/getMessage.md).
-
-#### `ConvoHopClient.members` method
-
-```ts
-members(id: string, options?: PageOptions): Promise<ItemPage<Membership>>
-```
-
-Sends [`communication.members`](../../operations/communication/members.md).
-
-#### `ConvoHopClient.inbox` method
-
-```ts
-inbox(options?: PageOptions): Promise<InboxPage>
-```
-
-Sends [`communication.inbox`](../../operations/communication/inbox.md).
-
-#### `ConvoHopClient.capabilities` method
-
-```ts
-capabilities(): Promise<ProjectCapabilities>
-```
-
-Sends [`communication.capabilities`](../../operations/communication/capabilities.md).
-
-#### `ConvoHopClient.typing` method
-
-```ts
-typing(id: string, isTyping: boolean): Promise<boolean>
-```
-
-Sends one ephemeral typing signal and returns whether the authority accepted it. Signals are never recorded,
-retried or resolved. Check `features?.typing` in `capabilities` first.
-
-Sends [`communication.typing`](../../operations/communication/typing.md).
-
-#### `ConvoHopClient.search` method
-
-```ts
-search(query: string, conversationIds?: string[]): Promise<ItemPage<SearchHit>>
-```
-
-Sends [`communication.search`](../../operations/communication/search.md).
-
-#### `ConvoHopClient.recoverPending` method
-
-```ts
-recoverPending(onError: (error: Error) => void): Promise<void>
-```
-
-Sends [`communication.resolveRequest`](../../operations/communication/resolveRequest.md).
-
-#### `ConvoHopClient.watch` method
-
-```ts
-watch(conversationId: string, apply: (events: ProtocolObject[]) => Promise<void>, onError: (error: Error) => void): Promise<ConversationStream>
-```
-
-Sends [`communication.events`](../../operations/communication/events.md) and [`communication.conversationEvents`](../../operations/communication/conversationEvents.md).
-
-#### `ConvoHopClient.resyncAuthorizedHistory` method
-
-```ts
-resyncAuthorizedHistory(conversationId: string, apply: (events: ProtocolObject[]) => Promise<void>, onError: (error: Error) => void): Promise<ConversationStream>
-```
-
-Sends [`communication.events`](../../operations/communication/events.md) and [`communication.conversationEvents`](../../operations/communication/conversationEvents.md).
-
-### `ConvoHopProblem` class
-
-```ts
-class ConvoHopProblem extends Error
-```
-
-Re-exported from `@convohop/core`.
-
-#### `ConvoHopProblem.code` property
-
-```ts
-readonly code: string
-```
-
-#### `ConvoHopProblem.requestId` property
-
-```ts
-readonly requestId: string
-```
-
-#### `ConvoHopProblem.outcome` property
-
-```ts
-readonly outcome: string
-```
-
-#### `ConvoHopProblem.status` property
-
-```ts
-readonly status: number
-```
-
-#### `ConvoHopProblem.retryAfter` property
-
-```ts
-readonly retryAfter?: number
-```
-
-Whole seconds to wait before resending the same request, when the authority sent a delay (for example with
-`RATE_LIMITED`). Read from the error's `extensions.retryAfter`, else from an HTTP `Retry-After` delay in seconds,
-or from a realtime close reason's `retryAfter=`. A request the caller sends is never resent on its own; when
-`@convohop/client` reconnects its stream or resends a queued message, it waits at least this long first.
-
-#### `ConvoHopProblem` constructor
-
-```ts
-constructor(code: string, requestId: string, outcome: string, status: number, message: string, options?: ErrorOptions & {
-    retryAfter?: number;
-})
-```
-
-### `ConvoHopTransport` class
-
-```ts
-class ConvoHopTransport
-```
-
-Re-exported from `@convohop/core`.
-
-#### `ConvoHopTransport.baseUrl` property
-
-```ts
-readonly baseUrl: string
-```
-
-#### `ConvoHopTransport.durableRecovery` property
-
-```ts
-readonly durableRecovery: boolean
-```
-
-#### `ConvoHopTransport.incarnation` property
-
-```ts
-incarnation: string
-```
-
-#### `ConvoHopTransport.servingEpoch` property
-
-```ts
-servingEpoch: string | undefined
-```
-
-#### `ConvoHopTransport` constructor
-
-```ts
-constructor(options: ConvoHopTransportOptions)
-```
-
-#### `ConvoHopTransport.initializeRecovery` method
-
-```ts
-initializeRecovery(): Promise<void>
-```
-
-#### `ConvoHopTransport.recoveryStates` property
-
-```ts
-get recoveryStates(): readonly RecoveryState[]
-```
-
-#### `ConvoHopTransport.execute` method
-
-```ts
-execute<K extends OperationKey>(key: K, projectId: string | undefined, input: OperationInput<K>, requestId?: string, credentialDeliveryPermit?: ProtocolObject): Promise<OperationPayload<K>>
-```
-
-#### `ConvoHopTransport.retry` method
-
-```ts
-retry(requestId: string): Promise<NonNullable<OperationPayload<"communication.resolveRequest">["result"]>>
-```
-
 ### `LiveEndOperation` class
 
 ```ts
@@ -895,13 +483,13 @@ readonly receipt: OperationPayload<"communication.endLiveSession">
 #### `LiveEndOperation` constructor
 
 ```ts
-constructor(client: ConvoHopClient, receipt: OperationPayload<"communication.endLiveSession">)
+constructor(client: RelayClient, receipt: OperationPayload<"communication.endLiveSession">)
 ```
 
 #### `LiveEndOperation.client` property
 
 ```ts
-readonly client: ConvoHopClient
+readonly client: RelayClient
 ```
 
 Inherited from `LiveAction`.
@@ -1050,7 +638,7 @@ class LiveSessionHandle
 #### `LiveSessionHandle.client` property
 
 ```ts
-readonly client: ConvoHopClient
+readonly client: RelayClient
 ```
 
 #### `LiveSessionHandle.snapshot` property
@@ -1080,13 +668,13 @@ readonly conversationId: string
 #### `LiveSessionHandle` constructor
 
 ```ts
-constructor(client: ConvoHopClient, snapshot: LiveSession)
+constructor(client: RelayClient, snapshot: LiveSession)
 ```
 
 #### `LiveSessionHandle.get` static method
 
 ```ts
-static get(client: ConvoHopClient, liveSessionId: string): Promise<LiveSessionHandle>
+static get(client: RelayClient, liveSessionId: string): Promise<LiveSessionHandle>
 ```
 
 Sends [`communication.liveSession`](../../operations/communication/liveSession.md).
@@ -1187,7 +775,7 @@ readonly receipt: OperationPayload<"communication.startLiveSession">
 #### `LiveStartOperation` constructor
 
 ```ts
-constructor(client: ConvoHopClient, receipt: OperationPayload<"communication.startLiveSession">)
+constructor(client: RelayClient, receipt: OperationPayload<"communication.startLiveSession">)
 ```
 
 #### `LiveStartOperation.ready` method
@@ -1201,7 +789,7 @@ Sends [`communication.liveSession`](../../operations/communication/liveSession.m
 #### `LiveStartOperation.client` property
 
 ```ts
-readonly client: ConvoHopClient
+readonly client: RelayClient
 ```
 
 Inherited from `LiveAction`.
@@ -1345,13 +933,13 @@ sent or fails. A failed entry is only sent again, as a new message, through `Out
 #### `Outbox.client` property
 
 ```ts
-readonly client: ConvoHopClient
+readonly client: RelayClient
 ```
 
 #### `Outbox` constructor
 
 ```ts
-constructor(client: ConvoHopClient, options?: OutboxOptions)
+constructor(client: RelayClient, options?: OutboxOptions)
 ```
 
 #### `Outbox.entries` property
@@ -1428,16 +1016,428 @@ and its storage is passed on or released. A send in flight is waited for until i
 sign-out, wait for it before clearing the storage. It never rejects; failures go to `onError`. Every call returns
 the same promise.
 
+### `RelayClient` class
+
+```ts
+class RelayClient
+```
+
+#### `RelayClient.projectId` property
+
+```ts
+readonly projectId: string
+```
+
+#### `RelayClient.principalId` property
+
+```ts
+readonly principalId: string
+```
+
+#### `RelayClient.http` property
+
+```ts
+readonly http: RelayTransport
+```
+
+#### `RelayClient.storage` property
+
+```ts
+readonly storage: RecoveryStorage | undefined
+```
+
+#### `RelayClient.asyncStorage` property
+
+```ts
+readonly asyncStorage: AsyncRecoveryStorage | undefined
+```
+
+The configured `asyncRecoveryStorage`, if any.
+
+#### `RelayClient.platform` property
+
+```ts
+readonly platform: Readonly<RelayPlatform>
+```
+
+The validated `platform` option, frozen. Empty when every service comes from globals.
+
+#### `RelayClient` constructor
+
+```ts
+constructor(options: RelayClientOptions)
+```
+
+#### `RelayClient.sessionBinding` property
+
+```ts
+get sessionBinding(): Readonly<SessionMetadata> | undefined
+```
+
+#### `RelayClient.sessionRefreshState` property
+
+```ts
+get sessionRefreshState(): SessionRefreshState
+```
+
+#### `RelayClient.initialize` method
+
+```ts
+initialize(): Promise<ProjectRoute>
+```
+
+Sends [`communication.route`](../../operations/communication/route.md) and [`communication.currentSession`](../../operations/communication/currentSession.md).
+
+#### `RelayClient.refreshSession` method
+
+```ts
+refreshSession(): Promise<SessionMetadata>
+```
+
+Sends [`communication.route`](../../operations/communication/route.md) and [`communication.currentSession`](../../operations/communication/currentSession.md).
+
+#### `RelayClient.scheduleSessionRefresh` method
+
+```ts
+scheduleSessionRefresh(options?: SessionRefreshSchedule): () => void
+```
+
+Renews the session `leadMs` before it expires, and again after each renewal, until the returned function is
+called. A failed renewal that leaves the current session verified is retried with backoff before expiry, so the
+`sessionRefresh` hook can run again; any other failure stops the schedule. Every failure goes to `onError`.
+Returning to the foreground (`platform.lifecycle`) re-checks a waiting renewal at once, since suspended apps'
+timers can fire late.
+
+Sends [`communication.route`](../../operations/communication/route.md) and [`communication.currentSession`](../../operations/communication/currentSession.md).
+
+#### `RelayClient.conversation` method
+
+```ts
+conversation(id: string): ConversationHandle
+```
+
+#### `RelayClient.getConversation` method
+
+```ts
+getConversation(id: string): Promise<Conversation>
+```
+
+Sends [`communication.getConversation`](../../operations/communication/getConversation.md).
+
+#### `RelayClient.requests` property
+
+```ts
+readonly requests: { … }
+```
+
+##### `RelayClient.requests.resolve` property
+
+```ts
+resolve: (requestId: string) => Promise<NonNullable<OperationPayload<"communication.resolveRequest">["result"]>>
+```
+
+Sends [`communication.resolveRequest`](../../operations/communication/resolveRequest.md).
+
+##### `RelayClient.requests.retry` property
+
+```ts
+retry: (requestId: string) => Promise<NonNullable<OperationPayload<"communication.resolveRequest">["result"]>>
+```
+
+Sends [`communication.resolveRequest`](../../operations/communication/resolveRequest.md).
+
+#### `RelayClient.liveSession` method
+
+```ts
+liveSession(id: string): Promise<LiveSessionHandle>
+```
+
+Sends [`communication.liveSession`](../../operations/communication/liveSession.md).
+
+#### `RelayClient.liveAlerts` property
+
+```ts
+readonly liveAlerts: { … }
+```
+
+##### `RelayClient.liveAlerts.list` property
+
+```ts
+list: (options?: PageOptions) => Promise<OperationPayload<"communication.liveSessionAlerts">["result"]>
+```
+
+Sends [`communication.liveSessionAlerts`](../../operations/communication/liveSessionAlerts.md).
+
+#### `RelayClient.messages` method
+
+```ts
+messages(id: string, beforeSequence?: string, limit?: number): Promise<ItemPage<ConversationMessage>>
+```
+
+Up to `limit` (1..100, default 100) messages before `beforeSequence` or the newest, newest first. Pages can hold fewer.
+
+Sends [`communication.messages`](../../operations/communication/messages.md).
+
+#### `RelayClient.send` method
+
+```ts
+send(id: string, text: string, requestId?: string, props?: ProtocolObject): Promise<SendReceipt>
+```
+
+Sends [`communication.sendMessage`](../../operations/communication/sendMessage.md).
+
+#### `RelayClient.edit` method
+
+```ts
+edit(message: ConversationMessage, text: string, requestId?: string): Promise<ConversationMessage>
+```
+
+Sends [`communication.editMessage`](../../operations/communication/editMessage.md).
+
+#### `RelayClient.delete` method
+
+```ts
+delete(message: ConversationMessage, requestId?: string): Promise<ConversationMessage>
+```
+
+Sends [`communication.deleteMessage`](../../operations/communication/deleteMessage.md).
+
+#### `RelayClient.events` method
+
+```ts
+events(id: string, after?: ConversationCursor): Promise<ItemPage<ProtocolObject> & {
+    nextCursor: ConversationCursor;
+}>
+```
+
+Sends [`communication.events`](../../operations/communication/events.md).
+
+#### `RelayClient.reportRead` method
+
+```ts
+reportRead(id: string, membership: Membership, throughSequence: string): Promise<ReadReceipt>
+```
+
+Reports reading through a message's sequence, which also covers its delivery. Returns the user's current receipt.
+
+Sends [`communication.reportReceipt`](../../operations/communication/reportReceipt.md).
+
+#### `RelayClient.reportDelivered` method
+
+```ts
+reportDelivered(id: string, membership: Membership, throughSequence: string): Promise<ReadReceipt>
+```
+
+Reports delivery through a message's sequence. Returns the user's current receipt.
+
+Sends [`communication.reportReceipt`](../../operations/communication/reportReceipt.md).
+
+#### `RelayClient.receipts` method
+
+```ts
+receipts(id: string, cursor?: string): Promise<ItemPage<ReadReceipt>>
+```
+
+Sends [`communication.receipts`](../../operations/communication/receipts.md).
+
+#### `RelayClient.getMessage` method
+
+```ts
+getMessage(id: string, messageId: string): Promise<ConversationMessage>
+```
+
+Sends [`communication.getMessage`](../../operations/communication/getMessage.md).
+
+#### `RelayClient.members` method
+
+```ts
+members(id: string, options?: PageOptions): Promise<ItemPage<Membership>>
+```
+
+Sends [`communication.members`](../../operations/communication/members.md).
+
+#### `RelayClient.inbox` method
+
+```ts
+inbox(options?: PageOptions): Promise<InboxPage>
+```
+
+Sends [`communication.inbox`](../../operations/communication/inbox.md).
+
+#### `RelayClient.capabilities` method
+
+```ts
+capabilities(): Promise<ProjectCapabilities>
+```
+
+Sends [`communication.capabilities`](../../operations/communication/capabilities.md).
+
+#### `RelayClient.typing` method
+
+```ts
+typing(id: string, isTyping: boolean): Promise<boolean>
+```
+
+Sends one ephemeral typing signal and returns whether the authority accepted it. Signals are never recorded,
+retried or resolved. Check `features?.typing` in `capabilities` first.
+
+Sends [`communication.typing`](../../operations/communication/typing.md).
+
+#### `RelayClient.search` method
+
+```ts
+search(query: string, conversationIds?: string[]): Promise<ItemPage<SearchHit>>
+```
+
+Sends [`communication.search`](../../operations/communication/search.md).
+
+#### `RelayClient.recoverPending` method
+
+```ts
+recoverPending(onError: (error: Error) => void): Promise<void>
+```
+
+Sends [`communication.resolveRequest`](../../operations/communication/resolveRequest.md).
+
+#### `RelayClient.watch` method
+
+```ts
+watch(conversationId: string, apply: (events: ProtocolObject[]) => Promise<void>, onError: (error: Error) => void): Promise<ConversationStream>
+```
+
+Sends [`communication.events`](../../operations/communication/events.md) and [`communication.conversationEvents`](../../operations/communication/conversationEvents.md).
+
+#### `RelayClient.resyncAuthorizedHistory` method
+
+```ts
+resyncAuthorizedHistory(conversationId: string, apply: (events: ProtocolObject[]) => Promise<void>, onError: (error: Error) => void): Promise<ConversationStream>
+```
+
+Sends [`communication.events`](../../operations/communication/events.md) and [`communication.conversationEvents`](../../operations/communication/conversationEvents.md).
+
+### `RelayProblem` class
+
+```ts
+class RelayProblem extends Error
+```
+
+Re-exported from `@instantrelay/core`.
+
+#### `RelayProblem.code` property
+
+```ts
+readonly code: string
+```
+
+#### `RelayProblem.requestId` property
+
+```ts
+readonly requestId: string
+```
+
+#### `RelayProblem.outcome` property
+
+```ts
+readonly outcome: string
+```
+
+#### `RelayProblem.status` property
+
+```ts
+readonly status: number
+```
+
+#### `RelayProblem.retryAfter` property
+
+```ts
+readonly retryAfter?: number
+```
+
+Whole seconds to wait before resending the same request, when the authority sent a delay (for example with
+`RATE_LIMITED`). Read from the error's `extensions.retryAfter`, else from an HTTP `Retry-After` delay in seconds,
+or from a realtime close reason's `retryAfter=`. A request the caller sends is never resent on its own; when
+`@instantrelay/client` reconnects its stream or resends a queued message, it waits at least this long first.
+
+#### `RelayProblem` constructor
+
+```ts
+constructor(code: string, requestId: string, outcome: string, status: number, message: string, options?: ErrorOptions & {
+    retryAfter?: number;
+})
+```
+
+### `RelayTransport` class
+
+```ts
+class RelayTransport
+```
+
+Re-exported from `@instantrelay/core`.
+
+#### `RelayTransport.baseUrl` property
+
+```ts
+readonly baseUrl: string
+```
+
+#### `RelayTransport.durableRecovery` property
+
+```ts
+readonly durableRecovery: boolean
+```
+
+#### `RelayTransport.incarnation` property
+
+```ts
+incarnation: string
+```
+
+#### `RelayTransport.servingEpoch` property
+
+```ts
+servingEpoch: string | undefined
+```
+
+#### `RelayTransport` constructor
+
+```ts
+constructor(options: RelayTransportOptions)
+```
+
+#### `RelayTransport.initializeRecovery` method
+
+```ts
+initializeRecovery(): Promise<void>
+```
+
+#### `RelayTransport.recoveryStates` property
+
+```ts
+get recoveryStates(): readonly RecoveryState[]
+```
+
+#### `RelayTransport.execute` method
+
+```ts
+execute<K extends OperationKey>(key: K, projectId: string | undefined, input: OperationInput<K>, requestId?: string, credentialDeliveryPermit?: ProtocolObject): Promise<OperationPayload<K>>
+```
+
+#### `RelayTransport.retry` method
+
+```ts
+retry(requestId: string): Promise<NonNullable<OperationPayload<"communication.resolveRequest">["result"]>>
+```
+
 ### `ScopeRequiredProblem` class
 
 ```ts
-class ScopeRequiredProblem extends ConvoHopProblem
+class ScopeRequiredProblem extends RelayProblem
 ```
 
 `SCOPE_REQUIRED`: the backend key lacks a scope the operation requires (403, rejected, not retryable).
-Classify it by `instanceof ConvoHopProblem` and `code`; `scope` is a diagnostic detail.
+Classify it by `instanceof RelayProblem` and `code`; `scope` is a diagnostic detail.
 
-Re-exported from `@convohop/core`.
+Re-exported from `@instantrelay/core`.
 
 #### `ScopeRequiredProblem.code` property
 
@@ -1469,7 +1469,7 @@ constructor(requestId: string, outcome: string, status: number, message: string,
 readonly requestId: string
 ```
 
-Inherited from `ConvoHopProblem`.
+Inherited from `RelayProblem`.
 
 #### `ScopeRequiredProblem.outcome` property
 
@@ -1477,7 +1477,7 @@ Inherited from `ConvoHopProblem`.
 readonly outcome: string
 ```
 
-Inherited from `ConvoHopProblem`.
+Inherited from `RelayProblem`.
 
 #### `ScopeRequiredProblem.status` property
 
@@ -1485,7 +1485,7 @@ Inherited from `ConvoHopProblem`.
 readonly status: number
 ```
 
-Inherited from `ConvoHopProblem`.
+Inherited from `RelayProblem`.
 
 #### `ScopeRequiredProblem.retryAfter` property
 
@@ -1496,9 +1496,9 @@ readonly retryAfter?: number
 Whole seconds to wait before resending the same request, when the authority sent a delay (for example with
 `RATE_LIMITED`). Read from the error's `extensions.retryAfter`, else from an HTTP `Retry-After` delay in seconds,
 or from a realtime close reason's `retryAfter=`. A request the caller sends is never resent on its own; when
-`@convohop/client` reconnects its stream or resends a queued message, it waits at least this long first.
+`@instantrelay/client` reconnects its stream or resends a queued message, it waits at least this long first.
 
-Inherited from `ConvoHopProblem`.
+Inherited from `RelayProblem`.
 
 ### `TypingIndicator` class
 
@@ -1513,7 +1513,7 @@ project doesn't support typing.
 #### `TypingIndicator.client` property
 
 ```ts
-readonly client: ConvoHopClient
+readonly client: RelayClient
 ```
 
 #### `TypingIndicator.conversationId` property
@@ -1525,7 +1525,7 @@ readonly conversationId: string
 #### `TypingIndicator` constructor
 
 ```ts
-constructor(client: ConvoHopClient, conversationId: string, options?: TypingIndicatorOptions)
+constructor(client: RelayClient, conversationId: string, options?: TypingIndicatorOptions)
 ```
 
 #### `TypingIndicator.enabled` property
@@ -1579,7 +1579,7 @@ Sends [`communication.typing`](../../operations/communication/typing.md).
 interface AsyncRecoveryStorage
 ```
 
-Re-exported from `@convohop/core`.
+Re-exported from `@instantrelay/core`.
 
 #### `AsyncRecoveryStorage.getItem` method
 
@@ -1605,7 +1605,7 @@ removeItem(key: string): Promise<void>
 interface CommandOptions
 ```
 
-Re-exported from `@convohop/core`.
+Re-exported from `@instantrelay/core`.
 
 #### `CommandOptions.requestId` property
 
@@ -1621,7 +1621,7 @@ interface Connectivity
 
 Network reachability.
 
-Re-exported from `@convohop/core`.
+Re-exported from `@instantrelay/core`.
 
 #### `Connectivity.online` property
 
@@ -1735,206 +1735,13 @@ onError?: (error: Error) => void
 
 Called for every error, including realtime interruptions the store recovers from on its own.
 
-### `ConvoHopClientOptions` interface
-
-```ts
-interface ConvoHopClientOptions
-```
-
-#### `ConvoHopClientOptions.baseUrl` property
-
-```ts
-baseUrl: string
-```
-
-#### `ConvoHopClientOptions.projectId` property
-
-```ts
-projectId: string
-```
-
-#### `ConvoHopClientOptions.sessionToken` property
-
-```ts
-sessionToken: string
-```
-
-#### `ConvoHopClientOptions.incarnation` property
-
-```ts
-incarnation: string
-```
-
-#### `ConvoHopClientOptions.principalId` property
-
-```ts
-principalId: string
-```
-
-#### `ConvoHopClientOptions.recoveryStorage` property
-
-```ts
-recoveryStorage?: RecoveryStorage
-```
-
-Synchronous storage, such as `localStorage`, for mutation recovery records and replay cursors. Never tokens.
-
-#### `ConvoHopClientOptions.asyncRecoveryStorage` property
-
-```ts
-asyncRecoveryStorage?: AsyncRecoveryStorage
-```
-
-Asynchronous storage, such as React Native's AsyncStorage, used instead of `recoveryStorage`. Recovery records load
-before the first command; replay cursors load when a replay starts.
-
-#### `ConvoHopClientOptions.fetch` property
-
-```ts
-fetch?: typeof fetch
-```
-
-#### `ConvoHopClientOptions.sessionRefresh` property
-
-```ts
-sessionRefresh?: SessionRefresh
-```
-
-#### `ConvoHopClientOptions.platform` property
-
-```ts
-platform?: ConvoHopPlatform
-```
-
-Runtime services that replace missing browser globals, such as in React Native. See `ConvoHopPlatform`.
-
-### `ConvoHopPlatform` interface
-
-```ts
-interface ConvoHopPlatform
-```
-
-Runtime services for runtimes that lack a browser global, such as React Native. Every field is optional and
-falls back to the global of the same name, looked up when it is used. The transport uses `randomUUID`, `sha256`
-and `URL`; `@convohop/client` also uses `WebSocket`, `connectivity` and `lifecycle`.
-
-Re-exported from `@convohop/core`.
-
-#### `ConvoHopPlatform.randomUUID` property
-
-```ts
-randomUUID?: () => string
-```
-
-A new random UUID in canonical lowercase form. Default: `crypto.randomUUID()`.
-
-#### `ConvoHopPlatform.sha256` property
-
-```ts
-sha256?: (data: Uint8Array) => Promise<Uint8Array>
-```
-
-The 32-byte SHA-256 digest of `data`. Default: `crypto.subtle.digest("SHA-256", data)`.
-
-#### `ConvoHopPlatform.URL` property
-
-```ts
-URL?: PlatformURLConstructor
-```
-
-A WHATWG URL constructor. Default: the global `URL`. The SDK checks it before first use and refuses one that doesn't conform.
-
-#### `ConvoHopPlatform.WebSocket` property
-
-```ts
-WebSocket?: PlatformWebSocketConstructor
-```
-
-Opens the realtime connection. Default: the global `WebSocket`.
-
-#### `ConvoHopPlatform.connectivity` property
-
-```ts
-connectivity?: Connectivity
-```
-
-Network reachability. The outbox waits while offline. Coming online starts a waiting outbox entry and realtime
-reconnection at once. Default in browsers: `navigator.onLine` and `online`/`offline` events; elsewhere always online.
-
-#### `ConvoHopPlatform.lifecycle` property
-
-```ts
-lifecycle?: Lifecycle
-```
-
-Foreground state. Returning to `active` starts waiting realtime reconnection, due outbox entries and due session
-renewal at once. It never changes retry budgets, request IDs or payloads. Default in browsers: page visibility.
-
-### `ConvoHopTransportOptions` interface
-
-```ts
-interface ConvoHopTransportOptions
-```
-
-Re-exported from `@convohop/core`.
-
-#### `ConvoHopTransportOptions.baseUrl` property
-
-```ts
-baseUrl: string
-```
-
-#### `ConvoHopTransportOptions.credential` property
-
-```ts
-credential?: string
-```
-
-#### `ConvoHopTransportOptions.namespace` property
-
-```ts
-namespace: string
-```
-
-#### `ConvoHopTransportOptions.incarnation` property
-
-```ts
-incarnation?: string
-```
-
-#### `ConvoHopTransportOptions.recoveryStorage` property
-
-```ts
-recoveryStorage?: RecoveryStorage
-```
-
-#### `ConvoHopTransportOptions.asyncRecoveryStorage` property
-
-```ts
-asyncRecoveryStorage?: AsyncRecoveryStorage
-```
-
-#### `ConvoHopTransportOptions.fetch` property
-
-```ts
-fetch?: typeof fetch
-```
-
-#### `ConvoHopTransportOptions.platform` property
-
-```ts
-platform?: ConvoHopPlatform
-```
-
-Runtime services that replace missing globals, such as in React Native. See `ConvoHopPlatform`.
-
 ### `ItemPage` interface
 
 ```ts
 interface ItemPage<T>
 ```
 
-Re-exported from `@convohop/core`.
+Re-exported from `@instantrelay/core`.
 
 #### `ItemPage.items` property
 
@@ -1968,7 +1775,7 @@ interface Lifecycle
 
 Whether the app is in the foreground.
 
-Re-exported from `@convohop/core`.
+Re-exported from `@instantrelay/core`.
 
 #### `Lifecycle.state` property
 
@@ -2291,7 +2098,7 @@ transports?: {
 interface OperationTypes
 ```
 
-Re-exported from `@convohop/core`.
+Re-exported from `@instantrelay/core`.
 
 ### `OutboxEntry` interface
 
@@ -2415,7 +2222,7 @@ Called when an entry fails and when persistence or a listener throws.
 interface PageOptions
 ```
 
-Re-exported from `@convohop/core`.
+Re-exported from `@instantrelay/core`.
 
 #### `PageOptions.cursor` property
 
@@ -2437,7 +2244,7 @@ interface PlatformURL
 
 The parts of a WHATWG `URL` the SDKs read.
 
-Re-exported from `@convohop/core`.
+Re-exported from `@instantrelay/core`.
 
 #### `PlatformURL.href` property
 
@@ -2513,7 +2320,7 @@ interface PlatformWebSocket
 
 The parts of a `WebSocket` the client uses.
 
-Re-exported from `@convohop/core`.
+Re-exported from `@instantrelay/core`.
 
 #### `PlatformWebSocket.onopen` property
 
@@ -2562,7 +2369,7 @@ close(code?: number, reason?: string): void
 interface ProjectRoute
 ```
 
-Re-exported from `@convohop/core`.
+Re-exported from `@instantrelay/core`.
 
 #### `ProjectRoute.projectId` property
 
@@ -2616,7 +2423,7 @@ A mutation's recovery record. `resolutionState` is how far its request is known 
 first attempt, `unknown` while an attempt's outcome is unknown, `rejected` once the authority has rejected every
 attempt, and `committed` or `accepted` once the authority has the request.
 
-Re-exported from `@convohop/core`.
+Re-exported from `@instantrelay/core`.
 
 #### `RecoveryState.requestId` property
 
@@ -2702,7 +2509,7 @@ mediaAdmissionAttempted?: true
 interface RecoveryStorage
 ```
 
-Re-exported from `@convohop/core`.
+Re-exported from `@instantrelay/core`.
 
 #### `RecoveryStorage.getItem` method
 
@@ -2721,6 +2528,199 @@ setItem(key: string, value: string): void
 ```ts
 removeItem(key: string): void
 ```
+
+### `RelayClientOptions` interface
+
+```ts
+interface RelayClientOptions
+```
+
+#### `RelayClientOptions.baseUrl` property
+
+```ts
+baseUrl: string
+```
+
+#### `RelayClientOptions.projectId` property
+
+```ts
+projectId: string
+```
+
+#### `RelayClientOptions.sessionToken` property
+
+```ts
+sessionToken: string
+```
+
+#### `RelayClientOptions.incarnation` property
+
+```ts
+incarnation: string
+```
+
+#### `RelayClientOptions.principalId` property
+
+```ts
+principalId: string
+```
+
+#### `RelayClientOptions.recoveryStorage` property
+
+```ts
+recoveryStorage?: RecoveryStorage
+```
+
+Synchronous storage, such as `localStorage`, for mutation recovery records and replay cursors. Never tokens.
+
+#### `RelayClientOptions.asyncRecoveryStorage` property
+
+```ts
+asyncRecoveryStorage?: AsyncRecoveryStorage
+```
+
+Asynchronous storage, such as React Native's AsyncStorage, used instead of `recoveryStorage`. Recovery records load
+before the first command; replay cursors load when a replay starts.
+
+#### `RelayClientOptions.fetch` property
+
+```ts
+fetch?: typeof fetch
+```
+
+#### `RelayClientOptions.sessionRefresh` property
+
+```ts
+sessionRefresh?: SessionRefresh
+```
+
+#### `RelayClientOptions.platform` property
+
+```ts
+platform?: RelayPlatform
+```
+
+Runtime services that replace missing browser globals, such as in React Native. See `RelayPlatform`.
+
+### `RelayPlatform` interface
+
+```ts
+interface RelayPlatform
+```
+
+Runtime services for runtimes that lack a browser global, such as React Native. Every field is optional and
+falls back to the global of the same name, looked up when it is used. The transport uses `randomUUID`, `sha256`
+and `URL`; `@instantrelay/client` also uses `WebSocket`, `connectivity` and `lifecycle`.
+
+Re-exported from `@instantrelay/core`.
+
+#### `RelayPlatform.randomUUID` property
+
+```ts
+randomUUID?: () => string
+```
+
+A new random UUID in canonical lowercase form. Default: `crypto.randomUUID()`.
+
+#### `RelayPlatform.sha256` property
+
+```ts
+sha256?: (data: Uint8Array) => Promise<Uint8Array>
+```
+
+The 32-byte SHA-256 digest of `data`. Default: `crypto.subtle.digest("SHA-256", data)`.
+
+#### `RelayPlatform.URL` property
+
+```ts
+URL?: PlatformURLConstructor
+```
+
+A WHATWG URL constructor. Default: the global `URL`. The SDK checks it before first use and refuses one that doesn't conform.
+
+#### `RelayPlatform.WebSocket` property
+
+```ts
+WebSocket?: PlatformWebSocketConstructor
+```
+
+Opens the realtime connection. Default: the global `WebSocket`.
+
+#### `RelayPlatform.connectivity` property
+
+```ts
+connectivity?: Connectivity
+```
+
+Network reachability. The outbox waits while offline. Coming online starts a waiting outbox entry and realtime
+reconnection at once. Default in browsers: `navigator.onLine` and `online`/`offline` events; elsewhere always online.
+
+#### `RelayPlatform.lifecycle` property
+
+```ts
+lifecycle?: Lifecycle
+```
+
+Foreground state. Returning to `active` starts waiting realtime reconnection, due outbox entries and due session
+renewal at once. It never changes retry budgets, request IDs or payloads. Default in browsers: page visibility.
+
+### `RelayTransportOptions` interface
+
+```ts
+interface RelayTransportOptions
+```
+
+Re-exported from `@instantrelay/core`.
+
+#### `RelayTransportOptions.baseUrl` property
+
+```ts
+baseUrl: string
+```
+
+#### `RelayTransportOptions.credential` property
+
+```ts
+credential?: string
+```
+
+#### `RelayTransportOptions.namespace` property
+
+```ts
+namespace: string
+```
+
+#### `RelayTransportOptions.incarnation` property
+
+```ts
+incarnation?: string
+```
+
+#### `RelayTransportOptions.recoveryStorage` property
+
+```ts
+recoveryStorage?: RecoveryStorage
+```
+
+#### `RelayTransportOptions.asyncRecoveryStorage` property
+
+```ts
+asyncRecoveryStorage?: AsyncRecoveryStorage
+```
+
+#### `RelayTransportOptions.fetch` property
+
+```ts
+fetch?: typeof fetch
+```
+
+#### `RelayTransportOptions.platform` property
+
+```ts
+platform?: RelayPlatform
+```
+
+Runtime services that replace missing globals, such as in React Native. See `RelayPlatform`.
 
 ### `RemoteMedia` interface
 
@@ -2849,7 +2849,7 @@ readonly keys?: Readonly<Record<string, string>>
 type Conversation = NonNullable<OperationPayload<"communication.getConversation">["result"]>
 ```
 
-Re-exported from `@convohop/core`.
+Re-exported from `@instantrelay/core`.
 
 ### `ConversationCursor` type
 
@@ -2857,7 +2857,7 @@ Re-exported from `@convohop/core`.
 type ConversationCursor = NonNullable<NonNullable<OperationPayload<"communication.events">["result"]>["nextCursor"]>
 ```
 
-Re-exported from `@convohop/core`.
+Re-exported from `@instantrelay/core`.
 
 ### `ConversationMessage` type
 
@@ -2865,7 +2865,7 @@ Re-exported from `@convohop/core`.
 type ConversationMessage = NonNullable<OperationPayload<"communication.getMessage">["result"]>
 ```
 
-Re-exported from `@convohop/core`.
+Re-exported from `@instantrelay/core`.
 
 ### `ConversationMute` type
 
@@ -2875,7 +2875,7 @@ type ConversationMute = OperationPayload<"communication.conversationMute">["resu
 
 Whether a member muted message push notifications for a conversation, and until when.
 
-Re-exported from `@convohop/core`.
+Re-exported from `@instantrelay/core`.
 
 ### `ConversationStatus` type
 
@@ -2914,7 +2914,7 @@ A page of the inbox. An incomplete page with no cursor carries `partialReason`, 
 type LifecycleState = "active" | "background"
 ```
 
-Re-exported from `@convohop/core`.
+Re-exported from `@instantrelay/core`.
 
 ### `LiveConnectionGrant` type
 
@@ -2955,7 +2955,7 @@ type LiveSession = OperationPayload<"communication.liveSession">["result"]
 type Membership = NonNullable<OperationPayload<"communication.members">["result"]>["items"][number]
 ```
 
-Re-exported from `@convohop/core`.
+Re-exported from `@instantrelay/core`.
 
 ### `OperationInput` type
 
@@ -2965,7 +2965,7 @@ type OperationInput<K extends OperationKey> = OperationTypes[K]["variables"] ext
 } ? NonNullable<I> : Record<string, never>
 ```
 
-Re-exported from `@convohop/core`.
+Re-exported from `@instantrelay/core`.
 
 ### `OperationKey` type
 
@@ -2973,7 +2973,7 @@ Re-exported from `@convohop/core`.
 type OperationKey = keyof OperationTypes
 ```
 
-Re-exported from `@convohop/core`.
+Re-exported from `@instantrelay/core`.
 
 ### `OperationPayload` type
 
@@ -2981,7 +2981,7 @@ Re-exported from `@convohop/core`.
 type OperationPayload<K extends OperationKey> = OperationTypes[K]["result"][FieldName<K> & keyof OperationTypes[K]["result"]]
 ```
 
-Re-exported from `@convohop/core`.
+Re-exported from `@instantrelay/core`.
 
 ### `OutboxStatus` type
 
@@ -3003,7 +3003,7 @@ type PlatformURLConstructor = new (url: string, base?: string) => PlatformURL
 
 A WHATWG URL constructor, such as the global `URL` or a polyfill's.
 
-Re-exported from `@convohop/core`.
+Re-exported from `@instantrelay/core`.
 
 ### `PlatformWebSocketConstructor` type
 
@@ -3011,7 +3011,7 @@ Re-exported from `@convohop/core`.
 type PlatformWebSocketConstructor = new (url: string, protocols?: string | string[]) => PlatformWebSocket
 ```
 
-Re-exported from `@convohop/core`.
+Re-exported from `@instantrelay/core`.
 
 ### `ProjectCapabilities` type
 
@@ -3027,7 +3027,7 @@ The project's features and limits, as `communication.capabilities` reports them.
 type ProtocolObject = Record<string, unknown>
 ```
 
-Re-exported from `@convohop/core`.
+Re-exported from `@instantrelay/core`.
 
 ### `PushRegistration` type
 
@@ -3050,8 +3050,8 @@ type PushRegistration = {
 }
 ```
 
-Where your backend sends one device's pushes. Every ConvoHop client hands your app this shape, so one backend
-endpoint can store registrations from browsers and native apps. ConvoHop never sees them.
+Where your backend sends one device's pushes. Every Relay client hands your app this shape, so one backend
+endpoint can store registrations from browsers and native apps. Relay never sees them.
 
 - `webPush`: a browser subscription; your backend signs pushes with its VAPID private key.
 - `apns`: an iOS device token for alerts. `environment` says which APNs host accepts it, when the app knows.
@@ -3077,7 +3077,7 @@ type SearchHit = NonNullable<OperationPayload<"communication.search">["result"]>
 }
 ```
 
-Re-exported from `@convohop/core`.
+Re-exported from `@instantrelay/core`.
 
 ### `SendReceipt` type
 
@@ -3087,7 +3087,7 @@ type SendReceipt = NonNullable<OperationPayload<"communication.sendMessage">["re
 }
 ```
 
-Re-exported from `@convohop/core`.
+Re-exported from `@instantrelay/core`.
 
 ### `SessionBootstrap` type
 
@@ -3097,7 +3097,7 @@ type SessionBootstrap = SessionResult & {
 }
 ```
 
-Re-exported from `@convohop/core`.
+Re-exported from `@instantrelay/core`.
 
 ### `SessionMetadata` type
 
@@ -3105,7 +3105,7 @@ Re-exported from `@convohop/core`.
 type SessionMetadata = OperationPayload<"communication.currentSession">["result"]
 ```
 
-Re-exported from `@convohop/core`.
+Re-exported from `@instantrelay/core`.
 
 ### `SessionRefresh` type
 
@@ -3113,7 +3113,7 @@ Re-exported from `@convohop/core`.
 type SessionRefresh = (current: Readonly<SessionMetadata>) => Promise<SessionBootstrap>
 ```
 
-Re-exported from `@convohop/core`.
+Re-exported from `@instantrelay/core`.
 
 ### `SessionRefreshState` type
 
@@ -3121,7 +3121,7 @@ Re-exported from `@convohop/core`.
 type SessionRefreshState = "disabled" | "uninitialized" | "ready" | "refreshing" | "blocked"
 ```
 
-Re-exported from `@convohop/core`.
+Re-exported from `@instantrelay/core`.
 
 ## Functions
 
@@ -3131,7 +3131,7 @@ Re-exported from `@convohop/core`.
 function parseConversation(value: unknown): Conversation
 ```
 
-Re-exported from `@convohop/core`.
+Re-exported from `@instantrelay/core`.
 
 ### `parseCounter` function
 
@@ -3139,7 +3139,7 @@ Re-exported from `@convohop/core`.
 function parseCounter(value: unknown): string
 ```
 
-Re-exported from `@convohop/core`.
+Re-exported from `@instantrelay/core`.
 
 ### `parseCursor` function
 
@@ -3147,7 +3147,7 @@ Re-exported from `@convohop/core`.
 function parseCursor(value: unknown): ConversationCursor
 ```
 
-Re-exported from `@convohop/core`.
+Re-exported from `@instantrelay/core`.
 
 ### `parseId` function
 
@@ -3155,7 +3155,7 @@ Re-exported from `@convohop/core`.
 function parseId(value: unknown): string
 ```
 
-Re-exported from `@convohop/core`.
+Re-exported from `@instantrelay/core`.
 
 ### `parseMembership` function
 
@@ -3163,7 +3163,7 @@ Re-exported from `@convohop/core`.
 function parseMembership(value: unknown): Membership
 ```
 
-Re-exported from `@convohop/core`.
+Re-exported from `@instantrelay/core`.
 
 ### `parseMessage` function
 
@@ -3171,7 +3171,7 @@ Re-exported from `@convohop/core`.
 function parseMessage(value: unknown): ConversationMessage
 ```
 
-Re-exported from `@convohop/core`.
+Re-exported from `@instantrelay/core`.
 
 ### `parseObject` function
 
@@ -3179,7 +3179,7 @@ Re-exported from `@convohop/core`.
 function parseObject(value: unknown): ProtocolObject
 ```
 
-Re-exported from `@convohop/core`.
+Re-exported from `@instantrelay/core`.
 
 ### `parsePage` function
 
@@ -3187,7 +3187,7 @@ Re-exported from `@convohop/core`.
 function parsePage<T>(value: unknown, parse: (value: unknown) => T): ItemPage<T>
 ```
 
-Re-exported from `@convohop/core`.
+Re-exported from `@instantrelay/core`.
 
 ### `parseSearchHit` function
 
@@ -3195,7 +3195,7 @@ Re-exported from `@convohop/core`.
 function parseSearchHit(value: unknown): SearchHit
 ```
 
-Re-exported from `@convohop/core`.
+Re-exported from `@instantrelay/core`.
 
 ### `parseString` function
 
@@ -3203,7 +3203,7 @@ Re-exported from `@convohop/core`.
 function parseString(value: unknown): string
 ```
 
-Re-exported from `@convohop/core`.
+Re-exported from `@instantrelay/core`.
 
 ## Constants
 
@@ -3213,7 +3213,7 @@ Re-exported from `@convohop/core`.
 const operationCatalog: Record<OperationKey, OperationCatalogEntry>
 ```
 
-Re-exported from `@convohop/core`.
+Re-exported from `@instantrelay/core`.
 
 ## Namespaces
 
@@ -3223,4 +3223,4 @@ Re-exported from `@convohop/core`.
 namespace GraphqlTypes
 ```
 
-Re-exported from `@convohop/core`.
+Re-exported from `@instantrelay/core`.

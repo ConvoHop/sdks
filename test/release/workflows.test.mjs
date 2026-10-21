@@ -18,6 +18,7 @@ const RELEASE_JOB_WRITES = {
   build: [],
   attest: ['attestations', 'id-token'],
   upload: ['contents'],
+  'npm-check': [],
   npm: ['id-token'],
   finalize: ['contents'],
 };
@@ -169,18 +170,25 @@ test('run scripts read expressions from env, never inline', () => {
   }
 });
 
-test('npm publishing stays a dry run until REL-PUB', () => {
+test('only the explicitly gated npm release job can publish; all CI publication remains a dry run', () => {
   const publish = /publish\.mjs|\bnpm\b[^|;&]*\s(?:publish|pub)(?:\s|$)/;
   let publishes = 0;
   for (const { name, lines } of workflows) {
-    for (const { line, commands } of runScripts(lines)) {
-      for (const command of commands.filter((text) => publish.test(text))) {
-        publishes += 1;
-        assert.match(command, /\s--dry-run(?:\s|$)/, `${name}:${line}: npm publishing must stay a dry run`);
+    for (const [job, jobLines] of sections(lines).jobs) {
+      for (const { line, commands } of runScripts(jobLines)) {
+        for (const command of commands.filter((text) => publish.test(text))) {
+          if (name.endsWith('/release.yml') && job === 'npm') {
+            assert.match(command, /publish\.mjs --publish --require-oidc/);
+            assert.doesNotMatch(command, /--skip-published|--dry-run/);
+          } else {
+            publishes += 1;
+            assert.match(command, /\s--dry-run(?:\s|$)/, `${name}:${line}: npm publishing must stay a dry run`);
+          }
+        }
       }
     }
   }
-  assert.ok(publishes >= 2, 'expected dry-run publishes in CI and release.yml');
+  assert.ok(publishes >= 2, 'expected dry-run publishes in CI and the credential-free release rehearsal');
 });
 
 test('release.yml grants each job only the permissions it needs', () => {
@@ -199,6 +207,16 @@ test('release.yml grants each job only the permissions it needs', () => {
 test('release.yml publishes from the npm environment at the release commit', () => {
   const { jobs } = sections(release.lines);
   assert.match(jobs.get('npm').join('\n'), /^ {4}environment:(?: npm| *\n {6}name: npm)\s*(?:#.*)?$/m);
+  const npm = jobs.get('npm').join('\n');
+  assert.match(npm, /needs\.plan\.outputs\.publish == 'true'/);
+  assert.match(npm, /NPM_PUBLISH_ENABLED: \$\{\{ vars\.NPM_PUBLISH_ENABLED/);
+  assert.match(npm, /PUBLISH_CONFIRMATION: \$\{\{ inputs\.confirmation \}\}/);
+  assert.match(npm, /fetch-depth: 0/);
+  assert.doesNotMatch(npm, /\bsecrets\.|NODE_AUTH_TOKEN|NPM_TOKEN/);
+  assert.match(jobs.get('plan').join('\n'), /REQUEST_PUBLISH: \$\{\{ inputs\.publish \|\| false \}\}/);
+  assert.match(jobs.get('upload').join('\n'), /needs\.plan\.outputs\.publish != 'true'/);
+  assert.match(jobs.get('finalize').join('\n'), /needs\.plan\.outputs\.publish != 'true'/);
+  assert.deepEqual(permissionsAt(jobs.get('npm-check'), 4), { contents: 'read' });
   for (const [job, jobLines] of jobs) {
     if (job !== 'npm') assert.doesNotMatch(jobLines.join('\n'), /^ {4}environment:/m, `${job} must not use an environment`);
     for (const step of stepsOf(jobLines).filter((text) => /uses: actions\/checkout@/.test(text))) {
@@ -235,8 +253,9 @@ test('the release build runs every npm check that CI runs', () => {
 });
 
 test('registry publishers are separate, explicitly gated jobs with no incidental branch publication', () => {
+  const instructions = readFileSync(join(REPO_ROOT, 'RELEASING.md'), 'utf8');
   for (const [file, environment] of [
-    ['pypi-release.yml', 'pypi'], ['nuget-release.yml', 'nuget'], ['pubdev-release.yml', 'pub.dev'],
+    ['pypi-release.yml', 'pypi'], ['nuget-release.yml', 'nuget'], ['pubdev-release.yml', 'pubdev'],
   ]) {
     const workflow = workflows.find(({ name }) => name.endsWith(`/${file}`));
     assert.ok(workflow, `${file} is missing`);
@@ -249,6 +268,7 @@ test('registry publishers are separate, explicitly gated jobs with no incidental
     const publication = jobs.get('publish').join('\n');
     assert.match(publication, /if: .*needs\.prepare\.outputs\.publish == 'true'/);
     assert.match(publication, new RegExp(`^ {4}environment: ${environment.replace('.', '\\.')}\\s*$`, 'm'));
+    assert.ok(instructions.includes(`| \`${file}\` | \`${environment}\` |`), `${file} trust instructions must use ${environment}`);
     assert.deepEqual(permissionsAt(jobs.get('publish'), 4), { contents: 'read', 'id-token': 'write' });
     assert.match(publication, /ref: \$\{\{ needs\.prepare\.outputs\.sha \}\}/);
     assert.match(publication, /persist-credentials: false/);
@@ -280,15 +300,34 @@ test('registry preparation has no credentials and preserves explicit publication
   assert.match(text, /vars\.PYPI_PUBLISH_ENABLED/);
   assert.match(text, /vars\.NUGET_PUBLISH_ENABLED/);
   assert.match(text, /vars\.PUBDEV_PUBLISH_ENABLED/);
+  assert.match(text, /vars\.MAVEN_PUBLISH_ENABLED/);
   assert.match(text, /registry\.mjs plan/);
   assert.match(text, /registry\.mjs seal/);
   assert.match(text, /fetch-depth: 0/);
   assert.match(text, /--ignore-scripts/);
   assert.doesNotMatch(text, /conformance --|dev-stack\.mjs|self-hosted/);
+});
+
+test('Central reuses preparation, verifies before signing and gates existing credentials behind maven approval', () => {
   const maven = workflows.find(({ name }) => name.endsWith('/maven-prepare.yml'));
   assert.ok(maven);
-  assert.deepEqual([...sections(maven.lines).jobs.keys()], ['prepare']);
-  assert.doesNotMatch(maven.lines.join('\n'), /id-token:|\bsecrets\.|environment:|https:\/\/central\.|uploadBundle|publish: true/);
+  const { top, jobs } = sections(maven.lines);
+  assert.deepEqual(permissionsAt(top, 0), {});
+  assert.deepEqual([...jobs.keys()], ['prepare', 'publish']);
+  assert.match(top.join('\n'), /publish:\n(?:.*\n)*? {8}default: false/);
+  const preparation = jobs.get('prepare').join('\n');
+  assert.match(preparation, /uses: \.\/\.github\/workflows\/registry-prepare\.yml/);
+  assert.match(preparation, /confirmation: \$\{\{ inputs\.confirmation \}\}/);
+  assert.deepEqual(permissionsAt(jobs.get('prepare'), 4), { contents: 'read' });
+  const publication = jobs.get('publish').join('\n');
+  assert.match(publication, /if: needs\.prepare\.outputs\.publish == 'true'/);
+  assert.match(publication, /^ {4}environment: maven$/m);
+  assert.deepEqual(permissionsAt(jobs.get('publish'), 4), { contents: 'read' });
+  assert.match(publication, /ref: \$\{\{ needs\.prepare\.outputs\.sha \}\}/);
+  assert.ok(publication.indexOf('registry.mjs verify') < publication.indexOf('secrets.MAVEN_SIGNING_KEY'));
+  assert.ok(publication.indexOf('sign-maven') < publication.indexOf('secrets.MAVEN_CENTRAL_USERNAME'));
+  assert.match(publication, /registry\.mjs maven-publish/);
+  assert.doesNotMatch(publication, /id-token:|skip-existing|skip-duplicate|--retry/);
 });
 
 test('registry uploads verify exact assets before authentication and never blindly skip duplicates', () => {
@@ -301,20 +340,28 @@ test('registry uploads verify exact assets before authentication and never blind
   assert.match(nuget, /user: \$\{\{ vars\.NUGET_USER \}\}/);
   assert.match(nuget, /NUGET_API_KEY: \$\{\{ steps\.login\.outputs\.NUGET_API_KEY \}\}/);
   assert.doesNotMatch(nuget, /--skip-duplicate/);
+  assert.match(nuget, /registry-assets\/InstantRelay\.\$VERSION\.nupkg/);
+  const pubdev = workflows.find(({ name }) => name.endsWith('/pubdev-release.yml')).lines.join('\n');
+  assert.match(pubdev, /registry-assets\/instantrelay-\$VERSION\.tar\.gz/);
 });
 
 test('development metadata stays blocked while Central uses complete build-local publications', () => {
   const python = readFileSync(join(REPO_ROOT, 'python/pyproject.toml'), 'utf8');
   const flutter = readFileSync(join(REPO_ROOT, 'flutter/pubspec.yaml'), 'utf8');
   assert.match(python, /"Private :: Do Not Upload"/);
+  assert.match(python, /^name = "instantrelay"$/m);
   assert.match(flutter, /^publish_to: none$/m);
+  assert.match(flutter, /^name: instantrelay$/m);
+  const dotnet = readFileSync(join(REPO_ROOT, 'dotnet/src/Relay/Relay.csproj'), 'utf8');
+  assert.match(dotnet, /<PackageId>InstantRelay<\/PackageId>/);
+  assert.match(dotnet, /<AssemblyName>Relay<\/AssemblyName>/);
   const maven = readFileSync(join(REPO_ROOT, 'scripts/release/maven-publishing.gradle.kts'), 'utf8');
   assert.match(maven, /useInMemoryPgpKeys\(signingKey, signingPassword\)/);
   assert.match(maven, /environmentVariable\("MAVEN_SIGNING_KEY"\)/);
   assert.match(maven, /environmentVariable\("MAVEN_SIGNING_PASSWORD"\)/);
   assert.match(maven, /layout\.buildDirectory\.dir\("repo"\)/);
   assert.doesNotMatch(maven, /https:\/\/central\.|ossrh|credentials\s*\{/);
-  for (const module of ['core', 'push', 'convohop']) {
+  for (const module of ['core', 'push', 'relay']) {
     const build = readFileSync(join(REPO_ROOT, 'android', module, 'build.gradle.kts'), 'utf8');
     assert.match(build, /withJavadocJar\(\)/, `${module} must supply documentation, not just sources`);
     assert.match(build, /^description = ".+"/m, `${module} needs Central POM description metadata`);

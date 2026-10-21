@@ -15,17 +15,17 @@ from typing import Any
 import httpx
 import pytest
 
-from convohop import (
-    ConvoHop,
-    ConvoHopManagement,
-    ConvoHopProblem,
+from instantrelay import (
+    Relay,
+    RelayManagement,
+    RelayProblem,
     RateLimitedProblem,
     ScopeRequiredProblem,
     __version__,
 )
-from convohop._engine import BODY_CAP, RESPONSE_BOUND
-from convohop._generated.operations import OPERATIONS
-from convohop.types import MemberBatchEntryInput, MemberInputInput, SearchScopeInput
+from instantrelay._engine import BODY_CAP, RESPONSE_BOUND
+from instantrelay._generated.operations import OPERATIONS
+from instantrelay.types import MemberBatchEntryInput, MemberInputInput, SearchScopeInput
 
 from .graphql import (
     ACCESS_TOKEN,
@@ -66,7 +66,7 @@ BACKEND_SCOPES: dict[str, list[list[str]]] = {
     if (alternatives := [entry.get("scopes", []) for entry in operation["auth"] if entry["credential"] == "backendKey"])
 }
 
-Call = Callable[[ConvoHop], object]
+Call = Callable[[Relay], object]
 
 # One public call per backend-key operation, with the exact generated input it must send.
 CALLS: list[tuple[str, Call, dict[str, Any] | None]] = [
@@ -329,7 +329,7 @@ def test_call_reads_accept_call_read_or_call_manage_as_the_docstrings_document()
         assert BACKEND_SCOPES[key] == [["callManage"]], key
     for key, alternatives in BACKEND_SCOPES.items():
         method = re.sub(r"(?<!^)(?=[A-Z])", "_", OPERATIONS[key].field).lower()
-        documentation = inspect.getdoc(getattr(ConvoHop, method)) or ""
+        documentation = inspect.getdoc(getattr(Relay, method)) or ""
         authorization = documentation.partition("Authorization")[2].partition("Idempotency:")[0]
         assert "``backendKey``" in authorization, key
         for scope in itertools.chain.from_iterable(alternatives):
@@ -342,7 +342,7 @@ def test_each_backend_key_call_sends_its_exact_input_and_surfaces_typed_problems
 ) -> None:
     authority = Authority(scoped_rejection)
     client = authority.project(project_id=PROJECT, incarnation=INCARNATION)
-    with pytest.raises(ConvoHopProblem) as caught:
+    with pytest.raises(RelayProblem) as caught:
         call(client)
     error = caught.value
     assert authority.keys == [key]
@@ -401,7 +401,7 @@ def test_project_options_are_checked_at_construction(
     options: dict[str, Any], error: type[Exception], message: str
 ) -> None:
     with pytest.raises(error) as caught:
-        ConvoHop(**project_options(**options))
+        Relay(**project_options(**options))
     assert str(caught.value) == message
     assert "secret" not in str(caught.value)
 
@@ -410,7 +410,7 @@ def test_project_options_are_checked_at_construction(
 async def test_an_async_http_client_is_refused_by_the_sync_client() -> None:
     async with httpx.AsyncClient() as http:
         with pytest.raises(TypeError, match=r"^http_client must be an httpx\.Client$"):
-            ConvoHop(**project_options(http_client=http))
+            Relay(**project_options(http_client=http))
 
 
 @pytest.mark.parametrize(
@@ -429,13 +429,13 @@ def test_management_options_are_checked_at_construction(
 ) -> None:
     defaults = {"base_url": BASE_URL, "access_token": ACCESS_TOKEN, "actor_id": uid()}
     with pytest.raises(error) as caught:
-        ConvoHopManagement(**(defaults | options))
+        RelayManagement(**(defaults | options))
     assert str(caught.value) == message
 
 
 def test_loopback_http_and_https_origins_are_accepted() -> None:
     for base_url in ("https://api.example.com", "https://api.example.com/", "http://localhost:8080", "http://[::1]:1"):
-        with ConvoHop(**project_options(base_url=base_url)) as client:
+        with Relay(**project_options(base_url=base_url)) as client:
             assert client.project_id == PROJECT
 
 
@@ -446,8 +446,8 @@ def test_credentials_never_appear_in_reprs_pickles_or_problems() -> None:
     authority = Authority(refuse)
     client = authority.project(project_id=PROJECT, incarnation=INCARNATION)
     management = authority.management()
-    assert repr(client) == f"ConvoHop(project_id='{PROJECT}', incarnation='{INCARNATION}')"
-    assert repr(management) == f"ConvoHopManagement(actor_id='{management.actor_id}')"
+    assert repr(client) == f"Relay(project_id='{PROJECT}', incarnation='{INCARNATION}')"
+    assert repr(management) == f"RelayManagement(actor_id='{management.actor_id}')"
     for value in (client, management):
         with pytest.raises(TypeError) as pickled:
             pickle.dumps(value)
@@ -470,7 +470,7 @@ def test_close_closes_only_an_http_client_the_sdk_created() -> None:
         pass
     assert not http.is_closed
     http.close()
-    owned = ConvoHop(**project_options())
+    owned = Relay(**project_options())
     with owned:
         assert not owned._http.is_closed
     assert owned._http.is_closed
@@ -490,7 +490,7 @@ def test_requests_carry_the_bearer_key_project_context_and_generated_document() 
     assert request.headers["content-type"] == "application/json"
     assert request.headers["accept"] == "application/json"
     assert request.headers["accept-encoding"] == "identity"
-    assert request.headers["user-agent"] == f"convohop-python/{__version__}"
+    assert request.headers["user-agent"] == f"relay-python/{__version__}"
     operation = OPERATIONS["communication.createPrincipal"]
     assert request.body == {
         "query": operation.document,

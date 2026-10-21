@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 
-import 'package:convohop/convohop.dart';
+import 'package:instantrelay/instantrelay.dart';
 
 final class FakeRealtimeSocket implements RealtimeSocket {
   /// A socket whose upgrade fails with [refusal], when given. Like

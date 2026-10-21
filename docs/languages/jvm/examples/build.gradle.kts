@@ -24,10 +24,10 @@ kotlin {
 }
 
 dependencies {
-    implementation(project(":convohop-server-kotlin"))
+    implementation(project(":relay-server-kotlin"))
     implementation(libs.firebase.admin)
 
-    testImplementation(testFixtures(project(":convohop-server")))
+    testImplementation(testFixtures(project(":relay-server")))
     testImplementation(platform(libs.junit.bom))
     testImplementation(libs.junit.jupiter)
     testRuntimeOnly(libs.junit.platform.launcher)

@@ -1,13 +1,13 @@
 # Go SDK
 
-`github.com/ConvoHop/sdks/go` wraps the ConvoHop API for Go backends. It runs only in your backend, with a secret backend key, verifies the webhooks that ConvoHop sends, and builds push requests from notification events.
+`github.com/ConvoHop/sdks/go` wraps the Relay API for Go backends. It runs only in your backend, with a secret backend key, verifies the webhooks that Relay sends, and builds push requests from notification events.
 
 ## How it fits in
 
 1. Your users sign in to your app with your own authentication.
-2. Your backend uses the `convohop` package to map each user to a ConvoHop principal and issue a short-lived session for the user's device.
-3. Your app passes the session to a client SDK, such as [`@convohop/client`](../typescript/quickstarts/client.md) in browsers, which sends, watches and calls as that one user.
-4. ConvoHop sends signed webhooks to your backend. The `webhooks` package verifies them, and the `push` package builds APNs, FCM and Web Push requests from notification events for you to send with your own push credentials.
+2. Your backend uses the `relay` package to map each user to a Relay principal and issue a short-lived session for the user's device.
+3. Your app passes the session to a client SDK, such as [`@instantrelay/client`](../typescript/quickstarts/client.md) in browsers, which sends, watches and calls as that one user.
+4. Relay sends signed webhooks to your backend. The `webhooks` package verifies them, and the `push` package builds APNs, FCM and Web Push requests from notification events for you to send with your own push credentials.
 
 Keep the backend key on your servers. It never belongs in browser or mobile app code, bundles, storage, URLs or logs.
 
@@ -30,23 +30,23 @@ The request and response types are structs generated from the GraphQL schema, li
 
 Every Go sample in these docs is a region of a file in [the examples module](https://github.com/ConvoHop/sdks/tree/main/docs/languages/go/examples), which CI vets and tests with the race detector on the two most recent Go releases:
 
-- The server samples run against the conformance mock, a local stand-in for the ConvoHop API, including dropped connections.
-- The webhooks samples verify deliveries signed the way ConvoHop signs them, through the sample's `http.Handler`.
+- The server samples run against the conformance mock, a local stand-in for the Relay API, including dropped connections.
+- The webhooks samples verify deliveries signed the way Relay signs them, through the sample's `http.Handler`.
 - The push samples run on every vector of the [push payload contract](https://github.com/ConvoHop/sdks/blob/main/spec/push-payload/README.md), and send the FCM and APNs requests to local test servers, the APNs ones over HTTP/2. CI doesn't run a Web Push library or the Firebase Admin SDK, so the push quickstart's advice about them isn't tested.
 
 ## Packages
 
 | Package | Layer | Runtime | Summary |
 | --- | --- | --- | --- |
-| [`github.com/ConvoHop/sdks/go`](reference/convohop.md) | Server | Go 1.26 or later | Server SDK for trusted Go backends: backend-key data-plane calls and operator management calls, with typed problems, request retries and recovery storage. |
-| [`github.com/ConvoHop/sdks/go/webhooks`](reference/webhooks.md) | Server | Go 1.26 or later | Verifies Standard Webhooks signatures and parses ConvoHop webhook deliveries into typed events. |
-| [`github.com/ConvoHop/sdks/go/push`](reference/push.md) | Server | Go 1.26 or later | Builds APNs, FCM and Web Push requests from ConvoHop push notification events. |
+| [`github.com/ConvoHop/sdks/go`](reference/relay.md) | Server | Go 1.26 or later | Server SDK for trusted Go backends: backend-key data-plane calls and operator management calls, with typed problems, request retries and recovery storage. |
+| [`github.com/ConvoHop/sdks/go/webhooks`](reference/webhooks.md) | Server | Go 1.26 or later | Verifies Standard Webhooks signatures and parses Relay webhook deliveries into typed events. |
+| [`github.com/ConvoHop/sdks/go/push`](reference/push.md) | Server | Go 1.26 or later | Builds APNs, FCM and Web Push requests from Relay push notification events. |
 
 ## Quickstarts
 
 | Quickstart | Summary |
 | --- | --- |
-| [Server](quickstarts/server.md) | Call ConvoHop from your backend with a backend key: principals, sessions, conversations and messages. |
+| [Server](quickstarts/server.md) | Call Relay from your backend with a backend key: principals, sessions, conversations and messages. |
 | [Webhooks](quickstarts/webhooks.md) | Verify signed webhook deliveries and handle events. |
 | [Push notifications](quickstarts/push.md) | Deliver messages and calls to your users' devices as APNs, FCM and Web Push notifications. |
 
@@ -58,7 +58,7 @@ Every Go sample in these docs is a region of a file in [the examples module](htt
 
 # Go server quickstart
 
-Call ConvoHop from your Go backend with `github.com/ConvoHop/sdks/go`: connect with a backend key, sign in your users, create a conversation, send and read messages as a member, and recover a send whose response was lost.
+Call Relay from your Go backend with `github.com/ConvoHop/sdks/go`: connect with a backend key, sign in your users, create a conversation, send and read messages as a member, and recover a send whose response was lost.
 
 ## Before you start
 
@@ -79,15 +79,15 @@ import (
 
 ## Connect
 
-`NewProjectClient` checks your configuration and sends nothing. `Initialize` reads your project's route before the first call. It fails with a `*convohop.Problem` whose code is `INCARNATION_MISMATCH` when the project has a new incarnation.
+`NewProjectClient` checks your configuration and sends nothing. `Initialize` reads your project's route before the first call. It fails with a `*instantrelay.Problem` whose code is `INCARNATION_MISMATCH` when the project has a new incarnation.
 
 ```go snippet=docs/languages/go/examples/server.go#connect
 // Connect creates a client for your project and reads the project's route.
 // Create one client when your backend starts and share it: it is safe for
 // concurrent use. config.BackendKey comes from your secret store. Never send
 // it to a browser or an app.
-func Connect(ctx context.Context, config convohop.ProjectConfig) (*convohop.ProjectClient, error) {
-	client, err := convohop.NewProjectClient(config)
+func Connect(ctx context.Context, config relay.ProjectConfig) (*relay.ProjectClient, error) {
+	client, err := relay.NewProjectClient(config)
 	if err != nil {
 		return nil, err
 	}
@@ -100,26 +100,26 @@ func Connect(ctx context.Context, config convohop.ProjectConfig) (*convohop.Proj
 
 ## Sign in a user
 
-ConvoHop doesn't authenticate your users. After your own login succeeds, map the user to a principal and issue a session for the device. Return the result to the user's app, which passes it to a client SDK, as the [TypeScript client quickstart](../typescript/quickstarts/client.md) shows.
+Relay doesn't authenticate your users. After your own login succeeds, map the user to a principal and issue a session for the device. Return the result to the user's app, which passes it to a client SDK, as the [TypeScript client quickstart](../typescript/quickstarts/client.md) shows.
 
 ```go snippet=docs/languages/go/examples/server.go#bootstrap
 // Login is what your login endpoint returns, as JSON, to the signed-in user's
 // app.
 type Login struct {
-	*convohop.SessionBootstrap
+	*relay.SessionBootstrap
 	BaseURL   string `json:"baseUrl"`
 	ProjectID string `json:"projectId"`
 }
 
 // BootstrapUser runs after your own authentication. accountID is your user's
 // ID: never trust a principal ID that a browser sends.
-func BootstrapUser(ctx context.Context, client *convohop.ProjectClient, config convohop.ProjectConfig, accountID, deviceID string) (*Login, error) {
+func BootstrapUser(ctx context.Context, client *relay.ProjectClient, config relay.ProjectConfig, accountID, deviceID string) (*Login, error) {
 	// The same principal on every login.
-	principal, err := client.CreatePrincipal(ctx, convohop.CreatePrincipalRequestInput{ExternalUserID: accountID})
+	principal, err := client.CreatePrincipal(ctx, relay.CreatePrincipalRequestInput{ExternalUserID: accountID})
 	if err != nil {
 		return nil, err
 	}
-	session, err := client.IssueSession(ctx, convohop.IssueSessionRequestInput{
+	session, err := client.IssueSession(ctx, relay.IssueSessionRequestInput{
 		PrincipalID:    principal.Result.PrincipalID,
 		DeviceID:       deviceID,
 		RequestedTTLMs: "900000", // 15 minutes.
@@ -135,20 +135,20 @@ func BootstrapUser(ctx context.Context, client *convohop.ProjectClient, config c
 
 ## Create a conversation
 
-Commands such as `CreateConversation` take a request ID that identifies the action. Create one per action with `convohop.NewRequestID()`, pass it with `convohop.WithRequestID`, and keep it until you know the outcome: [recover a lost response](quickstarts/server.md#recover-a-lost-response) shows why.
+Commands such as `CreateConversation` take a request ID that identifies the action. Create one per action with `instantrelay.NewRequestID()`, pass it with `instantrelay.WithRequestID`, and keep it until you know the outcome: [recover a lost response](quickstarts/server.md#recover-a-lost-response) shows why.
 
 ```go snippet=docs/languages/go/examples/server.go#create-conversation
 // CreateConversation creates a conversation with the given members, and
 // returns its ID.
-func CreateConversation(ctx context.Context, client *convohop.ProjectClient, title string, principalIDs []string, requestID string) (string, error) {
-	members := make([]convohop.MemberInputInput, 0, len(principalIDs))
+func CreateConversation(ctx context.Context, client *relay.ProjectClient, title string, principalIDs []string, requestID string) (string, error) {
+	members := make([]relay.MemberInputInput, 0, len(principalIDs))
 	for _, principalID := range principalIDs {
-		members = append(members, convohop.MemberInputInput{PrincipalID: principalID, Role: "member"})
+		members = append(members, relay.MemberInputInput{PrincipalID: principalID, Role: "member"})
 	}
-	conversation, err := client.CreateConversation(ctx, convohop.CreateConversationRequestInput{
+	conversation, err := client.CreateConversation(ctx, relay.CreateConversationRequestInput{
 		Title:   title,
 		Members: members,
-	}, convohop.WithRequestID(requestID))
+	}, relay.WithRequestID(requestID))
 	if err != nil {
 		return "", err
 	}
@@ -163,12 +163,12 @@ Your backend isn't a member of the conversation. To send or read as a member, se
 ```go snippet=docs/languages/go/examples/server.go#send-message
 // SendAs sends a message as a member, and returns its ID. Without
 // ActAsPrincipalID, the backend's own principal is the sender.
-func SendAs(ctx context.Context, client *convohop.ProjectClient, conversationID, authorID, text, requestID string) (string, error) {
-	ack, err := client.SendMessage(ctx, convohop.SendMessageRequestInput{
+func SendAs(ctx context.Context, client *relay.ProjectClient, conversationID, authorID, text, requestID string) (string, error) {
+	ack, err := client.SendMessage(ctx, relay.SendMessageRequestInput{
 		ConversationID:   conversationID,
 		Text:             text,
 		ActAsPrincipalID: &authorID,
-	}, convohop.WithRequestID(requestID))
+	}, relay.WithRequestID(requestID))
 	if err != nil {
 		return "", err
 	}
@@ -178,8 +178,8 @@ func SendAs(ctx context.Context, client *convohop.ProjectClient, conversationID,
 
 ```go snippet=docs/languages/go/examples/server.go#list-messages
 // LatestMessages reads what one member can see, newest first.
-func LatestMessages(ctx context.Context, client *convohop.ProjectClient, conversationID, readerID string) ([]convohop.Message, error) {
-	page, err := client.Messages(ctx, convohop.MessagesRequestInput{
+func LatestMessages(ctx context.Context, client *relay.ProjectClient, conversationID, readerID string) ([]relay.Message, error) {
+	page, err := client.Messages(ctx, relay.MessagesRequestInput{
 		ConversationID:   conversationID,
 		Limit:            20,
 		ActAsPrincipalID: &readerID,
@@ -196,16 +196,16 @@ A page holds at most `Limit` messages. Each paginated query, such as `Messages`,
 ```go snippet=docs/languages/go/examples/server.go#all-messages
 // AllMessages reads every message one member can see, newest first, a page
 // at a time.
-func AllMessages(ctx context.Context, client *convohop.ProjectClient, conversationID, readerID string) ([]convohop.Message, error) {
-	var messages []convohop.Message
-	pages := client.MessagesPages(ctx, convohop.MessagesRequestInput{
+func AllMessages(ctx context.Context, client *relay.ProjectClient, conversationID, readerID string) ([]relay.Message, error) {
+	var messages []relay.Message
+	pages := client.MessagesPages(ctx, relay.MessagesRequestInput{
 		ConversationID:   conversationID,
 		Limit:            50,
 		ActAsPrincipalID: &readerID,
 	})
 	for page, err := range pages {
 		if err != nil {
-			// errors.Is(err, convohop.ErrRefreshRequired) means that what the
+			// errors.Is(err, relay.ErrRefreshRequired) means that what the
 			// member can see changed while you read: start again.
 			return nil, err
 		}
@@ -217,7 +217,7 @@ func AllMessages(ctx context.Context, client *convohop.ProjectClient, conversati
 
 ## Recover a lost response
 
-When a connection drops after a command is sent, the SDK can't tell whether the authority committed it, so it fails with a `*convohop.Problem` whose `Outcome` is `convohop.OutcomeUnknown`. Sending again with a new request ID could post the message twice. Instead, `Retry` asks the authority about the original request. It returns the committed result, or resends the original command first if the authority never received it.
+When a connection drops after a command is sent, the SDK can't tell whether the authority committed it, so it fails with a `*instantrelay.Problem` whose `Outcome` is `instantrelay.OutcomeUnknown`. Sending again with a new request ID could post the message twice. Instead, `Retry` asks the authority about the original request. It returns the committed result, or resends the original command first if the authority never received it.
 
 ```go snippet=docs/languages/go/examples/server.go#recover
 // SendOnce sends a message exactly once, even when the response is lost. It
@@ -226,10 +226,10 @@ When a connection drops after a command is sent, the SDK can't tell whether the 
 // A lost response leaves the outcome unknown: the message may or may not
 // exist. Ask about the same request ID instead of sending with a new one,
 // which could post the message twice.
-func SendOnce(ctx context.Context, client *convohop.ProjectClient, conversationID, authorID, text, requestID string) (string, error) {
+func SendOnce(ctx context.Context, client *relay.ProjectClient, conversationID, authorID, text, requestID string) (string, error) {
 	messageID, err := SendAs(ctx, client, conversationID, authorID, text, requestID)
-	var problem *convohop.Problem
-	if !errors.As(err, &problem) || problem.Outcome != convohop.OutcomeUnknown {
+	var problem *relay.Problem
+	if !errors.As(err, &problem) || problem.Outcome != relay.OutcomeUnknown {
 		return messageID, err
 	}
 	// Resolves the request first, and resends the original only if the
@@ -248,16 +248,16 @@ func SendOnce(ctx context.Context, client *convohop.ProjectClient, conversationI
 }
 ```
 
-Retry with the same `ProjectClient`, which keeps the original request in memory. It sends a request at most three times, within a minute of the first attempt. After that, `Retry` fails with a `*convohop.Problem` whose code is `RESOLUTION_REQUIRED` instead of resending. To retry after a restart, create the client with `convohop.WithRecoveryStore`, as [recovery](https://github.com/ConvoHop/sdks/blob/main/go/README.md#recovery) describes. Recovery records hold request inputs, never tokens or keys.
+Retry with the same `ProjectClient`, which keeps the original request in memory. It sends a request at most three times, within a minute of the first attempt. After that, `Retry` fails with a `*instantrelay.Problem` whose code is `RESOLUTION_REQUIRED` instead of resending. To retry after a restart, create the client with `instantrelay.WithRecoveryStore`, as [recovery](https://github.com/ConvoHop/sdks/blob/main/go/README.md#recovery) describes. Recovery records hold request inputs, never tokens or keys.
 
 ## Next steps
 
 - [Webhooks quickstart](quickstarts/webhooks.md): react to events in your backend.
-- [`ProjectClient` reference](reference/convohop.md#projectclient-struct): every method, with the operation it sends.
+- [`ProjectClient` reference](reference/relay.md#projectclient-struct): every method, with the operation it sends.
 
 # Go webhooks quickstart
 
-Receive ConvoHop events in your Go backend with the `webhooks` package: verify each signed delivery, acknowledge it quickly, and handle its event in a queue worker.
+Receive Relay events in your Go backend with the `webhooks` package: verify each signed delivery, acknowledge it quickly, and handle its event in a queue worker.
 
 ## Before you start
 
@@ -280,7 +280,7 @@ import (
 
 ## Verify deliveries
 
-ConvoHop signs each delivery with the [Standard Webhooks](https://www.standardwebhooks.com) scheme. `webhooks.Verify` checks the signature and timestamp against the raw body, and returns the delivery's webhook ID and event. It takes the request's `http.Header`, so it works in any `net/http` handler.
+Relay signs each delivery with the [Standard Webhooks](https://www.standardwebhooks.com) scheme. `webhooks.Verify` checks the signature and timestamp against the raw body, and returns the delivery's webhook ID and event. It takes the request's `http.Header`, so it works in any `net/http` handler.
 
 ```go snippet=docs/languages/go/examples/webhooks.go#receive
 // ReceiveWebhook is your webhook endpoint. secrets are the endpoint's whsec_
@@ -318,7 +318,7 @@ func ReceiveWebhook(secrets []string, enqueue func(webhookID string, event webho
 }
 ```
 
-- Pass every secret you hold. While a rotation is pending, ConvoHop signs with both the current and the next secret, and it signs with the replaced secret for 24 hours after the rotation.
+- Pass every secret you hold. While a rotation is pending, Relay signs with both the current and the next secret, and it signs with the replaced secret for 24 hours after the rotation.
 - Verify the exact bytes you received, never re-encoded JSON. A body over 4096 bytes fails.
 - Answer within 5 seconds, and process the event afterwards.
 - Delivery is at least once, and retries keep the webhook ID, so deduplicate on it.
@@ -331,7 +331,7 @@ Events carry IDs and metadata, not content, so read the current state through th
 ```go snippet=docs/languages/go/examples/webhooks.go#handle
 // Handlers is what your app does with the events it subscribes to.
 type Handlers interface {
-	ConversationChanged(ctx context.Context, conversation *convohop.Conversation) error
+	ConversationChanged(ctx context.Context, conversation *relay.Conversation) error
 	// Notify pushes to the recipient's devices.
 	Notify(ctx context.Context, notification *webhooks.Notification) error
 	// EndpointDisabled reports that another of your endpoints kept failing.
@@ -340,7 +340,7 @@ type Handlers interface {
 
 // HandleEvent is your queue worker. Events arrive at least once and in any
 // order.
-func HandleEvent(ctx context.Context, client *convohop.ProjectClient, event webhooks.Event, handlers Handlers) error {
+func HandleEvent(ctx context.Context, client *relay.ProjectClient, event webhooks.Event, handlers Handlers) error {
 	switch {
 	case !event.Known:
 		// A type this SDK doesn't know yet, or an event that doesn't match
@@ -350,7 +350,7 @@ func HandleEvent(ctx context.Context, client *convohop.ProjectClient, event webh
 		return handlers.Notify(ctx, event.Notification)
 	case event.EventType == webhooks.EventConversationCreated || event.EventType == webhooks.EventConversationUpdated:
 		// Events carry only IDs. Read the current state through the API.
-		conversation, err := client.GetConversation(ctx, convohop.GetConversationRequestInput{ConversationID: event.SubjectRef.ID})
+		conversation, err := client.GetConversation(ctx, relay.GetConversationRequestInput{ConversationID: event.SubjectRef.ID})
 		if err != nil {
 			return err
 		}
@@ -376,11 +376,11 @@ Notification events, such as `notification.message`, are addressed to one recipi
 
 # Go push notifications quickstart
 
-Send push notifications for ConvoHop messages and calls: the `push` package turns notification events into APNs, FCM and Web Push requests, and you send them with your own push credentials and clients.
+Send push notifications for Relay messages and calls: the `push` package turns notification events into APNs, FCM and Web Push requests, and you send them with your own push credentials and clients.
 
 ## Before you start
 
-ConvoHop doesn't send push notifications itself. You need:
+Relay doesn't send push notifications itself. You need:
 
 - A webhook endpoint that receives `notification.message`, `notification.call` and `notification.callCancelled` events, as the [webhooks quickstart](quickstarts/webhooks.md) shows. Each of these events is addressed to one recipient. Events arrive at least once and in any order, so deduplicate on `EventID` before you send.
 - The devices that your app registered for each user, in your own database.
@@ -651,9 +651,9 @@ The public API of each Go package, generated from its declarations.
 
 | Package | Layer | Summary |
 | --- | --- | --- |
-| [`github.com/ConvoHop/sdks/go`](reference/convohop.md) | Server | Server SDK for trusted Go backends: backend-key data-plane calls and operator management calls, with typed problems, request retries and recovery storage. |
-| [`github.com/ConvoHop/sdks/go/webhooks`](reference/webhooks.md) | Server | Verifies Standard Webhooks signatures and parses ConvoHop webhook deliveries into typed events. |
-| [`github.com/ConvoHop/sdks/go/push`](reference/push.md) | Server | Builds APNs, FCM and Web Push requests from ConvoHop push notification events. |
+| [`github.com/ConvoHop/sdks/go`](reference/relay.md) | Server | Server SDK for trusted Go backends: backend-key data-plane calls and operator management calls, with typed problems, request retries and recovery storage. |
+| [`github.com/ConvoHop/sdks/go/webhooks`](reference/webhooks.md) | Server | Verifies Standard Webhooks signatures and parses Relay webhook deliveries into typed events. |
+| [`github.com/ConvoHop/sdks/go/push`](reference/push.md) | Server | Builds APNs, FCM and Web Push requests from Relay push notification events. |
 
 [Operation coverage](reference/operations.md) lists the members that send each API operation.
 
@@ -761,284 +761,6 @@ type AddMembersPayload struct {
 
 AddMembersPayload is the GraphQL object AddMembersPayload.
 
-### `AgentAuditEvent` struct
-
-```go
-type AgentAuditEvent struct {
-	EventID    UUID       `json:"eventId"`
-	OrgID      UUID       `json:"orgId"`
-	GrantID    *UUID      `json:"grantId"`
-	ActorKind  string     `json:"actorKind"`
-	ActorID    *UUID      `json:"actorId"`
-	Kind       string     `json:"kind"`
-	Details    Properties `json:"details"`
-	OccurredAt string     `json:"occurredAt"`
-}
-```
-
-AgentAuditEvent is the GraphQL object AgentAuditEvent.
-
-### `AgentAuditEventPage` struct
-
-```go
-type AgentAuditEventPage struct {
-	Items           []AgentAuditEvent `json:"items"`
-	Complete        bool              `json:"complete"`
-	RefreshRequired bool              `json:"refreshRequired"`
-	NextCursor      *string           `json:"nextCursor"`
-}
-```
-
-AgentAuditEventPage is the GraphQL object AgentAuditEventPage.
-
-### `AgentAuditEventsReply` struct
-
-```go
-type AgentAuditEventsReply struct {
-	Status      string               `json:"status"`
-	RequestID   UUID                 `json:"requestId"`
-	ServerTime  *string              `json:"serverTime"`
-	ReceiptID   *UUID                `json:"receiptId"`
-	CommittedAt *string              `json:"committedAt"`
-	Replayed    *bool                `json:"replayed"`
-	Operation   *OperationRef        `json:"operation"`
-	ResourceRef *ResourceRef         `json:"resourceRef"`
-	Result      *AgentAuditEventPage `json:"result"`
-}
-```
-
-AgentAuditEventsReply is the GraphQL object AgentAuditEventsReply.
-
-### `AgentAuditEventsRequestInput` struct
-
-```go
-type AgentAuditEventsRequestInput struct {
-	OrgID  UUID      `json:"orgId"`
-	Limit  *PageSize `json:"limit,omitzero"`
-	Cursor *string   `json:"cursor,omitzero"`
-}
-```
-
-AgentAuditEventsRequestInput is the GraphQL input AgentAuditEventsRequestInput.
-
-### `AgentCredentialPermitReply` struct
-
-```go
-type AgentCredentialPermitReply struct {
-	Status      string        `json:"status"`
-	RequestID   UUID          `json:"requestId"`
-	ServerTime  *string       `json:"serverTime"`
-	ReceiptID   *UUID         `json:"receiptId"`
-	CommittedAt *string       `json:"committedAt"`
-	Replayed    *bool         `json:"replayed"`
-	Operation   *OperationRef `json:"operation"`
-	ResourceRef *ResourceRef  `json:"resourceRef"`
-	Result      SignedProof   `json:"result"`
-}
-```
-
-AgentCredentialPermitReply is the GraphQL object AgentCredentialPermitReply.
-
-### `AgentCredentialPermitRequestInput` struct
-
-```go
-type AgentCredentialPermitRequestInput struct {
-	DeliveryID          UUID `json:"deliveryId"`
-	RedemptionRequestID UUID `json:"redemptionRequestId"`
-}
-```
-
-AgentCredentialPermitRequestInput is the GraphQL input AgentCredentialPermitRequestInput.
-
-### `AgentGrant` struct
-
-```go
-type AgentGrant struct {
-	GrantID      UUID       `json:"grantId"`
-	OrgID        UUID       `json:"orgId"`
-	SignupID     UUID       `json:"signupId"`
-	AgentActorID UUID       `json:"agentActorId"`
-	ProjectID    *UUID      `json:"projectId"`
-	Scopes       []string   `json:"scopes"`
-	ExpiresAt    string     `json:"expiresAt"`
-	RevokedAt    *string    `json:"revokedAt"`
-	CreatedAt    string     `json:"createdAt"`
-	Keys         []AgentKey `json:"keys"`
-}
-```
-
-AgentGrant is the GraphQL object AgentGrant.
-
-### `AgentGrantPage` struct
-
-```go
-type AgentGrantPage struct {
-	Items           []AgentGrant `json:"items"`
-	Complete        bool         `json:"complete"`
-	RefreshRequired bool         `json:"refreshRequired"`
-	NextCursor      *string      `json:"nextCursor"`
-}
-```
-
-AgentGrantPage is the GraphQL object AgentGrantPage.
-
-### `AgentGrantsReply` struct
-
-```go
-type AgentGrantsReply struct {
-	Status      string          `json:"status"`
-	RequestID   UUID            `json:"requestId"`
-	ServerTime  *string         `json:"serverTime"`
-	ReceiptID   *UUID           `json:"receiptId"`
-	CommittedAt *string         `json:"committedAt"`
-	Replayed    *bool           `json:"replayed"`
-	Operation   *OperationRef   `json:"operation"`
-	ResourceRef *ResourceRef    `json:"resourceRef"`
-	Result      *AgentGrantPage `json:"result"`
-}
-```
-
-AgentGrantsReply is the GraphQL object AgentGrantsReply.
-
-### `AgentGrantsRequestInput` struct
-
-```go
-type AgentGrantsRequestInput struct {
-	OrgID  UUID      `json:"orgId"`
-	Limit  *PageSize `json:"limit,omitzero"`
-	Cursor *string   `json:"cursor,omitzero"`
-}
-```
-
-AgentGrantsRequestInput is the GraphQL input AgentGrantsRequestInput.
-
-### `AgentKey` struct
-
-```go
-type AgentKey struct {
-	OperationID       UUID     `json:"operationId"`
-	State             string   `json:"state"`
-	Scopes            []string `json:"scopes"`
-	ExpiresAt         string   `json:"expiresAt"`
-	KeyID             *string  `json:"keyId"`
-	DeliveryID        *UUID    `json:"deliveryId"`
-	DeliveryExpiresAt *string  `json:"deliveryExpiresAt"`
-}
-```
-
-AgentKey is the GraphQL object AgentKey.
-
-### `AgentPayment` struct
-
-```go
-type AgentPayment struct {
-	PaymentID UUID   `json:"paymentId"`
-	Amount    string `json:"amount"`
-	Currency  string `json:"currency"`
-	State     string `json:"state"`
-}
-```
-
-AgentPayment is the GraphQL object AgentPayment.
-
-### `AgentSignupForApprovalReply` struct
-
-```go
-type AgentSignupForApprovalReply struct {
-	Status      string             `json:"status"`
-	RequestID   UUID               `json:"requestId"`
-	ServerTime  *string            `json:"serverTime"`
-	ReceiptID   *UUID              `json:"receiptId"`
-	CommittedAt *string            `json:"committedAt"`
-	Replayed    *bool              `json:"replayed"`
-	Operation   *OperationRef      `json:"operation"`
-	ResourceRef *ResourceRef       `json:"resourceRef"`
-	Result      *AgentSignupReview `json:"result"`
-}
-```
-
-AgentSignupForApprovalReply is the GraphQL object AgentSignupForApprovalReply.
-
-### `AgentSignupForApprovalRequestInput` struct
-
-```go
-type AgentSignupForApprovalRequestInput struct {
-	ApprovalToken string `json:"approvalToken"`
-}
-```
-
-AgentSignupForApprovalRequestInput is the GraphQL input AgentSignupForApprovalRequestInput.
-
-### `AgentSignupReply` struct
-
-```go
-type AgentSignupReply struct {
-	Status      string             `json:"status"`
-	RequestID   UUID               `json:"requestId"`
-	ServerTime  *string            `json:"serverTime"`
-	ReceiptID   *UUID              `json:"receiptId"`
-	CommittedAt *string            `json:"committedAt"`
-	Replayed    *bool              `json:"replayed"`
-	Operation   *OperationRef      `json:"operation"`
-	ResourceRef *ResourceRef       `json:"resourceRef"`
-	Result      *AgentSignupStatus `json:"result"`
-}
-```
-
-AgentSignupReply is the GraphQL object AgentSignupReply.
-
-### `AgentSignupReview` struct
-
-```go
-type AgentSignupReview struct {
-	SignupID                 UUID     `json:"signupId"`
-	OwnerEmail               string   `json:"ownerEmail"`
-	OrganizationName         string   `json:"organizationName"`
-	AgentName                string   `json:"agentName"`
-	Purpose                  *string  `json:"purpose"`
-	SuggestedPlan            *string  `json:"suggestedPlan"`
-	SuggestedScopes          []string `json:"suggestedScopes"`
-	SuggestedMonthlySpendCap *string  `json:"suggestedMonthlySpendCap"`
-	Currency                 string   `json:"currency"`
-	ExpiresAt                string   `json:"expiresAt"`
-}
-```
-
-AgentSignupReview is the GraphQL object AgentSignupReview.
-
-### `AgentSignupStatus` struct
-
-```go
-type AgentSignupStatus struct {
-	SignupID       UUID       `json:"signupId"`
-	State          string     `json:"state"`
-	OrgID          *UUID      `json:"orgId"`
-	DeploymentID   *UUID      `json:"deploymentId"`
-	ProjectID      *UUID      `json:"projectId"`
-	NextStep       *string    `json:"nextStep"`
-	Scopes         []string   `json:"scopes"`
-	GrantExpiresAt *string    `json:"grantExpiresAt"`
-	Keys           []AgentKey `json:"keys"`
-	Incarnation    *UUID      `json:"incarnation"`
-	ServingEpoch   *Decimal   `json:"servingEpoch"`
-}
-```
-
-AgentSignupStatus is the GraphQL object AgentSignupStatus.
-
-### `AgentSignupTicket` struct
-
-```go
-type AgentSignupTicket struct {
-	SignupID         UUID   `json:"signupId"`
-	ConfirmationCode string `json:"confirmationCode"`
-	ExpiresAt        string `json:"expiresAt"`
-	PollAfterSeconds int64  `json:"pollAfterSeconds"`
-}
-```
-
-AgentSignupTicket is the GraphQL object AgentSignupTicket.
-
 ### `AlertLiveSessionInput` struct
 
 ```go
@@ -1065,41 +787,6 @@ type AlertLiveSessionPayload struct {
 ```
 
 AlertLiveSessionPayload is the GraphQL object AlertLiveSessionPayload.
-
-### `ApproveAgentSignupReply` struct
-
-```go
-type ApproveAgentSignupReply struct {
-	Status      string             `json:"status"`
-	RequestID   UUID               `json:"requestId"`
-	ServerTime  *string            `json:"serverTime"`
-	ReceiptID   *UUID              `json:"receiptId"`
-	CommittedAt *string            `json:"committedAt"`
-	Replayed    *bool              `json:"replayed"`
-	Operation   *OperationRef      `json:"operation"`
-	ResourceRef *ResourceRef       `json:"resourceRef"`
-	Result      *AgentSignupStatus `json:"result"`
-}
-```
-
-ApproveAgentSignupReply is the GraphQL object ApproveAgentSignupReply.
-
-### `ApproveAgentSignupRequestInput` struct
-
-```go
-type ApproveAgentSignupRequestInput struct {
-	ApprovalToken      string   `json:"approvalToken"`
-	ConfirmationCode   string   `json:"confirmationCode"`
-	TermsRef           string   `json:"termsRef"`
-	Plan               string   `json:"plan"`
-	Scopes             []string `json:"scopes"`
-	MonthlySpendCap    string   `json:"monthlySpendCap"`
-	AgentPurchaseLimit *string  `json:"agentPurchaseLimit,omitzero"`
-	GrantExpiresAt     *string  `json:"grantExpiresAt,omitzero"`
-}
-```
-
-ApproveAgentSignupRequestInput is the GraphQL input ApproveAgentSignupRequestInput.
 
 ### `BillingCheckoutSession` struct
 
@@ -2174,35 +1861,6 @@ type InboxRequestInput struct {
 
 InboxRequestInput is the GraphQL input InboxRequestInput.
 
-### `IssueAgentKeyReply` struct
-
-```go
-type IssueAgentKeyReply struct {
-	Status      string        `json:"status"`
-	RequestID   UUID          `json:"requestId"`
-	ServerTime  *string       `json:"serverTime"`
-	ReceiptID   *UUID         `json:"receiptId"`
-	CommittedAt *string       `json:"committedAt"`
-	Replayed    *bool         `json:"replayed"`
-	Operation   *OperationRef `json:"operation"`
-	ResourceRef *ResourceRef  `json:"resourceRef"`
-	Result      *AgentKey     `json:"result"`
-}
-```
-
-IssueAgentKeyReply is the GraphQL object IssueAgentKeyReply.
-
-### `IssueAgentKeyRequestInput` struct
-
-```go
-type IssueAgentKeyRequestInput struct {
-	Scopes    []string `json:"scopes"`
-	ExpiresAt *string  `json:"expiresAt,omitzero"`
-}
-```
-
-IssueAgentKeyRequestInput is the GraphQL input IssueAgentKeyRequestInput.
-
 ### `IssueBackendKeyReply` struct
 
 ```go
@@ -2625,7 +2283,7 @@ type ManagementClient struct {
 
 ManagementClient calls the management plane. Organizations, deployments, projects, backend keys and webhooks.
 
-Bearer credential: portalCredential. Operator credential for the management plane. Server runtimes only. Anonymous credential: anonymous. No credential. The edge limits the caller by its network address, and the operation's input carries the capability. Bearer credential: agentVerifier. Secret verifier an agent generates before requestAgentSignup: ag\_ followed by 32 random bytes in base64url, whose base64url SHA-256 digest is the request's pollChallenge. It authenticates the agent to its own signup and grant on the management plane only; the communication plane refuses it. Server runtimes only.
+Bearer credential: portalCredential. Operator credential for the management plane. Server runtimes only.
 
 #### `ManagementClient.Retry` method
 
@@ -2759,7 +2417,7 @@ Sends [`management.organizationUsage`](../operations/management/organizationUsag
 func (c *ManagementClient) OrganizationBilling(ctx context.Context, input OrganizationBillingRequestInput, opts ...CallOption) (*OrganizationBillingReply, error)
 ```
 
-OrganizationBilling calls the management.organizationBilling query. Read the billing state of an organization in any status: the plan whose limits apply, whether ConvoHop bills the organization and, when it does, its standing and subscription.
+OrganizationBilling calls the management.organizationBilling query. Read the billing state of an organization in any status: the plan whose limits apply, whether Relay bills the organization and, when it does, its standing and subscription.
 
 Idempotency: safe. Read-only. Repeat freely; each attempt may use a new requestId. Authorized by portalCredential (condition: owner).
 
@@ -2810,72 +2468,6 @@ GetOperation calls the management.getOperation query. Read the state of a long-r
 Idempotency: safe. Read-only. Repeat freely; each attempt may use a new requestId. Authorized by portalCredential (condition: owner).
 
 Sends [`management.getOperation`](../operations/management/getOperation.md).
-
-#### `ManagementClient.AgentSignupForApproval` method
-
-```go
-func (c *ManagementClient) AgentSignupForApproval(ctx context.Context, input AgentSignupForApprovalRequestInput, opts ...CallOption) (*AgentSignupForApprovalReply, error)
-```
-
-AgentSignupForApproval calls the management.agentSignupForApproval query. Read a pending agent signup request for its approval page, with the agent's suggested plan, scopes and monthly spend cap.
-
-Idempotency: safe. Read-only. Repeat freely; each attempt may use a new requestId. Sent without a bearer token as anonymous (condition: approvalToken).
-
-#### `ManagementClient.AgentSignup` method
-
-```go
-func (c *ManagementClient) AgentSignup(ctx context.Context, opts ...CallOption) (*AgentSignupReply, error)
-```
-
-AgentSignup calls the management.agentSignup query. Read the agent's own signup: its state and, once approved, the organization, project, grant scopes and expiry, and keys. Poll no more often than the ticket's pollAfterSeconds.
-
-Idempotency: safe. Read-only. Repeat freely; each attempt may use a new requestId. Authorized by agentVerifier (condition: ownSignup).
-
-#### `ManagementClient.AgentGrants` method
-
-```go
-func (c *ManagementClient) AgentGrants(ctx context.Context, input AgentGrantsRequestInput, opts ...CallOption) (*AgentGrantsReply, error)
-```
-
-AgentGrants calls the management.agentGrants query. List an organization's agent grants with their keys, newest first.
-
-Idempotency: safe. Read-only. Repeat freely; each attempt may use a new requestId. Pagination: cursor. Server-ordered pages. Pass nextCursor back as the cursor input until complete is true. `ManagementClient.AgentGrantsPages` iterates over the pages. Authorized by portalCredential (condition: owner).
-
-#### `ManagementClient.AgentGrantsPages` method
-
-```go
-func (c *ManagementClient) AgentGrantsPages(ctx context.Context, input AgentGrantsRequestInput) iter.Seq2[*AgentGrantPage, error]
-```
-
-AgentGrantsPages iterates over the pages of `ManagementClient.AgentGrants`, starting at input.Cursor. Each page is a new request with a new request ID. Iteration stops after the complete page or at the first error. A page that requires a refresh yields `ErrRefreshRequired` and stops. An incomplete page whose next cursor is missing, malformed or doesn't advance yields an INVALID_RESPONSE `Problem` in place of the page and stops.
-
-#### `ManagementClient.AgentAuditEvents` method
-
-```go
-func (c *ManagementClient) AgentAuditEvents(ctx context.Context, input AgentAuditEventsRequestInput, opts ...CallOption) (*AgentAuditEventsReply, error)
-```
-
-AgentAuditEvents calls the management.agentAuditEvents query. List an organization's agent audit trail, newest first: the approval, provisioning, keys, revocations, spend-control changes and purchases.
-
-Idempotency: safe. Read-only. Repeat freely; each attempt may use a new requestId. Pagination: cursor. Server-ordered pages. Pass nextCursor back as the cursor input until complete is true. `ManagementClient.AgentAuditEventsPages` iterates over the pages. Authorized by portalCredential (condition: owner).
-
-#### `ManagementClient.AgentAuditEventsPages` method
-
-```go
-func (c *ManagementClient) AgentAuditEventsPages(ctx context.Context, input AgentAuditEventsRequestInput) iter.Seq2[*AgentAuditEventPage, error]
-```
-
-AgentAuditEventsPages iterates over the pages of `ManagementClient.AgentAuditEvents`, starting at input.Cursor. Each page is a new request with a new request ID. Iteration stops after the complete page or at the first error. A page that requires a refresh yields `ErrRefreshRequired` and stops. An incomplete page whose next cursor is missing, malformed or doesn't advance yields an INVALID_RESPONSE `Problem` in place of the page and stops.
-
-#### `ManagementClient.OrganizationSpend` method
-
-```go
-func (c *ManagementClient) OrganizationSpend(ctx context.Context, input OrganizationSpendRequestInput, opts ...CallOption) (*OrganizationSpendReply, error)
-```
-
-OrganizationSpend calls the management.organizationSpend query. Read the organization's spend this month: its cap, credits, minimum credit, charge limit, charges, margin, spend stop and the freshness of its usage.
-
-Idempotency: safe. Read-only. Repeat freely; each attempt may use a new requestId. Authorized by portalCredential (condition: owner).
 
 #### `ManagementClient.CreateOrganization` method
 
@@ -3064,86 +2656,6 @@ ReplayWebhookDeliveries calls the management.replayWebhookDeliveries mutation. R
 Idempotency: idempotent. Retry with the same requestId and identical input within the retry budget. The authority deduplicates by requestId; resolve an unknown outcome with resolveRequest. Retry budget: 3 attempts within 60 seconds. Long-running: poll `ManagementClient.GetOperation` with the reply's Operation reference until the work completes. Authorized by portalCredential (condition: owner).
 
 Sends [`management.replayWebhookDeliveries`](../operations/management/replayWebhookDeliveries.md).
-
-#### `ManagementClient.RequestAgentSignup` method
-
-```go
-func (c *ManagementClient) RequestAgentSignup(ctx context.Context, input RequestAgentSignupRequestInput, opts ...CallOption) (*RequestAgentSignupReply, error)
-```
-
-RequestAgentSignup calls the management.requestAgentSignup mutation. Request an organization for a named human owner, who approves it from an emailed link. Nothing is usable before approval.
-
-Idempotency: replayOnly. Retry with the same requestId and identical input within the retry budget; the authority answers a repeat with the original outcome. Outcomes cannot be resolved by lookup, so settle an unknown outcome by sending the same request again. Retry budget: 3 attempts within 60 seconds. Sent without a bearer token as anonymous.
-
-#### `ManagementClient.RejectAgentSignup` method
-
-```go
-func (c *ManagementClient) RejectAgentSignup(ctx context.Context, input RejectAgentSignupRequestInput, opts ...CallOption) (*RejectAgentSignupReply, error)
-```
-
-RejectAgentSignup calls the management.rejectAgentSignup mutation. Reject a signup request from its approval link, optionally suppressing future requests to the email.
-
-Idempotency: replayOnly. Retry with the same requestId and identical input within the retry budget; the authority answers a repeat with the original outcome. Outcomes cannot be resolved by lookup, so settle an unknown outcome by sending the same request again. Retry budget: 3 attempts within 60 seconds. Sent without a bearer token as anonymous (condition: approvalToken).
-
-#### `ManagementClient.ApproveAgentSignup` method
-
-```go
-func (c *ManagementClient) ApproveAgentSignup(ctx context.Context, input ApproveAgentSignupRequestInput, opts ...CallOption) (*ApproveAgentSignupReply, error)
-```
-
-ApproveAgentSignup calls the management.approveAgentSignup mutation. Approve a signup request with its approval token and the agent's confirmation code, choosing the plan, scopes, monthly spend cap, agent purchase limit and grant expiry. The signed-in approver becomes the owner.
-
-Idempotency: idempotent. Retry with the same requestId and identical input within the retry budget. The authority deduplicates by requestId; resolve an unknown outcome with resolveRequest. Retry budget: 3 attempts within 60 seconds. Authorized by portalCredential (condition: approvalToken).
-
-#### `ManagementClient.IssueAgentKey` method
-
-```go
-func (c *ManagementClient) IssueAgentKey(ctx context.Context, input IssueAgentKeyRequestInput, opts ...CallOption) (*IssueAgentKeyReply, error)
-```
-
-IssueAgentKey calls the management.issueAgentKey mutation. Issue a backend key for the agent within its grant's scopes and expiry. The result is the pending key; poll agentSignup until it shows the key's delivery, then redeem it with agentCredentialPermit.
-
-Idempotency: replayOnly. Retry with the same requestId and identical input within the retry budget; the authority answers a repeat with the original outcome. Outcomes cannot be resolved by lookup, so settle an unknown outcome by sending the same request again. Retry budget: 3 attempts within 60 seconds. Authorized by agentVerifier (condition: activeGrant).
-
-#### `ManagementClient.AgentCredentialPermit` method
-
-```go
-func (c *ManagementClient) AgentCredentialPermit(ctx context.Context, input AgentCredentialPermitRequestInput, opts ...CallOption) (*AgentCredentialPermitReply, error)
-```
-
-AgentCredentialPermit calls the management.agentCredentialPermit mutation. Issue a permit that authorizes the agent to redeem one of its key deliveries.
-
-Idempotency: replayOnly. Retry with the same requestId and identical input within the retry budget; the authority answers a repeat with the original outcome. Outcomes cannot be resolved by lookup, so settle an unknown outcome by sending the same request again. Retry budget: 3 attempts within 60 seconds. Authorized by agentVerifier (condition: activeGrant).
-
-#### `ManagementClient.RevokeAgentGrant` method
-
-```go
-func (c *ManagementClient) RevokeAgentGrant(ctx context.Context, input RevokeAgentGrantRequestInput, opts ...CallOption) (*RevokeAgentGrantReply, error)
-```
-
-RevokeAgentGrant calls the management.revokeAgentGrant mutation. Revoke an agent grant and every key issued under it.
-
-Idempotency: idempotent. Retry with the same requestId and identical input within the retry budget. The authority deduplicates by requestId; resolve an unknown outcome with resolveRequest. Retry budget: 3 attempts within 60 seconds. Authorized by portalCredential (condition: owner).
-
-#### `ManagementClient.SetSpendControls` method
-
-```go
-func (c *ManagementClient) SetSpendControls(ctx context.Context, input SetSpendControlsRequestInput, opts ...CallOption) (*SetSpendControlsReply, error)
-```
-
-SetSpendControls calls the management.setSpendControls mutation. Set the organization's monthly spend cap and agent purchase limit.
-
-Idempotency: idempotent. Retry with the same requestId and identical input within the retry budget. The authority deduplicates by requestId; resolve an unknown outcome with resolveRequest. Retry budget: 3 attempts within 60 seconds. Authorized by portalCredential (condition: owner).
-
-#### `ManagementClient.PurchaseAgentCredits` method
-
-```go
-func (c *ManagementClient) PurchaseAgentCredits(ctx context.Context, input PurchaseAgentCreditsRequestInput, opts ...CallOption) (*PurchaseAgentCreditsReply, error)
-```
-
-PurchaseAgentCredits calls the management.purchaseAgentCredits mutation. Buy prepaid credits with a Shared Payment Token, within the owner's agent purchase limit.
-
-Idempotency: replayOnly. Retry with the same requestId and identical input within the retry budget; the authority answers a repeat with the original outcome. Outcomes cannot be resolved by lookup, so settle an unknown outcome by sending the same request again. Retry budget: 3 attempts within 60 seconds. Authorized by agentVerifier (condition: activeGrant).
 
 ### `ManagementConfig` struct
 
@@ -3537,63 +3049,6 @@ type OrganizationPage struct {
 ```
 
 OrganizationPage is the GraphQL object OrganizationPage.
-
-### `OrganizationSpend` struct
-
-```go
-type OrganizationSpend struct {
-	OrgID              UUID     `json:"orgId"`
-	PlanID             string   `json:"planId"`
-	Currency           string   `json:"currency"`
-	CatalogVersion     string   `json:"catalogVersion"`
-	MonthlySpendCap    *string  `json:"monthlySpendCap"`
-	AgentPurchaseLimit *string  `json:"agentPurchaseLimit"`
-	UpdatedAt          *string  `json:"updatedAt"`
-	MonthlyMinimum     *string  `json:"monthlyMinimum"`
-	PeriodStart        *string  `json:"periodStart"`
-	PeriodEnd          *string  `json:"periodEnd"`
-	Credits            *string  `json:"credits"`
-	Charges            *string  `json:"charges"`
-	Margin             *string  `json:"margin"`
-	Stop               *string  `json:"stop"`
-	RefusedMeters      []string `json:"refusedMeters"`
-	EvaluatedAt        *string  `json:"evaluatedAt"`
-	UsageThrough       *string  `json:"usageThrough"`
-	ValidUntil         *string  `json:"validUntil"`
-	MinimumCredit      *string  `json:"minimumCredit"`
-	ChargeLimit        *string  `json:"chargeLimit"`
-}
-```
-
-OrganizationSpend is the GraphQL object OrganizationSpend.
-
-### `OrganizationSpendReply` struct
-
-```go
-type OrganizationSpendReply struct {
-	Status      string             `json:"status"`
-	RequestID   UUID               `json:"requestId"`
-	ServerTime  *string            `json:"serverTime"`
-	ReceiptID   *UUID              `json:"receiptId"`
-	CommittedAt *string            `json:"committedAt"`
-	Replayed    *bool              `json:"replayed"`
-	Operation   *OperationRef      `json:"operation"`
-	ResourceRef *ResourceRef       `json:"resourceRef"`
-	Result      *OrganizationSpend `json:"result"`
-}
-```
-
-OrganizationSpendReply is the GraphQL object OrganizationSpendReply.
-
-### `OrganizationSpendRequestInput` struct
-
-```go
-type OrganizationSpendRequestInput struct {
-	OrgID UUID `json:"orgId"`
-}
-```
-
-OrganizationSpendRequestInput is the GraphQL input OrganizationSpendRequestInput.
 
 ### `OrganizationUsage` struct
 
@@ -4509,35 +3964,6 @@ type ProjectUsageRequestInput struct {
 
 ProjectUsageRequestInput is the GraphQL input ProjectUsageRequestInput.
 
-### `PurchaseAgentCreditsReply` struct
-
-```go
-type PurchaseAgentCreditsReply struct {
-	Status      string        `json:"status"`
-	RequestID   UUID          `json:"requestId"`
-	ServerTime  *string       `json:"serverTime"`
-	ReceiptID   *UUID         `json:"receiptId"`
-	CommittedAt *string       `json:"committedAt"`
-	Replayed    *bool         `json:"replayed"`
-	Operation   *OperationRef `json:"operation"`
-	ResourceRef *ResourceRef  `json:"resourceRef"`
-	Result      *AgentPayment `json:"result"`
-}
-```
-
-PurchaseAgentCreditsReply is the GraphQL object PurchaseAgentCreditsReply.
-
-### `PurchaseAgentCreditsRequestInput` struct
-
-```go
-type PurchaseAgentCreditsRequestInput struct {
-	Amount             string `json:"amount"`
-	SharedPaymentToken string `json:"sharedPaymentToken"`
-}
-```
-
-PurchaseAgentCreditsRequestInput is the GraphQL input PurchaseAgentCreditsRequestInput.
-
 ### `ReadReceipt` struct
 
 ```go
@@ -4707,35 +4133,6 @@ type RedeemCredentialRequestInput struct {
 
 RedeemCredentialRequestInput is the GraphQL input RedeemCredentialRequestInput.
 
-### `RejectAgentSignupReply` struct
-
-```go
-type RejectAgentSignupReply struct {
-	Status      string             `json:"status"`
-	RequestID   UUID               `json:"requestId"`
-	ServerTime  *string            `json:"serverTime"`
-	ReceiptID   *UUID              `json:"receiptId"`
-	CommittedAt *string            `json:"committedAt"`
-	Replayed    *bool              `json:"replayed"`
-	Operation   *OperationRef      `json:"operation"`
-	ResourceRef *ResourceRef       `json:"resourceRef"`
-	Result      *AgentSignupStatus `json:"result"`
-}
-```
-
-RejectAgentSignupReply is the GraphQL object RejectAgentSignupReply.
-
-### `RejectAgentSignupRequestInput` struct
-
-```go
-type RejectAgentSignupRequestInput struct {
-	ApprovalToken          string `json:"approvalToken"`
-	SuppressFutureRequests bool   `json:"suppressFutureRequests"`
-}
-```
-
-RejectAgentSignupRequestInput is the GraphQL input RejectAgentSignupRequestInput.
-
 ### `RemoveMemberReply` struct
 
 ```go
@@ -4829,41 +4226,6 @@ type ReplayWebhookDeliveriesRequestInput struct {
 ```
 
 ReplayWebhookDeliveriesRequestInput is the GraphQL input ReplayWebhookDeliveriesRequestInput.
-
-### `RequestAgentSignupReply` struct
-
-```go
-type RequestAgentSignupReply struct {
-	Status      string             `json:"status"`
-	RequestID   UUID               `json:"requestId"`
-	ServerTime  *string            `json:"serverTime"`
-	ReceiptID   *UUID              `json:"receiptId"`
-	CommittedAt *string            `json:"committedAt"`
-	Replayed    *bool              `json:"replayed"`
-	Operation   *OperationRef      `json:"operation"`
-	ResourceRef *ResourceRef       `json:"resourceRef"`
-	Result      *AgentSignupTicket `json:"result"`
-}
-```
-
-RequestAgentSignupReply is the GraphQL object RequestAgentSignupReply.
-
-### `RequestAgentSignupRequestInput` struct
-
-```go
-type RequestAgentSignupRequestInput struct {
-	OwnerEmail               string   `json:"ownerEmail"`
-	PollChallenge            string   `json:"pollChallenge"`
-	OrganizationName         string   `json:"organizationName"`
-	AgentName                string   `json:"agentName"`
-	Purpose                  *string  `json:"purpose,omitzero"`
-	SuggestedPlan            *string  `json:"suggestedPlan,omitzero"`
-	SuggestedScopes          []string `json:"suggestedScopes"`
-	SuggestedMonthlySpendCap *string  `json:"suggestedMonthlySpendCap,omitzero"`
-}
-```
-
-RequestAgentSignupRequestInput is the GraphQL input RequestAgentSignupRequestInput.
 
 ### `RequestResolution` struct
 
@@ -4969,8 +4331,6 @@ ResumeOperationRequestInput is the GraphQL input ResumeOperationRequestInput.
 
 ```go
 type RetainedResult struct {
-	AgentGrant                 *AgentGrant                 `json:"agentGrant"`
-	AgentSignupStatus          *AgentSignupStatus          `json:"agentSignupStatus"`
 	BillingCheckoutSession     *BillingCheckoutSession     `json:"billingCheckoutSession"`
 	BillingPortalSession       *BillingPortalSession       `json:"billingPortalSession"`
 	BroadcastPermissionChanged *BroadcastPermissionChanged `json:"broadcastPermissionChanged"`
@@ -4989,7 +4349,6 @@ type RetainedResult struct {
 	Message                    *Message                    `json:"message"`
 	MessageAck                 *MessageAck                 `json:"messageAck"`
 	Organization               *Organization               `json:"organization"`
-	OrganizationSpend          *OrganizationSpend          `json:"organizationSpend"`
 	Principal                  *Principal                  `json:"principal"`
 	ReadReceipt                *ReadReceipt                `json:"readReceipt"`
 	SessionBootstrap           *SessionBootstrap           `json:"sessionBootstrap"`
@@ -4999,35 +4358,6 @@ type RetainedResult struct {
 ```
 
 RetainedResult is the GraphQL object RetainedResult. Exactly one typed field contains the retained, currently authorized receipt result.
-
-### `RevokeAgentGrantReply` struct
-
-```go
-type RevokeAgentGrantReply struct {
-	Status      string        `json:"status"`
-	RequestID   UUID          `json:"requestId"`
-	ServerTime  *string       `json:"serverTime"`
-	ReceiptID   *UUID         `json:"receiptId"`
-	CommittedAt *string       `json:"committedAt"`
-	Replayed    *bool         `json:"replayed"`
-	Operation   *OperationRef `json:"operation"`
-	ResourceRef *ResourceRef  `json:"resourceRef"`
-	Result      *AgentGrant   `json:"result"`
-}
-```
-
-RevokeAgentGrantReply is the GraphQL object RevokeAgentGrantReply.
-
-### `RevokeAgentGrantRequestInput` struct
-
-```go
-type RevokeAgentGrantRequestInput struct {
-	GrantID              UUID `json:"grantId"`
-	RevokeIssuedSessions bool `json:"revokeIssuedSessions"`
-}
-```
-
-RevokeAgentGrantRequestInput is the GraphQL input RevokeAgentGrantRequestInput.
 
 ### `RevokeBackendKeyReply` struct
 
@@ -5392,36 +4722,6 @@ type SetConversationMutePayload struct {
 ```
 
 SetConversationMutePayload is the GraphQL object SetConversationMutePayload.
-
-### `SetSpendControlsReply` struct
-
-```go
-type SetSpendControlsReply struct {
-	Status      string             `json:"status"`
-	RequestID   UUID               `json:"requestId"`
-	ServerTime  *string            `json:"serverTime"`
-	ReceiptID   *UUID              `json:"receiptId"`
-	CommittedAt *string            `json:"committedAt"`
-	Replayed    *bool              `json:"replayed"`
-	Operation   *OperationRef      `json:"operation"`
-	ResourceRef *ResourceRef       `json:"resourceRef"`
-	Result      *OrganizationSpend `json:"result"`
-}
-```
-
-SetSpendControlsReply is the GraphQL object SetSpendControlsReply.
-
-### `SetSpendControlsRequestInput` struct
-
-```go
-type SetSpendControlsRequestInput struct {
-	OrgID              UUID    `json:"orgId"`
-	MonthlySpendCap    string  `json:"monthlySpendCap"`
-	AgentPurchaseLimit *string `json:"agentPurchaseLimit,omitzero"`
-}
-```
-
-SetSpendControlsRequestInput is the GraphQL input SetSpendControlsRequestInput.
 
 ### `UpdateConversationReply` struct
 
@@ -6865,14 +6165,14 @@ WithTimeout bounds each HTTP exchange, including reading the response. The defau
 ### `ErrRefreshRequired` constant
 
 ```go
-var ErrRefreshRequired = errors.New("convohop: the page sequence requires a refresh; start again from the first page")
+var ErrRefreshRequired = errors.New("relay: the page sequence requires a refresh; start again from the first page")
 ```
 
 ErrRefreshRequired reports a page sequence the authority can no longer continue consistently, for example after a visibility change. A Pages iterator yields the page that requires the refresh together with this error and stops. Start again from the first page.
 
 # `github.com/ConvoHop/sdks/go/webhooks`
 
-Verifies Standard Webhooks signatures and parses ConvoHop webhook deliveries into typed events.
+Verifies Standard Webhooks signatures and parses Relay webhook deliveries into typed events.
 
 **Layer:** Server. **Runtime:** Go 1.26 or later. **Source:** `go/webhooks`.
 
@@ -7646,7 +6946,7 @@ Why a ring stopped, in `Notification`.Reason. Treat a reason you don't know as "
 
 # `github.com/ConvoHop/sdks/go/push`
 
-Builds APNs, FCM and Web Push requests from ConvoHop push notification events.
+Builds APNs, FCM and Web Push requests from Relay push notification events.
 
 **Layer:** Server. **Runtime:** Go 1.26 or later. **Source:** `go/push`.
 
@@ -8022,7 +7322,7 @@ WithoutPreview stops a message event's preview from becoming the body when there
 
 # Go operation coverage
 
-The Go SDK members that send each API operation. 65 of the 81 operations that Go packages can send have a method.
+The Go SDK members that send each API operation. 65 of the 68 operations that Go packages can send have a method.
 
 ## Communication
 
@@ -8030,44 +7330,44 @@ Conversations, members, messages, receipts, realtime events and live sessions in
 
 | Operation | Layer | Members |
 | --- | --- | --- |
-| [`communication.capabilities`](../operations/communication/capabilities.md) | both | [`ProjectClient.Capabilities`](reference/convohop.md#projectclientcapabilities-method) |
-| [`communication.route`](../operations/communication/route.md) | both | [`ProjectClient.Route`](reference/convohop.md#projectclientroute-method), [`ProjectClient.Initialize`](reference/convohop.md#projectclientinitialize-method) |
-| [`communication.getPrincipal`](../operations/communication/getPrincipal.md) | server | [`ProjectClient.GetPrincipal`](reference/convohop.md#projectclientgetprincipal-method) |
-| [`communication.getConversation`](../operations/communication/getConversation.md) | both | [`ProjectClient.GetConversation`](reference/convohop.md#projectclientgetconversation-method) |
-| [`communication.members`](../operations/communication/members.md) | both | [`ProjectClient.Members`](reference/convohop.md#projectclientmembers-method), [`ProjectClient.MembersPages`](reference/convohop.md#projectclientmemberspages-method) |
-| [`communication.messages`](../operations/communication/messages.md) | both | [`ProjectClient.Messages`](reference/convohop.md#projectclientmessages-method), [`ProjectClient.MessagesPages`](reference/convohop.md#projectclientmessagespages-method) |
-| [`communication.getMessage`](../operations/communication/getMessage.md) | both | [`ProjectClient.GetMessage`](reference/convohop.md#projectclientgetmessage-method) |
-| [`communication.inbox`](../operations/communication/inbox.md) | both | [`ProjectClient.Inbox`](reference/convohop.md#projectclientinbox-method), [`ProjectClient.InboxPages`](reference/convohop.md#projectclientinboxpages-method) |
-| [`communication.search`](../operations/communication/search.md) | both | [`ProjectClient.Search`](reference/convohop.md#projectclientsearch-method), [`ProjectClient.SearchPages`](reference/convohop.md#projectclientsearchpages-method) |
-| [`communication.resolveRequest`](../operations/communication/resolveRequest.md) | both | [`ProjectClient.ResolveRequest`](reference/convohop.md#projectclientresolverequest-method), [`ProjectClient.Retry`](reference/convohop.md#projectclientretry-method) |
-| [`communication.getOperation`](../operations/communication/getOperation.md) | both | [`ProjectClient.GetOperation`](reference/convohop.md#projectclientgetoperation-method) |
-| [`communication.conversationMute`](../operations/communication/conversationMute.md) | both | [`ProjectClient.ConversationMute`](reference/convohop.md#projectclientconversationmute-method) |
-| [`communication.currentLiveSession`](../operations/communication/currentLiveSession.md) | both | [`ProjectClient.CurrentLiveSession`](reference/convohop.md#projectclientcurrentlivesession-method) |
-| [`communication.liveSession`](../operations/communication/liveSession.md) | both | [`ProjectClient.LiveSession`](reference/convohop.md#projectclientlivesession-method) |
-| [`communication.liveSessions`](../operations/communication/liveSessions.md) | both | [`ProjectClient.LiveSessions`](reference/convohop.md#projectclientlivesessions-method), [`ProjectClient.LiveSessionsPages`](reference/convohop.md#projectclientlivesessionspages-method) |
-| [`communication.liveSessionParticipants`](../operations/communication/liveSessionParticipants.md) | both | [`ProjectClient.LiveSessionParticipants`](reference/convohop.md#projectclientlivesessionparticipants-method), [`ProjectClient.LiveSessionParticipantsPages`](reference/convohop.md#projectclientlivesessionparticipantspages-method) |
-| [`communication.liveSessionOperation`](../operations/communication/liveSessionOperation.md) | both | [`ProjectClient.LiveSessionOperation`](reference/convohop.md#projectclientlivesessionoperation-method) |
-| [`communication.sessionRequestOutcome`](../operations/communication/sessionRequestOutcome.md) | server | [`ProjectClient.SessionRequestOutcome`](reference/convohop.md#projectclientsessionrequestoutcome-method) |
-| [`communication.createPrincipal`](../operations/communication/createPrincipal.md) | server | [`ProjectClient.CreatePrincipal`](reference/convohop.md#projectclientcreateprincipal-method) |
-| [`communication.disablePrincipal`](../operations/communication/disablePrincipal.md) | server | [`ProjectClient.DisablePrincipal`](reference/convohop.md#projectclientdisableprincipal-method) |
-| [`communication.issueSession`](../operations/communication/issueSession.md) | server | [`ProjectClient.IssueSession`](reference/convohop.md#projectclientissuesession-method) |
-| [`communication.renewSession`](../operations/communication/renewSession.md) | server | [`ProjectClient.RenewSession`](reference/convohop.md#projectclientrenewsession-method) |
-| [`communication.revokeSession`](../operations/communication/revokeSession.md) | both | [`ProjectClient.RevokeSession`](reference/convohop.md#projectclientrevokesession-method) |
-| [`communication.createConversation`](../operations/communication/createConversation.md) | server | [`ProjectClient.CreateConversation`](reference/convohop.md#projectclientcreateconversation-method) |
-| [`communication.updateConversation`](../operations/communication/updateConversation.md) | both | [`ProjectClient.UpdateConversation`](reference/convohop.md#projectclientupdateconversation-method) |
-| [`communication.addMember`](../operations/communication/addMember.md) | server | [`ProjectClient.AddMember`](reference/convohop.md#projectclientaddmember-method) |
-| [`communication.addMembers`](../operations/communication/addMembers.md) | server | [`ProjectClient.AddMembers`](reference/convohop.md#projectclientaddmembers-method) |
-| [`communication.removeMember`](../operations/communication/removeMember.md) | server | [`ProjectClient.RemoveMember`](reference/convohop.md#projectclientremovemember-method) |
-| [`communication.historyGrant`](../operations/communication/historyGrant.md) | server | [`ProjectClient.HistoryGrant`](reference/convohop.md#projectclienthistorygrant-method) |
-| [`communication.sendMessage`](../operations/communication/sendMessage.md) | both | [`ProjectClient.SendMessage`](reference/convohop.md#projectclientsendmessage-method) |
-| [`communication.editMessage`](../operations/communication/editMessage.md) | both | [`ProjectClient.EditMessage`](reference/convohop.md#projectclienteditmessage-method) |
-| [`communication.deleteMessage`](../operations/communication/deleteMessage.md) | both | [`ProjectClient.DeleteMessage`](reference/convohop.md#projectclientdeletemessage-method) |
-| [`communication.setBroadcastPermission`](../operations/communication/setBroadcastPermission.md) | server | [`ProjectClient.SetBroadcastPermission`](reference/convohop.md#projectclientsetbroadcastpermission-method) |
-| [`communication.setConversationMute`](../operations/communication/setConversationMute.md) | both | [`ProjectClient.SetConversationMute`](reference/convohop.md#projectclientsetconversationmute-method) |
-| [`communication.alertLiveSession`](../operations/communication/alertLiveSession.md) | both | [`ProjectClient.AlertLiveSession`](reference/convohop.md#projectclientalertlivesession-method) |
-| [`communication.endLiveSession`](../operations/communication/endLiveSession.md) | both | [`ProjectClient.EndLiveSession`](reference/convohop.md#projectclientendlivesession-method) |
-| [`communication.redeemCredential`](../operations/communication/redeemCredential.md) | server | [`ProjectClient.RedeemCredential`](reference/convohop.md#projectclientredeemcredential-method) |
-| [`communication.acknowledgeCredential`](../operations/communication/acknowledgeCredential.md) | server | [`ProjectClient.AcknowledgeCredential`](reference/convohop.md#projectclientacknowledgecredential-method) |
+| [`communication.capabilities`](../operations/communication/capabilities.md) | both | [`ProjectClient.Capabilities`](reference/relay.md#projectclientcapabilities-method) |
+| [`communication.route`](../operations/communication/route.md) | both | [`ProjectClient.Route`](reference/relay.md#projectclientroute-method), [`ProjectClient.Initialize`](reference/relay.md#projectclientinitialize-method) |
+| [`communication.getPrincipal`](../operations/communication/getPrincipal.md) | server | [`ProjectClient.GetPrincipal`](reference/relay.md#projectclientgetprincipal-method) |
+| [`communication.getConversation`](../operations/communication/getConversation.md) | both | [`ProjectClient.GetConversation`](reference/relay.md#projectclientgetconversation-method) |
+| [`communication.members`](../operations/communication/members.md) | both | [`ProjectClient.Members`](reference/relay.md#projectclientmembers-method), [`ProjectClient.MembersPages`](reference/relay.md#projectclientmemberspages-method) |
+| [`communication.messages`](../operations/communication/messages.md) | both | [`ProjectClient.Messages`](reference/relay.md#projectclientmessages-method), [`ProjectClient.MessagesPages`](reference/relay.md#projectclientmessagespages-method) |
+| [`communication.getMessage`](../operations/communication/getMessage.md) | both | [`ProjectClient.GetMessage`](reference/relay.md#projectclientgetmessage-method) |
+| [`communication.inbox`](../operations/communication/inbox.md) | both | [`ProjectClient.Inbox`](reference/relay.md#projectclientinbox-method), [`ProjectClient.InboxPages`](reference/relay.md#projectclientinboxpages-method) |
+| [`communication.search`](../operations/communication/search.md) | both | [`ProjectClient.Search`](reference/relay.md#projectclientsearch-method), [`ProjectClient.SearchPages`](reference/relay.md#projectclientsearchpages-method) |
+| [`communication.resolveRequest`](../operations/communication/resolveRequest.md) | both | [`ProjectClient.ResolveRequest`](reference/relay.md#projectclientresolverequest-method), [`ProjectClient.Retry`](reference/relay.md#projectclientretry-method) |
+| [`communication.getOperation`](../operations/communication/getOperation.md) | both | [`ProjectClient.GetOperation`](reference/relay.md#projectclientgetoperation-method) |
+| [`communication.conversationMute`](../operations/communication/conversationMute.md) | both | [`ProjectClient.ConversationMute`](reference/relay.md#projectclientconversationmute-method) |
+| [`communication.currentLiveSession`](../operations/communication/currentLiveSession.md) | both | [`ProjectClient.CurrentLiveSession`](reference/relay.md#projectclientcurrentlivesession-method) |
+| [`communication.liveSession`](../operations/communication/liveSession.md) | both | [`ProjectClient.LiveSession`](reference/relay.md#projectclientlivesession-method) |
+| [`communication.liveSessions`](../operations/communication/liveSessions.md) | both | [`ProjectClient.LiveSessions`](reference/relay.md#projectclientlivesessions-method), [`ProjectClient.LiveSessionsPages`](reference/relay.md#projectclientlivesessionspages-method) |
+| [`communication.liveSessionParticipants`](../operations/communication/liveSessionParticipants.md) | both | [`ProjectClient.LiveSessionParticipants`](reference/relay.md#projectclientlivesessionparticipants-method), [`ProjectClient.LiveSessionParticipantsPages`](reference/relay.md#projectclientlivesessionparticipantspages-method) |
+| [`communication.liveSessionOperation`](../operations/communication/liveSessionOperation.md) | both | [`ProjectClient.LiveSessionOperation`](reference/relay.md#projectclientlivesessionoperation-method) |
+| [`communication.sessionRequestOutcome`](../operations/communication/sessionRequestOutcome.md) | server | [`ProjectClient.SessionRequestOutcome`](reference/relay.md#projectclientsessionrequestoutcome-method) |
+| [`communication.createPrincipal`](../operations/communication/createPrincipal.md) | server | [`ProjectClient.CreatePrincipal`](reference/relay.md#projectclientcreateprincipal-method) |
+| [`communication.disablePrincipal`](../operations/communication/disablePrincipal.md) | server | [`ProjectClient.DisablePrincipal`](reference/relay.md#projectclientdisableprincipal-method) |
+| [`communication.issueSession`](../operations/communication/issueSession.md) | server | [`ProjectClient.IssueSession`](reference/relay.md#projectclientissuesession-method) |
+| [`communication.renewSession`](../operations/communication/renewSession.md) | server | [`ProjectClient.RenewSession`](reference/relay.md#projectclientrenewsession-method) |
+| [`communication.revokeSession`](../operations/communication/revokeSession.md) | both | [`ProjectClient.RevokeSession`](reference/relay.md#projectclientrevokesession-method) |
+| [`communication.createConversation`](../operations/communication/createConversation.md) | server | [`ProjectClient.CreateConversation`](reference/relay.md#projectclientcreateconversation-method) |
+| [`communication.updateConversation`](../operations/communication/updateConversation.md) | both | [`ProjectClient.UpdateConversation`](reference/relay.md#projectclientupdateconversation-method) |
+| [`communication.addMember`](../operations/communication/addMember.md) | server | [`ProjectClient.AddMember`](reference/relay.md#projectclientaddmember-method) |
+| [`communication.addMembers`](../operations/communication/addMembers.md) | server | [`ProjectClient.AddMembers`](reference/relay.md#projectclientaddmembers-method) |
+| [`communication.removeMember`](../operations/communication/removeMember.md) | server | [`ProjectClient.RemoveMember`](reference/relay.md#projectclientremovemember-method) |
+| [`communication.historyGrant`](../operations/communication/historyGrant.md) | server | [`ProjectClient.HistoryGrant`](reference/relay.md#projectclienthistorygrant-method) |
+| [`communication.sendMessage`](../operations/communication/sendMessage.md) | both | [`ProjectClient.SendMessage`](reference/relay.md#projectclientsendmessage-method) |
+| [`communication.editMessage`](../operations/communication/editMessage.md) | both | [`ProjectClient.EditMessage`](reference/relay.md#projectclienteditmessage-method) |
+| [`communication.deleteMessage`](../operations/communication/deleteMessage.md) | both | [`ProjectClient.DeleteMessage`](reference/relay.md#projectclientdeletemessage-method) |
+| [`communication.setBroadcastPermission`](../operations/communication/setBroadcastPermission.md) | server | [`ProjectClient.SetBroadcastPermission`](reference/relay.md#projectclientsetbroadcastpermission-method) |
+| [`communication.setConversationMute`](../operations/communication/setConversationMute.md) | both | [`ProjectClient.SetConversationMute`](reference/relay.md#projectclientsetconversationmute-method) |
+| [`communication.alertLiveSession`](../operations/communication/alertLiveSession.md) | both | [`ProjectClient.AlertLiveSession`](reference/relay.md#projectclientalertlivesession-method) |
+| [`communication.endLiveSession`](../operations/communication/endLiveSession.md) | both | [`ProjectClient.EndLiveSession`](reference/relay.md#projectclientendlivesession-method) |
+| [`communication.redeemCredential`](../operations/communication/redeemCredential.md) | server | [`ProjectClient.RedeemCredential`](reference/relay.md#projectclientredeemcredential-method) |
+| [`communication.acknowledgeCredential`](../operations/communication/acknowledgeCredential.md) | server | [`ProjectClient.AcknowledgeCredential`](reference/relay.md#projectclientacknowledgecredential-method) |
 
 ## Management
 
@@ -8075,46 +7375,33 @@ Organizations, deployments, projects, backend keys and webhooks.
 
 | Operation | Layer | Members |
 | --- | --- | --- |
-| [`management.capabilities`](../operations/management/capabilities.md) | server | [`ManagementClient.Capabilities`](reference/convohop.md#managementclientcapabilities-method) |
-| [`management.organizations`](../operations/management/organizations.md) | server | [`ManagementClient.Organizations`](reference/convohop.md#managementclientorganizations-method) |
-| [`management.getOrganization`](../operations/management/getOrganization.md) | server | [`ManagementClient.GetOrganization`](reference/convohop.md#managementclientgetorganization-method) |
-| [`management.getDeployment`](../operations/management/getDeployment.md) | server | [`ManagementClient.GetDeployment`](reference/convohop.md#managementclientgetdeployment-method) |
-| [`management.getProject`](../operations/management/getProject.md) | server | [`ManagementClient.GetProject`](reference/convohop.md#managementclientgetproject-method) |
-| [`management.deploymentHealth`](../operations/management/deploymentHealth.md) | server | [`ManagementClient.DeploymentHealth`](reference/convohop.md#managementclientdeploymenthealth-method) |
-| [`management.deploymentUsage`](../operations/management/deploymentUsage.md) | server | [`ManagementClient.DeploymentUsage`](reference/convohop.md#managementclientdeploymentusage-method) |
-| [`management.projectUsage`](../operations/management/projectUsage.md) | server | [`ManagementClient.ProjectUsage`](reference/convohop.md#managementclientprojectusage-method) |
-| [`management.organizationUsage`](../operations/management/organizationUsage.md) | server | [`ManagementClient.OrganizationUsage`](reference/convohop.md#managementclientorganizationusage-method) |
+| [`management.capabilities`](../operations/management/capabilities.md) | server | [`ManagementClient.Capabilities`](reference/relay.md#managementclientcapabilities-method) |
+| [`management.organizations`](../operations/management/organizations.md) | server | [`ManagementClient.Organizations`](reference/relay.md#managementclientorganizations-method) |
+| [`management.getOrganization`](../operations/management/getOrganization.md) | server | [`ManagementClient.GetOrganization`](reference/relay.md#managementclientgetorganization-method) |
+| [`management.getDeployment`](../operations/management/getDeployment.md) | server | [`ManagementClient.GetDeployment`](reference/relay.md#managementclientgetdeployment-method) |
+| [`management.getProject`](../operations/management/getProject.md) | server | [`ManagementClient.GetProject`](reference/relay.md#managementclientgetproject-method) |
+| [`management.deploymentHealth`](../operations/management/deploymentHealth.md) | server | [`ManagementClient.DeploymentHealth`](reference/relay.md#managementclientdeploymenthealth-method) |
+| [`management.deploymentUsage`](../operations/management/deploymentUsage.md) | server | [`ManagementClient.DeploymentUsage`](reference/relay.md#managementclientdeploymentusage-method) |
+| [`management.projectUsage`](../operations/management/projectUsage.md) | server | [`ManagementClient.ProjectUsage`](reference/relay.md#managementclientprojectusage-method) |
+| [`management.organizationUsage`](../operations/management/organizationUsage.md) | server | [`ManagementClient.OrganizationUsage`](reference/relay.md#managementclientorganizationusage-method) |
 | [`management.organizationBilling`](../operations/management/organizationBilling.md) | server | Not wrapped by a method |
-| [`management.webhookEndpoints`](../operations/management/webhookEndpoints.md) | server | [`ManagementClient.WebhookEndpoints`](reference/convohop.md#managementclientwebhookendpoints-method) |
-| [`management.webhookDeliveries`](../operations/management/webhookDeliveries.md) | server | [`ManagementClient.WebhookDeliveries`](reference/convohop.md#managementclientwebhookdeliveries-method) |
-| [`management.resolveRequest`](../operations/management/resolveRequest.md) | server | [`ManagementClient.ResolveRequest`](reference/convohop.md#managementclientresolverequest-method), [`ManagementClient.Retry`](reference/convohop.md#managementclientretry-method) |
-| [`management.getOperation`](../operations/management/getOperation.md) | server | [`ManagementClient.GetOperation`](reference/convohop.md#managementclientgetoperation-method) |
-| [`management.agentSignupForApproval`](../operations/management/agentSignupForApproval.md) | server | Not wrapped by a method |
-| [`management.agentSignup`](../operations/management/agentSignup.md) | server | Not wrapped by a method |
-| [`management.agentGrants`](../operations/management/agentGrants.md) | server | Not wrapped by a method |
-| [`management.agentAuditEvents`](../operations/management/agentAuditEvents.md) | server | Not wrapped by a method |
-| [`management.organizationSpend`](../operations/management/organizationSpend.md) | server | Not wrapped by a method |
-| [`management.createOrganization`](../operations/management/createOrganization.md) | server | [`ManagementClient.CreateOrganization`](reference/convohop.md#managementclientcreateorganization-method) |
-| [`management.createDeployment`](../operations/management/createDeployment.md) | server | [`ManagementClient.CreateDeployment`](reference/convohop.md#managementclientcreatedeployment-method) |
-| [`management.createProject`](../operations/management/createProject.md) | server | [`ManagementClient.CreateProject`](reference/convohop.md#managementclientcreateproject-method) |
-| [`management.issueBackendKey`](../operations/management/issueBackendKey.md) | server | [`ManagementClient.IssueBackendKey`](reference/convohop.md#managementclientissuebackendkey-method) |
-| [`management.revokeBackendKey`](../operations/management/revokeBackendKey.md) | server | [`ManagementClient.RevokeBackendKey`](reference/convohop.md#managementclientrevokebackendkey-method) |
-| [`management.projectPolicy`](../operations/management/projectPolicy.md) | server | [`ManagementClient.ProjectPolicy`](reference/convohop.md#managementclientprojectpolicy-method) |
-| [`management.credentialPermit`](../operations/management/credentialPermit.md) | server | [`ManagementClient.CredentialPermit`](reference/convohop.md#managementclientcredentialpermit-method) |
-| [`management.pauseOperation`](../operations/management/pauseOperation.md) | server | [`ManagementClient.PauseOperation`](reference/convohop.md#managementclientpauseoperation-method) |
-| [`management.resumeOperation`](../operations/management/resumeOperation.md) | server | [`ManagementClient.ResumeOperation`](reference/convohop.md#managementclientresumeoperation-method) |
+| [`management.webhookEndpoints`](../operations/management/webhookEndpoints.md) | server | [`ManagementClient.WebhookEndpoints`](reference/relay.md#managementclientwebhookendpoints-method) |
+| [`management.webhookDeliveries`](../operations/management/webhookDeliveries.md) | server | [`ManagementClient.WebhookDeliveries`](reference/relay.md#managementclientwebhookdeliveries-method) |
+| [`management.resolveRequest`](../operations/management/resolveRequest.md) | server | [`ManagementClient.ResolveRequest`](reference/relay.md#managementclientresolverequest-method), [`ManagementClient.Retry`](reference/relay.md#managementclientretry-method) |
+| [`management.getOperation`](../operations/management/getOperation.md) | server | [`ManagementClient.GetOperation`](reference/relay.md#managementclientgetoperation-method) |
+| [`management.createOrganization`](../operations/management/createOrganization.md) | server | [`ManagementClient.CreateOrganization`](reference/relay.md#managementclientcreateorganization-method) |
+| [`management.createDeployment`](../operations/management/createDeployment.md) | server | [`ManagementClient.CreateDeployment`](reference/relay.md#managementclientcreatedeployment-method) |
+| [`management.createProject`](../operations/management/createProject.md) | server | [`ManagementClient.CreateProject`](reference/relay.md#managementclientcreateproject-method) |
+| [`management.issueBackendKey`](../operations/management/issueBackendKey.md) | server | [`ManagementClient.IssueBackendKey`](reference/relay.md#managementclientissuebackendkey-method) |
+| [`management.revokeBackendKey`](../operations/management/revokeBackendKey.md) | server | [`ManagementClient.RevokeBackendKey`](reference/relay.md#managementclientrevokebackendkey-method) |
+| [`management.projectPolicy`](../operations/management/projectPolicy.md) | server | [`ManagementClient.ProjectPolicy`](reference/relay.md#managementclientprojectpolicy-method) |
+| [`management.credentialPermit`](../operations/management/credentialPermit.md) | server | [`ManagementClient.CredentialPermit`](reference/relay.md#managementclientcredentialpermit-method) |
+| [`management.pauseOperation`](../operations/management/pauseOperation.md) | server | [`ManagementClient.PauseOperation`](reference/relay.md#managementclientpauseoperation-method) |
+| [`management.resumeOperation`](../operations/management/resumeOperation.md) | server | [`ManagementClient.ResumeOperation`](reference/relay.md#managementclientresumeoperation-method) |
 | [`management.createBillingCheckoutSession`](../operations/management/createBillingCheckoutSession.md) | server | Not wrapped by a method |
 | [`management.createBillingPortalSession`](../operations/management/createBillingPortalSession.md) | server | Not wrapped by a method |
-| [`management.configureWebhook`](../operations/management/configureWebhook.md) | server | [`ManagementClient.ConfigureWebhook`](reference/convohop.md#managementclientconfigurewebhook-method) |
-| [`management.updateWebhook`](../operations/management/updateWebhook.md) | server | [`ManagementClient.UpdateWebhook`](reference/convohop.md#managementclientupdatewebhook-method) |
-| [`management.rotateWebhookSecret`](../operations/management/rotateWebhookSecret.md) | server | [`ManagementClient.RotateWebhookSecret`](reference/convohop.md#managementclientrotatewebhooksecret-method) |
-| [`management.disableWebhook`](../operations/management/disableWebhook.md) | server | [`ManagementClient.DisableWebhook`](reference/convohop.md#managementclientdisablewebhook-method) |
-| [`management.replayWebhookDeliveries`](../operations/management/replayWebhookDeliveries.md) | server | [`ManagementClient.ReplayWebhookDeliveries`](reference/convohop.md#managementclientreplaywebhookdeliveries-method) |
-| [`management.requestAgentSignup`](../operations/management/requestAgentSignup.md) | server | Not wrapped by a method |
-| [`management.rejectAgentSignup`](../operations/management/rejectAgentSignup.md) | server | Not wrapped by a method |
-| [`management.approveAgentSignup`](../operations/management/approveAgentSignup.md) | server | Not wrapped by a method |
-| [`management.issueAgentKey`](../operations/management/issueAgentKey.md) | server | Not wrapped by a method |
-| [`management.agentCredentialPermit`](../operations/management/agentCredentialPermit.md) | server | Not wrapped by a method |
-| [`management.revokeAgentGrant`](../operations/management/revokeAgentGrant.md) | server | Not wrapped by a method |
-| [`management.setSpendControls`](../operations/management/setSpendControls.md) | server | Not wrapped by a method |
-| [`management.purchaseAgentCredits`](../operations/management/purchaseAgentCredits.md) | server | Not wrapped by a method |
+| [`management.configureWebhook`](../operations/management/configureWebhook.md) | server | [`ManagementClient.ConfigureWebhook`](reference/relay.md#managementclientconfigurewebhook-method) |
+| [`management.updateWebhook`](../operations/management/updateWebhook.md) | server | [`ManagementClient.UpdateWebhook`](reference/relay.md#managementclientupdatewebhook-method) |
+| [`management.rotateWebhookSecret`](../operations/management/rotateWebhookSecret.md) | server | [`ManagementClient.RotateWebhookSecret`](reference/relay.md#managementclientrotatewebhooksecret-method) |
+| [`management.disableWebhook`](../operations/management/disableWebhook.md) | server | [`ManagementClient.DisableWebhook`](reference/relay.md#managementclientdisablewebhook-method) |
+| [`management.replayWebhookDeliveries`](../operations/management/replayWebhookDeliveries.md) | server | [`ManagementClient.ReplayWebhookDeliveries`](reference/relay.md#managementclientreplaywebhookdeliveries-method) |

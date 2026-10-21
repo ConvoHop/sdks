@@ -2,11 +2,11 @@ import assert from "node:assert/strict";
 import { randomUUID } from "node:crypto";
 import { after, before, test } from "node:test";
 import {
-  ConvoHopProblem,
+  RelayProblem,
   type ConversationMessage,
   type ConversationSnapshot,
   type ConversationStore,
-} from "@convohop/client";
+} from "@instantrelay/client";
 import {
   connectUser,
   openOutbox,
@@ -55,7 +55,7 @@ async function twoMembers(title: string) {
   return { aliceLogin, bobLogin, conversationId };
 }
 
-const unknownOutcome = (error: unknown) => error instanceof ConvoHopProblem && error.outcome === "unknown";
+const unknownOutcome = (error: unknown) => error instanceof RelayProblem && error.outcome === "unknown";
 
 // Resolves with the store's first snapshot that passes check.
 function snapshotWhere(
@@ -124,7 +124,7 @@ for (const action of ["dropBeforeCommit", "dropAfterCommit"] as const) {
   });
 }
 
-test("a conversation store shows a draft at once, then the messages ConvoHop committed", { timeout: 15_000 }, async () => {
+test("a conversation store shows a draft at once, then the messages Relay committed", { timeout: 15_000 }, async () => {
   const { aliceLogin, bobLogin, conversationId } = await twoMembers("Store");
   const alice = await connectUser(aliceLogin, memoryStorage());
   const bob = await connectUser(bobLogin, memoryStorage());
@@ -165,7 +165,7 @@ for (const action of ["dropBeforeCommit", "dropAfterCommit"] as const) {
       assert.ok(entry);
       const snapshot = await snapshotWhere(store, snapshot => snapshot.pending.length === 0 && snapshot.messages.length > 0);
       assert.deepEqual(snapshot.messages.map(message => message.text), ["Still there?"]);
-      // The outbox looks up the request's outcome, and sends it again with the same request ID only if ConvoHop hadn't
+      // The outbox looks up the request's outcome, and sends it again with the same request ID only if Relay hadn't
       // committed it.
       const expected = action === "dropBeforeCommit" ? [true, false] : [true];
       assert.deepEqual(await attempts(target, "sendMessage", entry.requestId), expected);

@@ -1,9 +1,9 @@
 import 'dart:async';
 import 'dart:convert';
 
-import 'package:convohop/convohop.dart';
-import 'package:convohop/src/client.dart' show waitsOutRetryAfter;
-import 'package:convohop/src/failures.dart' show maxTimerDelayMs;
+import 'package:instantrelay/instantrelay.dart';
+import 'package:instantrelay/src/client.dart' show waitsOutRetryAfter;
+import 'package:instantrelay/src/failures.dart' show maxTimerDelayMs;
 import 'package:fake_async/fake_async.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:http/http.dart' as http;
@@ -14,7 +14,7 @@ import 'support/test_data.dart';
 
 typedef _Answer = http.Response Function(String requestId);
 
-Matcher _problem(String code, int status, {int? retryAfter}) => isA<ConvoHopProblem>()
+Matcher _problem(String code, int status, {int? retryAfter}) => isA<RelayProblem>()
     .having((problem) => problem.code, 'code', code)
     .having((problem) => problem.status, 'status', status)
     .having((problem) => problem.retryAfter, 'retryAfter', retryAfter);
@@ -47,7 +47,7 @@ final class _Realtime {
   final List<(String, int)> calls = <(String, int)>[];
   final List<Object> errors = <Object>[];
   final Map<String, List<_Answer>> _scripts = <String, List<_Answer>>{};
-  late final ConvoHopClient client;
+  late final RelayClient client;
   late final ConversationStream stream;
 
   int get now => async.elapsed.inMilliseconds;
@@ -215,7 +215,7 @@ void main() {
         ],
       });
       await pumpEventQueue();
-      expect(errors.single, isA<ConvoHopProblem>().having((problem) => problem.code, 'code', 'CURSOR_EXPIRED'));
+      expect(errors.single, isA<RelayProblem>().having((problem) => problem.code, 'code', 'CURSOR_EXPIRED'));
       client.close();
     });
   });
@@ -330,7 +330,7 @@ void main() {
         // A connector that reads the response reports its problem, which is
         // classified like any other.
         setup.connector.refusals.add(
-          ConvoHopProblem('RATE_LIMITED', requestId, 'rejected', 429, 'Slow down', retryAfter: 6),
+          RelayProblem('RATE_LIMITED', requestId, 'rejected', 429, 'Slow down', retryAfter: 6),
         );
         final since = setup.now;
         setup.serverClose(1006);
@@ -345,7 +345,7 @@ void main() {
         expect(setup.socket.sent.last['type'], 'subscribe');
 
         setup.connector.refusals.add(
-          ConvoHopProblem('QUOTA_EXCEEDED', requestId, 'rejected', 429, 'Quota reached', retryAfter: 60),
+          RelayProblem('QUOTA_EXCEEDED', requestId, 'rejected', 429, 'Quota reached', retryAfter: 60),
         );
         setup.serverClose(1006);
         async.elapse(const Duration(seconds: 2));

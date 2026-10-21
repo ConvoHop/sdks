@@ -2,7 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 import 'dart:isolate';
 
-import 'package:convohop_docgen_dart/convohop_docgen_dart.dart';
+import 'package:relay_docgen_dart/relay_docgen_dart.dart';
 import 'package:path/path.dart' as p;
 import 'package:test/test.dart';
 
@@ -593,7 +593,7 @@ final class Empty {
   });
 
   group('command', () {
-    final library = Isolate.resolvePackageUriSync(Uri.parse('package:convohop_docgen_dart/convohop_docgen_dart.dart'))!;
+    final library = Isolate.resolvePackageUriSync(Uri.parse('package:relay_docgen_dart/relay_docgen_dart.dart'))!;
     final script = p.join(p.dirname(p.dirname(library.toFilePath())), 'bin', 'extract.dart');
 
     test('print the surface as JSON', () async {

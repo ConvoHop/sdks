@@ -1,10 +1,10 @@
 # TypeScript server quickstart
 
-Call ConvoHop from your Node.js backend with `@convohop/server`: connect with a backend key, sign in your users, create a conversation, send and read messages as a member, and recover a send whose response was lost.
+Call Relay from your Node.js backend with `@instantrelay/server`: connect with a backend key, sign in your users, create a conversation, send and read messages as a member, and recover a send whose response was lost.
 
 ## Before you start
 
-You need Node.js 22 or later and `@convohop/server` ([install](../index.md#install)). For your project, you need the Communication API's base URL, the project ID, the project's incarnation and a backend key, which the [`management.issueBackendKey`](../../operations/management/issueBackendKey.md) operation delivers once.
+You need Node.js 22 or later and `@instantrelay/server` ([install](../index.md#install)). For your project, you need the Communication API's base URL, the project ID, the project's incarnation and a backend key, which the [`management.issueBackendKey`](../../operations/management/issueBackendKey.md) operation delivers once.
 
 Keep the backend key in your secret store. Its scopes limit what it can do. This quickstart needs `principalManage`, `sessionIssue`, `conversationManage`, `messageRead` and `messageWrite`.
 
@@ -13,7 +13,7 @@ Keep the backend key in your secret store. Its scopes limit what it can do. This
 `initialize()` looks up your project's route before the first call.
 
 ```ts snippet=docs/languages/typescript/examples/src/server.ts#connect
-import { ProjectServerClient } from "@convohop/server";
+import { ProjectServerClient } from "@instantrelay/server";
 
 export interface ServerConfig {
   baseUrl: string;
@@ -31,10 +31,10 @@ export async function connect(config: ServerConfig): Promise<ProjectServerClient
 
 ## Sign in a user
 
-ConvoHop doesn't authenticate your users. After your own login succeeds, map the user to a principal and issue a session for the device. Return the result to the user's app, which passes it to `@convohop/client`, as the [client quickstart](client.md) shows.
+Relay doesn't authenticate your users. After your own login succeeds, map the user to a principal and issue a session for the device. Return the result to the user's app, which passes it to `@instantrelay/client`, as the [client quickstart](client.md) shows.
 
 ```ts snippet=docs/languages/typescript/examples/src/server.ts#bootstrap
-import type { SessionBootstrap } from "@convohop/server";
+import type { SessionBootstrap } from "@instantrelay/server";
 
 // What your login endpoint returns to the signed-in user's app.
 export type UserBootstrap = SessionBootstrap & { baseUrl: string; projectId: string };
@@ -93,7 +93,7 @@ export async function sendAs(
 ```
 
 ```ts snippet=docs/languages/typescript/examples/src/server.ts#list-messages
-import type { MessagePage } from "@convohop/server";
+import type { MessagePage } from "@instantrelay/server";
 
 // Reads what one member can see, newest first.
 export async function latestMessages(
@@ -108,10 +108,10 @@ export async function latestMessages(
 
 ## Recover a lost response
 
-When a connection drops after a command is sent, the SDK can't tell whether the authority committed it, so it throws a `ConvoHopProblem` whose `outcome` is `unknown`. Sending again with a new request ID could post the message twice. Instead, `requests.retry` asks the authority about the original request. It returns the committed result, or resends the original command if the authority never received it.
+When a connection drops after a command is sent, the SDK can't tell whether the authority committed it, so it throws a `RelayProblem` whose `outcome` is `unknown`. Sending again with a new request ID could post the message twice. Instead, `requests.retry` asks the authority about the original request. It returns the committed result, or resends the original command if the authority never received it.
 
 ```ts snippet=docs/languages/typescript/examples/src/server.ts#recover
-import { ConvoHopProblem } from "@convohop/server";
+import { RelayProblem } from "@instantrelay/server";
 
 // A lost response leaves the outcome unknown: the message may or may not exist. Ask about the
 // same request ID instead of sending with a new one, which could post the message twice.
@@ -125,7 +125,7 @@ export async function sendOnce(
   try {
     return await sendAs(server, conversationId, authorId, text, requestId);
   } catch (error) {
-    if (!(error instanceof ConvoHopProblem) || error.outcome !== "unknown") throw error;
+    if (!(error instanceof RelayProblem) || error.outcome !== "unknown") throw error;
     // Resolves the request first, and resends the original only if the authority never saw it.
     const resolution = await server.requests.retry(requestId);
     if (resolution.state !== "committed") throw error;

@@ -1,6 +1,6 @@
 // Loaded with --import before each test file. React Native, its native modules, NetInfo and LiveKit's React Native SDK
 // only run in an app, so the samples' imports of them resolve to stand-ins: packages/react-native's, and netinfo.ts and
-// livekit.ts here. Everything else, including AsyncStorage's JavaScript and the ConvoHop SDKs, is the real package.
+// livekit.ts here. Everything else, including AsyncStorage's JavaScript and the Relay SDKs, is the real package.
 import { registerHooks } from "node:module";
 
 await import(new URL("../../../../../packages/react-native/test/support/register.mjs", import.meta.url).href);
@@ -18,6 +18,6 @@ registerHooks({
 
 const { native, reactNative } = await import("./native.ts");
 const { nativeAsyncStorage } = await import("./storage.ts");
-// AsyncStorage looks its native module up as it loads, and the SDK's UUIDs come from ConvoHopPlatform's random bytes.
+// AsyncStorage looks its native module up as it loads, and the SDK's UUIDs come from RelayPlatform's random bytes.
 reactNative.linkModule("RNAsyncStorage", nativeAsyncStorage);
 native.linkPlatform();

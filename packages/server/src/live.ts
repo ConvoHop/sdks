@@ -1,4 +1,4 @@
-import { ConvoHopProblem, parseCounter, parseId, type CommandOptions, type OperationPayload, type PageOptions } from "@convohop/core";
+import { RelayProblem, parseCounter, parseId, type CommandOptions, type OperationPayload, type PageOptions } from "@instantrelay/core";
 import type { ProjectServerClient } from "./project.js";
 import { mismatch, pageInput } from "./result.js";
 
@@ -81,7 +81,7 @@ export class ServerLiveOperation {
   }
   /**
    * Polls until the operation completes. An END completion must carry an enforced media cutoff. A failure throws a
-   * `ConvoHopProblem` with the live error code; the deadline throws `RESOLUTION_REQUIRED`, which is not a cutoff.
+   * `RelayProblem` with the live error code; the deadline throws `RESOLUTION_REQUIRED`, which is not a cutoff.
    */
   async completed(options: LiveWaitOptions = {}): Promise<LiveOperationCompletion> {
     const { deadline, signal } = waitOptions(options);
@@ -99,10 +99,10 @@ export class ServerLiveOperation {
       }
       if (operation.state === "FAILED") {
         if (!operation.failure) throw new TypeError("Failed live operation is missing its reason");
-        throw new ConvoHopProblem(operation.failure.code, requestId, "accepted", 409, operation.failure.message);
+        throw new RelayProblem(operation.failure.code, requestId, "accepted", 409, operation.failure.message);
       }
       if (operation.state !== "RUNNING") throw new TypeError("Unknown live operation state");
-      if (Date.now() >= deadline) throw new ConvoHopProblem("RESOLUTION_REQUIRED", requestId, "accepted", 409,
+      if (Date.now() >= deadline) throw new RelayProblem("RESOLUTION_REQUIRED", requestId, "accepted", 409,
         "Action remains unresolved; retain this operation ID and query it again. Elapsed time is not cutoff.");
       await pause(signal);
     }

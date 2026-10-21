@@ -9,14 +9,14 @@ export async function start(phone, launch) {
   linkModule("RNAsyncStorage", phone.storage.bind(launch));
   linkPlatform();
   const { createAsyncStorage } = await import("@react-native-async-storage/async-storage");
-  const { ConvoHopClient, Outbox } = await import("@convohop/client");
-  const { createPlatform } = await import("@convohop/react-native");
+  const { RelayClient, Outbox } = await import("@instantrelay/client");
+  const { createPlatform } = await import("@instantrelay/react-native");
   const platform = createPlatform({ netInfo: phone.network.bind(launch) });
   const recoveryStorage = createAsyncStorage("convohop"), outboxes = [];
   return {
     /** Signs the user in: a client and its persistent outbox, as the example's Session.start creates them. */
     open() {
-      const client = new ConvoHopClient({ ...phone.account, fetch: phone.authority.bind(launch),
+      const client = new RelayClient({ ...phone.account, fetch: phone.authority.bind(launch),
         asyncRecoveryStorage: recoveryStorage, platform });
       const errors = [], outbox = new Outbox(client, { persist: true, onError: error => { errors.push(error); } });
       outboxes.push(outbox);

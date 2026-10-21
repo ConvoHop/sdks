@@ -1,9 +1,9 @@
 // Calls to your own backend. The paths and bodies are this example's; see the server quickstart for issuing sessions.
-import type { SessionBootstrap, SessionMetadata } from "@convohop/client";
-import type { NativePushRegistration } from "@convohop/react-native";
+import type { SessionBootstrap, SessionMetadata } from "@instantrelay/client";
+import type { NativePushRegistration } from "@instantrelay/react-native";
 import { BACKEND_URL } from "./config";
 
-/** A ConvoHop session for the signed-in user, and where to use it. */
+/** A Relay session for the signed-in user, and where to use it. */
 export type UserBootstrap = SessionBootstrap & { baseUrl: string; projectId: string };
 export interface SignedIn {
   /** Your backend's own credential for this user. The example keeps it in memory only. */
@@ -58,7 +58,7 @@ export async function signIn(userName: string, password: string): Promise<Signed
   const result = fields(await call("POST", "/sign-in", { userName, password }), "sign-in");
   return { appToken: text(result, "appToken"), bootstrap: parseBootstrap(result.convohop) };
 }
-/** Asks the backend for a new ConvoHop session before the current one expires. */
+/** Asks the backend for a new Relay session before the current one expires. */
 export async function renewSession(appToken: string, current: Readonly<SessionMetadata>): Promise<UserBootstrap> {
   return parseBootstrap(await call("POST", "/convohop/session", { sessionId: current.sessionId }, appToken));
 }

@@ -15,7 +15,7 @@ abstract interface class RealtimeSocket {
   /// closes.
   ///
   /// When the server refuses the upgrade, a socket that can read the HTTP
-  /// response may add its problem as a `ConvoHopProblem` error. The SDK then
+  /// response may add its problem as a `RelayProblem` error. The SDK then
   /// retries, routes again or stops as it would for that problem over HTTP.
   /// After any other error, it reconnects with backoff once the stream is
   /// done.

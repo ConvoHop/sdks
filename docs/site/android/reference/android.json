@@ -1,63 +1,186 @@
 {
   "$schema": "../../../../spec/docs/reference.schema.json",
   "language": "android",
-  "package": "com.convohop:convohop-android",
+  "package": "dev.instantrelay:relay-android",
   "layer": "client",
   "page": "android.md",
   "symbols": [
     {
-      "name": "ConvoHopCall",
+      "name": "LiveKitMediaRoom",
       "kind": "class",
-      "ref": "com.convohop:convohop-android#ConvoHopCall",
-      "anchor": "convohopcall-class",
-      "signatures": ["public class ConvoHopCall"],
-      "docs": "A call's media, kept in step with the system call that rang for it.\n\n`answer` answers an incoming call, joins its live session and connects\nmedia through LiveKit; `join` connects a participation the app already\nholds, such as a call it started. Connecting never starts capture: turn on\nthe `microphone` and `camera` once the user granted their permissions.\nWhile the system mutes or holds the call they stay off, and come back\nwhen it resumes. When media drops, the call reconnects with fresh\ncredentials, backing off between attempts and waiting at least as long as\nthe authority asks. When it can't reconnect within the timeout, or the\nsystem ends the call, it leaves the live session. Errors it handles itself\nstill go to `onError`, for logging.\n\nPackage: `com.convohop.android`.",
+      "ref": "dev.instantrelay:relay-android#LiveKitMediaRoom",
+      "anchor": "livekitmediaroom-class",
+      "signatures": ["public class LiveKitMediaRoom : MediaRoom"],
+      "docs": "A `MediaRoom` that is one official LiveKit `Room`.\n\nPackage: `dev.instantrelay.android`.",
+      "members": [
+        {
+          "name": "room",
+          "kind": "property",
+          "ref": "dev.instantrelay:relay-android#LiveKitMediaRoom.room",
+          "anchor": "livekitmediaroomroom-property",
+          "signatures": ["public val room: Room"],
+          "docs": "LiveKit's room, for rendering tracks and observing participants. Don't\nconnect, disconnect or release it yourself: its connection does."
+        },
+        {
+          "name": "connect",
+          "kind": "method",
+          "ref": "dev.instantrelay:relay-android#LiveKitMediaRoom.connect",
+          "anchor": "livekitmediaroomconnect-method",
+          "signatures": ["public override suspend fun connect(url: String, token: String): String"],
+          "docs": "Joins with one single-use token and returns the local participant SID.\nMust not capture or publish anything, and must not retry with the same\ntoken. Never log or store the token."
+        },
+        {
+          "name": "setMicrophoneEnabled",
+          "kind": "method",
+          "ref": "dev.instantrelay:relay-android#LiveKitMediaRoom.setMicrophoneEnabled",
+          "anchor": "livekitmediaroomsetmicrophoneenabled-method",
+          "signatures": ["public override suspend fun setMicrophoneEnabled(enabled: Boolean)"],
+          "docs": ""
+        },
+        {
+          "name": "setCameraEnabled",
+          "kind": "method",
+          "ref": "dev.instantrelay:relay-android#LiveKitMediaRoom.setCameraEnabled",
+          "anchor": "livekitmediaroomsetcameraenabled-method",
+          "signatures": ["public override suspend fun setCameraEnabled(enabled: Boolean)"],
+          "docs": ""
+        },
+        {
+          "name": "disconnect",
+          "kind": "method",
+          "ref": "dev.instantrelay:relay-android#LiveKitMediaRoom.disconnect",
+          "anchor": "livekitmediaroomdisconnect-method",
+          "signatures": ["public override suspend fun disconnect()"],
+          "docs": "Leaves and releases everything the room owns. Idempotent and safe after the room disconnected itself."
+        }
+      ]
+    },
+    {
+      "name": "LiveKitMediaRooms",
+      "kind": "class",
+      "ref": "dev.instantrelay:relay-android#LiveKitMediaRooms",
+      "anchor": "livekitmediarooms-class",
+      "signatures": ["public class LiveKitMediaRooms : MediaRoomFactory"],
+      "docs": "Creates official LiveKit rooms for `dev.instantrelay.android.core.MediaOptions`.\nEvery connection attempt gets a new room, released when the connection\ncloses. Rooms join without capturing: enable the microphone or camera on\nthe `dev.instantrelay.android.core.MediaConnection`.\n\nPackage: `dev.instantrelay.android`.",
+      "members": [
+        {
+          "name": "constructor",
+          "kind": "constructor",
+          "ref": "dev.instantrelay:relay-android#LiveKitMediaRooms.constructor",
+          "anchor": "livekitmediarooms-constructor",
+          "signatures": [
+            "public constructor(\n    context: Context,\n    roomOptions: RoomOptions = RoomOptions(),\n    overrides: LiveKitOverrides = LiveKitOverrides(),\n)"
+          ],
+          "docs": ""
+        },
+        {
+          "name": "create",
+          "kind": "method",
+          "ref": "dev.instantrelay:relay-android#LiveKitMediaRooms.create",
+          "anchor": "livekitmediaroomscreate-method",
+          "signatures": ["public override fun create(events: MediaRoomEvents): MediaRoom"],
+          "docs": ""
+        },
+        {
+          "name": "forTelecom",
+          "kind": "method",
+          "ref": "dev.instantrelay:relay-android#LiveKitMediaRooms.forTelecom:static",
+          "anchor": "livekitmediaroomsfortelecom-static-method",
+          "signatures": [
+            "public fun forTelecom(context: Context, roomOptions: RoomOptions = RoomOptions()): LiveKitMediaRooms"
+          ],
+          "docs": "Rooms for a call that Android's Telecom runs, such as an answered\nring whose `CallInfo.telecom` is true. Telecom owns audio focus, the\naudio mode and the route, so LiveKit leaves them alone.",
+          "static": true
+        }
+      ]
+    },
+    {
+      "name": "NetworkMonitor",
+      "kind": "class",
+      "ref": "dev.instantrelay:relay-android#NetworkMonitor",
+      "anchor": "networkmonitor-class",
+      "signatures": ["public class NetworkMonitor : AutoCloseable"],
+      "docs": "Whether the device has a default network with internet access, for\n`RelayStore`'s `online`. It\ndoes not wait for Android to validate the network: the SDK's own requests\nshow whether the authority is reachable. Requires `ACCESS_NETWORK_STATE`,\nwhich the library declares. `close` it with the store.\n\nPackage: `dev.instantrelay.android`.",
+      "members": [
+        {
+          "name": "constructor",
+          "kind": "constructor",
+          "ref": "dev.instantrelay:relay-android#NetworkMonitor.constructor",
+          "anchor": "networkmonitor-constructor",
+          "signatures": ["public constructor(context: Context)"],
+          "docs": ""
+        },
+        {
+          "name": "online",
+          "kind": "property",
+          "ref": "dev.instantrelay:relay-android#NetworkMonitor.online",
+          "anchor": "networkmonitoronline-property",
+          "signatures": ["public val online: StateFlow<Boolean>"],
+          "docs": "True while the default network has internet access."
+        },
+        {
+          "name": "close",
+          "kind": "method",
+          "ref": "dev.instantrelay:relay-android#NetworkMonitor.close",
+          "anchor": "networkmonitorclose-method",
+          "signatures": ["public override fun close()"],
+          "docs": "Stops listening; `online` keeps its last value."
+        }
+      ]
+    },
+    {
+      "name": "RelayCall",
+      "kind": "class",
+      "ref": "dev.instantrelay:relay-android#RelayCall",
+      "anchor": "relaycall-class",
+      "signatures": ["public class RelayCall"],
+      "docs": "A call's media, kept in step with the system call that rang for it.\n\n`answer` answers an incoming call, joins its live session and connects\nmedia through LiveKit; `join` connects a participation the app already\nholds, such as a call it started. Connecting never starts capture: turn on\nthe `microphone` and `camera` once the user granted their permissions.\nWhile the system mutes or holds the call they stay off, and come back\nwhen it resumes. When media drops, the call reconnects with fresh\ncredentials, backing off between attempts and waiting at least as long as\nthe authority asks. When it can't reconnect within the timeout, or the\nsystem ends the call, it leaves the live session. Errors it handles itself\nstill go to `onError`, for logging.\n\nPackage: `dev.instantrelay.android`.",
       "members": [
         {
           "name": "phase",
           "kind": "property",
-          "ref": "com.convohop:convohop-android#ConvoHopCall.phase",
-          "anchor": "convohopcallphase-property",
+          "ref": "dev.instantrelay:relay-android#RelayCall.phase",
+          "anchor": "relaycallphase-property",
           "signatures": ["public val phase: StateFlow<CallPhase>"],
           "docs": "Where the call stands."
         },
         {
           "name": "alertId",
           "kind": "property",
-          "ref": "com.convohop:convohop-android#ConvoHopCall.alertId",
-          "anchor": "convohopcallalertid-property",
+          "ref": "dev.instantrelay:relay-android#RelayCall.alertId",
+          "anchor": "relaycallalertid-property",
           "signatures": ["public val alertId: String?"],
           "docs": "The ring this call answered, or null for a call joined in the app."
         },
         {
           "name": "connection",
           "kind": "property",
-          "ref": "com.convohop:convohop-android#ConvoHopCall.connection",
-          "anchor": "convohopcallconnection-property",
+          "ref": "dev.instantrelay:relay-android#RelayCall.connection",
+          "anchor": "relaycallconnection-property",
           "signatures": ["public val connection: MediaConnection?"],
           "docs": "The media connection, for rendering: its `room` is a `LiveKitMediaRoom`\nunless you passed other rooms. A reconnect replaces it."
         },
         {
           "name": "microphone",
           "kind": "method",
-          "ref": "com.convohop:convohop-android#ConvoHopCall.microphone",
-          "anchor": "convohopcallmicrophone-method",
+          "ref": "dev.instantrelay:relay-android#RelayCall.microphone",
+          "anchor": "relaycallmicrophone-method",
           "signatures": ["public suspend fun microphone(enabled: Boolean)"],
           "docs": "Turns the microphone on or off. Needs `RECORD_AUDIO` and a participation\nallowed to speak. It stays off while the system mutes or holds the call."
         },
         {
           "name": "camera",
           "kind": "method",
-          "ref": "com.convohop:convohop-android#ConvoHopCall.camera",
-          "anchor": "convohopcallcamera-method",
+          "ref": "dev.instantrelay:relay-android#RelayCall.camera",
+          "anchor": "relaycallcamera-method",
           "signatures": ["public suspend fun camera(enabled: Boolean)"],
           "docs": "Turns the camera on or off. Needs `CAMERA` and a participation allowed to publish video. It stays off on hold."
         },
         {
           "name": "hangUp",
           "kind": "method",
-          "ref": "com.convohop:convohop-android#ConvoHopCall.hangUp",
-          "anchor": "convohopcallhangup-method",
+          "ref": "dev.instantrelay:relay-android#RelayCall.hangUp",
+          "anchor": "relaycallhangup-method",
           "signatures": ["public suspend fun hangUp()"],
           "docs": "Leaves the live session and ends the system call. Repeated calls do nothing.",
           "operations": [
@@ -70,8 +193,8 @@
         {
           "name": "DEFAULT_RECONNECT_TIMEOUT_MILLIS",
           "kind": "property",
-          "ref": "com.convohop:convohop-android#ConvoHopCall.DEFAULT_RECONNECT_TIMEOUT_MILLIS:static",
-          "anchor": "convohopcalldefault_reconnect_timeout_millis-static-property",
+          "ref": "dev.instantrelay:relay-android#RelayCall.DEFAULT_RECONNECT_TIMEOUT_MILLIS:static",
+          "anchor": "relaycalldefault_reconnect_timeout_millis-static-property",
           "signatures": ["public const val DEFAULT_RECONNECT_TIMEOUT_MILLIS: Long = 30_000"],
           "docs": "How long a dropped call keeps trying to reconnect before it ends: 30 seconds.",
           "static": true
@@ -79,12 +202,12 @@
         {
           "name": "answer",
           "kind": "method",
-          "ref": "com.convohop:convohop-android#ConvoHopCall.answer:static",
-          "anchor": "convohopcallanswer-static-method",
+          "ref": "dev.instantrelay:relay-android#RelayCall.answer:static",
+          "anchor": "relaycallanswer-static-method",
           "signatures": [
-            "public suspend fun answer(\n    context: Context,\n    client: ConvoHopClient,\n    alertId: String,\n    rooms: MediaRoomFactory? = null,\n    reconnectTimeoutMillis: Long = DEFAULT_RECONNECT_TIMEOUT_MILLIS,\n    onError: (Throwable) -> Unit = {},\n): ConvoHopCall"
+            "public suspend fun answer(\n    context: Context,\n    client: RelayClient,\n    alertId: String,\n    rooms: MediaRoomFactory? = null,\n    reconnectTimeoutMillis: Long = DEFAULT_RECONNECT_TIMEOUT_MILLIS,\n    onError: (Throwable) -> Unit = {},\n): RelayCall"
           ],
-          "docs": "Answers `alertId` if it still rings, joins its live session as\n`client`'s user and connects media. Call it from\n`ConvoHopNotificationListener.onCallAnswered` or from your own answer\nbutton. `rooms` defaults to LiveKit, which leaves audio routing to\nTelecom when Telecom runs the call. Call it once per call. If it fails,\nthe system call ends.",
+          "docs": "Answers `alertId` if it still rings, joins its live session as\n`client`'s user and connects media. Call it from\n`RelayNotificationListener.onCallAnswered` or from your own answer\nbutton. `rooms` defaults to LiveKit, which leaves audio routing to\nTelecom when Telecom runs the call. Call it once per call. If it fails,\nthe system call ends.",
           "static": true,
           "operations": [
             {
@@ -104,10 +227,10 @@
         {
           "name": "join",
           "kind": "method",
-          "ref": "com.convohop:convohop-android#ConvoHopCall.join:static",
-          "anchor": "convohopcalljoin-static-method",
+          "ref": "dev.instantrelay:relay-android#RelayCall.join:static",
+          "anchor": "relaycalljoin-static-method",
           "signatures": [
-            "public suspend fun join(\n    context: Context,\n    participation: LiveParticipationHandle,\n    rooms: MediaRoomFactory = LiveKitMediaRooms(context),\n    reconnectTimeoutMillis: Long = DEFAULT_RECONNECT_TIMEOUT_MILLIS,\n    onError: (Throwable) -> Unit = {},\n): ConvoHopCall"
+            "public suspend fun join(\n    context: Context,\n    participation: LiveParticipationHandle,\n    rooms: MediaRoomFactory = LiveKitMediaRooms(context),\n    reconnectTimeoutMillis: Long = DEFAULT_RECONNECT_TIMEOUT_MILLIS,\n    onError: (Throwable) -> Unit = {},\n): RelayCall"
           ],
           "docs": "Connects `participation`'s media for a call the app joined or started\nitself, with no system call. The call owns `participation` from then\non: if media can't connect, it leaves and throws.",
           "static": true,
@@ -121,28 +244,28 @@
       ]
     },
     {
-      "name": "ConvoHopMessageContent",
+      "name": "RelayMessageContent",
       "kind": "class",
-      "ref": "com.convohop:convohop-android#ConvoHopMessageContent",
-      "anchor": "convohopmessagecontent-class",
-      "signatures": ["public class ConvoHopMessageContent : MessageContentProvider"],
-      "docs": "Fills in message notifications when the push carries no text, which is\nthe default: previews are off unless the project opts in. It reads the\nmessage with the signed-in user's own session, so the text never passes\nthrough the push service. Set it as\n`ConvoHopNotificationOptions.messageContent`.\n\n`client` returns the signed-in user's client, or null when nobody is\nsigned in. Pushes for another project or user, deleted messages and\nfailures within `timeoutMillis` show the generic text instead.\n\nPackage: `com.convohop.android`.",
+      "ref": "dev.instantrelay:relay-android#RelayMessageContent",
+      "anchor": "relaymessagecontent-class",
+      "signatures": ["public class RelayMessageContent : MessageContentProvider"],
+      "docs": "Fills in message notifications when the push carries no text, which is\nthe default: previews are off unless the project opts in. It reads the\nmessage with the signed-in user's own session, so the text never passes\nthrough the push service. Set it as\n`RelayNotificationOptions.messageContent`.\n\n`client` returns the signed-in user's client, or null when nobody is\nsigned in. Pushes for another project or user, deleted messages and\nfailures within `timeoutMillis` show the generic text instead.\n\nPackage: `dev.instantrelay.android`.",
       "members": [
         {
           "name": "constructor",
           "kind": "constructor",
-          "ref": "com.convohop:convohop-android#ConvoHopMessageContent.constructor",
-          "anchor": "convohopmessagecontent-constructor",
+          "ref": "dev.instantrelay:relay-android#RelayMessageContent.constructor",
+          "anchor": "relaymessagecontent-constructor",
           "signatures": [
-            "public constructor(timeoutMillis: Long = DEFAULT_TIMEOUT_MILLIS, client: () -> ConvoHopClient?)"
+            "public constructor(timeoutMillis: Long = DEFAULT_TIMEOUT_MILLIS, client: () -> RelayClient?)"
           ],
           "docs": ""
         },
         {
           "name": "content",
           "kind": "method",
-          "ref": "com.convohop:convohop-android#ConvoHopMessageContent.content",
-          "anchor": "convohopmessagecontentcontent-method",
+          "ref": "dev.instantrelay:relay-android#RelayMessageContent.content",
+          "anchor": "relaymessagecontentcontent-method",
           "signatures": [
             "public override fun content(message: PushNotification.Message): MessageContent?"
           ],
@@ -157,8 +280,8 @@
         {
           "name": "DEFAULT_TIMEOUT_MILLIS",
           "kind": "property",
-          "ref": "com.convohop:convohop-android#ConvoHopMessageContent.DEFAULT_TIMEOUT_MILLIS:static",
-          "anchor": "convohopmessagecontentdefault_timeout_millis-static-property",
+          "ref": "dev.instantrelay:relay-android#RelayMessageContent.DEFAULT_TIMEOUT_MILLIS:static",
+          "anchor": "relaymessagecontentdefault_timeout_millis-static-property",
           "signatures": ["public const val DEFAULT_TIMEOUT_MILLIS: Long = 5_000"],
           "docs": "",
           "static": true
@@ -166,151 +289,28 @@
       ]
     },
     {
-      "name": "LiveKitMediaRoom",
-      "kind": "class",
-      "ref": "com.convohop:convohop-android#LiveKitMediaRoom",
-      "anchor": "livekitmediaroom-class",
-      "signatures": ["public class LiveKitMediaRoom : MediaRoom"],
-      "docs": "A `MediaRoom` that is one official LiveKit `Room`.\n\nPackage: `com.convohop.android`.",
-      "members": [
-        {
-          "name": "room",
-          "kind": "property",
-          "ref": "com.convohop:convohop-android#LiveKitMediaRoom.room",
-          "anchor": "livekitmediaroomroom-property",
-          "signatures": ["public val room: Room"],
-          "docs": "LiveKit's room, for rendering tracks and observing participants. Don't\nconnect, disconnect or release it yourself: its connection does."
-        },
-        {
-          "name": "connect",
-          "kind": "method",
-          "ref": "com.convohop:convohop-android#LiveKitMediaRoom.connect",
-          "anchor": "livekitmediaroomconnect-method",
-          "signatures": ["public override suspend fun connect(url: String, token: String): String"],
-          "docs": "Joins with one single-use token and returns the local participant SID.\nMust not capture or publish anything, and must not retry with the same\ntoken. Never log or store the token."
-        },
-        {
-          "name": "setMicrophoneEnabled",
-          "kind": "method",
-          "ref": "com.convohop:convohop-android#LiveKitMediaRoom.setMicrophoneEnabled",
-          "anchor": "livekitmediaroomsetmicrophoneenabled-method",
-          "signatures": ["public override suspend fun setMicrophoneEnabled(enabled: Boolean)"],
-          "docs": ""
-        },
-        {
-          "name": "setCameraEnabled",
-          "kind": "method",
-          "ref": "com.convohop:convohop-android#LiveKitMediaRoom.setCameraEnabled",
-          "anchor": "livekitmediaroomsetcameraenabled-method",
-          "signatures": ["public override suspend fun setCameraEnabled(enabled: Boolean)"],
-          "docs": ""
-        },
-        {
-          "name": "disconnect",
-          "kind": "method",
-          "ref": "com.convohop:convohop-android#LiveKitMediaRoom.disconnect",
-          "anchor": "livekitmediaroomdisconnect-method",
-          "signatures": ["public override suspend fun disconnect()"],
-          "docs": "Leaves and releases everything the room owns. Idempotent and safe after the room disconnected itself."
-        }
-      ]
-    },
-    {
-      "name": "LiveKitMediaRooms",
-      "kind": "class",
-      "ref": "com.convohop:convohop-android#LiveKitMediaRooms",
-      "anchor": "livekitmediarooms-class",
-      "signatures": ["public class LiveKitMediaRooms : MediaRoomFactory"],
-      "docs": "Creates official LiveKit rooms for `com.convohop.android.core.MediaOptions`.\nEvery connection attempt gets a new room, released when the connection\ncloses. Rooms join without capturing: enable the microphone or camera on\nthe `com.convohop.android.core.MediaConnection`.\n\nPackage: `com.convohop.android`.",
-      "members": [
-        {
-          "name": "constructor",
-          "kind": "constructor",
-          "ref": "com.convohop:convohop-android#LiveKitMediaRooms.constructor",
-          "anchor": "livekitmediarooms-constructor",
-          "signatures": [
-            "public constructor(\n    context: Context,\n    roomOptions: RoomOptions = RoomOptions(),\n    overrides: LiveKitOverrides = LiveKitOverrides(),\n)"
-          ],
-          "docs": ""
-        },
-        {
-          "name": "create",
-          "kind": "method",
-          "ref": "com.convohop:convohop-android#LiveKitMediaRooms.create",
-          "anchor": "livekitmediaroomscreate-method",
-          "signatures": ["public override fun create(events: MediaRoomEvents): MediaRoom"],
-          "docs": ""
-        },
-        {
-          "name": "forTelecom",
-          "kind": "method",
-          "ref": "com.convohop:convohop-android#LiveKitMediaRooms.forTelecom:static",
-          "anchor": "livekitmediaroomsfortelecom-static-method",
-          "signatures": [
-            "public fun forTelecom(context: Context, roomOptions: RoomOptions = RoomOptions()): LiveKitMediaRooms"
-          ],
-          "docs": "Rooms for a call that Android's Telecom runs, such as an answered\nring whose `CallInfo.telecom` is true. Telecom owns audio focus, the\naudio mode and the route, so LiveKit leaves them alone.",
-          "static": true
-        }
-      ]
-    },
-    {
-      "name": "NetworkMonitor",
-      "kind": "class",
-      "ref": "com.convohop:convohop-android#NetworkMonitor",
-      "anchor": "networkmonitor-class",
-      "signatures": ["public class NetworkMonitor : AutoCloseable"],
-      "docs": "Whether the device has a default network with internet access, for\n`ConvoHopStore`'s `online`. It\ndoes not wait for Android to validate the network: the SDK's own requests\nshow whether the authority is reachable. Requires `ACCESS_NETWORK_STATE`,\nwhich the library declares. `close` it with the store.\n\nPackage: `com.convohop.android`.",
-      "members": [
-        {
-          "name": "constructor",
-          "kind": "constructor",
-          "ref": "com.convohop:convohop-android#NetworkMonitor.constructor",
-          "anchor": "networkmonitor-constructor",
-          "signatures": ["public constructor(context: Context)"],
-          "docs": ""
-        },
-        {
-          "name": "online",
-          "kind": "property",
-          "ref": "com.convohop:convohop-android#NetworkMonitor.online",
-          "anchor": "networkmonitoronline-property",
-          "signatures": ["public val online: StateFlow<Boolean>"],
-          "docs": "True while the default network has internet access."
-        },
-        {
-          "name": "close",
-          "kind": "method",
-          "ref": "com.convohop:convohop-android#NetworkMonitor.close",
-          "anchor": "networkmonitorclose-method",
-          "signatures": ["public override fun close()"],
-          "docs": "Stops listening; `online` keeps its last value."
-        }
-      ]
-    },
-    {
       "name": "SharedPreferencesRecoveryStorage",
       "kind": "class",
-      "ref": "com.convohop:convohop-android#SharedPreferencesRecoveryStorage",
+      "ref": "dev.instantrelay:relay-android#SharedPreferencesRecoveryStorage",
       "anchor": "sharedpreferencesrecoverystorage-class",
       "signatures": ["public class SharedPreferencesRecoveryStorage : RecoveryStorage"],
-      "docs": "`RecoveryStorage` in a private `SharedPreferences` file. It holds request\nidentities, inputs and outcomes, never tokens. Use one file per project and\nprincipal, and `clear` it when the user signs out.\n\nPackage: `com.convohop.android`.",
+      "docs": "`RecoveryStorage` in a private `SharedPreferences` file. It holds request\nidentities, inputs and outcomes, never tokens. Use one file per project and\nprincipal, and `clear` it when the user signs out.\n\nPackage: `dev.instantrelay.android`.",
       "members": [
         {
           "name": "constructor",
           "kind": "constructor",
-          "ref": "com.convohop:convohop-android#SharedPreferencesRecoveryStorage.constructor",
+          "ref": "dev.instantrelay:relay-android#SharedPreferencesRecoveryStorage.constructor",
           "anchor": "sharedpreferencesrecoverystorage-constructor",
           "signatures": [
             "public constructor(context: Context, name: String)",
-            "public constructor(context: Context, client: ConvoHopClient)"
+            "public constructor(context: Context, client: RelayClient)"
           ],
           "docs": "The file for `client`'s project and principal."
         },
         {
           "name": "getItem",
           "kind": "method",
-          "ref": "com.convohop:convohop-android#SharedPreferencesRecoveryStorage.getItem",
+          "ref": "dev.instantrelay:relay-android#SharedPreferencesRecoveryStorage.getItem",
           "anchor": "sharedpreferencesrecoverystoragegetitem-method",
           "signatures": ["public override suspend fun getItem(key: String): String?"],
           "docs": ""
@@ -318,7 +318,7 @@
         {
           "name": "setItem",
           "kind": "method",
-          "ref": "com.convohop:convohop-android#SharedPreferencesRecoveryStorage.setItem",
+          "ref": "dev.instantrelay:relay-android#SharedPreferencesRecoveryStorage.setItem",
           "anchor": "sharedpreferencesrecoverystoragesetitem-method",
           "signatures": ["public override suspend fun setItem(key: String, value: String)"],
           "docs": ""
@@ -326,7 +326,7 @@
         {
           "name": "removeItem",
           "kind": "method",
-          "ref": "com.convohop:convohop-android#SharedPreferencesRecoveryStorage.removeItem",
+          "ref": "dev.instantrelay:relay-android#SharedPreferencesRecoveryStorage.removeItem",
           "anchor": "sharedpreferencesrecoverystorageremoveitem-method",
           "signatures": ["public override suspend fun removeItem(key: String)"],
           "docs": ""
@@ -334,7 +334,7 @@
         {
           "name": "clear",
           "kind": "method",
-          "ref": "com.convohop:convohop-android#SharedPreferencesRecoveryStorage.clear",
+          "ref": "dev.instantrelay:relay-android#SharedPreferencesRecoveryStorage.clear",
           "anchor": "sharedpreferencesrecoverystorageclear-method",
           "signatures": ["public suspend fun clear()"],
           "docs": "Deletes every record."
@@ -344,26 +344,26 @@
     {
       "name": "SqliteLocalStore",
       "kind": "class",
-      "ref": "com.convohop:convohop-android#SqliteLocalStore",
+      "ref": "dev.instantrelay:relay-android#SqliteLocalStore",
       "anchor": "sqlitelocalstore-class",
       "signatures": ["public class SqliteLocalStore : LocalStore, AutoCloseable"],
-      "docs": "A `LocalStore` in a private SQLite database, so the outbox and cached\nmessages survive restarts. It never holds credentials. Use one database\nper project and principal; `ConvoHopStore.signOut`\nclears it.\n\nPackage: `com.convohop.android`.",
+      "docs": "A `LocalStore` in a private SQLite database, so the outbox and cached\nmessages survive restarts. It never holds credentials. Use one database\nper project and principal; `RelayStore.signOut`\nclears it.\n\nPackage: `dev.instantrelay.android`.",
       "members": [
         {
           "name": "constructor",
           "kind": "constructor",
-          "ref": "com.convohop:convohop-android#SqliteLocalStore.constructor",
+          "ref": "dev.instantrelay:relay-android#SqliteLocalStore.constructor",
           "anchor": "sqlitelocalstore-constructor",
           "signatures": [
             "public constructor(context: Context, name: String)",
-            "public constructor(context: Context, client: ConvoHopClient)"
+            "public constructor(context: Context, client: RelayClient)"
           ],
           "docs": "The database for `client`'s project and principal."
         },
         {
           "name": "messages",
           "kind": "method",
-          "ref": "com.convohop:convohop-android#SqliteLocalStore.messages",
+          "ref": "dev.instantrelay:relay-android#SqliteLocalStore.messages",
           "anchor": "sqlitelocalstoremessages-method",
           "signatures": [
             "public override suspend fun messages(conversationId: String): List<Message>"
@@ -373,7 +373,7 @@
         {
           "name": "putMessages",
           "kind": "method",
-          "ref": "com.convohop:convohop-android#SqliteLocalStore.putMessages",
+          "ref": "dev.instantrelay:relay-android#SqliteLocalStore.putMessages",
           "anchor": "sqlitelocalstoreputmessages-method",
           "signatures": [
             "public override suspend fun putMessages(conversationId: String, messages: List<Message>)"
@@ -383,7 +383,7 @@
         {
           "name": "removeMessages",
           "kind": "method",
-          "ref": "com.convohop:convohop-android#SqliteLocalStore.removeMessages",
+          "ref": "dev.instantrelay:relay-android#SqliteLocalStore.removeMessages",
           "anchor": "sqlitelocalstoreremovemessages-method",
           "signatures": ["public override suspend fun removeMessages(conversationId: String)"],
           "docs": "Deletes the stored messages of `conversationId`, when the cached history no longer joins the current one."
@@ -391,7 +391,7 @@
         {
           "name": "pending",
           "kind": "method",
-          "ref": "com.convohop:convohop-android#SqliteLocalStore.pending",
+          "ref": "dev.instantrelay:relay-android#SqliteLocalStore.pending",
           "anchor": "sqlitelocalstorepending-method",
           "signatures": ["public override suspend fun pending(): List<PendingMessage>"],
           "docs": "Every outbox entry, in the order they were first stored."
@@ -399,7 +399,7 @@
         {
           "name": "putPending",
           "kind": "method",
-          "ref": "com.convohop:convohop-android#SqliteLocalStore.putPending",
+          "ref": "dev.instantrelay:relay-android#SqliteLocalStore.putPending",
           "anchor": "sqlitelocalstoreputpending-method",
           "signatures": ["public override suspend fun putPending(message: PendingMessage)"],
           "docs": "Inserts or replaces `message` by request ID, keeping the position of an existing entry."
@@ -407,7 +407,7 @@
         {
           "name": "removePending",
           "kind": "method",
-          "ref": "com.convohop:convohop-android#SqliteLocalStore.removePending",
+          "ref": "dev.instantrelay:relay-android#SqliteLocalStore.removePending",
           "anchor": "sqlitelocalstoreremovepending-method",
           "signatures": ["public override suspend fun removePending(requestId: String)"],
           "docs": ""
@@ -415,7 +415,7 @@
         {
           "name": "clear",
           "kind": "method",
-          "ref": "com.convohop:convohop-android#SqliteLocalStore.clear",
+          "ref": "dev.instantrelay:relay-android#SqliteLocalStore.clear",
           "anchor": "sqlitelocalstoreclear-method",
           "signatures": ["public override suspend fun clear()"],
           "docs": "Deletes everything."
@@ -423,7 +423,7 @@
         {
           "name": "close",
           "kind": "method",
-          "ref": "com.convohop:convohop-android#SqliteLocalStore.close",
+          "ref": "dev.instantrelay:relay-android#SqliteLocalStore.close",
           "anchor": "sqlitelocalstoreclose-method",
           "signatures": ["public override fun close()"],
           "docs": "Closes the database; the next call reopens it."
@@ -433,15 +433,15 @@
     {
       "name": "CallPhase",
       "kind": "enum",
-      "ref": "com.convohop:convohop-android#CallPhase",
+      "ref": "dev.instantrelay:relay-android#CallPhase",
       "anchor": "callphase-enum",
       "signatures": ["public enum class CallPhase"],
-      "docs": "Where a `ConvoHopCall` stands.\n\nPackage: `com.convohop.android`.",
+      "docs": "Where a `RelayCall` stands.\n\nPackage: `dev.instantrelay.android`.",
       "members": [
         {
           "name": "CONNECTING",
           "kind": "case",
-          "ref": "com.convohop:convohop-android#CallPhase.CONNECTING",
+          "ref": "dev.instantrelay:relay-android#CallPhase.CONNECTING",
           "anchor": "callphaseconnecting-case",
           "signatures": ["CONNECTING"],
           "docs": ""
@@ -449,7 +449,7 @@
         {
           "name": "CONNECTED",
           "kind": "case",
-          "ref": "com.convohop:convohop-android#CallPhase.CONNECTED",
+          "ref": "dev.instantrelay:relay-android#CallPhase.CONNECTED",
           "anchor": "callphaseconnected-case",
           "signatures": ["CONNECTED"],
           "docs": ""
@@ -457,7 +457,7 @@
         {
           "name": "RECONNECTING",
           "kind": "case",
-          "ref": "com.convohop:convohop-android#CallPhase.RECONNECTING",
+          "ref": "dev.instantrelay:relay-android#CallPhase.RECONNECTING",
           "anchor": "callphasereconnecting-case",
           "signatures": ["RECONNECTING"],
           "docs": "Media dropped; the call is reconnecting with fresh credentials."
@@ -465,7 +465,7 @@
         {
           "name": "ENDED",
           "kind": "case",
-          "ref": "com.convohop:convohop-android#CallPhase.ENDED",
+          "ref": "dev.instantrelay:relay-android#CallPhase.ENDED",
           "anchor": "callphaseended-case",
           "signatures": ["ENDED"],
           "docs": "Hung up, ended by the system, or media could not reconnect. The live session was left."

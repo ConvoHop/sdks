@@ -2,8 +2,8 @@
 import { Platform } from "react-native";
 import { createAsyncStorage } from "@react-native-async-storage/async-storage";
 import NetInfo from "@react-native-community/netinfo";
-import { ConvoHopClient, Outbox, type ProjectCapabilities } from "@convohop/client";
-import { createPlatform, registerForPush, setPushRecipient, unregisterFromPush, watchRingingCalls } from "@convohop/react-native";
+import { RelayClient, Outbox, type ProjectCapabilities } from "@instantrelay/client";
+import { createPlatform, registerForPush, setPushRecipient, unregisterFromPush, watchRingingCalls } from "@instantrelay/react-native";
 import { registerPush, renewSession, signOut, unregisterPush, type SignedIn, type UserBootstrap } from "./backend";
 import { CallController } from "./calls";
 
@@ -12,7 +12,7 @@ export const platform = createPlatform({ netInfo: NetInfo });
 /** Unconfirmed sends, replay cursors and the outbox. Never tokens. */
 const recoveryStorage = createAsyncStorage("convohop");
 /** The example's own records: whose recovery state `recoveryStorage` holds. */
-const appStorage = createAsyncStorage("convohop-example");
+const appStorage = createAsyncStorage("relay-example");
 const OWNER = "recoveryOwner";
 
 /**
@@ -29,7 +29,7 @@ async function claimRecoveryStorage({ projectId, session }: UserBootstrap): Prom
 export type ProjectFeatures = ProjectCapabilities["features"];
 
 export class Session {
-  readonly client: ConvoHopClient;
+  readonly client: RelayClient;
   readonly outbox: Outbox;
   readonly calls: CallController;
   readonly #appToken: string;
@@ -51,7 +51,7 @@ export class Session {
   static async start({ appToken, bootstrap }: SignedIn, onError: (error: unknown) => void): Promise<Session> {
     try {
       await claimRecoveryStorage(bootstrap);
-      const client = new ConvoHopClient({
+      const client = new RelayClient({
         baseUrl: bootstrap.baseUrl,
         projectId: bootstrap.projectId,
         sessionToken: bootstrap.sessionToken,
@@ -69,7 +69,7 @@ export class Session {
     }
   }
 
-  private constructor(appToken: string, client: ConvoHopClient, onError: (error: unknown) => void) {
+  private constructor(appToken: string, client: RelayClient, onError: (error: unknown) => void) {
     this.#appToken = appToken;
     this.#onError = onError;
     this.client = client;

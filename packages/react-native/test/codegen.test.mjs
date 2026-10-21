@@ -42,10 +42,10 @@ function selectors(text) {
 }
 
 test("Codegen builds the package's TurboModules from src/specs", () => {
-  assert.deepEqual(codegenConfig, { name: "RNConvoHopSpec", type: "modules", jsSrcsDir: "src/specs",
-    android: { javaPackageName: "com.convohop.reactnative" },
-    ios: { modulesProvider: { ConvoHopCalls: "ConvoHopCallsModule", ConvoHopPlatform: "ConvoHopPlatformModule",
-      ConvoHopPush: "ConvoHopPushModule" } } });
+  assert.deepEqual(codegenConfig, { name: "RNRelaySpec", type: "modules", jsSrcsDir: "src/specs",
+    android: { javaPackageName: "dev.instantrelay.reactnative" },
+    ios: { modulesProvider: { RelayCalls: "RelayCallsModule", RelayPlatform: "RelayPlatformModule",
+      RelayPush: "RelayPushModule" } } });
 });
 
 test("each spec parses as one TurboModule whose methods and events the test fakes implement", () => {
@@ -59,7 +59,7 @@ test("each spec parses as one TurboModule whose methods and events the test fake
 });
 
 test("Codegen generates the Android, iOS and C++ bindings for every spec", t => {
-  const outputDirectory = mkdtempSync(join(tmpdir(), "convohop-codegen-"));
+  const outputDirectory = mkdtempSync(join(tmpdir(), "relay-codegen-"));
   t.after(() => rmSync(outputDirectory, { recursive: true, force: true }));
   const generated = RNCodegen.generate({ libraryName: codegenConfig.name, schema: { modules: parseSpecs() }, outputDirectory,
     packageName: codegenConfig.android.javaPackageName, assumeNonnull: false },
@@ -67,7 +67,7 @@ test("Codegen generates the Android, iOS and C++ bindings for every spec", t => 
   assert.equal(generated, true);
   const files = filesUnder(outputDirectory);
   for (const name of Object.keys(fakeSpecs)) {
-    assert.ok(files.includes(join("java", "com", "convohop", "reactnative", `Native${name}Spec.java`)), `${name} Android spec`);
+    assert.ok(files.includes(join("java", "dev", "instantrelay", "reactnative", `Native${name}Spec.java`)), `${name} Android spec`);
     assert.ok(files.some(file => readFileSync(join(outputDirectory, file), "utf8").includes(`class JSI_EXPORT Native${name}CxxSpec`)),
       `${name} C++ spec`);
   }
@@ -76,7 +76,7 @@ test("Codegen generates the Android, iOS and C++ bindings for every spec", t => 
 });
 
 test("each iOS module provider implements every method of its generated protocol", t => {
-  const outputDirectory = mkdtempSync(join(tmpdir(), "convohop-codegen-ios-"));
+  const outputDirectory = mkdtempSync(join(tmpdir(), "relay-codegen-ios-"));
   t.after(() => rmSync(outputDirectory, { recursive: true, force: true }));
   assert.equal(RNCodegen.generate({ libraryName: codegenConfig.name, schema: { modules: parseSpecs() }, outputDirectory,
     assumeNonnull: false }, { generators: ["modulesIOS"], test: false }), true);

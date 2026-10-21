@@ -1,6 +1,6 @@
 // Runs the push quickstart's snippets with payloads from the push payload contract's vectors, and the Notification
 // Service Extension against the conformance mock.
-import ConvoHop
+import Relay
 import Foundation
 import UserNotifications
 import XCTest
@@ -11,8 +11,8 @@ final class PushTests: XCTestCase {
     @MainActor
     func testOpeningANotificationShowsItsScreen() throws {
         // The vectors' recipient. Routing a notification doesn't use the network.
-        let client = try ConvoHopClient(
-            configuration: ConvoHopConfiguration(
+        let client = try RelayClient(
+            configuration: RelayConfiguration(
                 baseURL: URL(string: "https://convohop.invalid")!,
                 projectId: vectorField("message-metadata-only", "projectId"),
                 principalId: vectorField("message-metadata-only", "recipientId"), incarnation: newRequestId(),
@@ -24,7 +24,7 @@ final class PushTests: XCTestCase {
             apnsPayload("cancel-ended"),
             apnsPayload("cancel-ended", ["reason": "answered"]), // Answered on another device.
             apnsPayload("message-metadata-only", ["recipientId": newRequestId()]), // For another user.
-            ["aps": ["alert": "Hello"]], // Not ConvoHop's.
+            ["aps": ["alert": "Hello"]], // Not Relay's.
         ]
         for payload in payloads {
             try openNotification(payload, client: client, screens: screens)
@@ -81,8 +81,8 @@ final class PushTests: XCTestCase {
     func testStopPushForgetsTheUser() throws {
         let suiteName = "com.example.chat.tests.\(newRequestId())"
         addTeardownBlock { UserDefaults.standard.removePersistentDomain(forName: suiteName) }
-        let ledger = ConvoHopNotificationLedger(suiteName: suiteName)
-        let notification = try XCTUnwrap(ConvoHopNotification(userInfo: apnsPayload("message-metadata-only")))
+        let ledger = RelayNotificationLedger(suiteName: suiteName)
+        let notification = try XCTUnwrap(RelayNotification(userInfo: apnsPayload("message-metadata-only")))
         ledger.recipient = .only(projectId: notification.projectId, recipientId: notification.recipientId)
         XCTAssertTrue(ledger.record(notification))
 
@@ -97,9 +97,9 @@ final class PushTests: XCTestCase {
     }
 
     // The App Group suite that NotificationService uses. The test deletes it when it ends.
-    private func appGroupLedger() -> ConvoHopNotificationLedger {
+    private func appGroupLedger() -> RelayNotificationLedger {
         addTeardownBlock { UserDefaults.standard.removePersistentDomain(forName: "group.com.example.chat") }
-        return ConvoHopNotificationLedger(suiteName: "group.com.example.chat")
+        return RelayNotificationLedger(suiteName: "group.com.example.chat")
     }
 
     // Runs the extension as iOS does, and returns what iOS shows.
@@ -131,11 +131,11 @@ final class Screens: AppScreens {
         shown.append("message \(messageId) in \(conversation.conversationId)")
     }
 
-    func showCall(_ alert: ConvoHopCallAlert, in conversation: ConversationHandle) {
+    func showCall(_ alert: RelayCallAlert, in conversation: ConversationHandle) {
         shown.append("call \(alert.alertId) in \(conversation.conversationId)")
     }
 
-    func showMissedCall(_ alert: ConvoHopCallAlert, in conversation: ConversationHandle) {
+    func showMissedCall(_ alert: RelayCallAlert, in conversation: ConversationHandle) {
         shown.append("missed call \(alert.alertId) in \(conversation.conversationId)")
     }
 }

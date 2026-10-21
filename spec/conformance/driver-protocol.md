@@ -32,7 +32,7 @@ against it.
   may therefore process requests strictly in order.
 
 ```text
-runner → driver  {"id":1,"method":"hello","params":{"runner":{"name":"convohop-conformance-runner","version":"0.1.0"}}}
+runner → driver  {"id":1,"method":"hello","params":{"runner":{"name":"relay-conformance-runner","version":"0.1.0"}}}
 driver → runner  {"id":1,"result":{"driver":{"name":"example","version":"1.0.0","language":"python"},"roles":{"backend":{"operations":["principals.create"]}},"features":[]}}
 runner → driver  {"id":2,"method":"reset","params":{}}
 driver → runner  {"id":2,"result":{}}
@@ -93,7 +93,7 @@ driver declares what it supports.
 Params:
 
 ```json
-{ "runner": { "name": "convohop-conformance-runner", "version": "0.1.0" } }
+{ "runner": { "name": "relay-conformance-runner", "version": "0.1.0" } }
 ```
 
 Result:
@@ -101,10 +101,10 @@ Result:
 ```json
 {
   "driver": {
-    "name": "convohop-typescript-reference",
+    "name": "relay-typescript-reference",
     "version": "0.1.0",
     "language": "typescript",
-    "packages": { "@convohop/client": "0.1.0" }
+    "packages": { "@instantrelay/client": "0.1.0" }
   },
   "roles": {
     "user": { "operations": ["messages.send", "messages.list"] },
@@ -296,7 +296,7 @@ A result with the wrong shape for its method fails only the current step.
 ## Reference driver
 
 [`conformance/drivers/ts/`](../../conformance/drivers/ts) is the TypeScript
-reference driver, built on `@convohop/client` and `@convohop/server`.
+reference driver, built on `@instantrelay/client` and `@instantrelay/server`.
 
 ```sh
 npm run build                                              # the SDK packages, then the driver

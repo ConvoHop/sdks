@@ -198,7 +198,7 @@ final class _Active {
 final class TransportAuthentication {
   TransportAuthentication._(this._transport, this.credential);
 
-  final ConvoHopTransport _transport;
+  final RelayTransport _transport;
   String? credential;
   Future<void>? barrier;
   bool blocked = false;
@@ -221,13 +221,13 @@ final class TransportAuthentication {
 }
 
 /// The transport's session custody, for the client that constructed it.
-TransportAuthentication transportAuthentication(ConvoHopTransport transport) => transport._authentication;
+TransportAuthentication transportAuthentication(RelayTransport transport) => transport._authentication;
 
 /// Keeps the records of the request IDs that [requestIds] lists, each time the
 /// transport makes room, from being evicted, though they are final: a caller
 /// that may still resend or report a request retains its record. Returns a
 /// function that stops retaining them.
-void Function() retainRecovery(ConvoHopTransport transport, Iterable<String> Function() requestIds) {
+void Function() retainRecovery(RelayTransport transport, Iterable<String> Function() requestIds) {
   Iterable<String> retainer() => requestIds();
   transport._retainers.add(retainer);
   return () => transport._retainers.remove(retainer);
@@ -240,7 +240,7 @@ void Function() retainRecovery(ConvoHopTransport transport, Iterable<String> Fun
 /// that note without the record that recovers the request. If the hook
 /// throws, nothing is sent and the submission fails with its error. Returns a
 /// function that removes the hook.
-void Function() beforeSubmitting(ConvoHopTransport transport, String requestId, Future<void> Function() hook) {
+void Function() beforeSubmitting(RelayTransport transport, String requestId, Future<void> Function() hook) {
   final hooks = transport._submissionHooks;
   hooks[requestId] = hook;
   return () {
@@ -262,8 +262,8 @@ void Function() beforeSubmitting(ConvoHopTransport transport, String requestId, 
 /// with a code that isn't retryable, or out of retry budget. When no record
 /// can go, it refuses the new mutation before sending it, with
 /// `RECOVERY_LIMIT`. An evicted request can still be resolved by its ID.
-final class ConvoHopTransport {
-  ConvoHopTransport({
+final class RelayTransport {
+  RelayTransport({
     required String baseUrl,
     required String namespace,
     required this.incarnation,
@@ -364,7 +364,7 @@ final class ConvoHopTransport {
       try {
         await storage.setItem(_storageKey, snapshot);
       } on Object catch (cause) {
-        throw ConvoHopProblem(
+        throw RelayProblem(
           'RECOVERY_STORAGE_FAILURE',
           state.requestId,
           state.resolutionState == 'pending' ? 'unknown' : state.resolutionState,
@@ -385,17 +385,17 @@ final class ConvoHopTransport {
   /// Runs [spec] in [projectId] with [input]. A mutation uses [requestId]
   /// (or a new one) and records it for recovery before sending.
   Future<T> execute<T>(OperationSpec<T> spec, String projectId, Map<String, Object?> input, {String? requestId}) {
-    if (_closed) return Future<T>.error(StateError('ConvoHop transport is closed'));
+    if (_closed) return Future<T>.error(StateError('Relay transport is closed'));
     final id = requestId ?? newRequestId();
     final currentIncarnation = incarnation;
     final JsonObject body;
     try {
       body = parseObject(copyJson(input));
       _plan(spec, projectId, body, id, servingEpoch);
-    } on ConvoHopProblem catch (error) {
+    } on RelayProblem catch (error) {
       return Future<T>.error(error);
     } on FormatException catch (error) {
-      return Future<T>.error(ConvoHopProblem('INVALID_REQUEST', id, 'rejected', 400, error.message));
+      return Future<T>.error(RelayProblem('INVALID_REQUEST', id, 'rejected', 400, error.message));
     }
     return _authorized(id, (credential) async {
       final reply = await _execute(spec, projectId, body, id, currentIncarnation, credential);
@@ -404,16 +404,16 @@ final class ConvoHopTransport {
   }
 
   void _checkOpen() {
-    if (_closed) throw StateError('ConvoHop transport is closed');
+    if (_closed) throw StateError('Relay transport is closed');
   }
 
   Future<T> _authorized<T>(String requestId, Future<T> Function(String? credential) work) {
-    if (_closed) return Future<T>.error(StateError('ConvoHop transport is closed'));
+    if (_closed) return Future<T>.error(StateError('Relay transport is closed'));
     final authentication = _authentication;
     if (authentication.blocked) {
       final state = _states[requestId];
       return Future<T>.error(
-        ConvoHopProblem(
+        RelayProblem(
           'SESSION_REFRESH_REQUIRED',
           requestId,
           state == null ? 'rejected' : (state.resolutionState == 'pending' ? 'unknown' : state.resolutionState),
@@ -442,7 +442,7 @@ final class ConvoHopTransport {
     _plan(spec, projectId, body, requestId, epoch);
     await initializeRecovery();
     if (incarnation != expectedIncarnation) {
-      throw ConvoHopProblem(
+      throw RelayProblem(
         'INCARNATION_MISMATCH',
         requestId,
         'unknown',
@@ -459,11 +459,11 @@ final class ConvoHopTransport {
       if (resolution == null ||
           resolution.requestId != asked ||
           (resolution.receipt != null && resolution.receipt!.requestId != asked)) {
-        throw ConvoHopProblem('INVALID_RESPONSE', requestId, 'unknown', 503, 'Request resolution identity changed');
+        throw RelayProblem('INVALID_RESPONSE', requestId, 'unknown', 503, 'Request resolution identity changed');
       }
       final state = _states[asked];
       if (state != null && (state.projectId != projectId || state.incarnation != incarnation)) {
-        throw ConvoHopProblem(
+        throw RelayProblem(
           'RESOLUTION_REQUIRED',
           requestId,
           'unknown',
@@ -499,7 +499,7 @@ final class ConvoHopTransport {
     final active = _active[requestId];
     if (active != null) {
       if (active.identity != identity) {
-        throw ConvoHopProblem(
+        throw RelayProblem(
           'IDEMPOTENCY_CONFLICT',
           requestId,
           'unknown',
@@ -512,7 +512,7 @@ final class ConvoHopTransport {
     final work = () async {
       final hash = fingerprint(<String, Object?>{'operation': spec.id, 'projectId': projectId, 'input': input});
       if (incarnation != currentIncarnation) {
-        throw ConvoHopProblem(
+        throw RelayProblem(
           'INCARNATION_MISMATCH',
           requestId,
           'unknown',
@@ -527,7 +527,7 @@ final class ConvoHopTransport {
               state.operation != spec.id ||
               state.projectId != projectId ||
               canonicalJson(state.input) != canonicalJson(input))) {
-        throw ConvoHopProblem(
+        throw RelayProblem(
           'IDEMPOTENCY_CONFLICT',
           requestId,
           'unknown',
@@ -536,7 +536,7 @@ final class ConvoHopTransport {
         );
       }
       if (retry && (state == null || state.settled || state.mediaAdmissionAttempted)) {
-        throw ConvoHopProblem(
+        throw RelayProblem(
           'RESOLUTION_REQUIRED',
           requestId,
           'unknown',
@@ -593,7 +593,7 @@ final class ConvoHopTransport {
       }
     }
     if (forgotten == null) {
-      throw ConvoHopProblem(
+      throw RelayProblem(
         'RECOVERY_LIMIT',
         requestId,
         'rejected',
@@ -606,7 +606,7 @@ final class ConvoHopTransport {
 
   Future<_Reply> _submit(_Record state, OperationSpec<Object?> spec, String? credential, {bool retry = false}) async {
     if (state.incarnation != incarnation) {
-      throw ConvoHopProblem(
+      throw RelayProblem(
         'INCARNATION_MISMATCH',
         state.requestId,
         'unknown',
@@ -619,7 +619,7 @@ final class ConvoHopTransport {
         now > state.retryDeadline ||
         now < state.firstSubmittedAt ||
         now < state.lastAttemptAt) {
-      throw ConvoHopProblem(
+      throw RelayProblem(
         'RESOLUTION_REQUIRED',
         state.requestId,
         'unknown',
@@ -636,7 +636,7 @@ final class ConvoHopTransport {
     state.lastAttemptClassification = 'submitted';
     await _persist(state);
     if (state.incarnation != incarnation) {
-      throw ConvoHopProblem(
+      throw RelayProblem(
         'INCARNATION_MISMATCH',
         state.requestId,
         'unknown',
@@ -649,7 +649,7 @@ final class ConvoHopTransport {
         submittingAt < state.firstSubmittedAt ||
         submittingAt < state.lastAttemptAt ||
         (retry && (state.settled || state.mediaAdmissionAttempted))) {
-      throw ConvoHopProblem(
+      throw RelayProblem(
         'RESOLUTION_REQUIRED',
         state.requestId,
         'unknown',
@@ -663,7 +663,7 @@ final class ConvoHopTransport {
       reply = await _request(spec, state.projectId, state.input, state.requestId, credential, servingEpoch);
       final status = reply.raw['status'];
       if (status != 'committed' && status != 'accepted') {
-        throw ConvoHopProblem(
+        throw RelayProblem(
           'INVALID_RESPONSE',
           state.requestId,
           'unknown',
@@ -673,10 +673,10 @@ final class ConvoHopTransport {
       }
       outcome = status as String;
     } on Object catch (error) {
-      state.lastAttemptClassification = error is ConvoHopProblem ? error.code : 'opaqueTransportFailure';
+      state.lastAttemptClassification = error is RelayProblem ? error.code : 'opaqueTransportFailure';
       // A rejection is the request's outcome only if every attempt was
       // rejected: those before this one, and this one.
-      if (error is ConvoHopProblem &&
+      if (error is RelayProblem &&
           error.outcome == 'rejected' &&
           (prior == 'pending' || prior == 'rejected') &&
           state.resolutionState == 'unknown' &&
@@ -698,7 +698,7 @@ final class ConvoHopTransport {
   Future<RequestResolution> retry(String requestId) {
     if (!isId(requestId)) {
       return Future<RequestResolution>.error(
-        ConvoHopProblem('INVALID_REQUEST', requestId, 'rejected', 400, 'Expected a canonical nonzero UUID'),
+        RelayProblem('INVALID_REQUEST', requestId, 'rejected', 400, 'Expected a canonical nonzero UUID'),
       );
     }
     return _authorized(requestId, (credential) => _retry(requestId, credential));
@@ -721,7 +721,7 @@ final class ConvoHopTransport {
     final state = _states[requestId];
     if (state == null) throw StateError('No recovery record exists; do not invent a replacement identity');
     if (state.incarnation != incarnation) {
-      throw ConvoHopProblem(
+      throw RelayProblem(
         'INCARNATION_MISMATCH',
         requestId,
         'unknown',
@@ -732,10 +732,10 @@ final class ConvoHopTransport {
     final resolution = await _resolve(state.projectId, requestId, credential);
     if (_settled.contains(resolution.state)) return resolution;
     if (resolution.state != 'notObservedYet') {
-      throw ConvoHopProblem('INVALID_RESPONSE', requestId, 'unknown', 503, 'Unknown request resolution state');
+      throw RelayProblem('INVALID_RESPONSE', requestId, 'unknown', 503, 'Unknown request resolution state');
     }
     if (state.settled || state.mediaAdmissionAttempted) {
-      throw ConvoHopProblem(
+      throw RelayProblem(
         'RESOLUTION_REQUIRED',
         requestId,
         'unknown',
@@ -787,7 +787,7 @@ final class ConvoHopTransport {
         'variables': <String, Object?>{'context': context, if (spec.inputFields.isNotEmpty) 'input': input},
       };
     } on FormatException catch (error) {
-      throw ConvoHopProblem('INVALID_REQUEST', requestId, 'rejected', 400, error.message);
+      throw RelayProblem('INVALID_REQUEST', requestId, 'rejected', 400, error.message);
     }
   }
 
@@ -816,7 +816,7 @@ final class ConvoHopTransport {
         maxBytes: _maxResponseBytes,
       );
     } on TransportFailure catch (failure) {
-      throw ConvoHopProblem(
+      throw RelayProblem(
         'TRANSPORT_UNKNOWN',
         requestId,
         'unknown',
@@ -829,7 +829,7 @@ final class ConvoHopTransport {
     var text = response.tooLarge ? '' : utf8.decode(response.body, allowMalformed: true);
     if (text.startsWith('\uFEFF')) text = text.substring(1);
     if (response.tooLarge || text.length > _maxResponseUnits) {
-      throw ConvoHopProblem(
+      throw RelayProblem(
         'INVALID_RESPONSE',
         requestId,
         'unknown',
@@ -843,7 +843,7 @@ final class ConvoHopTransport {
     } on FormatException {
       // A proxy's or gateway's error page isn't JSON, but its Retry-After
       // still bounds the next attempt.
-      throw ConvoHopProblem(
+      throw RelayProblem(
         'INVALID_RESPONSE',
         requestId,
         'unknown',
@@ -885,7 +885,7 @@ final class ConvoHopTransport {
         throw const FormatException('Unrecognized authority envelope');
       }
       if (parseId(value['requestId']) != requestId) {
-        throw ConvoHopProblem(
+        throw RelayProblem(
           'INVALID_RESPONSE',
           requestId,
           'unknown',
@@ -906,7 +906,7 @@ final class ConvoHopTransport {
       }
       return _Reply(value, typed);
     } on FormatException {
-      throw ConvoHopProblem(
+      throw RelayProblem(
         'INVALID_RESPONSE',
         requestId,
         'unknown',

@@ -1,20 +1,20 @@
 # TypeScript client quickstart
 
-Use ConvoHop in your users' browsers with `@convohop/client`: connect with the session your backend issued, show a conversation and keep it current, and send messages that survive dropped connections and page reloads. `@convohop/react` offers the same as React hooks.
+Use Relay in your users' browsers with `@instantrelay/client`: connect with the session your backend issued, show a conversation and keep it current, and send messages that survive dropped connections and page reloads. `@instantrelay/react` offers the same as React hooks.
 
 ## Before you start
 
-Your backend signs the user in and returns a session, as the [server quickstart](server.md#sign-in-a-user) shows. `@convohop/client` never holds a backend key. It targets the current and previous major versions of Chrome, Edge, Firefox and Safari. For React Native, follow the [React Native client quickstart](../../react-native/quickstarts/client.md). `@convohop/react` needs React 18 or later.
+Your backend signs the user in and returns a session, as the [server quickstart](server.md#sign-in-a-user) shows. `@instantrelay/client` never holds a backend key. It targets the current and previous major versions of Chrome, Edge, Firefox and Safari. For React Native, follow the [React Native client quickstart](../../react-native/quickstarts/client.md). `@instantrelay/react` needs React 18 or later.
 
 ## Connect
 
 ```ts snippet=docs/languages/typescript/examples/src/client.ts#connect
 import {
-  ConvoHopClient,
+  RelayClient,
   type RecoveryStorage,
   type SessionBootstrap,
   type SessionRefresh,
-} from "@convohop/client";
+} from "@instantrelay/client";
 
 // What your backend's login endpoint returns. See the server quickstart.
 export type UserBootstrap = SessionBootstrap & { baseUrl: string; projectId: string };
@@ -23,8 +23,8 @@ export async function connectUser(
   bootstrap: UserBootstrap,
   storage: RecoveryStorage,
   sessionRefresh?: SessionRefresh, // Optional: renews the session before it expires.
-): Promise<ConvoHopClient> {
-  const client = new ConvoHopClient({
+): Promise<RelayClient> {
+  const client = new RelayClient({
     baseUrl: bootstrap.baseUrl,
     projectId: bootstrap.projectId,
     incarnation: bootstrap.session.incarnation,
@@ -47,11 +47,11 @@ export async function connectUser(
 Sessions expire, after 15 minutes by default. To renew the user's session before it does, pass `renewSession` to `connectUser` as `sessionRefresh`, then call `keepSessionAlive`:
 
 ```ts snippet=docs/languages/typescript/examples/src/client.ts#renew
-import type { SessionMetadata } from "@convohop/client";
+import type { SessionMetadata } from "@instantrelay/client";
 
 // Pass it to connectUser as sessionRefresh. The client calls it with the session's metadata, never its token.
 export async function renewSession(current: Readonly<SessionMetadata>): Promise<SessionBootstrap> {
-  // Your backend's endpoint, behind your app's own sign-in. It renews the session with @convohop/server.
+  // Your backend's endpoint, behind your app's own sign-in. It renews the session with @instantrelay/server.
   const response = await fetch("/api/convohop/session/renew", {
     method: "POST",
     headers: { "content-type": "application/json" },
@@ -59,27 +59,27 @@ export async function renewSession(current: Readonly<SessionMetadata>): Promise<
     signal: AbortSignal.timeout(10_000), // The client pauses its streams until this settles.
   });
   if (!response.ok) throw new Error(`Session renewal failed with HTTP ${response.status}`);
-  return response.json(); // The client checks the renewed session with ConvoHop before it uses it.
+  return response.json(); // The client checks the renewed session with Relay before it uses it.
 }
 
 // Renews the session a minute before it expires, and after each renewal, until you call the returned function.
-export function keepSessionAlive(client: ConvoHopClient): () => void {
+export function keepSessionAlive(client: RelayClient): () => void {
   return client.scheduleSessionRefresh({ onError: error => console.warn("Couldn't renew the session", error) });
 }
 ```
 
 The renewal endpoint is your backend's, behind your app's own sign-in. It renews the session with [`sessions.renew`](../reference/server.md#projectserverclientsessionsrenew-property), taking the principal and device from that sign-in rather than from the request, and returns the `SessionBootstrap` that `sessions.renew` resolves with.
 
-The client pauses its streams and lets its requests finish before it calls `sessionRefresh`, and checks the renewed session with ConvoHop before it uses it. Don't call the client from `sessionRefresh`: the call would wait for the renewal. [Session credential lifetime](https://github.com/ConvoHop/sdks/blob/main/packages/client/README.md#session-credential-lifetime) covers what your endpoint must check, and what happens when a renewal fails.
+The client pauses its streams and lets its requests finish before it calls `sessionRefresh`, and checks the renewed session with Relay before it uses it. Don't call the client from `sessionRefresh`: the call would wait for the renewal. [Session credential lifetime](https://github.com/ConvoHop/sdks/blob/main/packages/client/README.md#session-credential-lifetime) covers what your endpoint must check, and what happens when a renewal fails.
 
 ## Show a conversation
 
 ```ts snippet=docs/languages/typescript/examples/src/client.ts#store
-import { ConversationStore, Outbox, type ConversationSnapshot } from "@convohop/client";
+import { ConversationStore, Outbox, type ConversationSnapshot } from "@instantrelay/client";
 
 // One outbox for the signed-in user. With persist, unsent messages survive page reloads in the client's
 // recoveryStorage. Close it when the user signs out.
-export function openOutbox(client: ConvoHopClient): Outbox {
+export function openOutbox(client: RelayClient): Outbox {
   return new Outbox(client, {
     persist: true,
     onError: error => console.warn("A message wasn't sent", error),
@@ -88,7 +88,7 @@ export function openOutbox(client: ConvoHopClient): Outbox {
 
 // Loads a conversation, keeps it current and renders every change. Close the store when the view goes away.
 export async function showConversation(
-  client: ConvoHopClient,
+  client: RelayClient,
   outbox: Outbox,
   conversationId: string,
   render: (snapshot: ConversationSnapshot) => void,
@@ -113,9 +113,9 @@ export async function showConversation(
 ## Send a message
 
 ```ts snippet=docs/languages/typescript/examples/src/client.ts#outbox
-import type { OutboxEntry } from "@convohop/client";
+import type { OutboxEntry } from "@instantrelay/client";
 
-// The message shows in snapshot.pending at once, and moves to snapshot.messages once ConvoHop commits it.
+// The message shows in snapshot.pending at once, and moves to snapshot.messages once Relay commits it.
 export function sendDraft(store: ConversationStore, draft: string): OutboxEntry | null {
   const text = draft.trim();
   return text ? store.send(text) : null;
@@ -156,21 +156,21 @@ Other tabs of the same user share `localStorage` and keep saving to it, so sign 
 
 ## Use React
 
-`@convohop/react` wraps the client in hooks. Give its provider the user's client and outbox:
+`@instantrelay/react` wraps the client in hooks. Give its provider the user's client and outbox:
 
 ```tsx snippet=docs/languages/typescript/examples/src/react.tsx#provider
 import type { ReactNode } from "react";
-import type { ConvoHopClient, Outbox } from "@convohop/client";
-import { ConvoHopProvider, useSessionRefresh } from "@convohop/react";
+import type { RelayClient, Outbox } from "@instantrelay/client";
+import { RelayProvider, useSessionRefresh } from "@instantrelay/react";
 
 // Wrap the signed-in part of your app. When the user signs in, create the client with connectUser, passing
 // renewSession as sessionRefresh, and the outbox with openOutbox. When they sign out, unmount this, then call signOut.
-export function SignedIn({ client, outbox, children }: { client: ConvoHopClient; outbox: Outbox; children: ReactNode }) {
+export function SignedIn({ client, outbox, children }: { client: RelayClient; outbox: Outbox; children: ReactNode }) {
   return (
-    <ConvoHopProvider client={client} outbox={outbox}>
+    <RelayProvider client={client} outbox={outbox}>
       <KeepSessionAlive />
       {children}
-    </ConvoHopProvider>
+    </RelayProvider>
   );
 }
 
@@ -187,7 +187,7 @@ The provider doesn't own the client or the outbox. `useSessionRefresh` renews th
 
 ```tsx snippet=docs/languages/typescript/examples/src/react.tsx#conversation
 import { useState } from "react";
-import { useConversation, useTyping } from "@convohop/react";
+import { useConversation, useTyping } from "@instantrelay/react";
 import { pendingLabel } from "./client.ts";
 
 // typing: whether the project has typing indicators, from (await client.capabilities()).features?.typing.
@@ -239,11 +239,11 @@ The view's `status` is `idle` until the component's first effect creates the sto
 `watch` replays the conversation's events from the cursor it saved last time, or from the start, and then delivers new events as they happen. Events say what changed, so read the current messages when one did.
 
 ```ts snippet=docs/languages/typescript/examples/src/client.ts#watch
-import type { ConversationMessage, ConversationStream } from "@convohop/client";
+import type { ConversationMessage, ConversationStream } from "@instantrelay/client";
 
 // Renders the latest messages and keeps them current. Close the stream when the view goes away.
 export async function watchConversation(
-  client: ConvoHopClient,
+  client: RelayClient,
   conversationId: string,
   render: (messages: ConversationMessage[]) => void,
 ): Promise<ConversationStream> {
@@ -267,7 +267,7 @@ Close the stream when the view goes away. If the saved cursor can't be used any 
 ```ts snippet=docs/languages/typescript/examples/src/client.ts#send
 // Keep requestId with the draft until the send succeeds, and reuse it if you send the draft again.
 export async function sendMessage(
-  client: ConvoHopClient,
+  client: RelayClient,
   conversationId: string,
   text: string,
   requestId: string,
@@ -277,11 +277,11 @@ export async function sendMessage(
 }
 ```
 
-Create the request ID when the user writes the message, for example with `crypto.randomUUID()`, and keep it with the draft. If the connection drops during a send, `client.send` throws a `ConvoHopProblem` whose `outcome` is `unknown`. Sending the same text again with the same request ID posts it once, whether or not the first attempt reached the authority. The SDK sends a request at most three times, within 60 seconds of the first attempt. Reusing a request ID with different text throws `IDEMPOTENCY_CONFLICT`.
+Create the request ID when the user writes the message, for example with `crypto.randomUUID()`, and keep it with the draft. If the connection drops during a send, `client.send` throws a `RelayProblem` whose `outcome` is `unknown`. Sending the same text again with the same request ID posts it once, whether or not the first attempt reached the authority. The SDK sends a request at most three times, within 60 seconds of the first attempt. Reusing a request ID with different text throws `IDEMPOTENCY_CONFLICT`.
 
 ## Next steps
 
 - [Calling quickstart](calling.md): start and join calls in a conversation.
 - [Push notifications quickstart](push.md): notify users who aren't watching, and subscribe browsers.
-- [`ConvoHopClient` reference](../reference/client.md#convohopclient-class): every method, with the operation it sends.
-- [`@convohop/react` reference](../reference/react.md): every hook.
+- [`RelayClient` reference](../reference/client.md#relayclient-class): every method, with the operation it sends.
+- [`@instantrelay/react` reference](../reference/react.md): every hook.

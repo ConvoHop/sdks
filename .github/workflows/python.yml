@@ -93,8 +93,8 @@ jobs:
         working-directory: python
         # One run each: both trees contain a package named _generated.
         run: |
-          .venv/bin/mypy ../tools/sdkgen/test/golden/python/src/convohop/_generated
-          .venv/bin/mypy ../tools/sdkgen/test/golden/edge/python/src/convohop/_generated
+          .venv/bin/mypy ../tools/sdkgen/test/golden/python/src/instantrelay/_generated
+          .venv/bin/mypy ../tools/sdkgen/test/golden/edge/python/src/instantrelay/_generated
       - name: Build the sdist and wheel (dry run)
         working-directory: python
         run: |
@@ -112,7 +112,7 @@ jobs:
               sys.exit(f"expected one pure-Python wheel and one sdist: {sorted(p.name for p in dist.iterdir())}")
           sources = {
               path.relative_to("src").as_posix()
-              for path in pathlib.Path("src/convohop").rglob("*")
+              for path in pathlib.Path("src/instantrelay").rglob("*")
               if path.is_file() and "__pycache__" not in path.parts
           }
           with zipfile.ZipFile(wheels[0]) as wheel:
@@ -120,12 +120,12 @@ jobs:
               info = next(name.split("/")[0] for name in names if name.endswith(".dist-info/METADATA"))
               metadata = Parser().parsestr(wheel.read(f"{info}/METADATA").decode())
           packaged = {name for name in names if not name.startswith(f"{info}/")}
-          if packaged != sources or "convohop/py.typed" not in packaged:
+          if packaged != sources or "instantrelay/py.typed" not in packaged:
               sys.exit(f"wheel differs from src/: missing {sorted(sources - packaged)}, extra {sorted(packaged - sources)}")
           missing = {f"{info}/licenses/LICENSE", f"{info}/licenses/NOTICE"} - names
           if missing:
               sys.exit(f"wheel is missing {sorted(missing)}")
-          for key, value in {"Name": "convohop", "Requires-Python": ">=3.11", "License-Expression": "Apache-2.0"}.items():
+          for key, value in {"Name": "instantrelay", "Requires-Python": ">=3.11", "License-Expression": "Apache-2.0"}.items():
               if metadata[key] != value:
                   sys.exit(f"wheel metadata {key} is {metadata[key]!r}, expected {value!r}")
           if "Private :: Do Not Upload" not in metadata.get_all("Classifier", []):
@@ -153,18 +153,18 @@ jobs:
           cd "$RUNNER_TEMP"
           wheel/bin/python - <<'EOF'
           import importlib.metadata, pathlib, sys
-          import convohop
-          from convohop import AsyncConvoHop, AsyncConvoHopManagement, ConvoHop, ConvoHopManagement, push, webhooks
-          package = pathlib.Path(convohop.__file__).parent
+          import instantrelay
+          from instantrelay import AsyncRelay, AsyncRelayManagement, Relay, RelayManagement, push, webhooks
+          package = pathlib.Path(instantrelay.__file__).parent
           if "site-packages" not in package.parts or not (package / "py.typed").is_file():
               sys.exit(f"expected the installed, typed package; imported {package}")
-          if importlib.metadata.version("convohop") != convohop.__version__:
+          if importlib.metadata.version("instantrelay") != instantrelay.__version__:
               sys.exit("the distribution and package versions differ")
-          print(f"convohop {convohop.__version__} from {package}")
+          print(f"instantrelay {instantrelay.__version__} from {package}")
           EOF
           # PEP 561: mypy reads the installed package's annotations through py.typed.
           "$mypy" --strict --cache-dir /dev/null --python-executable wheel/bin/python \
-            -c 'from convohop import AsyncConvoHop, ConvoHop, push, webhooks'
+            -c 'from instantrelay import AsyncRelay, Relay, push, webhooks'
       - name: Upload the sdist and wheel
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
@@ -296,7 +296,7 @@ jobs:
           import { readFileSync } from "node:fs";
           const allowed = "it only uses user clients, which the driver under test does not declare";
           let failed = false;
-          for (const [directory, name] of [["python", "convohop-python"], ["python-async", "convohop-python-async"]]) {
+          for (const [directory, name] of [["python", "relay-python"], ["python-async", "relay-python-async"]]) {
             const summary = JSON.parse(readFileSync(`conformance/reports/${directory}/summary.json`, "utf8"));
             const scenarios = summary.suites.flatMap((suite) => suite.scenarios);
             const passed = scenarios.filter((scenario) => scenario.status === "passed");
@@ -322,7 +322,7 @@ jobs:
           retention-days: 14
 
   # Like the dev-stack job in conformance.yml, runs the scenarios against the
-  # ConvoHop dev stack: the private, development-only linux/arm64 image that
+  # Relay dev stack: the private, development-only linux/arm64 image that
   # runs the whole platform in one container (see spec/conformance/targets.md),
   # which conformance/dev-stack.mjs starts. The job runs only when the
   # CONVOHOP_DEV_STACK_IMAGE repository variable names the image, and never for

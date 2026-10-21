@@ -9,8 +9,8 @@ from typing import Any
 import httpx
 import pytest
 
-from convohop import (
-    ConvoHopProblem,
+from instantrelay import (
+    RelayProblem,
     CreditsExhaustedProblem,
     PlanLimitExceededProblem,
     QuotaExceededProblem,
@@ -45,10 +45,10 @@ def http(body: dict[str, Any], headers: dict[str, str] | None = None, status: in
     return lambda _request: httpx.Response(status, json=body, headers=headers)
 
 
-def problem(respond: Respond, call: Callable[[Any], object] = lambda client: client.capabilities()) -> ConvoHopProblem:
+def problem(respond: Respond, call: Callable[[Any], object] = lambda client: client.capabilities()) -> RelayProblem:
     authority = Authority(respond)
     client = authority.project()
-    with pytest.raises(ConvoHopProblem) as caught:
+    with pytest.raises(RelayProblem) as caught:
         call(client)
     error = caught.value
     assert error.request_id == authority.requests[-1].request_id
@@ -105,7 +105,7 @@ def test_http_dates_and_malformed_retry_after_headers_are_ignored(header: str) -
 
 def test_an_unannotated_problem_has_no_retry_delay() -> None:
     error = problem(graphql(message="Not found", code="NOT_FOUND", status=404))
-    assert type(error) is ConvoHopProblem
+    assert type(error) is RelayProblem
     assert (error.code, error.status, error.retry_after, error.retryable) == ("NOT_FOUND", 404, None, False)
 
 
@@ -166,7 +166,7 @@ def test_an_unexplained_scope_required_error_uses_the_default_message() -> None:
     ("code", "status", "cls"),
     [("QUOTA_EXCEEDED", 429, QuotaExceededProblem), ("PLAN_LIMIT_EXCEEDED", 403, PlanLimitExceededProblem)],
 )
-def test_quota_and_plan_problems_are_typed(code: str, status: int, cls: type[ConvoHopProblem]) -> None:
+def test_quota_and_plan_problems_are_typed(code: str, status: int, cls: type[RelayProblem]) -> None:
     error = problem(lambda request: graphql_error(request, code, status, "Limit reached", retryAfter=60))
     assert type(error) is cls
     assert (error.code, error.status, error.outcome, error.retry_after) == (code, status, "rejected", 60)
@@ -175,7 +175,7 @@ def test_quota_and_plan_problems_are_typed(code: str, status: int, cls: type[Con
 @pytest.mark.parametrize(
     ("code", "cls"), [("CREDITS_EXHAUSTED", CreditsExhaustedProblem), ("SPEND_CAP_REACHED", SpendCapReachedProblem)]
 )
-def test_spend_stops_are_typed_and_not_retryable(code: str, cls: type[ConvoHopProblem]) -> None:
+def test_spend_stops_are_typed_and_not_retryable(code: str, cls: type[RelayProblem]) -> None:
     error = problem(lambda request: graphql_error(request, code, 402, "Spend stopped", retryable=False, meter="mau"))
     assert type(error) is cls
     assert (error.code, error.status, error.outcome, error.retry_after) == (code, 402, "rejected", None)
@@ -191,14 +191,14 @@ def test_unverified_spend_is_typed_and_keeps_its_retry_delay() -> None:
 
 def test_problems_constructed_directly_keep_the_same_shape() -> None:
     request_id = uid()
-    limited = ConvoHopProblem("RATE_LIMITED", request_id, "rejected", 429, "Rate limited", retry_after=3)
+    limited = RelayProblem("RATE_LIMITED", request_id, "rejected", 429, "Rate limited", retry_after=3)
     assert (limited.message, limited.retry_after, str(limited)) == ("Rate limited", 3, "Rate limited")
-    assert ConvoHopProblem("NOT_FOUND", request_id, "rejected", 404, "Not found").retry_after is None
+    assert RelayProblem("NOT_FOUND", request_id, "rejected", 404, "Not found").retry_after is None
     scoped = ScopeRequiredProblem("SCOPE_REQUIRED", request_id, "rejected", 403, scope_message("callRead"))
-    assert isinstance(scoped, ConvoHopProblem)
+    assert isinstance(scoped, RelayProblem)
     assert (scoped.code, scoped.scope, scoped.request_id) == ("SCOPE_REQUIRED", "callRead", request_id)
     assert repr(limited) == (
-        f"ConvoHopProblem(code='RATE_LIMITED', request_id='{request_id}', outcome='rejected', status=429, "
+        f"RelayProblem(code='RATE_LIMITED', request_id='{request_id}', outcome='rejected', status=429, "
         "message='Rate limited', retry_after=3)"
     )
 
@@ -206,14 +206,14 @@ def test_problems_constructed_directly_keep_the_same_shape() -> None:
 @pytest.mark.parametrize(
     "error",
     [
-        ConvoHopProblem("TRANSPORT_UNKNOWN", "00000000-0000-4000-8000-000000000001", "unknown", 0, "Lost"),
+        RelayProblem("TRANSPORT_UNKNOWN", "00000000-0000-4000-8000-000000000001", "unknown", 0, "Lost"),
         RateLimitedProblem("RATE_LIMITED", "00000000-0000-4000-8000-000000000002", "rejected", 429, "", retry_after=4),
         ScopeRequiredProblem(
             "SCOPE_REQUIRED", "00000000-0000-4000-8000-000000000003", "rejected", 403, scope_message("callRead")
         ),
     ],
 )
-def test_problems_survive_pickling_with_their_class_and_fields(error: ConvoHopProblem) -> None:
+def test_problems_survive_pickling_with_their_class_and_fields(error: RelayProblem) -> None:
     restored = pickle.loads(pickle.dumps(error))  # noqa: S301 - round-trips an object this test created.
     assert type(restored) is type(error)
     assert repr(restored) == repr(error)

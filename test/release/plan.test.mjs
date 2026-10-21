@@ -1,8 +1,8 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 
-import { loadReleaseConfig, REPO_ROOT } from '../../scripts/release/lib.mjs';
-import { planRelease } from '../../scripts/release/plan.mjs';
+import { loadReleaseConfig, REPO_ROOT, REPOSITORY } from '../../scripts/release/lib.mjs';
+import { planNpmPublication, planRelease } from '../../scripts/release/plan.mjs';
 
 const { config } = loadReleaseConfig(REPO_ROOT);
 const SHA = 'a'.repeat(40);
@@ -27,6 +27,25 @@ function releasePleaseOutputs(releases, extra = {}) {
 
 const plan = (fields, commits = { 'core-v0.2.0': SHA, 'client-v0.2.1': SHA }) =>
   planRelease({ eventName: 'push', sha: SHA, config, manifest: MANIFEST, github: stubGitHub(commits), ...fields });
+
+test('npm publication defaults off and requires a confirmed tagged dispatch from main history', () => {
+  const request = {
+    repository: REPOSITORY, eventName: 'workflow_dispatch', ref: 'refs/tags/core-v0.2.0',
+    sha: SHA, headSha: SHA, onMain: true,
+    releases: [{ path: 'packages/core', version: '0.2.0', tag: 'core-v0.2.0' }],
+  };
+  assert.equal(planNpmPublication(request), false);
+  const approved = { ...request, publish: true, enabled: true, confirmation: 'publish npm core-v0.2.0' };
+  assert.equal(planNpmPublication(approved), true);
+  for (const overrides of [
+    { repository: 'example/sdks' }, { eventName: 'push' }, { ref: 'refs/heads/main' },
+    { ref: 'refs/tags/server-v0.1.0' }, { headSha: OTHER }, { onMain: false },
+    { enabled: false }, { confirmation: '' }, { confirmation: 'publish npm core-v0.2.1' },
+    { publish: 'true' }, { enabled: 'true' },
+  ]) {
+    assert.throws(() => planNpmPublication({ ...approved, ...overrides }));
+  }
+});
 
 test('a release-please push plans the released packages at the release commit', async () => {
   const result = await plan({

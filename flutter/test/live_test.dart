@@ -1,7 +1,7 @@
 import 'dart:convert';
 
-import 'package:convohop/convohop.dart';
-import 'package:convohop/src/protocol.dart' show fingerprint;
+import 'package:instantrelay/instantrelay.dart';
+import 'package:instantrelay/src/protocol.dart' show fingerprint;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:http/http.dart' as http;
 
@@ -128,7 +128,7 @@ void main() {
       await expectLater(
         participation!.connect<FakeMediaRoom>((_) => FakeMediaRoom(sid: null), requestId: requestId),
         throwsA(
-          isA<ConvoHopProblem>()
+          isA<RelayProblem>()
               .having((problem) => problem.code, 'code', 'MEDIA_CONNECT_FAILED')
               .having((problem) => problem.toString(), 'string', isNot(contains('fake-connect-token'))),
         ),
@@ -181,7 +181,7 @@ void main() {
       // handles still hold them, so the newer message's record makes room.
       await expectLater(
         client.send(conversationId, 'lost', requestId: requestIdTwo),
-        throwsA(isA<ConvoHopProblem>().having((problem) => problem.code, 'code', 'TRANSPORT_UNKNOWN')),
+        throwsA(isA<RelayProblem>().having((problem) => problem.code, 'code', 'TRANSPORT_UNKNOWN')),
       );
       expect(journal(), <String>[...fillers, _grantRequest, _leaveRequest, _endRequest, requestIdTwo]);
 
@@ -190,7 +190,7 @@ void main() {
       await expectLater(
         client.send(conversationId, 'later', requestId: _laterRequest),
         throwsA(
-          isA<ConvoHopProblem>()
+          isA<RelayProblem>()
               .having((problem) => problem.code, 'code', 'RECOVERY_LIMIT')
               .having((problem) => problem.requestId, 'requestId', _laterRequest)
               .having((problem) => problem.outcome, 'outcome', 'rejected')

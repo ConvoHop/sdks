@@ -1,13 +1,13 @@
 # .NET SDK
 
-The `ConvoHop` package wraps the ConvoHop API for .NET backends. It runs on your servers with a secret backend key, verifies the webhooks that ConvoHop sends, and builds push requests from notification events.
+The `Relay` package wraps the Relay API for .NET backends. It runs on your servers with a secret backend key, verifies the webhooks that Relay sends, and builds push requests from notification events.
 
 ## How it fits in
 
 1. Your users sign in to your app with your own authentication.
-2. Your backend uses the `ConvoHop` package to map each user to a ConvoHop principal and issue a short-lived session for the user's device.
-3. Your app passes the session to a client SDK, such as [`@convohop/client`](../typescript/quickstarts/client.md) in browsers, which sends, watches and calls as that one user.
-4. ConvoHop sends signed webhooks to your backend. `Webhooks.Verify` verifies them, and `PushPayloads` builds APNs, FCM and Web Push requests from notification events for you to send with your own push credentials.
+2. Your backend uses the `Relay` package to map each user to a Relay principal and issue a short-lived session for the user's device.
+3. Your app passes the session to a client SDK, such as [`@instantrelay/client`](../typescript/quickstarts/client.md) in browsers, which sends, watches and calls as that one user.
+4. Relay sends signed webhooks to your backend. `Webhooks.Verify` verifies them, and `PushPayloads` builds APNs, FCM and Web Push requests from notification events for you to send with your own push credentials.
 
 Keep the backend key on your servers. It never belongs in client code, such as a browser, MAUI, Blazor WebAssembly or Unity app, or in bundles, storage, URLs or logs.
 
@@ -16,43 +16,43 @@ Keep the backend key on your servers. It never belongs in client code, such as a
 The package isn't on NuGet yet. Build it from a clone of [the SDK repository](https://github.com/ConvoHop/sdks) with the .NET 10 SDK that the clone's `global.json` selects. From the clone's root, pack it into a folder:
 
 ```sh
-dotnet pack dotnet/src/ConvoHop -c Release -o "$PWD/dotnet/artifacts"
+dotnet pack dotnet/src/Relay -c Release -o "$PWD/dotnet/artifacts"
 ```
 
-Then add that folder to your project as a package source, and add the `ConvoHop` package from it, as [install from source](https://github.com/ConvoHop/sdks/blob/main/dotnet/README.md#install-from-source) shows.
+Then add that folder to your project as a package source, and add the `Relay` package from it, as [install from source](https://github.com/ConvoHop/sdks/blob/main/dotnet/README.md#install-from-source) shows.
 
 The package has `netstandard2.0` and `net10.0` assets, and its tests run on .NET 8, 9 and 10. The `netstandard2.0` asset should also run on .NET Framework 4.7.2 or later, but that isn't tested. The `net10.0` asset has no dependencies, and the `netstandard2.0` asset depends on `System.Text.Json`, `Microsoft.Bcl.AsyncInterfaces` and `Microsoft.Bcl.TimeProvider`. The build is deterministic and has Source Link, so debuggers can step into the matching source.
 
 ## Clients
 
 - `ProjectServerClient` calls one project with a backend key. Its helpers, such as `Principals`, `Sessions` and `Conversation(id)`, check that each reply names the resource you asked for. Its generated `Communication` property reaches every Communication API operation that a backend can send.
-- `ConvoHopManagementClient` calls the Management API with an operator access token. Its generated `Management` property reaches every management operation.
+- `RelayManagementClient` calls the Management API with an operator access token. Its generated `Management` property reaches every management operation.
 
 Create one client when your backend starts and share it: clients are safe for concurrent use. Every method that sends a request is asynchronous and takes a `CancellationToken`, and nullable reference types are annotated throughout.
 
-A failed call throws a `ConvoHopException`, whose `Code` is the stable error code and whose `Outcome` says whether the request took effect. The request and response models in `ConvoHop.Models` are generated from the GraphQL schema like the other SDKs' types. They serialize with `System.Text.Json` source generation, never reflection or Newtonsoft.Json.
+A failed call throws a `RelayException`, whose `Code` is the stable error code and whose `Outcome` says whether the request took effect. The request and response models in `Relay.Models` are generated from the GraphQL schema like the other SDKs' types. They serialize with `System.Text.Json` source generation, never reflection or Newtonsoft.Json.
 
 ## Tested examples
 
 Every C# sample in these docs is a region of a file in [the examples project](https://github.com/ConvoHop/sdks/tree/main/docs/languages/dotnet/examples), which CI builds with warnings as errors and tests with xUnit on .NET 8 and 10. On .NET 8 the samples use the package's `netstandard2.0` asset, and on .NET 10 its `net10.0` asset:
 
-- The server samples run against the conformance mock, a local stand-in for the ConvoHop API, including dropped connections.
-- The webhooks samples verify deliveries signed the way ConvoHop signs them, through ASP.NET Core's request and result types.
+- The server samples run against the conformance mock, a local stand-in for the Relay API, including dropped connections.
+- The webhooks samples verify deliveries signed the way Relay signs them, through ASP.NET Core's request and result types.
 - The push samples run on every vector of the [push payload contract](https://github.com/ConvoHop/sdks/blob/main/spec/push-payload/README.md), and check the requests with `Lib.Net.Http.WebPush` and `FirebaseAdmin`.
 
 ## Packages
 
 | Package | Layer | Runtime | Summary |
 | --- | --- | --- | --- |
-| [`ConvoHop`](reference/convohop.md) | Server | .NET 8 or later. The `netstandard2.0` build also targets .NET Framework 4.7.2 or later, which isn't tested yet. | Server SDK for trusted .NET backends: project and management clients for backend-key calls, typed errors, recovery storage, webhook verification and push payload builders. |
-| [`ConvoHop.Api`](reference/api.md) | Server | .NET 8 or later. The `netstandard2.0` build also targets .NET Framework 4.7.2 or later, which isn't tested yet. | Generated APIs with a method for every communication and management operation a backend can send, and async page streams for paginated ones. |
-| [`ConvoHop.Models`](reference/models.md) | Server | .NET 8 or later. The `netstandard2.0` build also targets .NET Framework 4.7.2 or later, which isn't tested yet. | Generated input and result models of the ConvoHop GraphQL API. |
+| [`Relay`](reference/relay.md) | Server | .NET 8 or later. The `netstandard2.0` build also targets .NET Framework 4.7.2 or later, which isn't tested yet. | Server SDK for trusted .NET backends: project and management clients for backend-key calls, typed errors, recovery storage, webhook verification and push payload builders. |
+| [`Relay.Api`](reference/api.md) | Server | .NET 8 or later. The `netstandard2.0` build also targets .NET Framework 4.7.2 or later, which isn't tested yet. | Generated APIs with a method for every communication and management operation a backend can send, and async page streams for paginated ones. |
+| [`Relay.Models`](reference/models.md) | Server | .NET 8 or later. The `netstandard2.0` build also targets .NET Framework 4.7.2 or later, which isn't tested yet. | Generated input and result models of the Relay GraphQL API. |
 
 ## Quickstarts
 
 | Quickstart | Summary |
 | --- | --- |
-| [Server](quickstarts/server.md) | Call ConvoHop from your backend with a backend key: principals, sessions, conversations and messages. |
+| [Server](quickstarts/server.md) | Call Relay from your backend with a backend key: principals, sessions, conversations and messages. |
 | [Webhooks](quickstarts/webhooks.md) | Verify signed webhook deliveries and handle events. |
 | [Push notifications](quickstarts/push.md) | Deliver messages and calls to your users' devices as APNs, FCM and Web Push notifications. |
 
@@ -64,11 +64,11 @@ Every C# sample in these docs is a region of a file in [the examples project](ht
 
 # .NET server quickstart
 
-Call ConvoHop from your .NET backend with the `ConvoHop` package: connect with a backend key, sign in your users, create a conversation, send and read messages as a member, and recover a send whose response was lost.
+Call Relay from your .NET backend with the `Relay` package: connect with a backend key, sign in your users, create a conversation, send and read messages as a member, and recover a send whose response was lost.
 
 ## Before you start
 
-You need .NET 8 or later and the `ConvoHop` package ([install](index.md#install)). For your project, you need the Communication API's base URL, the project ID, the project's incarnation and a backend key, which the [`management.issueBackendKey`](../operations/management/issueBackendKey.md) operation delivers once.
+You need .NET 8 or later and the `Relay` package ([install](index.md#install)). For your project, you need the Communication API's base URL, the project ID, the project's incarnation and a backend key, which the [`management.issueBackendKey`](../operations/management/issueBackendKey.md) operation delivers once.
 
 Keep the backend key in your secret store. Its scopes limit what it can do. This quickstart needs `principalManage`, `sessionIssue`, `conversationManage`, `messageRead` and `messageWrite`.
 
@@ -80,8 +80,8 @@ using System.Linq;
 using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
-using ConvoHop;
-using ConvoHop.Models;
+using Relay;
+using Relay.Models;
 ```
 
 ## Connect
@@ -110,11 +110,11 @@ public static async Task<ProjectServerClient> ConnectAsync(ServerConfig config, 
 }
 ```
 
-`BaseUrl` is an HTTPS origin, or HTTP on a loopback host for local development. The client gives each request 12 seconds and never follows redirects. To pass your own `HttpClient`, create it with `AllowAutoRedirect = false`, as the [`ProjectServerClientOptions` reference](reference/convohop.md#projectserverclientoptions-class) describes.
+`BaseUrl` is an HTTPS origin, or HTTP on a loopback host for local development. The client gives each request 12 seconds and never follows redirects. To pass your own `HttpClient`, create it with `AllowAutoRedirect = false`, as the [`ProjectServerClientOptions` reference](reference/relay.md#projectserverclientoptions-class) describes.
 
 ## Sign in a user
 
-ConvoHop doesn't authenticate your users. After your own login succeeds, map the user to a principal and issue a session for the device. Return the result to the user's app, which passes it to a client SDK, as the [TypeScript client quickstart](../typescript/quickstarts/client.md) shows.
+Relay doesn't authenticate your users. After your own login succeeds, map the user to a principal and issue a session for the device. Return the result to the user's app, which passes it to a client SDK, as the [TypeScript client quickstart](../typescript/quickstarts/client.md) shows.
 
 ```cs snippet=docs/languages/dotnet/examples/src/Server.cs#bootstrap
 // What your login endpoint returns, as JSON, to the signed-in user's app.
@@ -185,7 +185,7 @@ public static async Task<IReadOnlyList<Message>> LatestMessagesAsync(
 
 ## Recover a lost response
 
-When a connection drops after a command is sent, the SDK can't tell whether the authority committed it, so it throws a `ConvoHopException` whose `Outcome` is `"unknown"`. Sending again with a new request ID could post the message twice. Instead, `Requests.RetryAsync` asks the authority about the original request. If the authority never received it, `RetryAsync` resends the original command first. A `committed` resolution carries the command's result.
+When a connection drops after a command is sent, the SDK can't tell whether the authority committed it, so it throws a `RelayException` whose `Outcome` is `"unknown"`. Sending again with a new request ID could post the message twice. Instead, `Requests.RetryAsync` asks the authority about the original request. If the authority never received it, `RetryAsync` resends the original command first. A `committed` resolution carries the command's result.
 
 ```cs snippet=docs/languages/dotnet/examples/src/Server.cs#recover
 // A lost response leaves the outcome unknown: the message may or may not exist. Ask about the
@@ -198,7 +198,7 @@ public static async Task<string?> SendOnceAsync(
     {
         return await SendAsAsync(server, conversationId, authorId, text, requestId, cancellationToken);
     }
-    catch (ConvoHopException exception) when (exception.Outcome == "unknown")
+    catch (RelayException exception) when (exception.Outcome == "unknown")
     {
         // Resolves the request first, and resends the original only if the authority never saw it.
         RequestResolution resolution = await server.Requests.RetryAsync(requestId, cancellationToken);
@@ -213,11 +213,11 @@ Retry with the same client, which keeps the original request in memory. It sends
 ## Next steps
 
 - [Webhooks quickstart](quickstarts/webhooks.md): react to events in your backend.
-- [`ProjectServerClient` reference](reference/convohop.md#projectserverclient-class): every method, with the operation it sends.
+- [`ProjectServerClient` reference](reference/relay.md#projectserverclient-class): every method, with the operation it sends.
 
 # .NET webhooks quickstart
 
-Receive ConvoHop events in your .NET backend: verify each signed delivery with `Webhooks.Verify`, acknowledge it quickly, and handle its event in a queue worker.
+Receive Relay events in your .NET backend: verify each signed delivery with `Webhooks.Verify`, acknowledge it quickly, and handle its event in a queue worker.
 
 ## Before you start
 
@@ -230,14 +230,14 @@ using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
-using ConvoHop;
-using ConvoHop.Models;
+using Relay;
+using Relay.Models;
 using Microsoft.AspNetCore.Http;
 ```
 
 ## Verify deliveries
 
-ConvoHop signs each delivery with the [Standard Webhooks](https://www.standardwebhooks.com) scheme. `Webhooks.Verify` checks the signature and timestamp against the raw body, and returns the delivery's webhook ID and event. `WebhookHeaders.From` takes ASP.NET Core's `request.Headers`, an `HttpHeaders`, a dictionary or a lookup function.
+Relay signs each delivery with the [Standard Webhooks](https://www.standardwebhooks.com) scheme. `Webhooks.Verify` checks the signature and timestamp against the raw body, and returns the delivery's webhook ID and event. `WebhookHeaders.From` takes ASP.NET Core's `request.Headers`, an `HttpHeaders`, a dictionary or a lookup function.
 
 ```cs snippet=docs/languages/dotnet/examples/src/Webhooks.cs#receive
 // Map it to your endpoint's URL in ASP.NET Core, and enqueue the events for your queue worker:
@@ -271,11 +271,11 @@ public static async Task<IResult> ReceiveAsync(
 }
 ```
 
-- Pass every secret you hold. While a rotation is pending, ConvoHop signs with both the current and the next secret, and it signs with the replaced secret for 24 hours after the rotation.
+- Pass every secret you hold. While a rotation is pending, Relay signs with both the current and the next secret, and it signs with the replaced secret for 24 hours after the rotation.
 - Verify the exact bytes you received, never re-serialized JSON. A body over 4096 bytes fails with `BodyTooLarge`, so the sample reads at most one byte more.
 - Answer within 5 seconds, and process the event afterwards.
 - Delivery is at least once, and retries keep the webhook ID, so deduplicate on it.
-- A failed check throws `WebhookVerificationException`, whose `Code` names the check. Only `InvalidSecret` means your configuration is wrong. The [`WebhookVerificationCode` reference](reference/convohop.md#webhookverificationcode-enum) lists the others.
+- A failed check throws `WebhookVerificationException`, whose `Code` names the check. Only `InvalidSecret` means your configuration is wrong. The [`WebhookVerificationCode` reference](reference/relay.md#webhookverificationcode-enum) lists the others.
 
 ## Handle events
 
@@ -321,15 +321,15 @@ Notification events, such as `notification.message`, are `WebhookNotificationEve
 ## Next steps
 
 - [Push notifications quickstart](quickstarts/push.md): turn notification events into APNs, FCM and Web Push requests.
-- [`WebhookEvent` reference](reference/convohop.md#webhookevent-class): every event type and its fields.
+- [`WebhookEvent` reference](reference/relay.md#webhookevent-class): every event type and its fields.
 
 # .NET push notifications quickstart
 
-Send push notifications for ConvoHop messages and calls: `PushPayloads` turns notification events into APNs, FCM and Web Push requests, and you send them with your own push credentials and libraries.
+Send push notifications for Relay messages and calls: `PushPayloads` turns notification events into APNs, FCM and Web Push requests, and you send them with your own push credentials and libraries.
 
 ## Before you start
 
-ConvoHop doesn't send push notifications itself. You need:
+Relay doesn't send push notifications itself. You need:
 
 - A webhook endpoint that receives `notification.message`, `notification.call` and `notification.callCancelled` events, as the [webhooks quickstart](quickstarts/webhooks.md) shows. Each of these events is addressed to one recipient. Events arrive at least once and in any order, so deduplicate on `EventId` before you send.
 - The devices that your app registered for each user, in your own database.
@@ -343,7 +343,7 @@ using System.Collections.Generic;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
-using ConvoHop;
+using Relay;
 using FirebaseAdmin.Messaging;
 using Lib.Net.Http.WebPush;
 using Lib.Net.Http.WebPush.Authentication;
@@ -519,7 +519,7 @@ The test runs `NotifyAsync` on every vector of the [push payload contract](https
 
 ## Next steps
 
-- [`PushPayloads` reference](reference/convohop.md#pushpayloads-class): every builder and its options.
+- [`PushPayloads` reference](reference/relay.md#pushpayloads-class): every builder and its options.
 - [Webhooks quickstart](quickstarts/webhooks.md): verify the deliveries that carry these events.
 
 # .NET reference
@@ -528,17 +528,17 @@ The public API of each .NET package, generated from its declarations.
 
 | Package | Layer | Summary |
 | --- | --- | --- |
-| [`ConvoHop`](reference/convohop.md) | Server | Server SDK for trusted .NET backends: project and management clients for backend-key calls, typed errors, recovery storage, webhook verification and push payload builders. |
-| [`ConvoHop.Api`](reference/api.md) | Server | Generated APIs with a method for every communication and management operation a backend can send, and async page streams for paginated ones. |
-| [`ConvoHop.Models`](reference/models.md) | Server | Generated input and result models of the ConvoHop GraphQL API. |
+| [`Relay`](reference/relay.md) | Server | Server SDK for trusted .NET backends: project and management clients for backend-key calls, typed errors, recovery storage, webhook verification and push payload builders. |
+| [`Relay.Api`](reference/api.md) | Server | Generated APIs with a method for every communication and management operation a backend can send, and async page streams for paginated ones. |
+| [`Relay.Models`](reference/models.md) | Server | Generated input and result models of the Relay GraphQL API. |
 
 [Operation coverage](reference/operations.md) lists the members that send each API operation.
 
-# `ConvoHop`
+# `Relay`
 
 Server SDK for trusted .NET backends: project and management clients for backend-key calls, typed errors, recovery storage, webhook verification and push payload builders.
 
-**Layer:** Server. **Runtime:** .NET 8 or later. The `netstandard2.0` build also targets .NET Framework 4.7.2 or later, which isn't tested yet. **Source:** `dotnet/src/ConvoHop`.
+**Layer:** Server. **Runtime:** .NET 8 or later. The `netstandard2.0` build also targets .NET Framework 4.7.2 or later, which isn't tested yet. **Source:** `dotnet/src/Relay`.
 
 ## Classes
 
@@ -761,542 +761,6 @@ public ContextFieldUse Use { get; }
 ```
 
 How the operation uses the field.
-
-### `ConvoHopException` class
-
-```cs
-public class ConvoHopException : Exception
-```
-
-A classified failure from the authority or the SDK. Classify it by `Code` (see `ErrorCodes`), never by message text.
-
-`Outcome` says what is known about the request: `rejected` means it did not take effect, `committed` or `accepted` mean it did, and `unknown` means resolve the original request ID before sending anything new. Messages never contain credentials.
-
-#### `ConvoHopException` constructor
-
-```cs
-public ConvoHopException(string code, string requestId, string outcome, int status, string message, TimeSpan? retryAfter = null, Exception? innerException = null);
-```
-
-Creates an exception.
-
-Parameters:
-
-- `code`: The stable error code.
-- `requestId`: The request ID the failure belongs to.
-- `outcome`: What is known about the request outcome.
-- `status`: The HTTP-style status, or 0 when no authority response was observed.
-- `message`: The human-readable message.
-- `retryAfter`: How long to wait before resending, when the authority sent a delay.
-- `innerException`: The underlying failure, if any.
-
-Exceptions:
-
-- `ArgumentOutOfRangeException`: `retryAfter` is negative.
-
-#### `ConvoHopException.Code` property
-
-```cs
-public string Code { get; }
-```
-
-The stable machine-readable error code.
-
-#### `ConvoHopException.RequestId` property
-
-```cs
-public string RequestId { get; }
-```
-
-The request ID the failure belongs to.
-
-#### `ConvoHopException.Outcome` property
-
-```cs
-public string Outcome { get; }
-```
-
-What is known about the outcome: `rejected`, `unknown`, `committed` or `accepted`.
-
-#### `ConvoHopException.Status` property
-
-```cs
-public int Status { get; }
-```
-
-The HTTP-style status, or 0 when no authority response was observed.
-
-#### `ConvoHopException.RetryAfter` property
-
-```cs
-public TimeSpan? RetryAfter { get; }
-```
-
-How long to wait before resending the same request, when the authority sent a delay (for example with `RATE_LIMITED`). Read in whole seconds from the error's `extensions.retryAfter`, else from an HTTP `Retry-After` delay in seconds. A delay longer than `TimeSpan.MaxValue` is reported as `TimeSpan.MaxValue`. The SDK never waits or resends on its own because of it.
-
-### `ConvoHopManagementClient` class
-
-```cs
-public sealed class ConvoHopManagementClient
-```
-
-Operator-token client for organizations, deployments, projects and backend keys. Use it only in trusted operator tooling. Instances are thread-safe.
-
-Mutations accept a `requestId`: after an outcome of `unknown`, call the method again with the same ID and payload, or retry it with `ConvoHopTransport.RetryAsync`. Never send the change again under a new ID.
-
-#### `ConvoHopManagementClient` constructor
-
-```cs
-public ConvoHopManagementClient(ConvoHopManagementClientOptions options);
-```
-
-Creates a client. Construction sends no request.
-
-Parameters:
-
-- `options`: The client options.
-
-Exceptions:
-
-- `ArgumentException`: An option is invalid. The message never contains the access token.
-
-#### `ConvoHopManagementClient.Transport` property
-
-```cs
-public ConvoHopTransport Transport { get; }
-```
-
-The transport, for management operations without a typed method and for recovery records.
-
-#### `ConvoHopManagementClient.Management` property
-
-```cs
-public ManagementApi Management { get; }
-```
-
-Every management query and mutation in the schema, with the generated inputs and replies. Unlike the helpers, it does not check that a result names the resource the request did.
-
-#### `ConvoHopManagementClient.CreateOrganizationAsync` method
-
-```cs
-public Task<Organization> CreateOrganizationAsync(string name, string termsRef, string? requestId = null, CancellationToken cancellationToken = default);
-```
-
-Creates an organization owned by the operator.
-
-Parameters:
-
-- `name`: The organization name.
-- `termsRef`: The reference to the accepted terms.
-- `requestId`: The request ID; pass the original ID to resume after an uncertain outcome.
-- `cancellationToken`: Stops waiting. A cancelled mutation has an unknown outcome.
-
-Returns: The organization.
-
-Exceptions:
-
-- `ConvoHopException`: The request failed, or its outcome is uncertain.
-
-Sends [`management.createOrganization`](../operations/management/createOrganization.md).
-
-#### `ConvoHopManagementClient.CreateDeploymentAsync` method
-
-```cs
-public Task<CreateDeploymentReply> CreateDeploymentAsync(string orgId, DeploymentOptions? configuration = null, string? requestId = null, CancellationToken cancellationToken = default);
-```
-
-Requests a deployment. Without `configuration`, a loopback authority gets the local single-node defaults; any other authority requires it.
-
-Parameters:
-
-- `orgId`: The organization ID.
-- `configuration`: The offering, geography, installation profile and consent reference.
-- `requestId`: The request ID; pass the original ID to resume after an uncertain outcome.
-- `cancellationToken`: Stops waiting. A cancelled mutation has an unknown outcome.
-
-Returns: The receipt; its operation tracks the provisioning.
-
-Exceptions:
-
-- `ArgumentException`: An argument is invalid, or a hosted deployment has no configuration.
-- `ConvoHopException`: The request failed, or its outcome is uncertain.
-
-Sends [`management.createDeployment`](../operations/management/createDeployment.md).
-
-#### `ConvoHopManagementClient.CreateProjectAsync` method
-
-```cs
-public Task<CreateProjectReply> CreateProjectAsync(string deploymentId, string name, ProjectOptions? configuration = null, string? requestId = null, CancellationToken cancellationToken = default);
-```
-
-Requests a project in a deployment. Without `configuration`, a loopback authority gets the `local` environment and the `application-server` backend principal; any other authority requires it.
-
-Parameters:
-
-- `deploymentId`: The deployment ID.
-- `name`: The project name.
-- `configuration`: The environment and backend principal name.
-- `requestId`: The request ID; pass the original ID to resume after an uncertain outcome.
-- `cancellationToken`: Stops waiting. A cancelled mutation has an unknown outcome.
-
-Returns: The receipt; its result carries the project ID and incarnation once committed.
-
-Exceptions:
-
-- `ArgumentException`: An argument is invalid, or a hosted project has no configuration.
-- `ConvoHopException`: The request failed, or its outcome is uncertain.
-
-Sends [`management.createProject`](../operations/management/createProject.md).
-
-#### `ConvoHopManagementClient.GetOperationAsync` method
-
-```cs
-public Task<Operation> GetOperationAsync(string operationId, CancellationToken cancellationToken = default);
-```
-
-Reads a management operation, such as deployment provisioning.
-
-Parameters:
-
-- `operationId`: The operation ID.
-- `cancellationToken`: Stops waiting for the read.
-
-Returns: The operation.
-
-Exceptions:
-
-- `ArgumentException`: The ID is not a canonical UUID.
-- `ConvoHopException`: The read failed or its response was malformed.
-
-Sends [`management.getOperation`](../operations/management/getOperation.md).
-
-#### `ConvoHopManagementClient.IssueBackendKeyAsync` method
-
-```cs
-public Task<IssueBackendKeyReply> IssueBackendKeyAsync(string projectId, string name, IReadOnlyList<string> scopes, string expiresAt, string? requestId = null, CancellationToken cancellationToken = default);
-```
-
-Issues a backend key. The secret is delivered through a credential delivery, never in this response; see the result's `OperationResult.Delivery`.
-
-Parameters:
-
-- `projectId`: The project ID.
-- `name`: The key name.
-- `scopes`: The scopes the key grants, such as `messageWrite`.
-- `expiresAt`: When the key expires, as an RFC 3339 UTC timestamp.
-- `requestId`: The request ID; pass the original ID to resume after an uncertain outcome.
-- `cancellationToken`: Stops waiting. A cancelled mutation has an unknown outcome.
-
-Returns: The receipt.
-
-Exceptions:
-
-- `ArgumentException`: An argument is invalid.
-- `ConvoHopException`: The request failed, or its outcome is uncertain.
-
-Sends [`management.issueBackendKey`](../operations/management/issueBackendKey.md).
-
-#### `ConvoHopManagementClient.GetDeliveryPermitAsync` method
-
-```cs
-public Task<JsonElement> GetDeliveryPermitAsync(string projectId, string deliveryId, string redemptionRequestId, string? requestId = null, CancellationToken cancellationToken = default);
-```
-
-Obtains a single-use permit to redeem a credential delivery. Hand it, with the redemption request ID, to the process that redeems the delivery; treat it as a secret.
-
-Parameters:
-
-- `projectId`: The project ID.
-- `deliveryId`: The credential delivery ID.
-- `redemptionRequestId`: The request ID the redemption will use.
-- `requestId`: The request ID; pass the original ID to resume after an uncertain outcome.
-- `cancellationToken`: Stops waiting. A cancelled mutation has an unknown outcome.
-
-Returns: The permit object.
-
-Exceptions:
-
-- `ArgumentException`: An argument is invalid.
-- `ConvoHopException`: The request failed, its outcome is uncertain, or the permit is not an object.
-
-Sends [`management.credentialPermit`](../operations/management/credentialPermit.md).
-
-### `ConvoHopManagementClientOptions` class
-
-```cs
-public sealed class ConvoHopManagementClientOptions
-```
-
-Options for `ConvoHopManagementClient`.
-
-#### `ConvoHopManagementClientOptions` constructor
-
-```cs
-public ConvoHopManagementClientOptions();
-```
-
-#### `ConvoHopManagementClientOptions.BaseUrl` property
-
-```cs
-public string BaseUrl { get; set; }
-```
-
-The authority origin: HTTPS, or explicit loopback HTTP for local development. Requests go to `{BaseUrl}/graphql`.
-
-#### `ConvoHopManagementClientOptions.AccessToken` property
-
-```cs
-public string AccessToken { get; set; }
-```
-
-The operator access token. Keep it in trusted operator tooling; never log it or send it to clients.
-
-#### `ConvoHopManagementClientOptions.ActorId` property
-
-```cs
-public string ActorId { get; set; }
-```
-
-The operator's actor ID, a canonical UUID. It scopes the recovery records.
-
-#### `ConvoHopManagementClientOptions.RecoveryStorage` property
-
-```cs
-public IRecoveryStorage? RecoveryStorage { get; set; }
-```
-
-Durable storage for mutation recovery records, so an uncertain mutation can be resolved after a restart. The records never contain the access token.
-
-#### `ConvoHopManagementClientOptions.HttpClient` property
-
-```cs
-public HttpClient? HttpClient { get; set; }
-```
-
-The HTTP client to send requests with. It must not follow redirects or add credentials of its own. Null uses a shared client that never follows redirects or stores cookies.
-
-#### `ConvoHopManagementClientOptions.TimeProvider` property
-
-```cs
-public TimeProvider? TimeProvider { get; set; }
-```
-
-The clock for timeouts and retry budgets. Defaults to `TimeProvider.System`.
-
-### `ConvoHopTransport` class
-
-```cs
-public sealed class ConvoHopTransport
-```
-
-The GraphQL transport for one credential: generated operations over `/graphql`, response and receipt validation, and mutation recovery.
-
-Instances are thread-safe. A mutation keeps its request ID, payload, incarnation and retry budget across attempts. Transport uncertainty is neither rejection nor commit: when an attempt fails with outcome `unknown`, resolve or retry the original request ID (see `RetryAsync`); never send the change again under a new ID.
-
-Cancelling a call stops waiting for it; it does not prove the authority did not apply a mutation. Recovery records never contain credentials.
-
-#### `ConvoHopTransport` constructor
-
-```cs
-public ConvoHopTransport(ConvoHopTransportOptions options);
-```
-
-Creates a transport.
-
-Parameters:
-
-- `options`: The transport options.
-
-Exceptions:
-
-- `ArgumentException`: The base URL, namespace or credential is invalid. The message never contains the credential.
-
-#### `ConvoHopTransport.BaseUrl` property
-
-```cs
-public string BaseUrl { get; }
-```
-
-The authority origin requests are sent to.
-
-#### `ConvoHopTransport.DurableRecovery` property
-
-```cs
-public bool DurableRecovery { get; }
-```
-
-Whether mutation recovery records are written to `ConvoHopTransportOptions.RecoveryStorage`.
-
-#### `ConvoHopTransport.Incarnation` property
-
-```cs
-public string Incarnation { get; }
-```
-
-The project incarnation requests belong to, or `management`.
-
-#### `ConvoHopTransport.ServingEpoch` property
-
-```cs
-public string? ServingEpoch { get; set; }
-```
-
-The serving epoch most recently observed from route initialization. When set, it is sent with each request as `observedServingEpoch` so the authority can reject requests routed from a stale view.
-
-#### `ConvoHopTransport.InitializeRecoveryAsync` method
-
-```cs
-public Task InitializeRecoveryAsync(CancellationToken cancellationToken = default);
-```
-
-Loads recovery records from `ConvoHopTransportOptions.RecoveryStorage`. Calls that need recovery state load it first, so calling this is optional; call it at startup to surface corrupt storage early.
-
-Parameters:
-
-- `cancellationToken`: Stops waiting; the load itself still completes.
-
-Returns: A task that completes when the records are loaded.
-
-Exceptions:
-
-- `InvalidDataException`: The stored records are malformed. A later call reads the storage again.
-
-#### `ConvoHopTransport.GetRecoveryStatesAsync` method
-
-```cs
-public Task<IReadOnlyList<RecoveryState>> GetRecoveryStatesAsync(CancellationToken cancellationToken = default);
-```
-
-Returns a snapshot of the mutation recovery records, oldest first.
-
-Parameters:
-
-- `cancellationToken`: Cancels the wait for recovery initialization.
-
-Returns: The recovery records.
-
-#### `ConvoHopTransport.ExecuteAsync` method
-
-```cs
-public Task<TResult> ExecuteAsync<TInput, TResult>(OperationDescriptor<TInput, TResult> operation, string? projectId, TInput input, string? requestId = null, JsonElement? credentialDeliveryPermit = null, CancellationToken cancellationToken = default);
-```
-
-Executes a generated operation.
-
-Type parameters:
-
-- `TInput`: The operation input model.
-- `TResult`: The operation result model.
-
-Parameters:
-
-- `operation`: The operation, from `Operations`.
-- `projectId`: The project of a communication operation; null for management operations.
-- `input`: The operation input, or `NoInput.Value`. Null is allowed only when the input is optional, and sends an empty input object.
-- `requestId`: The request ID. Pass the original ID to resume a mutation after an uncertain outcome; null creates a new one.
-- `credentialDeliveryPermit`: A credential delivery permit, only for credential redemption or acknowledgement.
-- `cancellationToken`: Stops waiting. A cancelled mutation has an unknown outcome.
-
-Returns: The validated result.
-
-Exceptions:
-
-- `ArgumentNullException`: `input` is null and the operation requires an input.
-- `ArgumentException`: `credentialDeliveryPermit` is a default `JsonElement`.
-- `ConvoHopException`: The request was invalid, the authority rejected it, or its outcome is uncertain.
-
-#### `ConvoHopTransport.RetryAsync` method
-
-```cs
-public Task<RequestResolution> RetryAsync(string requestId, CancellationToken cancellationToken = default);
-```
-
-Resolves an uncertain mutation by its original request ID and resends the original payload only when the authority has not observed it and the retry budget allows.
-
-Parameters:
-
-- `requestId`: The original request ID.
-- `cancellationToken`: Stops waiting. A cancelled resend has an unknown outcome.
-
-Returns: The current resolution: committed, accepted, or not observed yet after a resend.
-
-Exceptions:
-
-- `ArgumentException`: The request ID is not a canonical UUID.
-- `InvalidOperationException`: No recovery record exists for the request ID.
-- `ConvoHopException`: The request cannot be resent or its resolution failed.
-
-Sends [`communication.resolveRequest`](../operations/communication/resolveRequest.md) and [`management.resolveRequest`](../operations/management/resolveRequest.md).
-
-### `ConvoHopTransportOptions` class
-
-```cs
-public sealed class ConvoHopTransportOptions
-```
-
-Options for `ConvoHopTransport`.
-
-#### `ConvoHopTransportOptions` constructor
-
-```cs
-public ConvoHopTransportOptions();
-```
-
-#### `ConvoHopTransportOptions.BaseUrl` property
-
-```cs
-public string BaseUrl { get; set; }
-```
-
-The authority origin: HTTPS, or explicit loopback HTTP for local development. It must not have a path, query, fragment or user information.
-
-#### `ConvoHopTransportOptions.Credential` property
-
-```cs
-public string? Credential { get; set; }
-```
-
-The bearer credential, for example a backend key. Keep it on trusted servers; never send it to browsers or put it in URLs, logs or recovery storage.
-
-#### `ConvoHopTransportOptions.Namespace` property
-
-```cs
-public string Namespace { get; set; }
-```
-
-The recovery namespace. Records are stored under `convohop.requests:` followed by this value, so each credential scope needs its own namespace.
-
-#### `ConvoHopTransportOptions.Incarnation` property
-
-```cs
-public string? Incarnation { get; set; }
-```
-
-The project incarnation requests belong to. Null means `management`, which sends no incarnation.
-
-#### `ConvoHopTransportOptions.RecoveryStorage` property
-
-```cs
-public IRecoveryStorage? RecoveryStorage { get; set; }
-```
-
-Durable storage for mutation recovery records. Null keeps them only in this transport instance, so an uncertain mutation cannot be recovered after the process restarts.
-
-#### `ConvoHopTransportOptions.HttpClient` property
-
-```cs
-public HttpClient? HttpClient { get; set; }
-```
-
-The HTTP client to send requests with. It must not follow redirects or add credentials of its own. Null uses a shared client that never follows redirects or stores cookies.
-
-#### `ConvoHopTransportOptions.TimeProvider` property
-
-```cs
-public TimeProvider? TimeProvider { get; set; }
-```
-
-The clock for retry budgets and request timeouts. Null uses `TimeProvider.System`.
 
 ### `DeploymentOptions` class
 
@@ -3074,7 +2538,7 @@ Read the metered usage of an organization in any status, summed over its project
 public static readonly OperationDescriptor<OrganizationBillingRequestInput, OrganizationBillingReply> OrganizationBilling;
 ```
 
-Read the billing state of an organization in any status: the plan whose limits apply, whether ConvoHop bills the organization and, when it does, its standing and subscription.
+Read the billing state of an organization in any status: the plan whose limits apply, whether Relay bills the organization and, when it does, its standing and subscription.
 
 #### `Operations.Management.WebhookEndpoints` static property
 
@@ -3107,46 +2571,6 @@ public static readonly OperationDescriptor<GetOperationRequestInput, GetOperatio
 ```
 
 Read the state of a long-running management operation.
-
-#### `Operations.Management.AgentSignupForApproval` static property
-
-```cs
-public static readonly OperationDescriptor<AgentSignupForApprovalRequestInput, AgentSignupForApprovalReply> AgentSignupForApproval;
-```
-
-Read a pending agent signup request for its approval page, with the agent's suggested plan, scopes and monthly spend cap.
-
-#### `Operations.Management.AgentSignup` static property
-
-```cs
-public static readonly OperationDescriptor<NoInput, AgentSignupReply> AgentSignup;
-```
-
-Read the agent's own signup: its state and, once approved, the organization, project, grant scopes and expiry, and keys. Poll no more often than the ticket's pollAfterSeconds.
-
-#### `Operations.Management.AgentGrants` static property
-
-```cs
-public static readonly OperationDescriptor<AgentGrantsRequestInput, AgentGrantsReply> AgentGrants;
-```
-
-List an organization's agent grants with their keys, newest first.
-
-#### `Operations.Management.AgentAuditEvents` static property
-
-```cs
-public static readonly OperationDescriptor<AgentAuditEventsRequestInput, AgentAuditEventsReply> AgentAuditEvents;
-```
-
-List an organization's agent audit trail, newest first: the approval, provisioning, keys, revocations, spend-control changes and purchases.
-
-#### `Operations.Management.OrganizationSpend` static property
-
-```cs
-public static readonly OperationDescriptor<OrganizationSpendRequestInput, OrganizationSpendReply> OrganizationSpend;
-```
-
-Read the organization's spend this month: its cap, credits, minimum credit, charge limit, charges, margin, spend stop and the freshness of its usage.
 
 #### `Operations.Management.CreateOrganization` static property
 
@@ -3276,70 +2700,6 @@ public static readonly OperationDescriptor<ReplayWebhookDeliveriesRequestInput, 
 
 Redeliver one webhook delivery, or the deliveries of an endpoint in a time range, with their original event IDs.
 
-#### `Operations.Management.RequestAgentSignup` static property
-
-```cs
-public static readonly OperationDescriptor<RequestAgentSignupRequestInput, RequestAgentSignupReply> RequestAgentSignup;
-```
-
-Request an organization for a named human owner, who approves it from an emailed link. Nothing is usable before approval.
-
-#### `Operations.Management.RejectAgentSignup` static property
-
-```cs
-public static readonly OperationDescriptor<RejectAgentSignupRequestInput, RejectAgentSignupReply> RejectAgentSignup;
-```
-
-Reject a signup request from its approval link, optionally suppressing future requests to the email.
-
-#### `Operations.Management.ApproveAgentSignup` static property
-
-```cs
-public static readonly OperationDescriptor<ApproveAgentSignupRequestInput, ApproveAgentSignupReply> ApproveAgentSignup;
-```
-
-Approve a signup request with its approval token and the agent's confirmation code, choosing the plan, scopes, monthly spend cap, agent purchase limit and grant expiry. The signed-in approver becomes the owner.
-
-#### `Operations.Management.IssueAgentKey` static property
-
-```cs
-public static readonly OperationDescriptor<IssueAgentKeyRequestInput, IssueAgentKeyReply> IssueAgentKey;
-```
-
-Issue a backend key for the agent within its grant's scopes and expiry. The result is the pending key; poll agentSignup until it shows the key's delivery, then redeem it with agentCredentialPermit.
-
-#### `Operations.Management.AgentCredentialPermit` static property
-
-```cs
-public static readonly OperationDescriptor<AgentCredentialPermitRequestInput, AgentCredentialPermitReply> AgentCredentialPermit;
-```
-
-Issue a permit that authorizes the agent to redeem one of its key deliveries.
-
-#### `Operations.Management.RevokeAgentGrant` static property
-
-```cs
-public static readonly OperationDescriptor<RevokeAgentGrantRequestInput, RevokeAgentGrantReply> RevokeAgentGrant;
-```
-
-Revoke an agent grant and every key issued under it.
-
-#### `Operations.Management.SetSpendControls` static property
-
-```cs
-public static readonly OperationDescriptor<SetSpendControlsRequestInput, SetSpendControlsReply> SetSpendControls;
-```
-
-Set the organization's monthly spend cap and agent purchase limit.
-
-#### `Operations.Management.PurchaseAgentCredits` static property
-
-```cs
-public static readonly OperationDescriptor<PurchaseAgentCreditsRequestInput, PurchaseAgentCreditsReply> PurchaseAgentCredits;
-```
-
-Buy prepaid credits with a Shared Payment Token, within the owner's agent purchase limit.
-
 ### `ProjectOptions` class
 
 ```cs
@@ -3409,7 +2769,7 @@ The project ID.
 #### `ProjectServerClient.Transport` property
 
 ```cs
-public ConvoHopTransport Transport { get; }
+public RelayTransport Transport { get; }
 ```
 
 The transport, for operations without a typed method and for recovery records.
@@ -3525,7 +2885,7 @@ Returns: A task that completes when the route is stored.
 Exceptions:
 
 - `InvalidOperationException`: The route names another project or incarnation. Recover explicitly; do not rebind recovery records.
-- `ConvoHopException`: The read failed or its response was malformed.
+- `RelayException`: The read failed or its response was malformed.
 
 Sends [`communication.route`](../operations/communication/route.md).
 
@@ -3545,7 +2905,7 @@ Returns: The capabilities.
 
 Exceptions:
 
-- `ConvoHopException`: The read failed or its response was malformed.
+- `RelayException`: The read failed or its response was malformed.
 
 Sends [`communication.capabilities`](../operations/communication/capabilities.md).
 
@@ -3567,7 +2927,7 @@ Returns: The operation.
 Exceptions:
 
 - `ArgumentException`: The ID is not a canonical UUID.
-- `ConvoHopException`: The read failed or its response was malformed.
+- `RelayException`: The read failed or its response was malformed.
 
 Sends [`communication.getOperation`](../operations/communication/getOperation.md).
 
@@ -3591,7 +2951,7 @@ Returns: The inbox page.
 Exceptions:
 
 - `ArgumentException`: An argument is invalid.
-- `ConvoHopException`: The read failed or its response was malformed.
+- `RelayException`: The read failed or its response was malformed.
 
 Sends [`communication.inbox`](../operations/communication/inbox.md).
 
@@ -3617,7 +2977,7 @@ Returns: The search page. Every hit carries its message.
 Exceptions:
 
 - `ArgumentException`: An argument is invalid.
-- `ConvoHopException`: The read failed or its response was malformed.
+- `RelayException`: The read failed or its response was malformed.
 
 Sends [`communication.search`](../operations/communication/search.md).
 
@@ -4114,10 +3474,546 @@ public bool MediaAdmissionAttempted { get; }
 
 Whether a native media admission was attempted with the credentials this request issued.
 
+### `RelayException` class
+
+```cs
+public class RelayException : Exception
+```
+
+A classified failure from the authority or the SDK. Classify it by `Code` (see `ErrorCodes`), never by message text.
+
+`Outcome` says what is known about the request: `rejected` means it did not take effect, `committed` or `accepted` mean it did, and `unknown` means resolve the original request ID before sending anything new. Messages never contain credentials.
+
+#### `RelayException` constructor
+
+```cs
+public RelayException(string code, string requestId, string outcome, int status, string message, TimeSpan? retryAfter = null, Exception? innerException = null);
+```
+
+Creates an exception.
+
+Parameters:
+
+- `code`: The stable error code.
+- `requestId`: The request ID the failure belongs to.
+- `outcome`: What is known about the request outcome.
+- `status`: The HTTP-style status, or 0 when no authority response was observed.
+- `message`: The human-readable message.
+- `retryAfter`: How long to wait before resending, when the authority sent a delay.
+- `innerException`: The underlying failure, if any.
+
+Exceptions:
+
+- `ArgumentOutOfRangeException`: `retryAfter` is negative.
+
+#### `RelayException.Code` property
+
+```cs
+public string Code { get; }
+```
+
+The stable machine-readable error code.
+
+#### `RelayException.RequestId` property
+
+```cs
+public string RequestId { get; }
+```
+
+The request ID the failure belongs to.
+
+#### `RelayException.Outcome` property
+
+```cs
+public string Outcome { get; }
+```
+
+What is known about the outcome: `rejected`, `unknown`, `committed` or `accepted`.
+
+#### `RelayException.Status` property
+
+```cs
+public int Status { get; }
+```
+
+The HTTP-style status, or 0 when no authority response was observed.
+
+#### `RelayException.RetryAfter` property
+
+```cs
+public TimeSpan? RetryAfter { get; }
+```
+
+How long to wait before resending the same request, when the authority sent a delay (for example with `RATE_LIMITED`). Read in whole seconds from the error's `extensions.retryAfter`, else from an HTTP `Retry-After` delay in seconds. A delay longer than `TimeSpan.MaxValue` is reported as `TimeSpan.MaxValue`. The SDK never waits or resends on its own because of it.
+
+### `RelayManagementClient` class
+
+```cs
+public sealed class RelayManagementClient
+```
+
+Operator-token client for organizations, deployments, projects and backend keys. Use it only in trusted operator tooling. Instances are thread-safe.
+
+Mutations accept a `requestId`: after an outcome of `unknown`, call the method again with the same ID and payload, or retry it with `RelayTransport.RetryAsync`. Never send the change again under a new ID.
+
+#### `RelayManagementClient` constructor
+
+```cs
+public RelayManagementClient(RelayManagementClientOptions options);
+```
+
+Creates a client. Construction sends no request.
+
+Parameters:
+
+- `options`: The client options.
+
+Exceptions:
+
+- `ArgumentException`: An option is invalid. The message never contains the access token.
+
+#### `RelayManagementClient.Transport` property
+
+```cs
+public RelayTransport Transport { get; }
+```
+
+The transport, for management operations without a typed method and for recovery records.
+
+#### `RelayManagementClient.Management` property
+
+```cs
+public ManagementApi Management { get; }
+```
+
+Every management query and mutation in the schema, with the generated inputs and replies. Unlike the helpers, it does not check that a result names the resource the request did.
+
+#### `RelayManagementClient.CreateOrganizationAsync` method
+
+```cs
+public Task<Organization> CreateOrganizationAsync(string name, string termsRef, string? requestId = null, CancellationToken cancellationToken = default);
+```
+
+Creates an organization owned by the operator.
+
+Parameters:
+
+- `name`: The organization name.
+- `termsRef`: The reference to the accepted terms.
+- `requestId`: The request ID; pass the original ID to resume after an uncertain outcome.
+- `cancellationToken`: Stops waiting. A cancelled mutation has an unknown outcome.
+
+Returns: The organization.
+
+Exceptions:
+
+- `RelayException`: The request failed, or its outcome is uncertain.
+
+Sends [`management.createOrganization`](../operations/management/createOrganization.md).
+
+#### `RelayManagementClient.CreateDeploymentAsync` method
+
+```cs
+public Task<CreateDeploymentReply> CreateDeploymentAsync(string orgId, DeploymentOptions? configuration = null, string? requestId = null, CancellationToken cancellationToken = default);
+```
+
+Requests a deployment. Without `configuration`, a loopback authority gets the local single-node defaults; any other authority requires it.
+
+Parameters:
+
+- `orgId`: The organization ID.
+- `configuration`: The offering, geography, installation profile and consent reference.
+- `requestId`: The request ID; pass the original ID to resume after an uncertain outcome.
+- `cancellationToken`: Stops waiting. A cancelled mutation has an unknown outcome.
+
+Returns: The receipt; its operation tracks the provisioning.
+
+Exceptions:
+
+- `ArgumentException`: An argument is invalid, or a hosted deployment has no configuration.
+- `RelayException`: The request failed, or its outcome is uncertain.
+
+Sends [`management.createDeployment`](../operations/management/createDeployment.md).
+
+#### `RelayManagementClient.CreateProjectAsync` method
+
+```cs
+public Task<CreateProjectReply> CreateProjectAsync(string deploymentId, string name, ProjectOptions? configuration = null, string? requestId = null, CancellationToken cancellationToken = default);
+```
+
+Requests a project in a deployment. Without `configuration`, a loopback authority gets the `local` environment and the `application-server` backend principal; any other authority requires it.
+
+Parameters:
+
+- `deploymentId`: The deployment ID.
+- `name`: The project name.
+- `configuration`: The environment and backend principal name.
+- `requestId`: The request ID; pass the original ID to resume after an uncertain outcome.
+- `cancellationToken`: Stops waiting. A cancelled mutation has an unknown outcome.
+
+Returns: The receipt; its result carries the project ID and incarnation once committed.
+
+Exceptions:
+
+- `ArgumentException`: An argument is invalid, or a hosted project has no configuration.
+- `RelayException`: The request failed, or its outcome is uncertain.
+
+Sends [`management.createProject`](../operations/management/createProject.md).
+
+#### `RelayManagementClient.GetOperationAsync` method
+
+```cs
+public Task<Operation> GetOperationAsync(string operationId, CancellationToken cancellationToken = default);
+```
+
+Reads a management operation, such as deployment provisioning.
+
+Parameters:
+
+- `operationId`: The operation ID.
+- `cancellationToken`: Stops waiting for the read.
+
+Returns: The operation.
+
+Exceptions:
+
+- `ArgumentException`: The ID is not a canonical UUID.
+- `RelayException`: The read failed or its response was malformed.
+
+Sends [`management.getOperation`](../operations/management/getOperation.md).
+
+#### `RelayManagementClient.IssueBackendKeyAsync` method
+
+```cs
+public Task<IssueBackendKeyReply> IssueBackendKeyAsync(string projectId, string name, IReadOnlyList<string> scopes, string expiresAt, string? requestId = null, CancellationToken cancellationToken = default);
+```
+
+Issues a backend key. The secret is delivered through a credential delivery, never in this response; see the result's `OperationResult.Delivery`.
+
+Parameters:
+
+- `projectId`: The project ID.
+- `name`: The key name.
+- `scopes`: The scopes the key grants, such as `messageWrite`.
+- `expiresAt`: When the key expires, as an RFC 3339 UTC timestamp.
+- `requestId`: The request ID; pass the original ID to resume after an uncertain outcome.
+- `cancellationToken`: Stops waiting. A cancelled mutation has an unknown outcome.
+
+Returns: The receipt.
+
+Exceptions:
+
+- `ArgumentException`: An argument is invalid.
+- `RelayException`: The request failed, or its outcome is uncertain.
+
+Sends [`management.issueBackendKey`](../operations/management/issueBackendKey.md).
+
+#### `RelayManagementClient.GetDeliveryPermitAsync` method
+
+```cs
+public Task<JsonElement> GetDeliveryPermitAsync(string projectId, string deliveryId, string redemptionRequestId, string? requestId = null, CancellationToken cancellationToken = default);
+```
+
+Obtains a single-use permit to redeem a credential delivery. Hand it, with the redemption request ID, to the process that redeems the delivery; treat it as a secret.
+
+Parameters:
+
+- `projectId`: The project ID.
+- `deliveryId`: The credential delivery ID.
+- `redemptionRequestId`: The request ID the redemption will use.
+- `requestId`: The request ID; pass the original ID to resume after an uncertain outcome.
+- `cancellationToken`: Stops waiting. A cancelled mutation has an unknown outcome.
+
+Returns: The permit object.
+
+Exceptions:
+
+- `ArgumentException`: An argument is invalid.
+- `RelayException`: The request failed, its outcome is uncertain, or the permit is not an object.
+
+Sends [`management.credentialPermit`](../operations/management/credentialPermit.md).
+
+### `RelayManagementClientOptions` class
+
+```cs
+public sealed class RelayManagementClientOptions
+```
+
+Options for `RelayManagementClient`.
+
+#### `RelayManagementClientOptions` constructor
+
+```cs
+public RelayManagementClientOptions();
+```
+
+#### `RelayManagementClientOptions.BaseUrl` property
+
+```cs
+public string BaseUrl { get; set; }
+```
+
+The authority origin: HTTPS, or explicit loopback HTTP for local development. Requests go to `{BaseUrl}/graphql`.
+
+#### `RelayManagementClientOptions.AccessToken` property
+
+```cs
+public string AccessToken { get; set; }
+```
+
+The operator access token. Keep it in trusted operator tooling; never log it or send it to clients.
+
+#### `RelayManagementClientOptions.ActorId` property
+
+```cs
+public string ActorId { get; set; }
+```
+
+The operator's actor ID, a canonical UUID. It scopes the recovery records.
+
+#### `RelayManagementClientOptions.RecoveryStorage` property
+
+```cs
+public IRecoveryStorage? RecoveryStorage { get; set; }
+```
+
+Durable storage for mutation recovery records, so an uncertain mutation can be resolved after a restart. The records never contain the access token.
+
+#### `RelayManagementClientOptions.HttpClient` property
+
+```cs
+public HttpClient? HttpClient { get; set; }
+```
+
+The HTTP client to send requests with. It must not follow redirects or add credentials of its own. Null uses a shared client that never follows redirects or stores cookies.
+
+#### `RelayManagementClientOptions.TimeProvider` property
+
+```cs
+public TimeProvider? TimeProvider { get; set; }
+```
+
+The clock for timeouts and retry budgets. Defaults to `TimeProvider.System`.
+
+### `RelayTransport` class
+
+```cs
+public sealed class RelayTransport
+```
+
+The GraphQL transport for one credential: generated operations over `/graphql`, response and receipt validation, and mutation recovery.
+
+Instances are thread-safe. A mutation keeps its request ID, payload, incarnation and retry budget across attempts. Transport uncertainty is neither rejection nor commit: when an attempt fails with outcome `unknown`, resolve or retry the original request ID (see `RetryAsync`); never send the change again under a new ID.
+
+Cancelling a call stops waiting for it; it does not prove the authority did not apply a mutation. Recovery records never contain credentials.
+
+#### `RelayTransport` constructor
+
+```cs
+public RelayTransport(RelayTransportOptions options);
+```
+
+Creates a transport.
+
+Parameters:
+
+- `options`: The transport options.
+
+Exceptions:
+
+- `ArgumentException`: The base URL, namespace or credential is invalid. The message never contains the credential.
+
+#### `RelayTransport.BaseUrl` property
+
+```cs
+public string BaseUrl { get; }
+```
+
+The authority origin requests are sent to.
+
+#### `RelayTransport.DurableRecovery` property
+
+```cs
+public bool DurableRecovery { get; }
+```
+
+Whether mutation recovery records are written to `RelayTransportOptions.RecoveryStorage`.
+
+#### `RelayTransport.Incarnation` property
+
+```cs
+public string Incarnation { get; }
+```
+
+The project incarnation requests belong to, or `management`.
+
+#### `RelayTransport.ServingEpoch` property
+
+```cs
+public string? ServingEpoch { get; set; }
+```
+
+The serving epoch most recently observed from route initialization. When set, it is sent with each request as `observedServingEpoch` so the authority can reject requests routed from a stale view.
+
+#### `RelayTransport.InitializeRecoveryAsync` method
+
+```cs
+public Task InitializeRecoveryAsync(CancellationToken cancellationToken = default);
+```
+
+Loads recovery records from `RelayTransportOptions.RecoveryStorage`. Calls that need recovery state load it first, so calling this is optional; call it at startup to surface corrupt storage early.
+
+Parameters:
+
+- `cancellationToken`: Stops waiting; the load itself still completes.
+
+Returns: A task that completes when the records are loaded.
+
+Exceptions:
+
+- `InvalidDataException`: The stored records are malformed. A later call reads the storage again.
+
+#### `RelayTransport.GetRecoveryStatesAsync` method
+
+```cs
+public Task<IReadOnlyList<RecoveryState>> GetRecoveryStatesAsync(CancellationToken cancellationToken = default);
+```
+
+Returns a snapshot of the mutation recovery records, oldest first.
+
+Parameters:
+
+- `cancellationToken`: Cancels the wait for recovery initialization.
+
+Returns: The recovery records.
+
+#### `RelayTransport.ExecuteAsync` method
+
+```cs
+public Task<TResult> ExecuteAsync<TInput, TResult>(OperationDescriptor<TInput, TResult> operation, string? projectId, TInput input, string? requestId = null, JsonElement? credentialDeliveryPermit = null, CancellationToken cancellationToken = default);
+```
+
+Executes a generated operation.
+
+Type parameters:
+
+- `TInput`: The operation input model.
+- `TResult`: The operation result model.
+
+Parameters:
+
+- `operation`: The operation, from `Operations`.
+- `projectId`: The project of a communication operation; null for management operations.
+- `input`: The operation input, or `NoInput.Value`. Null is allowed only when the input is optional, and sends an empty input object.
+- `requestId`: The request ID. Pass the original ID to resume a mutation after an uncertain outcome; null creates a new one.
+- `credentialDeliveryPermit`: A credential delivery permit, only for credential redemption or acknowledgement.
+- `cancellationToken`: Stops waiting. A cancelled mutation has an unknown outcome.
+
+Returns: The validated result.
+
+Exceptions:
+
+- `ArgumentNullException`: `input` is null and the operation requires an input.
+- `ArgumentException`: `credentialDeliveryPermit` is a default `JsonElement`.
+- `RelayException`: The request was invalid, the authority rejected it, or its outcome is uncertain.
+
+#### `RelayTransport.RetryAsync` method
+
+```cs
+public Task<RequestResolution> RetryAsync(string requestId, CancellationToken cancellationToken = default);
+```
+
+Resolves an uncertain mutation by its original request ID and resends the original payload only when the authority has not observed it and the retry budget allows.
+
+Parameters:
+
+- `requestId`: The original request ID.
+- `cancellationToken`: Stops waiting. A cancelled resend has an unknown outcome.
+
+Returns: The current resolution: committed, accepted, or not observed yet after a resend.
+
+Exceptions:
+
+- `ArgumentException`: The request ID is not a canonical UUID.
+- `InvalidOperationException`: No recovery record exists for the request ID.
+- `RelayException`: The request cannot be resent or its resolution failed.
+
+Sends [`communication.resolveRequest`](../operations/communication/resolveRequest.md) and [`management.resolveRequest`](../operations/management/resolveRequest.md).
+
+### `RelayTransportOptions` class
+
+```cs
+public sealed class RelayTransportOptions
+```
+
+Options for `RelayTransport`.
+
+#### `RelayTransportOptions` constructor
+
+```cs
+public RelayTransportOptions();
+```
+
+#### `RelayTransportOptions.BaseUrl` property
+
+```cs
+public string BaseUrl { get; set; }
+```
+
+The authority origin: HTTPS, or explicit loopback HTTP for local development. It must not have a path, query, fragment or user information.
+
+#### `RelayTransportOptions.Credential` property
+
+```cs
+public string? Credential { get; set; }
+```
+
+The bearer credential, for example a backend key. Keep it on trusted servers; never send it to browsers or put it in URLs, logs or recovery storage.
+
+#### `RelayTransportOptions.Namespace` property
+
+```cs
+public string Namespace { get; set; }
+```
+
+The recovery namespace. Records are stored under `convohop.requests:` followed by this value, so each credential scope needs its own namespace.
+
+#### `RelayTransportOptions.Incarnation` property
+
+```cs
+public string? Incarnation { get; set; }
+```
+
+The project incarnation requests belong to. Null means `management`, which sends no incarnation.
+
+#### `RelayTransportOptions.RecoveryStorage` property
+
+```cs
+public IRecoveryStorage? RecoveryStorage { get; set; }
+```
+
+Durable storage for mutation recovery records. Null keeps them only in this transport instance, so an uncertain mutation cannot be recovered after the process restarts.
+
+#### `RelayTransportOptions.HttpClient` property
+
+```cs
+public HttpClient? HttpClient { get; set; }
+```
+
+The HTTP client to send requests with. It must not follow redirects or add credentials of its own. Null uses a shared client that never follows redirects or stores cookies.
+
+#### `RelayTransportOptions.TimeProvider` property
+
+```cs
+public TimeProvider? TimeProvider { get; set; }
+```
+
+The clock for retry budgets and request timeouts. Null uses `TimeProvider.System`.
+
 ### `ScopeRequiredException` class
 
 ```cs
-public sealed class ScopeRequiredException : ConvoHopException
+public sealed class ScopeRequiredException : RelayException
 ```
 
 `SCOPE_REQUIRED`: the backend key lacks a scope the operation requires (403, rejected, not retryable). Classify it by `Code`; `Scope` is a diagnostic detail.
@@ -4158,7 +4054,7 @@ public string Code { get; }
 
 The stable machine-readable error code.
 
-Inherited from `ConvoHopException`.
+Inherited from `RelayException`.
 
 #### `ScopeRequiredException.RequestId` property
 
@@ -4168,7 +4064,7 @@ public string RequestId { get; }
 
 The request ID the failure belongs to.
 
-Inherited from `ConvoHopException`.
+Inherited from `RelayException`.
 
 #### `ScopeRequiredException.Outcome` property
 
@@ -4178,7 +4074,7 @@ public string Outcome { get; }
 
 What is known about the outcome: `rejected`, `unknown`, `committed` or `accepted`.
 
-Inherited from `ConvoHopException`.
+Inherited from `RelayException`.
 
 #### `ScopeRequiredException.Status` property
 
@@ -4188,7 +4084,7 @@ public int Status { get; }
 
 The HTTP-style status, or 0 when no authority response was observed.
 
-Inherited from `ConvoHopException`.
+Inherited from `RelayException`.
 
 #### `ScopeRequiredException.RetryAfter` property
 
@@ -4198,7 +4094,7 @@ public TimeSpan? RetryAfter { get; }
 
 How long to wait before resending the same request, when the authority sent a delay (for example with `RATE_LIMITED`). Read in whole seconds from the error's `extensions.retryAfter`, else from an HTTP `Retry-After` delay in seconds. A delay longer than `TimeSpan.MaxValue` is reported as `TimeSpan.MaxValue`. The SDK never waits or resends on its own because of it.
 
-Inherited from `ConvoHopException`.
+Inherited from `RelayException`.
 
 ### `ServerConversation` class
 
@@ -4264,7 +4160,7 @@ Returns: The conversation.
 
 Exceptions:
 
-- `ConvoHopException`: The read failed or its response was malformed.
+- `RelayException`: The read failed or its response was malformed.
 
 Sends [`communication.getConversation`](../operations/communication/getConversation.md).
 
@@ -4289,7 +4185,7 @@ Returns: The updated conversation.
 Exceptions:
 
 - `ArgumentException`: An argument is invalid.
-- `ConvoHopException`: The request failed, or its outcome is uncertain.
+- `RelayException`: The request failed, or its outcome is uncertain.
 
 Sends [`communication.updateConversation`](../operations/communication/updateConversation.md).
 
@@ -4317,7 +4213,7 @@ Returns: The live session, or null when none is live.
 
 Exceptions:
 
-- `ConvoHopException`: The read failed or its response was malformed.
+- `RelayException`: The read failed or its response was malformed.
 
 Sends [`communication.currentLiveSession`](../operations/communication/currentLiveSession.md).
 
@@ -4340,7 +4236,7 @@ Returns: The live session page.
 Exceptions:
 
 - `ArgumentException`: An argument is invalid.
-- `ConvoHopException`: The read failed or its response was malformed.
+- `RelayException`: The read failed or its response was malformed.
 
 Sends [`communication.liveSessions`](../operations/communication/liveSessions.md).
 
@@ -4370,7 +4266,7 @@ Returns: The conversation.
 
 Exceptions:
 
-- `ConvoHopException`: The request failed, or its outcome is uncertain.
+- `RelayException`: The request failed, or its outcome is uncertain.
 
 Sends [`communication.createConversation`](../operations/communication/createConversation.md).
 
@@ -4422,7 +4318,7 @@ Returns: The operation.
 
 Exceptions:
 
-- `ConvoHopException`: The read failed, or its response was malformed or names another live session or kind (`INVALID_RESPONSE`).
+- `RelayException`: The read failed, or its response was malformed or names another live session or kind (`INVALID_RESPONSE`).
 
 Sends [`communication.liveSessionOperation`](../operations/communication/liveSessionOperation.md).
 
@@ -4444,7 +4340,7 @@ Returns: The completion.
 Exceptions:
 
 - `ArgumentOutOfRangeException`: The timeout is out of range.
-- `ConvoHopException`: The operation failed, with its live error code and outcome `accepted`; or the deadline passed, with `RESOLUTION_REQUIRED`, which is not a cutoff (keep the operation ID and query it again); or a response was malformed (`INVALID_RESPONSE`).
+- `RelayException`: The operation failed, with its live error code and outcome `accepted`; or the deadline passed, with `RESOLUTION_REQUIRED`, which is not a cutoff (keep the operation ID and query it again); or a response was malformed (`INVALID_RESPONSE`).
 
 Sends [`communication.liveSessionOperation`](../operations/communication/liveSessionOperation.md).
 
@@ -4488,7 +4384,7 @@ Returns: The live session.
 
 Exceptions:
 
-- `ConvoHopException`: The read failed or its response was malformed.
+- `RelayException`: The read failed or its response was malformed.
 
 Sends [`communication.liveSession`](../operations/communication/liveSession.md).
 
@@ -4511,7 +4407,7 @@ Returns: The participant page.
 Exceptions:
 
 - `ArgumentException`: An argument is invalid.
-- `ConvoHopException`: The read failed or its response was malformed.
+- `RelayException`: The read failed or its response was malformed.
 
 Sends [`communication.liveSessionParticipants`](../operations/communication/liveSessionParticipants.md).
 
@@ -4535,7 +4431,7 @@ Returns: How many alerts were created and how many were suppressed.
 Exceptions:
 
 - `ArgumentException`: An argument is invalid.
-- `ConvoHopException`: The request failed, or its outcome is uncertain.
+- `RelayException`: The request failed, or its outcome is uncertain.
 
 Sends [`communication.alertLiveSession`](../operations/communication/alertLiveSession.md).
 
@@ -4559,7 +4455,7 @@ Returns: The end operation, with the commit receipt in `ServerLiveOperation.Rece
 Exceptions:
 
 - `ArgumentException`: An argument is invalid.
-- `ConvoHopException`: The request failed, or its outcome is uncertain.
+- `RelayException`: The request failed, or its outcome is uncertain.
 
 Sends [`communication.endLiveSession`](../operations/communication/endLiveSession.md).
 
@@ -4590,7 +4486,7 @@ Returns: The member page.
 Exceptions:
 
 - `ArgumentException`: An argument is invalid.
-- `ConvoHopException`: The read failed or its response was malformed.
+- `RelayException`: The read failed or its response was malformed.
 
 Sends [`communication.members`](../operations/communication/members.md).
 
@@ -4615,7 +4511,7 @@ Returns: The membership.
 Exceptions:
 
 - `ArgumentException`: An argument is invalid.
-- `ConvoHopException`: The request failed, or its outcome is uncertain.
+- `RelayException`: The request failed, or its outcome is uncertain.
 
 Sends [`communication.addMember`](../operations/communication/addMember.md).
 
@@ -4638,7 +4534,7 @@ Returns: The memberships, one per entry.
 Exceptions:
 
 - `ArgumentException`: An argument is invalid.
-- `ConvoHopException`: The request failed, or its outcome is uncertain.
+- `RelayException`: The request failed, or its outcome is uncertain.
 
 Sends [`communication.addMembers`](../operations/communication/addMembers.md).
 
@@ -4662,7 +4558,7 @@ Returns: The ended membership.
 Exceptions:
 
 - `ArgumentException`: An argument is invalid.
-- `ConvoHopException`: The request failed, or its outcome is uncertain.
+- `RelayException`: The request failed, or its outcome is uncertain.
 
 Sends [`communication.removeMember`](../operations/communication/removeMember.md).
 
@@ -4688,7 +4584,7 @@ Returns: The membership with its new visibility.
 Exceptions:
 
 - `ArgumentException`: An argument is invalid.
-- `ConvoHopException`: The request failed, or its outcome is uncertain.
+- `RelayException`: The request failed, or its outcome is uncertain.
 
 Sends [`communication.historyGrant`](../operations/communication/historyGrant.md).
 
@@ -4713,7 +4609,7 @@ Returns: The commit receipt with the membership and any media cutoff.
 Exceptions:
 
 - `ArgumentException`: An argument is invalid.
-- `ConvoHopException`: The request failed, or its outcome is uncertain.
+- `RelayException`: The request failed, or its outcome is uncertain.
 
 Sends [`communication.setBroadcastPermission`](../operations/communication/setBroadcastPermission.md).
 
@@ -4735,7 +4631,7 @@ Returns: The mute.
 Exceptions:
 
 - `ArgumentException`: The ID is not a canonical UUID.
-- `ConvoHopException`: The read failed or its response was malformed.
+- `RelayException`: The read failed or its response was malformed.
 
 Sends [`communication.conversationMute`](../operations/communication/conversationMute.md).
 
@@ -4760,7 +4656,7 @@ Returns: The mute.
 Exceptions:
 
 - `ArgumentException`: An argument is invalid.
-- `ConvoHopException`: The request failed, or its outcome is uncertain.
+- `RelayException`: The request failed, or its outcome is uncertain.
 
 Sends [`communication.setConversationMute`](../operations/communication/setConversationMute.md).
 
@@ -4792,7 +4688,7 @@ Returns: The message page.
 Exceptions:
 
 - `ArgumentException`: An argument is invalid.
-- `ConvoHopException`: The read failed or its response was malformed.
+- `RelayException`: The read failed or its response was malformed.
 
 Sends [`communication.messages`](../operations/communication/messages.md).
 
@@ -4815,7 +4711,7 @@ Returns: The message.
 Exceptions:
 
 - `ArgumentException`: An argument is invalid.
-- `ConvoHopException`: The read failed or its response was malformed.
+- `RelayException`: The read failed or its response was malformed.
 
 Sends [`communication.getMessage`](../operations/communication/getMessage.md).
 
@@ -4840,7 +4736,7 @@ Returns: The send receipt. `MessageAck.Cursor` is never null.
 Exceptions:
 
 - `ArgumentException`: An argument is invalid.
-- `ConvoHopException`: The request failed, or its outcome is uncertain.
+- `RelayException`: The request failed, or its outcome is uncertain.
 
 Sends [`communication.sendMessage`](../operations/communication/sendMessage.md).
 
@@ -4866,7 +4762,7 @@ Returns: The edited message.
 Exceptions:
 
 - `ArgumentException`: An argument is invalid.
-- `ConvoHopException`: The request failed, or its outcome is uncertain.
+- `RelayException`: The request failed, or its outcome is uncertain.
 
 Sends [`communication.editMessage`](../operations/communication/editMessage.md).
 
@@ -4890,7 +4786,7 @@ Returns: The deleted message.
 Exceptions:
 
 - `ArgumentException`: An argument is invalid.
-- `ConvoHopException`: The request failed, or its outcome is uncertain.
+- `RelayException`: The request failed, or its outcome is uncertain.
 
 Sends [`communication.deleteMessage`](../operations/communication/deleteMessage.md).
 
@@ -4921,7 +4817,7 @@ Returns: The principal.
 Exceptions:
 
 - `ArgumentException`: An argument is invalid.
-- `ConvoHopException`: The request failed, or its outcome is uncertain.
+- `RelayException`: The request failed, or its outcome is uncertain.
 
 Sends [`communication.createPrincipal`](../operations/communication/createPrincipal.md).
 
@@ -4943,7 +4839,7 @@ Returns: The principal.
 Exceptions:
 
 - `ArgumentException`: The ID is not a canonical UUID.
-- `ConvoHopException`: The read failed or its response was malformed.
+- `RelayException`: The read failed or its response was malformed.
 
 Sends [`communication.getPrincipal`](../operations/communication/getPrincipal.md).
 
@@ -4967,7 +4863,7 @@ Returns: The disabled principal.
 Exceptions:
 
 - `ArgumentException`: An argument is invalid.
-- `ConvoHopException`: The request failed, or its outcome is uncertain.
+- `RelayException`: The request failed, or its outcome is uncertain.
 
 Sends [`communication.disablePrincipal`](../operations/communication/disablePrincipal.md).
 
@@ -4997,7 +4893,7 @@ Returns: The resolution: committed, accepted or not observed yet.
 Exceptions:
 
 - `ArgumentException`: The ID is not a canonical UUID.
-- `ConvoHopException`: The read failed or its response was malformed.
+- `RelayException`: The read failed or its response was malformed.
 
 Sends [`communication.resolveRequest`](../operations/communication/resolveRequest.md).
 
@@ -5007,7 +4903,7 @@ Sends [`communication.resolveRequest`](../operations/communication/resolveReques
 public Task<RequestResolution> RetryAsync(string requestId, CancellationToken cancellationToken = default);
 ```
 
-Resolves a recorded mutation and resends its original payload only when the authority has not observed it and the retry budget allows. See `ConvoHopTransport.RetryAsync`.
+Resolves a recorded mutation and resends its original payload only when the authority has not observed it and the retry budget allows. See `RelayTransport.RetryAsync`.
 
 Parameters:
 
@@ -5020,7 +4916,7 @@ Exceptions:
 
 - `ArgumentException`: The ID is not a canonical UUID.
 - `InvalidOperationException`: No recovery record exists for the request ID.
-- `ConvoHopException`: The request cannot be resent or its resolution failed.
+- `RelayException`: The request cannot be resent or its resolution failed.
 
 Sends [`communication.resolveRequest`](../operations/communication/resolveRequest.md).
 
@@ -5053,7 +4949,7 @@ Returns: The session and its token. `SessionBootstrap.Session` is never null.
 Exceptions:
 
 - `ArgumentException`: An argument is invalid.
-- `ConvoHopException`: The request failed, or its outcome is uncertain.
+- `RelayException`: The request failed, or its outcome is uncertain.
 
 Sends [`communication.issueSession`](../operations/communication/issueSession.md).
 
@@ -5080,7 +4976,7 @@ Returns: The renewed session and its token. `SessionBootstrap.Session` is never 
 Exceptions:
 
 - `ArgumentException`: An argument is invalid.
-- `ConvoHopException`: The request failed, or its outcome is uncertain.
+- `RelayException`: The request failed, or its outcome is uncertain.
 
 Sends [`communication.renewSession`](../operations/communication/renewSession.md).
 
@@ -5104,7 +5000,7 @@ Returns: The revocation, with the media cutoff of the session's live participati
 Exceptions:
 
 - `ArgumentException`: An argument is invalid.
-- `ConvoHopException`: The request failed, or its outcome is uncertain.
+- `RelayException`: The request failed, or its outcome is uncertain.
 
 Sends [`communication.revokeSession`](../operations/communication/revokeSession.md).
 
@@ -5126,7 +5022,7 @@ Returns: The checked outcome.
 Exceptions:
 
 - `ArgumentException`: The ID is not a canonical UUID.
-- `ConvoHopException`: The read failed, or the outcome is malformed (`INVALID_RESPONSE`); keep the original request and payload.
+- `RelayException`: The read failed, or the outcome is malformed (`INVALID_RESPONSE`); keep the original request and payload.
 
 The outcome is checked against the authority's proof and, when this client recorded the original request, against that record. `SessionRequestOutcome.State` is `notObservedYet` (every other field except `SessionRequestOutcome.RequestId` and `SessionRequestOutcome.CheckedAt` is null) or `committed`, with `SessionRequestOutcome.Operation`, `SessionRequestOutcome.ReceiptId`, `SessionRequestOutcome.CommittedAt`, `SessionRequestOutcome.OriginalSession` and `SessionRequestOutcome.CurrentState` set; `SessionRequestOutcome.CurrentSession` is null only when the current state is `missing`. The outcome never contains a session token.
 
@@ -5138,7 +5034,7 @@ Sends [`communication.sessionRequestOutcome`](../operations/communication/sessio
 public sealed class VerifiedWebhookDelivery : WebhookSignature
 ```
 
-A verified delivery: its `webhook-id`, `webhook-timestamp` and event. (`ConvoHop.Models.WebhookDelivery` is the management API's delivery record.)
+A verified delivery: its `webhook-id`, `webhook-timestamp` and event. (`Relay.Models.WebhookDelivery` is the management API's delivery record.)
 
 #### `VerifiedWebhookDelivery.Event` property
 
@@ -6375,7 +6271,7 @@ Why verification failed.
 public static class Webhooks
 ```
 
-Verifies ConvoHop webhook deliveries (Standard Webhooks symmetric `v1`). Pass the raw body; respond `2xx` within 5 s, then process; de-duplicate on `webhook-id`. Failures throw `WebhookVerificationException`.
+Verifies Relay webhook deliveries (Standard Webhooks symmetric `v1`). Pass the raw body; respond `2xx` within 5 s, then process; de-duplicate on `webhook-id`. Failures throw `WebhookVerificationException`.
 
 Verification is CPU-only and synchronous: it sends nothing and stores nothing.
 
@@ -6650,11 +6546,11 @@ InvalidBody = 9
 
 `Webhooks.Verify` only: the signed body is not a UTF-8 JSON event envelope.
 
-# `ConvoHop.Api`
+# `Relay.Api`
 
 Generated APIs with a method for every communication and management operation a backend can send, and async page streams for paginated ones.
 
-**Layer:** Server. **Runtime:** .NET 8 or later. The `netstandard2.0` build also targets .NET Framework 4.7.2 or later, which isn't tested yet. **Source:** `dotnet/src/ConvoHop`.
+**Layer:** Server. **Runtime:** .NET 8 or later. The `netstandard2.0` build also targets .NET Framework 4.7.2 or later, which isn't tested yet. **Source:** `dotnet/src/Relay`.
 
 ## Classes
 
@@ -6684,7 +6580,7 @@ Returns: The authority result.
 
 Exceptions:
 
-- `ConvoHopException`: The request was invalid, the authority rejected it, or its outcome is unknown.
+- `RelayException`: The request was invalid, the authority rejected it, or its outcome is unknown.
 
 Idempotency: `safe`. Read-only. Repeat freely; each attempt may use a new requestId.
 
@@ -6708,7 +6604,7 @@ Returns: The authority result.
 
 Exceptions:
 
-- `ConvoHopException`: The request was invalid, the authority rejected it, or its outcome is unknown.
+- `RelayException`: The request was invalid, the authority rejected it, or its outcome is unknown.
 
 Idempotency: `safe`. Read-only. Repeat freely; each attempt may use a new requestId.
 
@@ -6734,7 +6630,7 @@ Returns: The authority result.
 Exceptions:
 
 - `ArgumentNullException`: `input` is null.
-- `ConvoHopException`: The request was invalid, the authority rejected it, or its outcome is unknown.
+- `RelayException`: The request was invalid, the authority rejected it, or its outcome is unknown.
 
 Idempotency: `safe`. Read-only. Repeat freely; each attempt may use a new requestId.
 
@@ -6760,7 +6656,7 @@ Returns: The authority result.
 Exceptions:
 
 - `ArgumentNullException`: `input` is null.
-- `ConvoHopException`: The request was invalid, the authority rejected it, or its outcome is unknown.
+- `RelayException`: The request was invalid, the authority rejected it, or its outcome is unknown.
 
 Idempotency: `safe`. Read-only. Repeat freely; each attempt may use a new requestId.
 
@@ -6786,7 +6682,7 @@ Returns: The authority result.
 Exceptions:
 
 - `ArgumentNullException`: `input` is null.
-- `ConvoHopException`: The request was invalid, the authority rejected it, or its outcome is unknown.
+- `RelayException`: The request was invalid, the authority rejected it, or its outcome is unknown.
 
 Idempotency: `safe`. Read-only. Repeat freely; each attempt may use a new requestId.
 
@@ -6818,7 +6714,7 @@ Each page is requested when enumeration reaches it. Later requests set `cursor` 
 
 Pagination: `cursor`. Server-ordered pages. Pass nextCursor back as the cursor input until complete is true.
 
-Enumeration throws `ConvoHopException` if the authority rejects a request or a page is malformed or does not advance, and `InvalidOperationException` if a page reports `refreshRequired`: start again from current state, not from the cursor. These page failures are final. After any other failed request, an enumerator can call `MoveNextAsync` again to repeat it; `await foreach` stops at the first exception.
+Enumeration throws `RelayException` if the authority rejects a request or a page is malformed or does not advance, and `InvalidOperationException` if a page reports `refreshRequired`: start again from current state, not from the cursor. These page failures are final. After any other failed request, an enumerator can call `MoveNextAsync` again to repeat it; `await foreach` stops at the first exception.
 
 Sends [`communication.members`](../operations/communication/members.md).
 
@@ -6840,7 +6736,7 @@ Returns: The authority result.
 Exceptions:
 
 - `ArgumentNullException`: `input` is null.
-- `ConvoHopException`: The request was invalid, the authority rejected it, or its outcome is unknown.
+- `RelayException`: The request was invalid, the authority rejected it, or its outcome is unknown.
 
 Idempotency: `safe`. Read-only. Repeat freely; each attempt may use a new requestId.
 
@@ -6872,7 +6768,7 @@ Each page is requested when enumeration reaches it. Later requests set `beforeSe
 
 Pagination: `sequence`. Newest first. Pass nextCursor back as the sequence cursor input to read older items until complete is true.
 
-Enumeration throws `ConvoHopException` if the authority rejects a request or a page is malformed or does not advance, and `InvalidOperationException` if a page reports `refreshRequired`: start again from current state, not from the cursor. These page failures are final. After any other failed request, an enumerator can call `MoveNextAsync` again to repeat it; `await foreach` stops at the first exception.
+Enumeration throws `RelayException` if the authority rejects a request or a page is malformed or does not advance, and `InvalidOperationException` if a page reports `refreshRequired`: start again from current state, not from the cursor. These page failures are final. After any other failed request, an enumerator can call `MoveNextAsync` again to repeat it; `await foreach` stops at the first exception.
 
 Sends [`communication.messages`](../operations/communication/messages.md).
 
@@ -6894,7 +6790,7 @@ Returns: The authority result.
 Exceptions:
 
 - `ArgumentNullException`: `input` is null.
-- `ConvoHopException`: The request was invalid, the authority rejected it, or its outcome is unknown.
+- `RelayException`: The request was invalid, the authority rejected it, or its outcome is unknown.
 
 Idempotency: `safe`. Read-only. Repeat freely; each attempt may use a new requestId.
 
@@ -6920,7 +6816,7 @@ Returns: The authority result.
 Exceptions:
 
 - `ArgumentNullException`: `input` is null.
-- `ConvoHopException`: The request was invalid, the authority rejected it, or its outcome is unknown.
+- `RelayException`: The request was invalid, the authority rejected it, or its outcome is unknown.
 
 Idempotency: `safe`. Read-only. Repeat freely; each attempt may use a new requestId.
 
@@ -6952,7 +6848,7 @@ Each page is requested when enumeration reaches it. Later requests set `cursor` 
 
 Pagination: `cursor`. Server-ordered pages. Pass nextCursor back as the cursor input until complete is true.
 
-Enumeration throws `ConvoHopException` if the authority rejects a request or a page is malformed or does not advance, and `InvalidOperationException` if a page reports `refreshRequired`: start again from current state, not from the cursor. These page failures are final. After any other failed request, an enumerator can call `MoveNextAsync` again to repeat it; `await foreach` stops at the first exception.
+Enumeration throws `RelayException` if the authority rejects a request or a page is malformed or does not advance, and `InvalidOperationException` if a page reports `refreshRequired`: start again from current state, not from the cursor. These page failures are final. After any other failed request, an enumerator can call `MoveNextAsync` again to repeat it; `await foreach` stops at the first exception.
 
 Sends [`communication.inbox`](../operations/communication/inbox.md).
 
@@ -6974,7 +6870,7 @@ Returns: The authority result.
 Exceptions:
 
 - `ArgumentNullException`: `input` is null.
-- `ConvoHopException`: The request was invalid, the authority rejected it, or its outcome is unknown.
+- `RelayException`: The request was invalid, the authority rejected it, or its outcome is unknown.
 
 Idempotency: `safe`. Read-only. Repeat freely; each attempt may use a new requestId.
 
@@ -7006,7 +6902,7 @@ Each page is requested when enumeration reaches it. Later requests set `cursor` 
 
 Pagination: `cursor`. Server-ordered pages. Pass nextCursor back as the cursor input until complete is true.
 
-Enumeration throws `ConvoHopException` if the authority rejects a request or a page is malformed or does not advance, and `InvalidOperationException` if a page reports `refreshRequired`: start again from current state, not from the cursor. These page failures are final. After any other failed request, an enumerator can call `MoveNextAsync` again to repeat it; `await foreach` stops at the first exception.
+Enumeration throws `RelayException` if the authority rejects a request or a page is malformed or does not advance, and `InvalidOperationException` if a page reports `refreshRequired`: start again from current state, not from the cursor. These page failures are final. After any other failed request, an enumerator can call `MoveNextAsync` again to repeat it; `await foreach` stops at the first exception.
 
 Sends [`communication.search`](../operations/communication/search.md).
 
@@ -7028,7 +6924,7 @@ Returns: The authority result.
 Exceptions:
 
 - `ArgumentNullException`: `input` is null.
-- `ConvoHopException`: The request was invalid, the authority rejected it, or its outcome is unknown.
+- `RelayException`: The request was invalid, the authority rejected it, or its outcome is unknown.
 
 Idempotency: `safe`. Read-only. Repeat freely; each attempt may use a new requestId.
 
@@ -7054,7 +6950,7 @@ Returns: The authority result.
 Exceptions:
 
 - `ArgumentNullException`: `input` is null.
-- `ConvoHopException`: The request was invalid, the authority rejected it, or its outcome is unknown.
+- `RelayException`: The request was invalid, the authority rejected it, or its outcome is unknown.
 
 Idempotency: `safe`. Read-only. Repeat freely; each attempt may use a new requestId.
 
@@ -7080,7 +6976,7 @@ Returns: The authority result.
 Exceptions:
 
 - `ArgumentNullException`: `input` is null.
-- `ConvoHopException`: The request was invalid, the authority rejected it, or its outcome is unknown.
+- `RelayException`: The request was invalid, the authority rejected it, or its outcome is unknown.
 
 Idempotency: `safe`. Read-only. Repeat freely; each attempt may use a new requestId.
 
@@ -7106,7 +7002,7 @@ Returns: The authority result.
 Exceptions:
 
 - `ArgumentNullException`: `input` is null.
-- `ConvoHopException`: The request was invalid, the authority rejected it, or its outcome is unknown.
+- `RelayException`: The request was invalid, the authority rejected it, or its outcome is unknown.
 
 Idempotency: `safe`. Read-only. Repeat freely; each attempt may use a new requestId.
 
@@ -7132,7 +7028,7 @@ Returns: The authority result.
 Exceptions:
 
 - `ArgumentNullException`: `input` is null.
-- `ConvoHopException`: The request was invalid, the authority rejected it, or its outcome is unknown.
+- `RelayException`: The request was invalid, the authority rejected it, or its outcome is unknown.
 
 Idempotency: `safe`. Read-only. Repeat freely; each attempt may use a new requestId.
 
@@ -7158,7 +7054,7 @@ Returns: The authority result.
 Exceptions:
 
 - `ArgumentNullException`: `input` is null.
-- `ConvoHopException`: The request was invalid, the authority rejected it, or its outcome is unknown.
+- `RelayException`: The request was invalid, the authority rejected it, or its outcome is unknown.
 
 Idempotency: `safe`. Read-only. Repeat freely; each attempt may use a new requestId.
 
@@ -7190,7 +7086,7 @@ Each page is requested when enumeration reaches it. Later requests set `cursor` 
 
 Pagination: `cursor`. Server-ordered pages. Pass nextCursor back as the cursor input until complete is true.
 
-Enumeration throws `ConvoHopException` if the authority rejects a request or a page is malformed or does not advance, and `InvalidOperationException` if a page reports `refreshRequired`: start again from current state, not from the cursor. These page failures are final. After any other failed request, an enumerator can call `MoveNextAsync` again to repeat it; `await foreach` stops at the first exception.
+Enumeration throws `RelayException` if the authority rejects a request or a page is malformed or does not advance, and `InvalidOperationException` if a page reports `refreshRequired`: start again from current state, not from the cursor. These page failures are final. After any other failed request, an enumerator can call `MoveNextAsync` again to repeat it; `await foreach` stops at the first exception.
 
 Sends [`communication.liveSessions`](../operations/communication/liveSessions.md).
 
@@ -7212,7 +7108,7 @@ Returns: The authority result.
 Exceptions:
 
 - `ArgumentNullException`: `input` is null.
-- `ConvoHopException`: The request was invalid, the authority rejected it, or its outcome is unknown.
+- `RelayException`: The request was invalid, the authority rejected it, or its outcome is unknown.
 
 Idempotency: `safe`. Read-only. Repeat freely; each attempt may use a new requestId.
 
@@ -7244,7 +7140,7 @@ Each page is requested when enumeration reaches it. Later requests set `cursor` 
 
 Pagination: `cursor`. Server-ordered pages. Pass nextCursor back as the cursor input until complete is true.
 
-Enumeration throws `ConvoHopException` if the authority rejects a request or a page is malformed or does not advance, and `InvalidOperationException` if a page reports `refreshRequired`: start again from current state, not from the cursor. These page failures are final. After any other failed request, an enumerator can call `MoveNextAsync` again to repeat it; `await foreach` stops at the first exception.
+Enumeration throws `RelayException` if the authority rejects a request or a page is malformed or does not advance, and `InvalidOperationException` if a page reports `refreshRequired`: start again from current state, not from the cursor. These page failures are final. After any other failed request, an enumerator can call `MoveNextAsync` again to repeat it; `await foreach` stops at the first exception.
 
 Sends [`communication.liveSessionParticipants`](../operations/communication/liveSessionParticipants.md).
 
@@ -7266,7 +7162,7 @@ Returns: The authority result.
 Exceptions:
 
 - `ArgumentNullException`: `input` is null.
-- `ConvoHopException`: The request was invalid, the authority rejected it, or its outcome is unknown.
+- `RelayException`: The request was invalid, the authority rejected it, or its outcome is unknown.
 
 Idempotency: `safe`. Read-only. Repeat freely; each attempt may use a new requestId.
 
@@ -7292,7 +7188,7 @@ Returns: The authority result.
 Exceptions:
 
 - `ArgumentNullException`: `input` is null.
-- `ConvoHopException`: The request was invalid, the authority rejected it, or its outcome is unknown.
+- `RelayException`: The request was invalid, the authority rejected it, or its outcome is unknown.
 
 Idempotency: `safe`. Read-only. Repeat freely; each attempt may use a new requestId.
 
@@ -7319,7 +7215,7 @@ Returns: The authority result.
 Exceptions:
 
 - `ArgumentNullException`: `input` is null.
-- `ConvoHopException`: The request was invalid, the authority rejected it, or its outcome is unknown.
+- `RelayException`: The request was invalid, the authority rejected it, or its outcome is unknown.
 
 Idempotency: `idempotent`. Retry with the same requestId and identical input within the retry budget. The authority deduplicates by requestId; resolve an unknown outcome with resolveRequest.
 
@@ -7346,7 +7242,7 @@ Returns: The authority result.
 Exceptions:
 
 - `ArgumentNullException`: `input` is null.
-- `ConvoHopException`: The request was invalid, the authority rejected it, or its outcome is unknown.
+- `RelayException`: The request was invalid, the authority rejected it, or its outcome is unknown.
 
 Idempotency: `idempotent`. Retry with the same requestId and identical input within the retry budget. The authority deduplicates by requestId; resolve an unknown outcome with resolveRequest.
 
@@ -7375,7 +7271,7 @@ Returns: The authority result.
 Exceptions:
 
 - `ArgumentNullException`: `input` is null.
-- `ConvoHopException`: The request was invalid, the authority rejected it, or its outcome is unknown.
+- `RelayException`: The request was invalid, the authority rejected it, or its outcome is unknown.
 
 Idempotency: `idempotent`. Retry with the same requestId and identical input within the retry budget. The authority deduplicates by requestId; resolve an unknown outcome with resolveRequest.
 
@@ -7402,7 +7298,7 @@ Returns: The authority result.
 Exceptions:
 
 - `ArgumentNullException`: `input` is null.
-- `ConvoHopException`: The request was invalid, the authority rejected it, or its outcome is unknown.
+- `RelayException`: The request was invalid, the authority rejected it, or its outcome is unknown.
 
 Idempotency: `idempotent`. Retry with the same requestId and identical input within the retry budget. The authority deduplicates by requestId; resolve an unknown outcome with resolveRequest.
 
@@ -7429,7 +7325,7 @@ Returns: The authority result.
 Exceptions:
 
 - `ArgumentNullException`: `input` is null.
-- `ConvoHopException`: The request was invalid, the authority rejected it, or its outcome is unknown.
+- `RelayException`: The request was invalid, the authority rejected it, or its outcome is unknown.
 
 Idempotency: `idempotent`. Retry with the same requestId and identical input within the retry budget. The authority deduplicates by requestId; resolve an unknown outcome with resolveRequest.
 
@@ -7458,7 +7354,7 @@ Returns: The authority result.
 Exceptions:
 
 - `ArgumentNullException`: `input` is null.
-- `ConvoHopException`: The request was invalid, the authority rejected it, or its outcome is unknown.
+- `RelayException`: The request was invalid, the authority rejected it, or its outcome is unknown.
 
 Idempotency: `idempotent`. Retry with the same requestId and identical input within the retry budget. The authority deduplicates by requestId; resolve an unknown outcome with resolveRequest.
 
@@ -7485,7 +7381,7 @@ Returns: The authority result.
 Exceptions:
 
 - `ArgumentNullException`: `input` is null.
-- `ConvoHopException`: The request was invalid, the authority rejected it, or its outcome is unknown.
+- `RelayException`: The request was invalid, the authority rejected it, or its outcome is unknown.
 
 Idempotency: `idempotent`. Retry with the same requestId and identical input within the retry budget. The authority deduplicates by requestId; resolve an unknown outcome with resolveRequest.
 
@@ -7512,7 +7408,7 @@ Returns: The authority result.
 Exceptions:
 
 - `ArgumentNullException`: `input` is null.
-- `ConvoHopException`: The request was invalid, the authority rejected it, or its outcome is unknown.
+- `RelayException`: The request was invalid, the authority rejected it, or its outcome is unknown.
 
 Idempotency: `idempotent`. Retry with the same requestId and identical input within the retry budget. The authority deduplicates by requestId; resolve an unknown outcome with resolveRequest.
 
@@ -7539,7 +7435,7 @@ Returns: The authority result.
 Exceptions:
 
 - `ArgumentNullException`: `input` is null.
-- `ConvoHopException`: The request was invalid, the authority rejected it, or its outcome is unknown.
+- `RelayException`: The request was invalid, the authority rejected it, or its outcome is unknown.
 
 Idempotency: `idempotent`. Retry with the same requestId and identical input within the retry budget. The authority deduplicates by requestId; resolve an unknown outcome with resolveRequest.
 
@@ -7566,7 +7462,7 @@ Returns: The authority result.
 Exceptions:
 
 - `ArgumentNullException`: `input` is null.
-- `ConvoHopException`: The request was invalid, the authority rejected it, or its outcome is unknown.
+- `RelayException`: The request was invalid, the authority rejected it, or its outcome is unknown.
 
 Idempotency: `idempotent`. Retry with the same requestId and identical input within the retry budget. The authority deduplicates by requestId; resolve an unknown outcome with resolveRequest.
 
@@ -7595,7 +7491,7 @@ Returns: The authority result.
 Exceptions:
 
 - `ArgumentNullException`: `input` is null.
-- `ConvoHopException`: The request was invalid, the authority rejected it, or its outcome is unknown.
+- `RelayException`: The request was invalid, the authority rejected it, or its outcome is unknown.
 
 Idempotency: `idempotent`. Retry with the same requestId and identical input within the retry budget. The authority deduplicates by requestId; resolve an unknown outcome with resolveRequest.
 
@@ -7622,7 +7518,7 @@ Returns: The authority result.
 Exceptions:
 
 - `ArgumentNullException`: `input` is null.
-- `ConvoHopException`: The request was invalid, the authority rejected it, or its outcome is unknown.
+- `RelayException`: The request was invalid, the authority rejected it, or its outcome is unknown.
 
 Idempotency: `idempotent`. Retry with the same requestId and identical input within the retry budget. The authority deduplicates by requestId; resolve an unknown outcome with resolveRequest.
 
@@ -7649,7 +7545,7 @@ Returns: The authority result.
 Exceptions:
 
 - `ArgumentNullException`: `input` is null.
-- `ConvoHopException`: The request was invalid, the authority rejected it, or its outcome is unknown.
+- `RelayException`: The request was invalid, the authority rejected it, or its outcome is unknown.
 
 Idempotency: `idempotent`. Retry with the same requestId and identical input within the retry budget. The authority deduplicates by requestId; resolve an unknown outcome with resolveRequest.
 
@@ -7676,7 +7572,7 @@ Returns: The authority result.
 Exceptions:
 
 - `ArgumentNullException`: `input` is null.
-- `ConvoHopException`: The request was invalid, the authority rejected it, or its outcome is unknown.
+- `RelayException`: The request was invalid, the authority rejected it, or its outcome is unknown.
 
 Idempotency: `idempotent`. Retry with the same requestId and identical input within the retry budget. The authority deduplicates by requestId; resolve an unknown outcome with resolveRequest.
 
@@ -7705,7 +7601,7 @@ Returns: The authority result.
 Exceptions:
 
 - `ArgumentNullException`: `input` is null.
-- `ConvoHopException`: The request was invalid, the authority rejected it, or its outcome is unknown.
+- `RelayException`: The request was invalid, the authority rejected it, or its outcome is unknown.
 
 Idempotency: `idempotent`. Retry with the same requestId and identical input within the retry budget. The authority deduplicates by requestId; resolve an unknown outcome with resolveRequest.
 
@@ -7732,7 +7628,7 @@ Returns: The authority result.
 Exceptions:
 
 - `ArgumentNullException`: `input` is null.
-- `ConvoHopException`: The request was invalid, the authority rejected it, or its outcome is unknown.
+- `RelayException`: The request was invalid, the authority rejected it, or its outcome is unknown.
 
 Idempotency: `idempotent`. Retry with the same requestId and identical input within the retry budget. The authority deduplicates by requestId; resolve an unknown outcome with resolveRequest.
 
@@ -7759,7 +7655,7 @@ Returns: The authority result.
 Exceptions:
 
 - `ArgumentNullException`: `input` is null.
-- `ConvoHopException`: The request was invalid, the authority rejected it, or its outcome is unknown.
+- `RelayException`: The request was invalid, the authority rejected it, or its outcome is unknown.
 
 Idempotency: `idempotent`. Retry with the same requestId and identical input within the retry budget. The authority deduplicates by requestId; resolve an unknown outcome with resolveRequest.
 
@@ -7786,7 +7682,7 @@ Returns: The authority result.
 Exceptions:
 
 - `ArgumentNullException`: `input` is null.
-- `ConvoHopException`: The request was invalid, the authority rejected it, or its outcome is unknown.
+- `RelayException`: The request was invalid, the authority rejected it, or its outcome is unknown.
 
 Idempotency: `idempotent`. Retry with the same requestId and identical input within the retry budget. The authority deduplicates by requestId; resolve an unknown outcome with resolveRequest.
 
@@ -7817,7 +7713,7 @@ Exceptions:
 
 - `ArgumentNullException`: `input` is null.
 - `ArgumentException`: `credentialDeliveryPermit` is a default `JsonElement`.
-- `ConvoHopException`: The request was invalid, the authority rejected it, or its outcome is unknown.
+- `RelayException`: The request was invalid, the authority rejected it, or its outcome is unknown.
 
 Idempotency: `permitBound`. Authorized by a single-delivery permit. Retry with the same requestId and permit; outcomes cannot be resolved by lookup.
 
@@ -7846,7 +7742,7 @@ Exceptions:
 
 - `ArgumentNullException`: `input` is null.
 - `ArgumentException`: `credentialDeliveryPermit` is a default `JsonElement`.
-- `ConvoHopException`: The request was invalid, the authority rejected it, or its outcome is unknown.
+- `RelayException`: The request was invalid, the authority rejected it, or its outcome is unknown.
 
 Idempotency: `permitBound`. Authorized by a single-delivery permit. Retry with the same requestId and permit; outcomes cannot be resolved by lookup.
 
@@ -7880,7 +7776,7 @@ Returns: The authority result.
 
 Exceptions:
 
-- `ConvoHopException`: The request was invalid, the authority rejected it, or its outcome is unknown.
+- `RelayException`: The request was invalid, the authority rejected it, or its outcome is unknown.
 
 Idempotency: `safe`. Read-only. Repeat freely; each attempt may use a new requestId.
 
@@ -7904,7 +7800,7 @@ Returns: The authority result.
 
 Exceptions:
 
-- `ConvoHopException`: The request was invalid, the authority rejected it, or its outcome is unknown.
+- `RelayException`: The request was invalid, the authority rejected it, or its outcome is unknown.
 
 Idempotency: `safe`. Read-only. Repeat freely; each attempt may use a new requestId.
 
@@ -7930,7 +7826,7 @@ Returns: The authority result.
 Exceptions:
 
 - `ArgumentNullException`: `input` is null.
-- `ConvoHopException`: The request was invalid, the authority rejected it, or its outcome is unknown.
+- `RelayException`: The request was invalid, the authority rejected it, or its outcome is unknown.
 
 Idempotency: `safe`. Read-only. Repeat freely; each attempt may use a new requestId.
 
@@ -7956,7 +7852,7 @@ Returns: The authority result.
 Exceptions:
 
 - `ArgumentNullException`: `input` is null.
-- `ConvoHopException`: The request was invalid, the authority rejected it, or its outcome is unknown.
+- `RelayException`: The request was invalid, the authority rejected it, or its outcome is unknown.
 
 Idempotency: `safe`. Read-only. Repeat freely; each attempt may use a new requestId.
 
@@ -7982,7 +7878,7 @@ Returns: The authority result.
 Exceptions:
 
 - `ArgumentNullException`: `input` is null.
-- `ConvoHopException`: The request was invalid, the authority rejected it, or its outcome is unknown.
+- `RelayException`: The request was invalid, the authority rejected it, or its outcome is unknown.
 
 Idempotency: `safe`. Read-only. Repeat freely; each attempt may use a new requestId.
 
@@ -8008,7 +7904,7 @@ Returns: The authority result.
 Exceptions:
 
 - `ArgumentNullException`: `input` is null.
-- `ConvoHopException`: The request was invalid, the authority rejected it, or its outcome is unknown.
+- `RelayException`: The request was invalid, the authority rejected it, or its outcome is unknown.
 
 Idempotency: `safe`. Read-only. Repeat freely; each attempt may use a new requestId.
 
@@ -8034,7 +7930,7 @@ Returns: The authority result.
 Exceptions:
 
 - `ArgumentNullException`: `input` is null.
-- `ConvoHopException`: The request was invalid, the authority rejected it, or its outcome is unknown.
+- `RelayException`: The request was invalid, the authority rejected it, or its outcome is unknown.
 
 Idempotency: `safe`. Read-only. Repeat freely; each attempt may use a new requestId.
 
@@ -8060,7 +7956,7 @@ Returns: The authority result.
 Exceptions:
 
 - `ArgumentNullException`: `input` is null.
-- `ConvoHopException`: The request was invalid, the authority rejected it, or its outcome is unknown.
+- `RelayException`: The request was invalid, the authority rejected it, or its outcome is unknown.
 
 Idempotency: `safe`. Read-only. Repeat freely; each attempt may use a new requestId.
 
@@ -8086,7 +7982,7 @@ Returns: The authority result.
 Exceptions:
 
 - `ArgumentNullException`: `input` is null.
-- `ConvoHopException`: The request was invalid, the authority rejected it, or its outcome is unknown.
+- `RelayException`: The request was invalid, the authority rejected it, or its outcome is unknown.
 
 Idempotency: `safe`. Read-only. Repeat freely; each attempt may use a new requestId.
 
@@ -8100,7 +7996,7 @@ Sends [`management.organizationUsage`](../operations/management/organizationUsag
 public Task<OrganizationBillingReply> OrganizationBillingAsync(OrganizationBillingRequestInput input, CancellationToken cancellationToken = default);
 ```
 
-Read the billing state of an organization in any status: the plan whose limits apply, whether ConvoHop bills the organization and, when it does, its standing and subscription.
+Read the billing state of an organization in any status: the plan whose limits apply, whether Relay bills the organization and, when it does, its standing and subscription.
 
 Parameters:
 
@@ -8112,7 +8008,7 @@ Returns: The authority result.
 Exceptions:
 
 - `ArgumentNullException`: `input` is null.
-- `ConvoHopException`: The request was invalid, the authority rejected it, or its outcome is unknown.
+- `RelayException`: The request was invalid, the authority rejected it, or its outcome is unknown.
 
 Idempotency: `safe`. Read-only. Repeat freely; each attempt may use a new requestId.
 
@@ -8136,7 +8032,7 @@ Returns: The authority result.
 Exceptions:
 
 - `ArgumentNullException`: `input` is null.
-- `ConvoHopException`: The request was invalid, the authority rejected it, or its outcome is unknown.
+- `RelayException`: The request was invalid, the authority rejected it, or its outcome is unknown.
 
 Idempotency: `safe`. Read-only. Repeat freely; each attempt may use a new requestId.
 
@@ -8162,7 +8058,7 @@ Returns: The authority result.
 Exceptions:
 
 - `ArgumentNullException`: `input` is null.
-- `ConvoHopException`: The request was invalid, the authority rejected it, or its outcome is unknown.
+- `RelayException`: The request was invalid, the authority rejected it, or its outcome is unknown.
 
 Idempotency: `safe`. Read-only. Repeat freely; each attempt may use a new requestId.
 
@@ -8188,7 +8084,7 @@ Returns: The authority result.
 Exceptions:
 
 - `ArgumentNullException`: `input` is null.
-- `ConvoHopException`: The request was invalid, the authority rejected it, or its outcome is unknown.
+- `RelayException`: The request was invalid, the authority rejected it, or its outcome is unknown.
 
 Idempotency: `safe`. Read-only. Repeat freely; each attempt may use a new requestId.
 
@@ -8214,183 +8110,13 @@ Returns: The authority result.
 Exceptions:
 
 - `ArgumentNullException`: `input` is null.
-- `ConvoHopException`: The request was invalid, the authority rejected it, or its outcome is unknown.
+- `RelayException`: The request was invalid, the authority rejected it, or its outcome is unknown.
 
 Idempotency: `safe`. Read-only. Repeat freely; each attempt may use a new requestId.
 
 Authorization: portalCredential (condition owner).
 
 Sends [`management.getOperation`](../operations/management/getOperation.md).
-
-#### `ManagementApi.AgentSignupForApprovalAsync` method
-
-```cs
-public Task<AgentSignupForApprovalReply> AgentSignupForApprovalAsync(AgentSignupForApprovalRequestInput input, CancellationToken cancellationToken = default);
-```
-
-Read a pending agent signup request for its approval page, with the agent's suggested plan, scopes and monthly spend cap.
-
-Parameters:
-
-- `input`: The operation input.
-- `cancellationToken`: Stops waiting.
-
-Returns: The authority result.
-
-Exceptions:
-
-- `ArgumentNullException`: `input` is null.
-- `ConvoHopException`: The request was invalid, the authority rejected it, or its outcome is unknown.
-
-Idempotency: `safe`. Read-only. Repeat freely; each attempt may use a new requestId.
-
-Authorization: anonymous (condition approvalToken).
-
-#### `ManagementApi.AgentSignupAsync` method
-
-```cs
-public Task<AgentSignupReply> AgentSignupAsync(CancellationToken cancellationToken = default);
-```
-
-Read the agent's own signup: its state and, once approved, the organization, project, grant scopes and expiry, and keys. Poll no more often than the ticket's pollAfterSeconds.
-
-Parameters:
-
-- `cancellationToken`: Stops waiting.
-
-Returns: The authority result.
-
-Exceptions:
-
-- `ConvoHopException`: The request was invalid, the authority rejected it, or its outcome is unknown.
-
-Idempotency: `safe`. Read-only. Repeat freely; each attempt may use a new requestId.
-
-Authorization: agentVerifier (condition ownSignup).
-
-#### `ManagementApi.AgentGrantsAsync` method
-
-```cs
-public Task<AgentGrantsReply> AgentGrantsAsync(AgentGrantsRequestInput input, CancellationToken cancellationToken = default);
-```
-
-List an organization's agent grants with their keys, newest first.
-
-Parameters:
-
-- `input`: The operation input.
-- `cancellationToken`: Stops waiting.
-
-Returns: The authority result.
-
-Exceptions:
-
-- `ArgumentNullException`: `input` is null.
-- `ConvoHopException`: The request was invalid, the authority rejected it, or its outcome is unknown.
-
-Idempotency: `safe`. Read-only. Repeat freely; each attempt may use a new requestId.
-
-Authorization: portalCredential (condition owner).
-
-#### `ManagementApi.AgentGrantsPagesAsync` method
-
-```cs
-public IAsyncEnumerable<AgentGrantPage> AgentGrantsPagesAsync(AgentGrantsRequestInput input, CancellationToken cancellationToken = default);
-```
-
-The pages of `AgentGrantsAsync`, requested lazily.
-
-Parameters:
-
-- `input`: The first page's input.
-- `cancellationToken`: Stops waiting for a page, together with any token passed to `WithCancellation`.
-
-Returns: The pages, in order.
-
-Exceptions:
-
-- `ArgumentNullException`: `input` is null.
-- `ArgumentException`: The input's `cursor` is not a valid cursor.
-
-Each page is requested when enumeration reaches it. Later requests set `cursor` to the previous page's `nextCursor`, and enumeration ends after the page whose `complete` is true. Each enumeration starts again from the input as it was when this method was called, and every request has a new request ID.
-
-Pagination: `cursor`. Server-ordered pages. Pass nextCursor back as the cursor input until complete is true.
-
-Enumeration throws `ConvoHopException` if the authority rejects a request or a page is malformed or does not advance, and `InvalidOperationException` if a page reports `refreshRequired`: start again from current state, not from the cursor. These page failures are final. After any other failed request, an enumerator can call `MoveNextAsync` again to repeat it; `await foreach` stops at the first exception.
-
-#### `ManagementApi.AgentAuditEventsAsync` method
-
-```cs
-public Task<AgentAuditEventsReply> AgentAuditEventsAsync(AgentAuditEventsRequestInput input, CancellationToken cancellationToken = default);
-```
-
-List an organization's agent audit trail, newest first: the approval, provisioning, keys, revocations, spend-control changes and purchases.
-
-Parameters:
-
-- `input`: The operation input.
-- `cancellationToken`: Stops waiting.
-
-Returns: The authority result.
-
-Exceptions:
-
-- `ArgumentNullException`: `input` is null.
-- `ConvoHopException`: The request was invalid, the authority rejected it, or its outcome is unknown.
-
-Idempotency: `safe`. Read-only. Repeat freely; each attempt may use a new requestId.
-
-Authorization: portalCredential (condition owner).
-
-#### `ManagementApi.AgentAuditEventsPagesAsync` method
-
-```cs
-public IAsyncEnumerable<AgentAuditEventPage> AgentAuditEventsPagesAsync(AgentAuditEventsRequestInput input, CancellationToken cancellationToken = default);
-```
-
-The pages of `AgentAuditEventsAsync`, requested lazily.
-
-Parameters:
-
-- `input`: The first page's input.
-- `cancellationToken`: Stops waiting for a page, together with any token passed to `WithCancellation`.
-
-Returns: The pages, in order.
-
-Exceptions:
-
-- `ArgumentNullException`: `input` is null.
-- `ArgumentException`: The input's `cursor` is not a valid cursor.
-
-Each page is requested when enumeration reaches it. Later requests set `cursor` to the previous page's `nextCursor`, and enumeration ends after the page whose `complete` is true. Each enumeration starts again from the input as it was when this method was called, and every request has a new request ID.
-
-Pagination: `cursor`. Server-ordered pages. Pass nextCursor back as the cursor input until complete is true.
-
-Enumeration throws `ConvoHopException` if the authority rejects a request or a page is malformed or does not advance, and `InvalidOperationException` if a page reports `refreshRequired`: start again from current state, not from the cursor. These page failures are final. After any other failed request, an enumerator can call `MoveNextAsync` again to repeat it; `await foreach` stops at the first exception.
-
-#### `ManagementApi.OrganizationSpendAsync` method
-
-```cs
-public Task<OrganizationSpendReply> OrganizationSpendAsync(OrganizationSpendRequestInput input, CancellationToken cancellationToken = default);
-```
-
-Read the organization's spend this month: its cap, credits, minimum credit, charge limit, charges, margin, spend stop and the freshness of its usage.
-
-Parameters:
-
-- `input`: The operation input.
-- `cancellationToken`: Stops waiting.
-
-Returns: The authority result.
-
-Exceptions:
-
-- `ArgumentNullException`: `input` is null.
-- `ConvoHopException`: The request was invalid, the authority rejected it, or its outcome is unknown.
-
-Idempotency: `safe`. Read-only. Repeat freely; each attempt may use a new requestId.
-
-Authorization: portalCredential (condition owner).
 
 #### `ManagementApi.CreateOrganizationAsync` method
 
@@ -8411,7 +8137,7 @@ Returns: The authority result.
 Exceptions:
 
 - `ArgumentNullException`: `input` is null.
-- `ConvoHopException`: The request was invalid, the authority rejected it, or its outcome is unknown.
+- `RelayException`: The request was invalid, the authority rejected it, or its outcome is unknown.
 
 Idempotency: `idempotent`. Retry with the same requestId and identical input within the retry budget. The authority deduplicates by requestId; resolve an unknown outcome with resolveRequest.
 
@@ -8438,7 +8164,7 @@ Returns: The authority result.
 Exceptions:
 
 - `ArgumentNullException`: `input` is null.
-- `ConvoHopException`: The request was invalid, the authority rejected it, or its outcome is unknown.
+- `RelayException`: The request was invalid, the authority rejected it, or its outcome is unknown.
 
 Idempotency: `idempotent`. Retry with the same requestId and identical input within the retry budget. The authority deduplicates by requestId; resolve an unknown outcome with resolveRequest.
 
@@ -8465,7 +8191,7 @@ Returns: The authority result.
 Exceptions:
 
 - `ArgumentNullException`: `input` is null.
-- `ConvoHopException`: The request was invalid, the authority rejected it, or its outcome is unknown.
+- `RelayException`: The request was invalid, the authority rejected it, or its outcome is unknown.
 
 Idempotency: `idempotent`. Retry with the same requestId and identical input within the retry budget. The authority deduplicates by requestId; resolve an unknown outcome with resolveRequest.
 
@@ -8492,7 +8218,7 @@ Returns: The authority result.
 Exceptions:
 
 - `ArgumentNullException`: `input` is null.
-- `ConvoHopException`: The request was invalid, the authority rejected it, or its outcome is unknown.
+- `RelayException`: The request was invalid, the authority rejected it, or its outcome is unknown.
 
 Idempotency: `idempotent`. Retry with the same requestId and identical input within the retry budget. The authority deduplicates by requestId; resolve an unknown outcome with resolveRequest.
 
@@ -8519,7 +8245,7 @@ Returns: The authority result.
 Exceptions:
 
 - `ArgumentNullException`: `input` is null.
-- `ConvoHopException`: The request was invalid, the authority rejected it, or its outcome is unknown.
+- `RelayException`: The request was invalid, the authority rejected it, or its outcome is unknown.
 
 Idempotency: `idempotent`. Retry with the same requestId and identical input within the retry budget. The authority deduplicates by requestId; resolve an unknown outcome with resolveRequest.
 
@@ -8548,7 +8274,7 @@ Returns: The authority result.
 Exceptions:
 
 - `ArgumentNullException`: `input` is null.
-- `ConvoHopException`: The request was invalid, the authority rejected it, or its outcome is unknown.
+- `RelayException`: The request was invalid, the authority rejected it, or its outcome is unknown.
 
 Idempotency: `idempotent`. Retry with the same requestId and identical input within the retry budget. The authority deduplicates by requestId; resolve an unknown outcome with resolveRequest.
 
@@ -8575,7 +8301,7 @@ Returns: The authority result.
 Exceptions:
 
 - `ArgumentNullException`: `input` is null.
-- `ConvoHopException`: The request was invalid, the authority rejected it, or its outcome is unknown.
+- `RelayException`: The request was invalid, the authority rejected it, or its outcome is unknown.
 
 Idempotency: `idempotent`. Retry with the same requestId and identical input within the retry budget. The authority deduplicates by requestId; resolve an unknown outcome with resolveRequest.
 
@@ -8602,7 +8328,7 @@ Returns: The authority result.
 Exceptions:
 
 - `ArgumentNullException`: `input` is null.
-- `ConvoHopException`: The request was invalid, the authority rejected it, or its outcome is unknown.
+- `RelayException`: The request was invalid, the authority rejected it, or its outcome is unknown.
 
 Idempotency: `idempotent`. Retry with the same requestId and identical input within the retry budget. The authority deduplicates by requestId; resolve an unknown outcome with resolveRequest.
 
@@ -8629,7 +8355,7 @@ Returns: The authority result.
 Exceptions:
 
 - `ArgumentNullException`: `input` is null.
-- `ConvoHopException`: The request was invalid, the authority rejected it, or its outcome is unknown.
+- `RelayException`: The request was invalid, the authority rejected it, or its outcome is unknown.
 
 Idempotency: `idempotent`. Retry with the same requestId and identical input within the retry budget. The authority deduplicates by requestId; resolve an unknown outcome with resolveRequest.
 
@@ -8656,7 +8382,7 @@ Returns: The authority result.
 Exceptions:
 
 - `ArgumentNullException`: `input` is null.
-- `ConvoHopException`: The request was invalid, the authority rejected it, or its outcome is unknown.
+- `RelayException`: The request was invalid, the authority rejected it, or its outcome is unknown.
 
 Idempotency: `singleUse`. Like idempotent, but the result carries a short-lived credential for one connection. Request a new one instead of reusing an expired result.
 
@@ -8681,7 +8407,7 @@ Returns: The authority result.
 Exceptions:
 
 - `ArgumentNullException`: `input` is null.
-- `ConvoHopException`: The request was invalid, the authority rejected it, or its outcome is unknown.
+- `RelayException`: The request was invalid, the authority rejected it, or its outcome is unknown.
 
 Idempotency: `singleUse`. Like idempotent, but the result carries a short-lived credential for one connection. Request a new one instead of reusing an expired result.
 
@@ -8706,7 +8432,7 @@ Returns: The authority result.
 Exceptions:
 
 - `ArgumentNullException`: `input` is null.
-- `ConvoHopException`: The request was invalid, the authority rejected it, or its outcome is unknown.
+- `RelayException`: The request was invalid, the authority rejected it, or its outcome is unknown.
 
 Idempotency: `idempotent`. Retry with the same requestId and identical input within the retry budget. The authority deduplicates by requestId; resolve an unknown outcome with resolveRequest.
 
@@ -8733,7 +8459,7 @@ Returns: The authority result.
 Exceptions:
 
 - `ArgumentNullException`: `input` is null.
-- `ConvoHopException`: The request was invalid, the authority rejected it, or its outcome is unknown.
+- `RelayException`: The request was invalid, the authority rejected it, or its outcome is unknown.
 
 Idempotency: `idempotent`. Retry with the same requestId and identical input within the retry budget. The authority deduplicates by requestId; resolve an unknown outcome with resolveRequest.
 
@@ -8762,7 +8488,7 @@ Returns: The authority result.
 Exceptions:
 
 - `ArgumentNullException`: `input` is null.
-- `ConvoHopException`: The request was invalid, the authority rejected it, or its outcome is unknown.
+- `RelayException`: The request was invalid, the authority rejected it, or its outcome is unknown.
 
 Idempotency: `idempotent`. Retry with the same requestId and identical input within the retry budget. The authority deduplicates by requestId; resolve an unknown outcome with resolveRequest.
 
@@ -8791,7 +8517,7 @@ Returns: The authority result.
 Exceptions:
 
 - `ArgumentNullException`: `input` is null.
-- `ConvoHopException`: The request was invalid, the authority rejected it, or its outcome is unknown.
+- `RelayException`: The request was invalid, the authority rejected it, or its outcome is unknown.
 
 Idempotency: `idempotent`. Retry with the same requestId and identical input within the retry budget. The authority deduplicates by requestId; resolve an unknown outcome with resolveRequest.
 
@@ -8820,7 +8546,7 @@ Returns: The authority result.
 Exceptions:
 
 - `ArgumentNullException`: `input` is null.
-- `ConvoHopException`: The request was invalid, the authority rejected it, or its outcome is unknown.
+- `RelayException`: The request was invalid, the authority rejected it, or its outcome is unknown.
 
 Idempotency: `idempotent`. Retry with the same requestId and identical input within the retry budget. The authority deduplicates by requestId; resolve an unknown outcome with resolveRequest.
 
@@ -8828,213 +8554,11 @@ Authorization: portalCredential (condition owner).
 
 Sends [`management.replayWebhookDeliveries`](../operations/management/replayWebhookDeliveries.md).
 
-#### `ManagementApi.RequestAgentSignupAsync` method
+# `Relay.Models`
 
-```cs
-public Task<RequestAgentSignupReply> RequestAgentSignupAsync(RequestAgentSignupRequestInput input, string? requestId = null, CancellationToken cancellationToken = default);
-```
+Generated input and result models of the Relay GraphQL API.
 
-Request an organization for a named human owner, who approves it from an emailed link. Nothing is usable before approval.
-
-Parameters:
-
-- `input`: The operation input.
-- `requestId`: The request ID of an earlier attempt to retry with the same input, or null for a new one.
-- `cancellationToken`: Stops waiting. A cancelled mutation has an unknown outcome.
-
-Returns: The authority result.
-
-Exceptions:
-
-- `ArgumentNullException`: `input` is null.
-- `ConvoHopException`: The request was invalid, the authority rejected it, or its outcome is unknown.
-
-Idempotency: `replayOnly`. Retry with the same requestId and identical input within the retry budget; the authority answers a repeat with the original outcome. Outcomes cannot be resolved by lookup, so settle an unknown outcome by sending the same request again.
-
-Authorization: anonymous.
-
-#### `ManagementApi.RejectAgentSignupAsync` method
-
-```cs
-public Task<RejectAgentSignupReply> RejectAgentSignupAsync(RejectAgentSignupRequestInput input, string? requestId = null, CancellationToken cancellationToken = default);
-```
-
-Reject a signup request from its approval link, optionally suppressing future requests to the email.
-
-Parameters:
-
-- `input`: The operation input.
-- `requestId`: The request ID of an earlier attempt to retry with the same input, or null for a new one.
-- `cancellationToken`: Stops waiting. A cancelled mutation has an unknown outcome.
-
-Returns: The authority result.
-
-Exceptions:
-
-- `ArgumentNullException`: `input` is null.
-- `ConvoHopException`: The request was invalid, the authority rejected it, or its outcome is unknown.
-
-Idempotency: `replayOnly`. Retry with the same requestId and identical input within the retry budget; the authority answers a repeat with the original outcome. Outcomes cannot be resolved by lookup, so settle an unknown outcome by sending the same request again.
-
-Authorization: anonymous (condition approvalToken).
-
-#### `ManagementApi.ApproveAgentSignupAsync` method
-
-```cs
-public Task<ApproveAgentSignupReply> ApproveAgentSignupAsync(ApproveAgentSignupRequestInput input, string? requestId = null, CancellationToken cancellationToken = default);
-```
-
-Approve a signup request with its approval token and the agent's confirmation code, choosing the plan, scopes, monthly spend cap, agent purchase limit and grant expiry. The signed-in approver becomes the owner.
-
-Parameters:
-
-- `input`: The operation input.
-- `requestId`: The request ID of an earlier attempt to retry with the same input, or null for a new one.
-- `cancellationToken`: Stops waiting. A cancelled mutation has an unknown outcome.
-
-Returns: The authority result.
-
-Exceptions:
-
-- `ArgumentNullException`: `input` is null.
-- `ConvoHopException`: The request was invalid, the authority rejected it, or its outcome is unknown.
-
-Idempotency: `idempotent`. Retry with the same requestId and identical input within the retry budget. The authority deduplicates by requestId; resolve an unknown outcome with resolveRequest.
-
-Authorization: portalCredential (condition approvalToken).
-
-#### `ManagementApi.IssueAgentKeyAsync` method
-
-```cs
-public Task<IssueAgentKeyReply> IssueAgentKeyAsync(IssueAgentKeyRequestInput input, string? requestId = null, CancellationToken cancellationToken = default);
-```
-
-Issue a backend key for the agent within its grant's scopes and expiry. The result is the pending key; poll agentSignup until it shows the key's delivery, then redeem it with agentCredentialPermit.
-
-Parameters:
-
-- `input`: The operation input.
-- `requestId`: The request ID of an earlier attempt to retry with the same input, or null for a new one.
-- `cancellationToken`: Stops waiting. A cancelled mutation has an unknown outcome.
-
-Returns: The authority result.
-
-Exceptions:
-
-- `ArgumentNullException`: `input` is null.
-- `ConvoHopException`: The request was invalid, the authority rejected it, or its outcome is unknown.
-
-Idempotency: `replayOnly`. Retry with the same requestId and identical input within the retry budget; the authority answers a repeat with the original outcome. Outcomes cannot be resolved by lookup, so settle an unknown outcome by sending the same request again.
-
-Authorization: agentVerifier (condition activeGrant).
-
-#### `ManagementApi.AgentCredentialPermitAsync` method
-
-```cs
-public Task<AgentCredentialPermitReply> AgentCredentialPermitAsync(AgentCredentialPermitRequestInput input, string? requestId = null, CancellationToken cancellationToken = default);
-```
-
-Issue a permit that authorizes the agent to redeem one of its key deliveries.
-
-Parameters:
-
-- `input`: The operation input.
-- `requestId`: The request ID of an earlier attempt to retry with the same input, or null for a new one.
-- `cancellationToken`: Stops waiting. A cancelled mutation has an unknown outcome.
-
-Returns: The authority result.
-
-Exceptions:
-
-- `ArgumentNullException`: `input` is null.
-- `ConvoHopException`: The request was invalid, the authority rejected it, or its outcome is unknown.
-
-Idempotency: `replayOnly`. Retry with the same requestId and identical input within the retry budget; the authority answers a repeat with the original outcome. Outcomes cannot be resolved by lookup, so settle an unknown outcome by sending the same request again.
-
-Authorization: agentVerifier (condition activeGrant).
-
-#### `ManagementApi.RevokeAgentGrantAsync` method
-
-```cs
-public Task<RevokeAgentGrantReply> RevokeAgentGrantAsync(RevokeAgentGrantRequestInput input, string? requestId = null, CancellationToken cancellationToken = default);
-```
-
-Revoke an agent grant and every key issued under it.
-
-Parameters:
-
-- `input`: The operation input.
-- `requestId`: The request ID of an earlier attempt to retry with the same input, or null for a new one.
-- `cancellationToken`: Stops waiting. A cancelled mutation has an unknown outcome.
-
-Returns: The authority result.
-
-Exceptions:
-
-- `ArgumentNullException`: `input` is null.
-- `ConvoHopException`: The request was invalid, the authority rejected it, or its outcome is unknown.
-
-Idempotency: `idempotent`. Retry with the same requestId and identical input within the retry budget. The authority deduplicates by requestId; resolve an unknown outcome with resolveRequest.
-
-Authorization: portalCredential (condition owner).
-
-Destructive: it deletes, revokes, removes, disables or ends something.
-
-#### `ManagementApi.SetSpendControlsAsync` method
-
-```cs
-public Task<SetSpendControlsReply> SetSpendControlsAsync(SetSpendControlsRequestInput input, string? requestId = null, CancellationToken cancellationToken = default);
-```
-
-Set the organization's monthly spend cap and agent purchase limit.
-
-Parameters:
-
-- `input`: The operation input.
-- `requestId`: The request ID of an earlier attempt to retry with the same input, or null for a new one.
-- `cancellationToken`: Stops waiting. A cancelled mutation has an unknown outcome.
-
-Returns: The authority result.
-
-Exceptions:
-
-- `ArgumentNullException`: `input` is null.
-- `ConvoHopException`: The request was invalid, the authority rejected it, or its outcome is unknown.
-
-Idempotency: `idempotent`. Retry with the same requestId and identical input within the retry budget. The authority deduplicates by requestId; resolve an unknown outcome with resolveRequest.
-
-Authorization: portalCredential (condition owner).
-
-#### `ManagementApi.PurchaseAgentCreditsAsync` method
-
-```cs
-public Task<PurchaseAgentCreditsReply> PurchaseAgentCreditsAsync(PurchaseAgentCreditsRequestInput input, string? requestId = null, CancellationToken cancellationToken = default);
-```
-
-Buy prepaid credits with a Shared Payment Token, within the owner's agent purchase limit.
-
-Parameters:
-
-- `input`: The operation input.
-- `requestId`: The request ID of an earlier attempt to retry with the same input, or null for a new one.
-- `cancellationToken`: Stops waiting. A cancelled mutation has an unknown outcome.
-
-Returns: The authority result.
-
-Exceptions:
-
-- `ArgumentNullException`: `input` is null.
-- `ConvoHopException`: The request was invalid, the authority rejected it, or its outcome is unknown.
-
-Idempotency: `replayOnly`. Retry with the same requestId and identical input within the retry budget; the authority answers a repeat with the original outcome. Outcomes cannot be resolved by lookup, so settle an unknown outcome by sending the same request again.
-
-Authorization: agentVerifier (condition activeGrant).
-
-# `ConvoHop.Models`
-
-Generated input and result models of the ConvoHop GraphQL API.
-
-**Layer:** Server. **Runtime:** .NET 8 or later. The `netstandard2.0` build also targets .NET Framework 4.7.2 or later, which isn't tested yet. **Source:** `dotnet/src/ConvoHop`.
+**Layer:** Server. **Runtime:** .NET 8 or later. The `netstandard2.0` build also targets .NET Framework 4.7.2 or later, which isn't tested yet. **Source:** `dotnet/src/Relay`.
 
 ## Classes
 
@@ -9148,320 +8672,6 @@ public sealed class AddMembersPayload
 
 The AddMembersPayload result.
 
-### `AgentAuditEvent` class
-
-```cs
-public sealed class AgentAuditEvent
-{
-    public AgentAuditEvent();
-    public string EventId { get; init; }
-    public string OrgId { get; init; }
-    public string? GrantId { get; init; }
-    public string ActorKind { get; init; }
-    public string? ActorId { get; init; }
-    public string Kind { get; init; }
-    public JsonElement? Details { get; init; }
-    public string OccurredAt { get; init; }
-}
-```
-
-The AgentAuditEvent result.
-
-### `AgentAuditEventPage` class
-
-```cs
-public sealed class AgentAuditEventPage
-{
-    public AgentAuditEventPage();
-    public IReadOnlyList<AgentAuditEvent> Items { get; init; }
-    public bool Complete { get; init; }
-    public bool RefreshRequired { get; init; }
-    public string? NextCursor { get; init; }
-}
-```
-
-The AgentAuditEventPage result.
-
-### `AgentAuditEventsReply` class
-
-```cs
-public sealed class AgentAuditEventsReply
-{
-    public AgentAuditEventsReply();
-    public string Status { get; init; }
-    public string RequestId { get; init; }
-    public string? ServerTime { get; init; }
-    public string? ReceiptId { get; init; }
-    public string? CommittedAt { get; init; }
-    public bool? Replayed { get; init; }
-    public OperationRef? Operation { get; init; }
-    public ResourceRef? ResourceRef { get; init; }
-    public AgentAuditEventPage? Result { get; init; }
-}
-```
-
-The AgentAuditEventsReply result.
-
-### `AgentAuditEventsRequestInput` class
-
-```cs
-public sealed class AgentAuditEventsRequestInput
-{
-    public AgentAuditEventsRequestInput(string orgId);
-    public string OrgId { get; set; }
-    public int? Limit { get; set; }
-    public string? Cursor { get; set; }
-}
-```
-
-The AgentAuditEventsRequestInput input.
-
-### `AgentCredentialPermitReply` class
-
-```cs
-public sealed class AgentCredentialPermitReply
-{
-    public AgentCredentialPermitReply();
-    public string Status { get; init; }
-    public string RequestId { get; init; }
-    public string? ServerTime { get; init; }
-    public string? ReceiptId { get; init; }
-    public string? CommittedAt { get; init; }
-    public bool? Replayed { get; init; }
-    public OperationRef? Operation { get; init; }
-    public ResourceRef? ResourceRef { get; init; }
-    public JsonElement? Result { get; init; }
-}
-```
-
-The AgentCredentialPermitReply result.
-
-### `AgentCredentialPermitRequestInput` class
-
-```cs
-public sealed class AgentCredentialPermitRequestInput
-{
-    public AgentCredentialPermitRequestInput(string deliveryId, string redemptionRequestId);
-    public string DeliveryId { get; set; }
-    public string RedemptionRequestId { get; set; }
-}
-```
-
-The AgentCredentialPermitRequestInput input.
-
-### `AgentGrant` class
-
-```cs
-public sealed class AgentGrant
-{
-    public AgentGrant();
-    public string GrantId { get; init; }
-    public string OrgId { get; init; }
-    public string SignupId { get; init; }
-    public string AgentActorId { get; init; }
-    public string? ProjectId { get; init; }
-    public IReadOnlyList<string> Scopes { get; init; }
-    public string ExpiresAt { get; init; }
-    public string? RevokedAt { get; init; }
-    public string CreatedAt { get; init; }
-    public IReadOnlyList<AgentKey> Keys { get; init; }
-}
-```
-
-The AgentGrant result.
-
-### `AgentGrantPage` class
-
-```cs
-public sealed class AgentGrantPage
-{
-    public AgentGrantPage();
-    public IReadOnlyList<AgentGrant> Items { get; init; }
-    public bool Complete { get; init; }
-    public bool RefreshRequired { get; init; }
-    public string? NextCursor { get; init; }
-}
-```
-
-The AgentGrantPage result.
-
-### `AgentGrantsReply` class
-
-```cs
-public sealed class AgentGrantsReply
-{
-    public AgentGrantsReply();
-    public string Status { get; init; }
-    public string RequestId { get; init; }
-    public string? ServerTime { get; init; }
-    public string? ReceiptId { get; init; }
-    public string? CommittedAt { get; init; }
-    public bool? Replayed { get; init; }
-    public OperationRef? Operation { get; init; }
-    public ResourceRef? ResourceRef { get; init; }
-    public AgentGrantPage? Result { get; init; }
-}
-```
-
-The AgentGrantsReply result.
-
-### `AgentGrantsRequestInput` class
-
-```cs
-public sealed class AgentGrantsRequestInput
-{
-    public AgentGrantsRequestInput(string orgId);
-    public string OrgId { get; set; }
-    public int? Limit { get; set; }
-    public string? Cursor { get; set; }
-}
-```
-
-The AgentGrantsRequestInput input.
-
-### `AgentKey` class
-
-```cs
-public sealed class AgentKey
-{
-    public AgentKey();
-    public string OperationId { get; init; }
-    public string State { get; init; }
-    public IReadOnlyList<string> Scopes { get; init; }
-    public string ExpiresAt { get; init; }
-    public string? KeyId { get; init; }
-    public string? DeliveryId { get; init; }
-    public string? DeliveryExpiresAt { get; init; }
-}
-```
-
-The AgentKey result.
-
-### `AgentPayment` class
-
-```cs
-public sealed class AgentPayment
-{
-    public AgentPayment();
-    public string PaymentId { get; init; }
-    public string Amount { get; init; }
-    public string Currency { get; init; }
-    public string State { get; init; }
-}
-```
-
-The AgentPayment result.
-
-### `AgentSignupForApprovalReply` class
-
-```cs
-public sealed class AgentSignupForApprovalReply
-{
-    public AgentSignupForApprovalReply();
-    public string Status { get; init; }
-    public string RequestId { get; init; }
-    public string? ServerTime { get; init; }
-    public string? ReceiptId { get; init; }
-    public string? CommittedAt { get; init; }
-    public bool? Replayed { get; init; }
-    public OperationRef? Operation { get; init; }
-    public ResourceRef? ResourceRef { get; init; }
-    public AgentSignupReview? Result { get; init; }
-}
-```
-
-The AgentSignupForApprovalReply result.
-
-### `AgentSignupForApprovalRequestInput` class
-
-```cs
-public sealed class AgentSignupForApprovalRequestInput
-{
-    public AgentSignupForApprovalRequestInput(string approvalToken);
-    public string ApprovalToken { get; set; }
-}
-```
-
-The AgentSignupForApprovalRequestInput input.
-
-### `AgentSignupReply` class
-
-```cs
-public sealed class AgentSignupReply
-{
-    public AgentSignupReply();
-    public string Status { get; init; }
-    public string RequestId { get; init; }
-    public string? ServerTime { get; init; }
-    public string? ReceiptId { get; init; }
-    public string? CommittedAt { get; init; }
-    public bool? Replayed { get; init; }
-    public OperationRef? Operation { get; init; }
-    public ResourceRef? ResourceRef { get; init; }
-    public AgentSignupStatus? Result { get; init; }
-}
-```
-
-The AgentSignupReply result.
-
-### `AgentSignupReview` class
-
-```cs
-public sealed class AgentSignupReview
-{
-    public AgentSignupReview();
-    public string SignupId { get; init; }
-    public string OwnerEmail { get; init; }
-    public string OrganizationName { get; init; }
-    public string AgentName { get; init; }
-    public string? Purpose { get; init; }
-    public string? SuggestedPlan { get; init; }
-    public IReadOnlyList<string> SuggestedScopes { get; init; }
-    public string? SuggestedMonthlySpendCap { get; init; }
-    public string Currency { get; init; }
-    public string ExpiresAt { get; init; }
-}
-```
-
-The AgentSignupReview result.
-
-### `AgentSignupStatus` class
-
-```cs
-public sealed class AgentSignupStatus
-{
-    public AgentSignupStatus();
-    public string SignupId { get; init; }
-    public string State { get; init; }
-    public string? OrgId { get; init; }
-    public string? DeploymentId { get; init; }
-    public string? ProjectId { get; init; }
-    public string? NextStep { get; init; }
-    public IReadOnlyList<string> Scopes { get; init; }
-    public string? GrantExpiresAt { get; init; }
-    public IReadOnlyList<AgentKey> Keys { get; init; }
-    public string? Incarnation { get; init; }
-    public string? ServingEpoch { get; init; }
-}
-```
-
-The AgentSignupStatus result.
-
-### `AgentSignupTicket` class
-
-```cs
-public sealed class AgentSignupTicket
-{
-    public AgentSignupTicket();
-    public string SignupId { get; init; }
-    public string ConfirmationCode { get; init; }
-    public string ExpiresAt { get; init; }
-    public int PollAfterSeconds { get; init; }
-}
-```
-
-The AgentSignupTicket result.
-
 ### `AlertLiveSessionInput` class
 
 ```cs
@@ -9492,45 +8702,6 @@ public sealed class AlertLiveSessionPayload
 ```
 
 The AlertLiveSessionPayload result.
-
-### `ApproveAgentSignupReply` class
-
-```cs
-public sealed class ApproveAgentSignupReply
-{
-    public ApproveAgentSignupReply();
-    public string Status { get; init; }
-    public string RequestId { get; init; }
-    public string? ServerTime { get; init; }
-    public string? ReceiptId { get; init; }
-    public string? CommittedAt { get; init; }
-    public bool? Replayed { get; init; }
-    public OperationRef? Operation { get; init; }
-    public ResourceRef? ResourceRef { get; init; }
-    public AgentSignupStatus? Result { get; init; }
-}
-```
-
-The ApproveAgentSignupReply result.
-
-### `ApproveAgentSignupRequestInput` class
-
-```cs
-public sealed class ApproveAgentSignupRequestInput
-{
-    public ApproveAgentSignupRequestInput(string approvalToken, string confirmationCode, string termsRef, string plan, IReadOnlyList<string> scopes, string monthlySpendCap);
-    public string ApprovalToken { get; set; }
-    public string ConfirmationCode { get; set; }
-    public string TermsRef { get; set; }
-    public string Plan { get; set; }
-    public IReadOnlyList<string> Scopes { get; set; }
-    public string MonthlySpendCap { get; set; }
-    public string? AgentPurchaseLimit { get; set; }
-    public string? GrantExpiresAt { get; set; }
-}
-```
-
-The ApproveAgentSignupRequestInput input.
 
 ### `BillingCheckoutSession` class
 
@@ -10753,39 +9924,6 @@ public sealed class InboxRequestInput
 
 The InboxRequestInput input.
 
-### `IssueAgentKeyReply` class
-
-```cs
-public sealed class IssueAgentKeyReply
-{
-    public IssueAgentKeyReply();
-    public string Status { get; init; }
-    public string RequestId { get; init; }
-    public string? ServerTime { get; init; }
-    public string? ReceiptId { get; init; }
-    public string? CommittedAt { get; init; }
-    public bool? Replayed { get; init; }
-    public OperationRef? Operation { get; init; }
-    public ResourceRef? ResourceRef { get; init; }
-    public AgentKey? Result { get; init; }
-}
-```
-
-The IssueAgentKeyReply result.
-
-### `IssueAgentKeyRequestInput` class
-
-```cs
-public sealed class IssueAgentKeyRequestInput
-{
-    public IssueAgentKeyRequestInput(IReadOnlyList<string> scopes);
-    public IReadOnlyList<string> Scopes { get; set; }
-    public string? ExpiresAt { get; set; }
-}
-```
-
-The IssueAgentKeyRequestInput input.
-
 ### `IssueBackendKeyReply` class
 
 ```cs
@@ -11633,69 +10771,6 @@ public sealed class OrganizationPage
 
 The OrganizationPage result.
 
-### `OrganizationSpend` class
-
-```cs
-public sealed class OrganizationSpend
-{
-    public OrganizationSpend();
-    public string OrgId { get; init; }
-    public string PlanId { get; init; }
-    public string Currency { get; init; }
-    public string CatalogVersion { get; init; }
-    public string? MonthlySpendCap { get; init; }
-    public string? AgentPurchaseLimit { get; init; }
-    public string? UpdatedAt { get; init; }
-    public string? MonthlyMinimum { get; init; }
-    public string? PeriodStart { get; init; }
-    public string? PeriodEnd { get; init; }
-    public string? Credits { get; init; }
-    public string? Charges { get; init; }
-    public string? Margin { get; init; }
-    public string? Stop { get; init; }
-    public IReadOnlyList<string> RefusedMeters { get; init; }
-    public string? EvaluatedAt { get; init; }
-    public string? UsageThrough { get; init; }
-    public string? ValidUntil { get; init; }
-    public string? MinimumCredit { get; init; }
-    public string? ChargeLimit { get; init; }
-}
-```
-
-The OrganizationSpend result.
-
-### `OrganizationSpendReply` class
-
-```cs
-public sealed class OrganizationSpendReply
-{
-    public OrganizationSpendReply();
-    public string Status { get; init; }
-    public string RequestId { get; init; }
-    public string? ServerTime { get; init; }
-    public string? ReceiptId { get; init; }
-    public string? CommittedAt { get; init; }
-    public bool? Replayed { get; init; }
-    public OperationRef? Operation { get; init; }
-    public ResourceRef? ResourceRef { get; init; }
-    public OrganizationSpend? Result { get; init; }
-}
-```
-
-The OrganizationSpendReply result.
-
-### `OrganizationSpendRequestInput` class
-
-```cs
-public sealed class OrganizationSpendRequestInput
-{
-    public OrganizationSpendRequestInput(string orgId);
-    public string OrgId { get; set; }
-}
-```
-
-The OrganizationSpendRequestInput input.
-
 ### `OrganizationUsage` class
 
 ```cs
@@ -11942,39 +11017,6 @@ public sealed class ProjectUsageRequestInput
 
 The ProjectUsageRequestInput input.
 
-### `PurchaseAgentCreditsReply` class
-
-```cs
-public sealed class PurchaseAgentCreditsReply
-{
-    public PurchaseAgentCreditsReply();
-    public string Status { get; init; }
-    public string RequestId { get; init; }
-    public string? ServerTime { get; init; }
-    public string? ReceiptId { get; init; }
-    public string? CommittedAt { get; init; }
-    public bool? Replayed { get; init; }
-    public OperationRef? Operation { get; init; }
-    public ResourceRef? ResourceRef { get; init; }
-    public AgentPayment? Result { get; init; }
-}
-```
-
-The PurchaseAgentCreditsReply result.
-
-### `PurchaseAgentCreditsRequestInput` class
-
-```cs
-public sealed class PurchaseAgentCreditsRequestInput
-{
-    public PurchaseAgentCreditsRequestInput(string amount, string sharedPaymentToken);
-    public string Amount { get; set; }
-    public string SharedPaymentToken { get; set; }
-}
-```
-
-The PurchaseAgentCreditsRequestInput input.
-
 ### `ReadReceipt` class
 
 ```cs
@@ -12023,39 +11065,6 @@ public sealed class RedeemCredentialRequestInput
 ```
 
 The RedeemCredentialRequestInput input.
-
-### `RejectAgentSignupReply` class
-
-```cs
-public sealed class RejectAgentSignupReply
-{
-    public RejectAgentSignupReply();
-    public string Status { get; init; }
-    public string RequestId { get; init; }
-    public string? ServerTime { get; init; }
-    public string? ReceiptId { get; init; }
-    public string? CommittedAt { get; init; }
-    public bool? Replayed { get; init; }
-    public OperationRef? Operation { get; init; }
-    public ResourceRef? ResourceRef { get; init; }
-    public AgentSignupStatus? Result { get; init; }
-}
-```
-
-The RejectAgentSignupReply result.
-
-### `RejectAgentSignupRequestInput` class
-
-```cs
-public sealed class RejectAgentSignupRequestInput
-{
-    public RejectAgentSignupRequestInput(string approvalToken, bool suppressFutureRequests);
-    public string ApprovalToken { get; set; }
-    public bool SuppressFutureRequests { get; set; }
-}
-```
-
-The RejectAgentSignupRequestInput input.
 
 ### `RemoveMemberReply` class
 
@@ -12162,45 +11171,6 @@ public sealed class ReplayWebhookDeliveriesRequestInput
 ```
 
 The ReplayWebhookDeliveriesRequestInput input.
-
-### `RequestAgentSignupReply` class
-
-```cs
-public sealed class RequestAgentSignupReply
-{
-    public RequestAgentSignupReply();
-    public string Status { get; init; }
-    public string RequestId { get; init; }
-    public string? ServerTime { get; init; }
-    public string? ReceiptId { get; init; }
-    public string? CommittedAt { get; init; }
-    public bool? Replayed { get; init; }
-    public OperationRef? Operation { get; init; }
-    public ResourceRef? ResourceRef { get; init; }
-    public AgentSignupTicket? Result { get; init; }
-}
-```
-
-The RequestAgentSignupReply result.
-
-### `RequestAgentSignupRequestInput` class
-
-```cs
-public sealed class RequestAgentSignupRequestInput
-{
-    public RequestAgentSignupRequestInput(string ownerEmail, string pollChallenge, string organizationName, string agentName, IReadOnlyList<string> suggestedScopes);
-    public string OwnerEmail { get; set; }
-    public string PollChallenge { get; set; }
-    public string OrganizationName { get; set; }
-    public string AgentName { get; set; }
-    public string? Purpose { get; set; }
-    public string? SuggestedPlan { get; set; }
-    public IReadOnlyList<string> SuggestedScopes { get; set; }
-    public string? SuggestedMonthlySpendCap { get; set; }
-}
-```
-
-The RequestAgentSignupRequestInput input.
 
 ### `RequestResolution` class
 
@@ -12322,8 +11292,6 @@ The ResumeOperationRequestInput input.
 public sealed class RetainedResult
 {
     public RetainedResult();
-    public AgentGrant? AgentGrant { get; init; }
-    public AgentSignupStatus? AgentSignupStatus { get; init; }
     public BillingCheckoutSession? BillingCheckoutSession { get; init; }
     public BillingPortalSession? BillingPortalSession { get; init; }
     public BroadcastPermissionChanged? BroadcastPermissionChanged { get; init; }
@@ -12342,7 +11310,6 @@ public sealed class RetainedResult
     public Message? Message { get; init; }
     public MessageAck? MessageAck { get; init; }
     public Organization? Organization { get; init; }
-    public OrganizationSpend? OrganizationSpend { get; init; }
     public Principal? Principal { get; init; }
     public ReadReceipt? ReadReceipt { get; init; }
     public SessionBootstrap? SessionBootstrap { get; init; }
@@ -12352,39 +11319,6 @@ public sealed class RetainedResult
 ```
 
 Exactly one typed field contains the retained, currently authorized receipt result.
-
-### `RevokeAgentGrantReply` class
-
-```cs
-public sealed class RevokeAgentGrantReply
-{
-    public RevokeAgentGrantReply();
-    public string Status { get; init; }
-    public string RequestId { get; init; }
-    public string? ServerTime { get; init; }
-    public string? ReceiptId { get; init; }
-    public string? CommittedAt { get; init; }
-    public bool? Replayed { get; init; }
-    public OperationRef? Operation { get; init; }
-    public ResourceRef? ResourceRef { get; init; }
-    public AgentGrant? Result { get; init; }
-}
-```
-
-The RevokeAgentGrantReply result.
-
-### `RevokeAgentGrantRequestInput` class
-
-```cs
-public sealed class RevokeAgentGrantRequestInput
-{
-    public RevokeAgentGrantRequestInput(string grantId, bool revokeIssuedSessions);
-    public string GrantId { get; set; }
-    public bool RevokeIssuedSessions { get; set; }
-}
-```
-
-The RevokeAgentGrantRequestInput input.
 
 ### `RevokeBackendKeyReply` class
 
@@ -12802,40 +11736,6 @@ public sealed class SetConversationMutePayload
 
 The SetConversationMutePayload result.
 
-### `SetSpendControlsReply` class
-
-```cs
-public sealed class SetSpendControlsReply
-{
-    public SetSpendControlsReply();
-    public string Status { get; init; }
-    public string RequestId { get; init; }
-    public string? ServerTime { get; init; }
-    public string? ReceiptId { get; init; }
-    public string? CommittedAt { get; init; }
-    public bool? Replayed { get; init; }
-    public OperationRef? Operation { get; init; }
-    public ResourceRef? ResourceRef { get; init; }
-    public OrganizationSpend? Result { get; init; }
-}
-```
-
-The SetSpendControlsReply result.
-
-### `SetSpendControlsRequestInput` class
-
-```cs
-public sealed class SetSpendControlsRequestInput
-{
-    public SetSpendControlsRequestInput(string orgId, string monthlySpendCap);
-    public string OrgId { get; set; }
-    public string MonthlySpendCap { get; set; }
-    public string? AgentPurchaseLimit { get; set; }
-}
-```
-
-The SetSpendControlsRequestInput input.
-
 ### `UpdateConversationReply` class
 
 ```cs
@@ -13229,7 +12129,7 @@ The LiveSessionState enum.
 
 # .NET operation coverage
 
-The .NET SDK members that send each API operation. 65 of the 81 operations that .NET packages can send have a method.
+The .NET SDK members that send each API operation. 65 of the 68 operations that .NET packages can send have a method.
 
 ## Communication
 
@@ -13237,42 +12137,42 @@ Conversations, members, messages, receipts, realtime events and live sessions in
 
 | Operation | Layer | Members |
 | --- | --- | --- |
-| [`communication.capabilities`](../operations/communication/capabilities.md) | both | [`ProjectServerClient.GetCapabilitiesAsync`](reference/convohop.md#projectserverclientgetcapabilitiesasync-method), [`CommunicationApi.CapabilitiesAsync`](reference/api.md#communicationapicapabilitiesasync-method) |
-| [`communication.route`](../operations/communication/route.md) | both | [`ProjectServerClient.InitializeAsync`](reference/convohop.md#projectserverclientinitializeasync-method), [`CommunicationApi.RouteAsync`](reference/api.md#communicationapirouteasync-method) |
-| [`communication.getPrincipal`](../operations/communication/getPrincipal.md) | server | [`ServerPrincipals.GetAsync`](reference/convohop.md#serverprincipalsgetasync-method), [`CommunicationApi.GetPrincipalAsync`](reference/api.md#communicationapigetprincipalasync-method) |
-| [`communication.getConversation`](../operations/communication/getConversation.md) | both | [`ServerConversation.GetAsync`](reference/convohop.md#serverconversationgetasync-method), [`CommunicationApi.GetConversationAsync`](reference/api.md#communicationapigetconversationasync-method) |
-| [`communication.members`](../operations/communication/members.md) | both | [`ServerMembers.ListAsync`](reference/convohop.md#servermemberslistasync-method), [`CommunicationApi.MembersAsync`](reference/api.md#communicationapimembersasync-method), [`CommunicationApi.MembersPagesAsync`](reference/api.md#communicationapimemberspagesasync-method) |
-| [`communication.messages`](../operations/communication/messages.md) | both | [`ServerMessages.ListAsync`](reference/convohop.md#servermessageslistasync-method), [`CommunicationApi.MessagesAsync`](reference/api.md#communicationapimessagesasync-method), [`CommunicationApi.MessagesPagesAsync`](reference/api.md#communicationapimessagespagesasync-method) |
-| [`communication.getMessage`](../operations/communication/getMessage.md) | both | [`ServerMessages.GetAsync`](reference/convohop.md#servermessagesgetasync-method), [`CommunicationApi.GetMessageAsync`](reference/api.md#communicationapigetmessageasync-method) |
-| [`communication.inbox`](../operations/communication/inbox.md) | both | [`ProjectServerClient.GetInboxAsync`](reference/convohop.md#projectserverclientgetinboxasync-method), [`CommunicationApi.InboxAsync`](reference/api.md#communicationapiinboxasync-method), [`CommunicationApi.InboxPagesAsync`](reference/api.md#communicationapiinboxpagesasync-method) |
-| [`communication.search`](../operations/communication/search.md) | both | [`ProjectServerClient.SearchAsync`](reference/convohop.md#projectserverclientsearchasync-method), [`CommunicationApi.SearchAsync`](reference/api.md#communicationapisearchasync-method), [`CommunicationApi.SearchPagesAsync`](reference/api.md#communicationapisearchpagesasync-method) |
-| [`communication.resolveRequest`](../operations/communication/resolveRequest.md) | both | [`ServerRequests.ResolveAsync`](reference/convohop.md#serverrequestsresolveasync-method), [`ServerRequests.RetryAsync`](reference/convohop.md#serverrequestsretryasync-method), [`ConvoHopTransport.RetryAsync`](reference/convohop.md#convohoptransportretryasync-method), [`CommunicationApi.ResolveRequestAsync`](reference/api.md#communicationapiresolverequestasync-method) |
-| [`communication.getOperation`](../operations/communication/getOperation.md) | both | [`ProjectServerClient.GetOperationAsync`](reference/convohop.md#projectserverclientgetoperationasync-method), [`CommunicationApi.GetOperationAsync`](reference/api.md#communicationapigetoperationasync-method) |
-| [`communication.conversationMute`](../operations/communication/conversationMute.md) | both | [`ServerMembers.GetMuteAsync`](reference/convohop.md#servermembersgetmuteasync-method), [`CommunicationApi.ConversationMuteAsync`](reference/api.md#communicationapiconversationmuteasync-method) |
-| [`communication.currentLiveSession`](../operations/communication/currentLiveSession.md) | both | [`ServerConversationLive.GetCurrentAsync`](reference/convohop.md#serverconversationlivegetcurrentasync-method), [`CommunicationApi.CurrentLiveSessionAsync`](reference/api.md#communicationapicurrentlivesessionasync-method) |
-| [`communication.liveSession`](../operations/communication/liveSession.md) | both | [`ServerLiveSession.GetAsync`](reference/convohop.md#serverlivesessiongetasync-method), [`CommunicationApi.LiveSessionAsync`](reference/api.md#communicationapilivesessionasync-method) |
-| [`communication.liveSessions`](../operations/communication/liveSessions.md) | both | [`ServerConversationLive.ListHistoryAsync`](reference/convohop.md#serverconversationlivelisthistoryasync-method), [`CommunicationApi.LiveSessionsAsync`](reference/api.md#communicationapilivesessionsasync-method), [`CommunicationApi.LiveSessionsPagesAsync`](reference/api.md#communicationapilivesessionspagesasync-method) |
-| [`communication.liveSessionParticipants`](../operations/communication/liveSessionParticipants.md) | both | [`ServerLiveSession.ListParticipantsAsync`](reference/convohop.md#serverlivesessionlistparticipantsasync-method), [`CommunicationApi.LiveSessionParticipantsAsync`](reference/api.md#communicationapilivesessionparticipantsasync-method), [`CommunicationApi.LiveSessionParticipantsPagesAsync`](reference/api.md#communicationapilivesessionparticipantspagesasync-method) |
-| [`communication.liveSessionOperation`](../operations/communication/liveSessionOperation.md) | both | [`ServerLiveOperation.GetAsync`](reference/convohop.md#serverliveoperationgetasync-method), [`ServerLiveOperation.WaitForCompletionAsync`](reference/convohop.md#serverliveoperationwaitforcompletionasync-method), [`CommunicationApi.LiveSessionOperationAsync`](reference/api.md#communicationapilivesessionoperationasync-method) |
-| [`communication.sessionRequestOutcome`](../operations/communication/sessionRequestOutcome.md) | server | [`ServerSessions.GetOutcomeAsync`](reference/convohop.md#serversessionsgetoutcomeasync-method), [`CommunicationApi.SessionRequestOutcomeAsync`](reference/api.md#communicationapisessionrequestoutcomeasync-method) |
-| [`communication.createPrincipal`](../operations/communication/createPrincipal.md) | server | [`ServerPrincipals.CreateAsync`](reference/convohop.md#serverprincipalscreateasync-method), [`CommunicationApi.CreatePrincipalAsync`](reference/api.md#communicationapicreateprincipalasync-method) |
-| [`communication.disablePrincipal`](../operations/communication/disablePrincipal.md) | server | [`ServerPrincipals.DisableAsync`](reference/convohop.md#serverprincipalsdisableasync-method), [`CommunicationApi.DisablePrincipalAsync`](reference/api.md#communicationapidisableprincipalasync-method) |
-| [`communication.issueSession`](../operations/communication/issueSession.md) | server | [`ServerSessions.IssueAsync`](reference/convohop.md#serversessionsissueasync-method), [`CommunicationApi.IssueSessionAsync`](reference/api.md#communicationapiissuesessionasync-method) |
-| [`communication.renewSession`](../operations/communication/renewSession.md) | server | [`ServerSessions.RenewAsync`](reference/convohop.md#serversessionsrenewasync-method), [`CommunicationApi.RenewSessionAsync`](reference/api.md#communicationapirenewsessionasync-method) |
-| [`communication.revokeSession`](../operations/communication/revokeSession.md) | both | [`ServerSessions.RevokeAsync`](reference/convohop.md#serversessionsrevokeasync-method), [`CommunicationApi.RevokeSessionAsync`](reference/api.md#communicationapirevokesessionasync-method) |
-| [`communication.createConversation`](../operations/communication/createConversation.md) | server | [`ServerConversations.CreateAsync`](reference/convohop.md#serverconversationscreateasync-method), [`CommunicationApi.CreateConversationAsync`](reference/api.md#communicationapicreateconversationasync-method) |
-| [`communication.updateConversation`](../operations/communication/updateConversation.md) | both | [`ServerConversation.UpdateAsync`](reference/convohop.md#serverconversationupdateasync-method), [`CommunicationApi.UpdateConversationAsync`](reference/api.md#communicationapiupdateconversationasync-method) |
-| [`communication.addMember`](../operations/communication/addMember.md) | server | [`ServerMembers.AddAsync`](reference/convohop.md#servermembersaddasync-method), [`CommunicationApi.AddMemberAsync`](reference/api.md#communicationapiaddmemberasync-method) |
-| [`communication.addMembers`](../operations/communication/addMembers.md) | server | [`ServerMembers.AddBatchAsync`](reference/convohop.md#servermembersaddbatchasync-method), [`CommunicationApi.AddMembersAsync`](reference/api.md#communicationapiaddmembersasync-method) |
-| [`communication.removeMember`](../operations/communication/removeMember.md) | server | [`ServerMembers.RemoveAsync`](reference/convohop.md#servermembersremoveasync-method), [`CommunicationApi.RemoveMemberAsync`](reference/api.md#communicationapiremovememberasync-method) |
-| [`communication.historyGrant`](../operations/communication/historyGrant.md) | server | [`ServerMembers.GrantHistoryAsync`](reference/convohop.md#servermembersgranthistoryasync-method), [`CommunicationApi.HistoryGrantAsync`](reference/api.md#communicationapihistorygrantasync-method) |
-| [`communication.sendMessage`](../operations/communication/sendMessage.md) | both | [`ServerMessages.SendAsync`](reference/convohop.md#servermessagessendasync-method), [`CommunicationApi.SendMessageAsync`](reference/api.md#communicationapisendmessageasync-method) |
-| [`communication.editMessage`](../operations/communication/editMessage.md) | both | [`ServerMessages.EditAsync`](reference/convohop.md#servermessageseditasync-method), [`CommunicationApi.EditMessageAsync`](reference/api.md#communicationapieditmessageasync-method) |
-| [`communication.deleteMessage`](../operations/communication/deleteMessage.md) | both | [`ServerMessages.DeleteAsync`](reference/convohop.md#servermessagesdeleteasync-method), [`CommunicationApi.DeleteMessageAsync`](reference/api.md#communicationapideletemessageasync-method) |
-| [`communication.setBroadcastPermission`](../operations/communication/setBroadcastPermission.md) | server | [`ServerMembers.SetBroadcastPermissionAsync`](reference/convohop.md#servermemberssetbroadcastpermissionasync-method), [`CommunicationApi.SetBroadcastPermissionAsync`](reference/api.md#communicationapisetbroadcastpermissionasync-method) |
-| [`communication.setConversationMute`](../operations/communication/setConversationMute.md) | both | [`ServerMembers.SetMuteAsync`](reference/convohop.md#servermemberssetmuteasync-method), [`CommunicationApi.SetConversationMuteAsync`](reference/api.md#communicationapisetconversationmuteasync-method) |
-| [`communication.alertLiveSession`](../operations/communication/alertLiveSession.md) | both | [`ServerLiveSession.AlertAsync`](reference/convohop.md#serverlivesessionalertasync-method), [`CommunicationApi.AlertLiveSessionAsync`](reference/api.md#communicationapialertlivesessionasync-method) |
-| [`communication.endLiveSession`](../operations/communication/endLiveSession.md) | both | [`ServerLiveSession.EndAsync`](reference/convohop.md#serverlivesessionendasync-method), [`CommunicationApi.EndLiveSessionAsync`](reference/api.md#communicationapiendlivesessionasync-method) |
+| [`communication.capabilities`](../operations/communication/capabilities.md) | both | [`ProjectServerClient.GetCapabilitiesAsync`](reference/relay.md#projectserverclientgetcapabilitiesasync-method), [`CommunicationApi.CapabilitiesAsync`](reference/api.md#communicationapicapabilitiesasync-method) |
+| [`communication.route`](../operations/communication/route.md) | both | [`ProjectServerClient.InitializeAsync`](reference/relay.md#projectserverclientinitializeasync-method), [`CommunicationApi.RouteAsync`](reference/api.md#communicationapirouteasync-method) |
+| [`communication.getPrincipal`](../operations/communication/getPrincipal.md) | server | [`ServerPrincipals.GetAsync`](reference/relay.md#serverprincipalsgetasync-method), [`CommunicationApi.GetPrincipalAsync`](reference/api.md#communicationapigetprincipalasync-method) |
+| [`communication.getConversation`](../operations/communication/getConversation.md) | both | [`ServerConversation.GetAsync`](reference/relay.md#serverconversationgetasync-method), [`CommunicationApi.GetConversationAsync`](reference/api.md#communicationapigetconversationasync-method) |
+| [`communication.members`](../operations/communication/members.md) | both | [`ServerMembers.ListAsync`](reference/relay.md#servermemberslistasync-method), [`CommunicationApi.MembersAsync`](reference/api.md#communicationapimembersasync-method), [`CommunicationApi.MembersPagesAsync`](reference/api.md#communicationapimemberspagesasync-method) |
+| [`communication.messages`](../operations/communication/messages.md) | both | [`ServerMessages.ListAsync`](reference/relay.md#servermessageslistasync-method), [`CommunicationApi.MessagesAsync`](reference/api.md#communicationapimessagesasync-method), [`CommunicationApi.MessagesPagesAsync`](reference/api.md#communicationapimessagespagesasync-method) |
+| [`communication.getMessage`](../operations/communication/getMessage.md) | both | [`ServerMessages.GetAsync`](reference/relay.md#servermessagesgetasync-method), [`CommunicationApi.GetMessageAsync`](reference/api.md#communicationapigetmessageasync-method) |
+| [`communication.inbox`](../operations/communication/inbox.md) | both | [`ProjectServerClient.GetInboxAsync`](reference/relay.md#projectserverclientgetinboxasync-method), [`CommunicationApi.InboxAsync`](reference/api.md#communicationapiinboxasync-method), [`CommunicationApi.InboxPagesAsync`](reference/api.md#communicationapiinboxpagesasync-method) |
+| [`communication.search`](../operations/communication/search.md) | both | [`ProjectServerClient.SearchAsync`](reference/relay.md#projectserverclientsearchasync-method), [`CommunicationApi.SearchAsync`](reference/api.md#communicationapisearchasync-method), [`CommunicationApi.SearchPagesAsync`](reference/api.md#communicationapisearchpagesasync-method) |
+| [`communication.resolveRequest`](../operations/communication/resolveRequest.md) | both | [`ServerRequests.ResolveAsync`](reference/relay.md#serverrequestsresolveasync-method), [`ServerRequests.RetryAsync`](reference/relay.md#serverrequestsretryasync-method), [`RelayTransport.RetryAsync`](reference/relay.md#relaytransportretryasync-method), [`CommunicationApi.ResolveRequestAsync`](reference/api.md#communicationapiresolverequestasync-method) |
+| [`communication.getOperation`](../operations/communication/getOperation.md) | both | [`ProjectServerClient.GetOperationAsync`](reference/relay.md#projectserverclientgetoperationasync-method), [`CommunicationApi.GetOperationAsync`](reference/api.md#communicationapigetoperationasync-method) |
+| [`communication.conversationMute`](../operations/communication/conversationMute.md) | both | [`ServerMembers.GetMuteAsync`](reference/relay.md#servermembersgetmuteasync-method), [`CommunicationApi.ConversationMuteAsync`](reference/api.md#communicationapiconversationmuteasync-method) |
+| [`communication.currentLiveSession`](../operations/communication/currentLiveSession.md) | both | [`ServerConversationLive.GetCurrentAsync`](reference/relay.md#serverconversationlivegetcurrentasync-method), [`CommunicationApi.CurrentLiveSessionAsync`](reference/api.md#communicationapicurrentlivesessionasync-method) |
+| [`communication.liveSession`](../operations/communication/liveSession.md) | both | [`ServerLiveSession.GetAsync`](reference/relay.md#serverlivesessiongetasync-method), [`CommunicationApi.LiveSessionAsync`](reference/api.md#communicationapilivesessionasync-method) |
+| [`communication.liveSessions`](../operations/communication/liveSessions.md) | both | [`ServerConversationLive.ListHistoryAsync`](reference/relay.md#serverconversationlivelisthistoryasync-method), [`CommunicationApi.LiveSessionsAsync`](reference/api.md#communicationapilivesessionsasync-method), [`CommunicationApi.LiveSessionsPagesAsync`](reference/api.md#communicationapilivesessionspagesasync-method) |
+| [`communication.liveSessionParticipants`](../operations/communication/liveSessionParticipants.md) | both | [`ServerLiveSession.ListParticipantsAsync`](reference/relay.md#serverlivesessionlistparticipantsasync-method), [`CommunicationApi.LiveSessionParticipantsAsync`](reference/api.md#communicationapilivesessionparticipantsasync-method), [`CommunicationApi.LiveSessionParticipantsPagesAsync`](reference/api.md#communicationapilivesessionparticipantspagesasync-method) |
+| [`communication.liveSessionOperation`](../operations/communication/liveSessionOperation.md) | both | [`ServerLiveOperation.GetAsync`](reference/relay.md#serverliveoperationgetasync-method), [`ServerLiveOperation.WaitForCompletionAsync`](reference/relay.md#serverliveoperationwaitforcompletionasync-method), [`CommunicationApi.LiveSessionOperationAsync`](reference/api.md#communicationapilivesessionoperationasync-method) |
+| [`communication.sessionRequestOutcome`](../operations/communication/sessionRequestOutcome.md) | server | [`ServerSessions.GetOutcomeAsync`](reference/relay.md#serversessionsgetoutcomeasync-method), [`CommunicationApi.SessionRequestOutcomeAsync`](reference/api.md#communicationapisessionrequestoutcomeasync-method) |
+| [`communication.createPrincipal`](../operations/communication/createPrincipal.md) | server | [`ServerPrincipals.CreateAsync`](reference/relay.md#serverprincipalscreateasync-method), [`CommunicationApi.CreatePrincipalAsync`](reference/api.md#communicationapicreateprincipalasync-method) |
+| [`communication.disablePrincipal`](../operations/communication/disablePrincipal.md) | server | [`ServerPrincipals.DisableAsync`](reference/relay.md#serverprincipalsdisableasync-method), [`CommunicationApi.DisablePrincipalAsync`](reference/api.md#communicationapidisableprincipalasync-method) |
+| [`communication.issueSession`](../operations/communication/issueSession.md) | server | [`ServerSessions.IssueAsync`](reference/relay.md#serversessionsissueasync-method), [`CommunicationApi.IssueSessionAsync`](reference/api.md#communicationapiissuesessionasync-method) |
+| [`communication.renewSession`](../operations/communication/renewSession.md) | server | [`ServerSessions.RenewAsync`](reference/relay.md#serversessionsrenewasync-method), [`CommunicationApi.RenewSessionAsync`](reference/api.md#communicationapirenewsessionasync-method) |
+| [`communication.revokeSession`](../operations/communication/revokeSession.md) | both | [`ServerSessions.RevokeAsync`](reference/relay.md#serversessionsrevokeasync-method), [`CommunicationApi.RevokeSessionAsync`](reference/api.md#communicationapirevokesessionasync-method) |
+| [`communication.createConversation`](../operations/communication/createConversation.md) | server | [`ServerConversations.CreateAsync`](reference/relay.md#serverconversationscreateasync-method), [`CommunicationApi.CreateConversationAsync`](reference/api.md#communicationapicreateconversationasync-method) |
+| [`communication.updateConversation`](../operations/communication/updateConversation.md) | both | [`ServerConversation.UpdateAsync`](reference/relay.md#serverconversationupdateasync-method), [`CommunicationApi.UpdateConversationAsync`](reference/api.md#communicationapiupdateconversationasync-method) |
+| [`communication.addMember`](../operations/communication/addMember.md) | server | [`ServerMembers.AddAsync`](reference/relay.md#servermembersaddasync-method), [`CommunicationApi.AddMemberAsync`](reference/api.md#communicationapiaddmemberasync-method) |
+| [`communication.addMembers`](../operations/communication/addMembers.md) | server | [`ServerMembers.AddBatchAsync`](reference/relay.md#servermembersaddbatchasync-method), [`CommunicationApi.AddMembersAsync`](reference/api.md#communicationapiaddmembersasync-method) |
+| [`communication.removeMember`](../operations/communication/removeMember.md) | server | [`ServerMembers.RemoveAsync`](reference/relay.md#servermembersremoveasync-method), [`CommunicationApi.RemoveMemberAsync`](reference/api.md#communicationapiremovememberasync-method) |
+| [`communication.historyGrant`](../operations/communication/historyGrant.md) | server | [`ServerMembers.GrantHistoryAsync`](reference/relay.md#servermembersgranthistoryasync-method), [`CommunicationApi.HistoryGrantAsync`](reference/api.md#communicationapihistorygrantasync-method) |
+| [`communication.sendMessage`](../operations/communication/sendMessage.md) | both | [`ServerMessages.SendAsync`](reference/relay.md#servermessagessendasync-method), [`CommunicationApi.SendMessageAsync`](reference/api.md#communicationapisendmessageasync-method) |
+| [`communication.editMessage`](../operations/communication/editMessage.md) | both | [`ServerMessages.EditAsync`](reference/relay.md#servermessageseditasync-method), [`CommunicationApi.EditMessageAsync`](reference/api.md#communicationapieditmessageasync-method) |
+| [`communication.deleteMessage`](../operations/communication/deleteMessage.md) | both | [`ServerMessages.DeleteAsync`](reference/relay.md#servermessagesdeleteasync-method), [`CommunicationApi.DeleteMessageAsync`](reference/api.md#communicationapideletemessageasync-method) |
+| [`communication.setBroadcastPermission`](../operations/communication/setBroadcastPermission.md) | server | [`ServerMembers.SetBroadcastPermissionAsync`](reference/relay.md#servermemberssetbroadcastpermissionasync-method), [`CommunicationApi.SetBroadcastPermissionAsync`](reference/api.md#communicationapisetbroadcastpermissionasync-method) |
+| [`communication.setConversationMute`](../operations/communication/setConversationMute.md) | both | [`ServerMembers.SetMuteAsync`](reference/relay.md#servermemberssetmuteasync-method), [`CommunicationApi.SetConversationMuteAsync`](reference/api.md#communicationapisetconversationmuteasync-method) |
+| [`communication.alertLiveSession`](../operations/communication/alertLiveSession.md) | both | [`ServerLiveSession.AlertAsync`](reference/relay.md#serverlivesessionalertasync-method), [`CommunicationApi.AlertLiveSessionAsync`](reference/api.md#communicationapialertlivesessionasync-method) |
+| [`communication.endLiveSession`](../operations/communication/endLiveSession.md) | both | [`ServerLiveSession.EndAsync`](reference/relay.md#serverlivesessionendasync-method), [`CommunicationApi.EndLiveSessionAsync`](reference/api.md#communicationapiendlivesessionasync-method) |
 | [`communication.redeemCredential`](../operations/communication/redeemCredential.md) | server | [`CommunicationApi.RedeemCredentialAsync`](reference/api.md#communicationapiredeemcredentialasync-method) |
 | [`communication.acknowledgeCredential`](../operations/communication/acknowledgeCredential.md) | server | [`CommunicationApi.AcknowledgeCredentialAsync`](reference/api.md#communicationapiacknowledgecredentialasync-method) |
 
@@ -13294,20 +12194,15 @@ Organizations, deployments, projects, backend keys and webhooks.
 | [`management.organizationBilling`](../operations/management/organizationBilling.md) | server | Not wrapped by a method |
 | [`management.webhookEndpoints`](../operations/management/webhookEndpoints.md) | server | [`ManagementApi.WebhookEndpointsAsync`](reference/api.md#managementapiwebhookendpointsasync-method) |
 | [`management.webhookDeliveries`](../operations/management/webhookDeliveries.md) | server | [`ManagementApi.WebhookDeliveriesAsync`](reference/api.md#managementapiwebhookdeliveriesasync-method) |
-| [`management.resolveRequest`](../operations/management/resolveRequest.md) | server | [`ConvoHopTransport.RetryAsync`](reference/convohop.md#convohoptransportretryasync-method), [`ManagementApi.ResolveRequestAsync`](reference/api.md#managementapiresolverequestasync-method) |
-| [`management.getOperation`](../operations/management/getOperation.md) | server | [`ConvoHopManagementClient.GetOperationAsync`](reference/convohop.md#convohopmanagementclientgetoperationasync-method), [`ManagementApi.GetOperationAsync`](reference/api.md#managementapigetoperationasync-method) |
-| [`management.agentSignupForApproval`](../operations/management/agentSignupForApproval.md) | server | Not wrapped by a method |
-| [`management.agentSignup`](../operations/management/agentSignup.md) | server | Not wrapped by a method |
-| [`management.agentGrants`](../operations/management/agentGrants.md) | server | Not wrapped by a method |
-| [`management.agentAuditEvents`](../operations/management/agentAuditEvents.md) | server | Not wrapped by a method |
-| [`management.organizationSpend`](../operations/management/organizationSpend.md) | server | Not wrapped by a method |
-| [`management.createOrganization`](../operations/management/createOrganization.md) | server | [`ConvoHopManagementClient.CreateOrganizationAsync`](reference/convohop.md#convohopmanagementclientcreateorganizationasync-method), [`ManagementApi.CreateOrganizationAsync`](reference/api.md#managementapicreateorganizationasync-method) |
-| [`management.createDeployment`](../operations/management/createDeployment.md) | server | [`ConvoHopManagementClient.CreateDeploymentAsync`](reference/convohop.md#convohopmanagementclientcreatedeploymentasync-method), [`ManagementApi.CreateDeploymentAsync`](reference/api.md#managementapicreatedeploymentasync-method) |
-| [`management.createProject`](../operations/management/createProject.md) | server | [`ConvoHopManagementClient.CreateProjectAsync`](reference/convohop.md#convohopmanagementclientcreateprojectasync-method), [`ManagementApi.CreateProjectAsync`](reference/api.md#managementapicreateprojectasync-method) |
-| [`management.issueBackendKey`](../operations/management/issueBackendKey.md) | server | [`ConvoHopManagementClient.IssueBackendKeyAsync`](reference/convohop.md#convohopmanagementclientissuebackendkeyasync-method), [`ManagementApi.IssueBackendKeyAsync`](reference/api.md#managementapiissuebackendkeyasync-method) |
+| [`management.resolveRequest`](../operations/management/resolveRequest.md) | server | [`RelayTransport.RetryAsync`](reference/relay.md#relaytransportretryasync-method), [`ManagementApi.ResolveRequestAsync`](reference/api.md#managementapiresolverequestasync-method) |
+| [`management.getOperation`](../operations/management/getOperation.md) | server | [`RelayManagementClient.GetOperationAsync`](reference/relay.md#relaymanagementclientgetoperationasync-method), [`ManagementApi.GetOperationAsync`](reference/api.md#managementapigetoperationasync-method) |
+| [`management.createOrganization`](../operations/management/createOrganization.md) | server | [`RelayManagementClient.CreateOrganizationAsync`](reference/relay.md#relaymanagementclientcreateorganizationasync-method), [`ManagementApi.CreateOrganizationAsync`](reference/api.md#managementapicreateorganizationasync-method) |
+| [`management.createDeployment`](../operations/management/createDeployment.md) | server | [`RelayManagementClient.CreateDeploymentAsync`](reference/relay.md#relaymanagementclientcreatedeploymentasync-method), [`ManagementApi.CreateDeploymentAsync`](reference/api.md#managementapicreatedeploymentasync-method) |
+| [`management.createProject`](../operations/management/createProject.md) | server | [`RelayManagementClient.CreateProjectAsync`](reference/relay.md#relaymanagementclientcreateprojectasync-method), [`ManagementApi.CreateProjectAsync`](reference/api.md#managementapicreateprojectasync-method) |
+| [`management.issueBackendKey`](../operations/management/issueBackendKey.md) | server | [`RelayManagementClient.IssueBackendKeyAsync`](reference/relay.md#relaymanagementclientissuebackendkeyasync-method), [`ManagementApi.IssueBackendKeyAsync`](reference/api.md#managementapiissuebackendkeyasync-method) |
 | [`management.revokeBackendKey`](../operations/management/revokeBackendKey.md) | server | [`ManagementApi.RevokeBackendKeyAsync`](reference/api.md#managementapirevokebackendkeyasync-method) |
 | [`management.projectPolicy`](../operations/management/projectPolicy.md) | server | [`ManagementApi.ProjectPolicyAsync`](reference/api.md#managementapiprojectpolicyasync-method) |
-| [`management.credentialPermit`](../operations/management/credentialPermit.md) | server | [`ConvoHopManagementClient.GetDeliveryPermitAsync`](reference/convohop.md#convohopmanagementclientgetdeliverypermitasync-method), [`ManagementApi.CredentialPermitAsync`](reference/api.md#managementapicredentialpermitasync-method) |
+| [`management.credentialPermit`](../operations/management/credentialPermit.md) | server | [`RelayManagementClient.GetDeliveryPermitAsync`](reference/relay.md#relaymanagementclientgetdeliverypermitasync-method), [`ManagementApi.CredentialPermitAsync`](reference/api.md#managementapicredentialpermitasync-method) |
 | [`management.pauseOperation`](../operations/management/pauseOperation.md) | server | [`ManagementApi.PauseOperationAsync`](reference/api.md#managementapipauseoperationasync-method) |
 | [`management.resumeOperation`](../operations/management/resumeOperation.md) | server | [`ManagementApi.ResumeOperationAsync`](reference/api.md#managementapiresumeoperationasync-method) |
 | [`management.createBillingCheckoutSession`](../operations/management/createBillingCheckoutSession.md) | server | Not wrapped by a method |
@@ -13317,11 +12212,3 @@ Organizations, deployments, projects, backend keys and webhooks.
 | [`management.rotateWebhookSecret`](../operations/management/rotateWebhookSecret.md) | server | [`ManagementApi.RotateWebhookSecretAsync`](reference/api.md#managementapirotatewebhooksecretasync-method) |
 | [`management.disableWebhook`](../operations/management/disableWebhook.md) | server | [`ManagementApi.DisableWebhookAsync`](reference/api.md#managementapidisablewebhookasync-method) |
 | [`management.replayWebhookDeliveries`](../operations/management/replayWebhookDeliveries.md) | server | [`ManagementApi.ReplayWebhookDeliveriesAsync`](reference/api.md#managementapireplaywebhookdeliveriesasync-method) |
-| [`management.requestAgentSignup`](../operations/management/requestAgentSignup.md) | server | Not wrapped by a method |
-| [`management.rejectAgentSignup`](../operations/management/rejectAgentSignup.md) | server | Not wrapped by a method |
-| [`management.approveAgentSignup`](../operations/management/approveAgentSignup.md) | server | Not wrapped by a method |
-| [`management.issueAgentKey`](../operations/management/issueAgentKey.md) | server | Not wrapped by a method |
-| [`management.agentCredentialPermit`](../operations/management/agentCredentialPermit.md) | server | Not wrapped by a method |
-| [`management.revokeAgentGrant`](../operations/management/revokeAgentGrant.md) | server | Not wrapped by a method |
-| [`management.setSpendControls`](../operations/management/setSpendControls.md) | server | Not wrapped by a method |
-| [`management.purchaseAgentCredits`](../operations/management/purchaseAgentCredits.md) | server | Not wrapped by a method |

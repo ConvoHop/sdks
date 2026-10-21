@@ -3,15 +3,15 @@ import assert from "node:assert/strict";
 import { mathRandomUUID, registrations } from "@livekit/react-native";
 import { audioSession, RTCAudioSession } from "@livekit/react-native-webrtc";
 import { ConnectionState, Room, RoomEvent } from "livekit-client";
-import { ConvoHopClient, LiveParticipationHandle, LiveSessionHandle, MediaConnection } from "@convohop/client";
-import { createPlatform } from "@convohop/react-native";
+import { RelayClient, LiveParticipationHandle, LiveSessionHandle, MediaConnection } from "@instantrelay/client";
+import { createPlatform } from "@instantrelay/react-native";
 import { Platform, reported } from "react-native";
 import { reply } from "../../../test/graphql-fixtures.mjs";
 import { randomUUID } from "../dist/random.js";
 import { linkCalls, linkPlatform, turn, uuid } from "./support/native.mjs";
 
 let instances = 0;
-/** A fresh copy of `@convohop/react-native/media`, because `setupMedia` configures a copy once. */
+/** A fresh copy of `@instantrelay/react-native/media`, because `setupMedia` configures a copy once. */
 const fresh = () => import(`../dist/media.js?instance=${++instances}`);
 
 test.beforeEach(() => {
@@ -105,8 +105,8 @@ test("malformed audio session values and native failures are reported and change
   await turn();
   for (const event of [undefined, null, {}, { active: "true" }, { active: 1 }]) calls.emit("onAudioSession", event);
   assert.deepEqual(reported.map(error => [error.name, error.message]), [
-    ["TypeError", "ConvoHopCalls returned a malformed audio session state"],
-    ...Array(5).fill(["TypeError", "ConvoHopCalls sent a malformed audio session event"])]);
+    ["TypeError", "RelayCalls returned a malformed audio session state"],
+    ...Array(5).fill(["TypeError", "RelayCalls sent a malformed audio session event"])]);
   assert.deepEqual(audioSession, []);
 
   reported.length = 0;
@@ -423,7 +423,7 @@ test("an old connection never disconnects the room's next connection", async () 
 });
 
 const time = () => new Date().toISOString();
-/** A participation in a live session that a fake ConvoHop API serves, on the React Native platform. */
+/** A participation in a live session that a fake Relay API serves, on the React Native platform. */
 function participationFixture(t) {
   const p = { participationId: uuid(), principalId: uuid(), membershipEpoch: "1", role: "PUBLISHER", state: "JOINED",
     permissions: { microphone: true, camera: true, subscribe: true },
@@ -439,7 +439,7 @@ function participationFixture(t) {
     leaseExpiresAt: expires, leasePolicyId: "fixture", connectToken: "never-persist-connect-token" };
   const values = new Map(), requests = [], platform = createPlatform();
   t.after(() => platform.dispose());
-  const client = new ConvoHopClient({ baseUrl: "https://api.example.test", projectId: uuid(), incarnation: uuid(),
+  const client = new RelayClient({ baseUrl: "https://api.example.test", projectId: uuid(), incarnation: uuid(),
     principalId: uuid(), sessionToken: "react-native-test-session", platform,
     recoveryStorage: { getItem: key => values.get(key) ?? null, setItem: (key, value) => values.set(key, value),
       removeItem: key => values.delete(key) },

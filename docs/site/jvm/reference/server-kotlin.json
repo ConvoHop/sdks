@@ -1,22 +1,22 @@
 {
   "$schema": "../../../../spec/docs/reference.schema.json",
   "language": "jvm",
-  "package": "com.convohop:convohop-server-kotlin",
+  "package": "dev.instantrelay:relay-server-kotlin",
   "layer": "server",
   "page": "server-kotlin.md",
   "symbols": [
     {
       "name": "CommunicationSuspendApi",
       "kind": "class",
-      "ref": "com.convohop:convohop-server-kotlin#CommunicationSuspendApi",
+      "ref": "dev.instantrelay:relay-server-kotlin#CommunicationSuspendApi",
       "anchor": "communicationsuspendapi-class",
       "signatures": ["public class CommunicationSuspendApi"],
-      "docs": "Suspending view of `CommunicationApi`. Each call runs on `dispatcher`. Cancelling the calling\ncoroutine interrupts the blocking request and the call fails with a CancellationException\nwhose cause is the lost-request problem; a mutation stays in the client's recovery journal.\n\nPackage: `com.convohop.server.kotlin`.",
+      "docs": "Suspending view of `CommunicationApi`. Each call runs on `dispatcher`. Cancelling the calling\ncoroutine interrupts the blocking request and the call fails with a CancellationException\nwhose cause is the lost-request problem; a mutation stays in the client's recovery journal.\n\nPackage: `dev.instantrelay.server.kotlin`.",
       "members": [
         {
           "name": "constructor",
           "kind": "constructor",
-          "ref": "com.convohop:convohop-server-kotlin#CommunicationSuspendApi.constructor",
+          "ref": "dev.instantrelay:relay-server-kotlin#CommunicationSuspendApi.constructor",
           "anchor": "communicationsuspendapi-constructor",
           "signatures": [
             "public constructor(api: CommunicationApi, dispatcher: CoroutineDispatcher = Dispatchers.IO)"
@@ -26,7 +26,7 @@
         {
           "name": "capabilities",
           "kind": "method",
-          "ref": "com.convohop:convohop-server-kotlin#CommunicationSuspendApi.capabilities",
+          "ref": "dev.instantrelay:relay-server-kotlin#CommunicationSuspendApi.capabilities",
           "anchor": "communicationsuspendapicapabilities-method",
           "signatures": ["public suspend fun capabilities(): CapabilitiesReply"],
           "docs": "Suspending `CommunicationApi.capabilities`.",
@@ -40,7 +40,7 @@
         {
           "name": "route",
           "kind": "method",
-          "ref": "com.convohop:convohop-server-kotlin#CommunicationSuspendApi.route",
+          "ref": "dev.instantrelay:relay-server-kotlin#CommunicationSuspendApi.route",
           "anchor": "communicationsuspendapiroute-method",
           "signatures": ["public suspend fun route(): RouteReply"],
           "docs": "Suspending `CommunicationApi.route`.",
@@ -51,7 +51,7 @@
         {
           "name": "getPrincipal",
           "kind": "method",
-          "ref": "com.convohop:convohop-server-kotlin#CommunicationSuspendApi.getPrincipal",
+          "ref": "dev.instantrelay:relay-server-kotlin#CommunicationSuspendApi.getPrincipal",
           "anchor": "communicationsuspendapigetprincipal-method",
           "signatures": [
             "public suspend fun getPrincipal(input: GetPrincipalRequestInput): GetPrincipalReply"
@@ -67,7 +67,7 @@
         {
           "name": "getConversation",
           "kind": "method",
-          "ref": "com.convohop:convohop-server-kotlin#CommunicationSuspendApi.getConversation",
+          "ref": "dev.instantrelay:relay-server-kotlin#CommunicationSuspendApi.getConversation",
           "anchor": "communicationsuspendapigetconversation-method",
           "signatures": [
             "public suspend fun getConversation(input: GetConversationRequestInput): GetConversationReply"
@@ -83,7 +83,7 @@
         {
           "name": "members",
           "kind": "method",
-          "ref": "com.convohop:convohop-server-kotlin#CommunicationSuspendApi.members",
+          "ref": "dev.instantrelay:relay-server-kotlin#CommunicationSuspendApi.members",
           "anchor": "communicationsuspendapimembers-method",
           "signatures": ["public suspend fun members(input: MembersRequestInput): MembersReply"],
           "docs": "Suspending `CommunicationApi.members`.",
@@ -94,7 +94,7 @@
         {
           "name": "membersPages",
           "kind": "method",
-          "ref": "com.convohop:convohop-server-kotlin#CommunicationSuspendApi.membersPages",
+          "ref": "dev.instantrelay:relay-server-kotlin#CommunicationSuspendApi.membersPages",
           "anchor": "communicationsuspendapimemberspages-method",
           "signatures": ["public fun membersPages(input: MembersRequestInput): Flow<MemberPage>"],
           "docs": "`CommunicationApi.membersPages` as a cold flow. Each collection starts again from `input`, and each page is requested\non `dispatcher` when the collector is ready for it.",
@@ -105,7 +105,7 @@
         {
           "name": "messages",
           "kind": "method",
-          "ref": "com.convohop:convohop-server-kotlin#CommunicationSuspendApi.messages",
+          "ref": "dev.instantrelay:relay-server-kotlin#CommunicationSuspendApi.messages",
           "anchor": "communicationsuspendapimessages-method",
           "signatures": ["public suspend fun messages(input: MessagesRequestInput): MessagesReply"],
           "docs": "Suspending `CommunicationApi.messages`.",
@@ -116,7 +116,7 @@
         {
           "name": "messagesPages",
           "kind": "method",
-          "ref": "com.convohop:convohop-server-kotlin#CommunicationSuspendApi.messagesPages",
+          "ref": "dev.instantrelay:relay-server-kotlin#CommunicationSuspendApi.messagesPages",
           "anchor": "communicationsuspendapimessagespages-method",
           "signatures": ["public fun messagesPages(input: MessagesRequestInput): Flow<MessagePage>"],
           "docs": "`CommunicationApi.messagesPages` as a cold flow. Each collection starts again from `input`, and each page is requested\non `dispatcher` when the collector is ready for it.",
@@ -127,7 +127,7 @@
         {
           "name": "getMessage",
           "kind": "method",
-          "ref": "com.convohop:convohop-server-kotlin#CommunicationSuspendApi.getMessage",
+          "ref": "dev.instantrelay:relay-server-kotlin#CommunicationSuspendApi.getMessage",
           "anchor": "communicationsuspendapigetmessage-method",
           "signatures": [
             "public suspend fun getMessage(input: GetMessageRequestInput): GetMessageReply"
@@ -143,7 +143,7 @@
         {
           "name": "inbox",
           "kind": "method",
-          "ref": "com.convohop:convohop-server-kotlin#CommunicationSuspendApi.inbox",
+          "ref": "dev.instantrelay:relay-server-kotlin#CommunicationSuspendApi.inbox",
           "anchor": "communicationsuspendapiinbox-method",
           "signatures": ["public suspend fun inbox(input: InboxRequestInput): InboxReply"],
           "docs": "Suspending `CommunicationApi.inbox`.",
@@ -154,7 +154,7 @@
         {
           "name": "inboxPages",
           "kind": "method",
-          "ref": "com.convohop:convohop-server-kotlin#CommunicationSuspendApi.inboxPages",
+          "ref": "dev.instantrelay:relay-server-kotlin#CommunicationSuspendApi.inboxPages",
           "anchor": "communicationsuspendapiinboxpages-method",
           "signatures": ["public fun inboxPages(input: InboxRequestInput): Flow<InboxPage>"],
           "docs": "`CommunicationApi.inboxPages` as a cold flow. Each collection starts again from `input`, and each page is requested\non `dispatcher` when the collector is ready for it.",
@@ -165,7 +165,7 @@
         {
           "name": "search",
           "kind": "method",
-          "ref": "com.convohop:convohop-server-kotlin#CommunicationSuspendApi.search",
+          "ref": "dev.instantrelay:relay-server-kotlin#CommunicationSuspendApi.search",
           "anchor": "communicationsuspendapisearch-method",
           "signatures": ["public suspend fun search(input: SearchRequestInput): SearchReply"],
           "docs": "Suspending `CommunicationApi.search`.",
@@ -176,7 +176,7 @@
         {
           "name": "searchPages",
           "kind": "method",
-          "ref": "com.convohop:convohop-server-kotlin#CommunicationSuspendApi.searchPages",
+          "ref": "dev.instantrelay:relay-server-kotlin#CommunicationSuspendApi.searchPages",
           "anchor": "communicationsuspendapisearchpages-method",
           "signatures": ["public fun searchPages(input: SearchRequestInput): Flow<SearchPage>"],
           "docs": "`CommunicationApi.searchPages` as a cold flow. Each collection starts again from `input`, and each page is requested\non `dispatcher` when the collector is ready for it.",
@@ -187,7 +187,7 @@
         {
           "name": "resolveRequest",
           "kind": "method",
-          "ref": "com.convohop:convohop-server-kotlin#CommunicationSuspendApi.resolveRequest",
+          "ref": "dev.instantrelay:relay-server-kotlin#CommunicationSuspendApi.resolveRequest",
           "anchor": "communicationsuspendapiresolverequest-method",
           "signatures": [
             "public suspend fun resolveRequest(input: ResolveRequestRequestInput): ResolveRequestReply"
@@ -203,7 +203,7 @@
         {
           "name": "getOperation",
           "kind": "method",
-          "ref": "com.convohop:convohop-server-kotlin#CommunicationSuspendApi.getOperation",
+          "ref": "dev.instantrelay:relay-server-kotlin#CommunicationSuspendApi.getOperation",
           "anchor": "communicationsuspendapigetoperation-method",
           "signatures": [
             "public suspend fun getOperation(input: GetOperationRequestInput): GetOperationReply"
@@ -219,7 +219,7 @@
         {
           "name": "conversationMute",
           "kind": "method",
-          "ref": "com.convohop:convohop-server-kotlin#CommunicationSuspendApi.conversationMute",
+          "ref": "dev.instantrelay:relay-server-kotlin#CommunicationSuspendApi.conversationMute",
           "anchor": "communicationsuspendapiconversationmute-method",
           "signatures": [
             "public suspend fun conversationMute(input: ConversationMuteInput): ConversationMuteReply"
@@ -235,7 +235,7 @@
         {
           "name": "currentLiveSession",
           "kind": "method",
-          "ref": "com.convohop:convohop-server-kotlin#CommunicationSuspendApi.currentLiveSession",
+          "ref": "dev.instantrelay:relay-server-kotlin#CommunicationSuspendApi.currentLiveSession",
           "anchor": "communicationsuspendapicurrentlivesession-method",
           "signatures": [
             "public suspend fun currentLiveSession(input: ConversationLiveInput): CurrentLiveSessionReply"
@@ -251,7 +251,7 @@
         {
           "name": "liveSession",
           "kind": "method",
-          "ref": "com.convohop:convohop-server-kotlin#CommunicationSuspendApi.liveSession",
+          "ref": "dev.instantrelay:relay-server-kotlin#CommunicationSuspendApi.liveSession",
           "anchor": "communicationsuspendapilivesession-method",
           "signatures": [
             "public suspend fun liveSession(input: LiveSessionInput): LiveSessionReply"
@@ -267,7 +267,7 @@
         {
           "name": "liveSessions",
           "kind": "method",
-          "ref": "com.convohop:convohop-server-kotlin#CommunicationSuspendApi.liveSessions",
+          "ref": "dev.instantrelay:relay-server-kotlin#CommunicationSuspendApi.liveSessions",
           "anchor": "communicationsuspendapilivesessions-method",
           "signatures": [
             "public suspend fun liveSessions(input: LiveSessionsInput): LiveSessionPageReply"
@@ -283,7 +283,7 @@
         {
           "name": "liveSessionsPages",
           "kind": "method",
-          "ref": "com.convohop:convohop-server-kotlin#CommunicationSuspendApi.liveSessionsPages",
+          "ref": "dev.instantrelay:relay-server-kotlin#CommunicationSuspendApi.liveSessionsPages",
           "anchor": "communicationsuspendapilivesessionspages-method",
           "signatures": [
             "public fun liveSessionsPages(input: LiveSessionsInput): Flow<LiveSessionPage>"
@@ -299,7 +299,7 @@
         {
           "name": "liveSessionParticipants",
           "kind": "method",
-          "ref": "com.convohop:convohop-server-kotlin#CommunicationSuspendApi.liveSessionParticipants",
+          "ref": "dev.instantrelay:relay-server-kotlin#CommunicationSuspendApi.liveSessionParticipants",
           "anchor": "communicationsuspendapilivesessionparticipants-method",
           "signatures": [
             "public suspend fun liveSessionParticipants(input: LiveParticipantsInput): LiveParticipantPageReply"
@@ -315,7 +315,7 @@
         {
           "name": "liveSessionParticipantsPages",
           "kind": "method",
-          "ref": "com.convohop:convohop-server-kotlin#CommunicationSuspendApi.liveSessionParticipantsPages",
+          "ref": "dev.instantrelay:relay-server-kotlin#CommunicationSuspendApi.liveSessionParticipantsPages",
           "anchor": "communicationsuspendapilivesessionparticipantspages-method",
           "signatures": [
             "public fun liveSessionParticipantsPages(input: LiveParticipantsInput): Flow<LiveParticipantPage>"
@@ -331,7 +331,7 @@
         {
           "name": "liveSessionOperation",
           "kind": "method",
-          "ref": "com.convohop:convohop-server-kotlin#CommunicationSuspendApi.liveSessionOperation",
+          "ref": "dev.instantrelay:relay-server-kotlin#CommunicationSuspendApi.liveSessionOperation",
           "anchor": "communicationsuspendapilivesessionoperation-method",
           "signatures": [
             "public suspend fun liveSessionOperation(input: LiveSessionOperationInput): LiveSessionOperationReply"
@@ -347,7 +347,7 @@
         {
           "name": "sessionRequestOutcome",
           "kind": "method",
-          "ref": "com.convohop:convohop-server-kotlin#CommunicationSuspendApi.sessionRequestOutcome",
+          "ref": "dev.instantrelay:relay-server-kotlin#CommunicationSuspendApi.sessionRequestOutcome",
           "anchor": "communicationsuspendapisessionrequestoutcome-method",
           "signatures": [
             "public suspend fun sessionRequestOutcome(input: SessionRequestOutcomeRequestInput): SessionRequestOutcomeReply"
@@ -363,7 +363,7 @@
         {
           "name": "createPrincipal",
           "kind": "method",
-          "ref": "com.convohop:convohop-server-kotlin#CommunicationSuspendApi.createPrincipal",
+          "ref": "dev.instantrelay:relay-server-kotlin#CommunicationSuspendApi.createPrincipal",
           "anchor": "communicationsuspendapicreateprincipal-method",
           "signatures": [
             "public suspend fun createPrincipal(input: CreatePrincipalRequestInput, requestId: String? = null): CreatePrincipalReply"
@@ -379,7 +379,7 @@
         {
           "name": "disablePrincipal",
           "kind": "method",
-          "ref": "com.convohop:convohop-server-kotlin#CommunicationSuspendApi.disablePrincipal",
+          "ref": "dev.instantrelay:relay-server-kotlin#CommunicationSuspendApi.disablePrincipal",
           "anchor": "communicationsuspendapidisableprincipal-method",
           "signatures": [
             "public suspend fun disablePrincipal(input: DisablePrincipalRequestInput, requestId: String? = null): DisablePrincipalReply"
@@ -395,7 +395,7 @@
         {
           "name": "issueSession",
           "kind": "method",
-          "ref": "com.convohop:convohop-server-kotlin#CommunicationSuspendApi.issueSession",
+          "ref": "dev.instantrelay:relay-server-kotlin#CommunicationSuspendApi.issueSession",
           "anchor": "communicationsuspendapiissuesession-method",
           "signatures": [
             "public suspend fun issueSession(input: IssueSessionRequestInput, requestId: String? = null): IssueSessionReply"
@@ -411,7 +411,7 @@
         {
           "name": "renewSession",
           "kind": "method",
-          "ref": "com.convohop:convohop-server-kotlin#CommunicationSuspendApi.renewSession",
+          "ref": "dev.instantrelay:relay-server-kotlin#CommunicationSuspendApi.renewSession",
           "anchor": "communicationsuspendapirenewsession-method",
           "signatures": [
             "public suspend fun renewSession(input: RenewSessionRequestInput, requestId: String? = null): RenewSessionReply"
@@ -427,7 +427,7 @@
         {
           "name": "revokeSession",
           "kind": "method",
-          "ref": "com.convohop:convohop-server-kotlin#CommunicationSuspendApi.revokeSession",
+          "ref": "dev.instantrelay:relay-server-kotlin#CommunicationSuspendApi.revokeSession",
           "anchor": "communicationsuspendapirevokesession-method",
           "signatures": [
             "public suspend fun revokeSession(input: RevokeSessionRequestInput, requestId: String? = null): RevokeSessionReply"
@@ -443,7 +443,7 @@
         {
           "name": "createConversation",
           "kind": "method",
-          "ref": "com.convohop:convohop-server-kotlin#CommunicationSuspendApi.createConversation",
+          "ref": "dev.instantrelay:relay-server-kotlin#CommunicationSuspendApi.createConversation",
           "anchor": "communicationsuspendapicreateconversation-method",
           "signatures": [
             "public suspend fun createConversation(input: CreateConversationRequestInput, requestId: String? = null): CreateConversationReply"
@@ -459,7 +459,7 @@
         {
           "name": "updateConversation",
           "kind": "method",
-          "ref": "com.convohop:convohop-server-kotlin#CommunicationSuspendApi.updateConversation",
+          "ref": "dev.instantrelay:relay-server-kotlin#CommunicationSuspendApi.updateConversation",
           "anchor": "communicationsuspendapiupdateconversation-method",
           "signatures": [
             "public suspend fun updateConversation(input: UpdateConversationRequestInput, requestId: String? = null): UpdateConversationReply"
@@ -475,7 +475,7 @@
         {
           "name": "addMember",
           "kind": "method",
-          "ref": "com.convohop:convohop-server-kotlin#CommunicationSuspendApi.addMember",
+          "ref": "dev.instantrelay:relay-server-kotlin#CommunicationSuspendApi.addMember",
           "anchor": "communicationsuspendapiaddmember-method",
           "signatures": [
             "public suspend fun addMember(input: AddMemberRequestInput, requestId: String? = null): AddMemberReply"
@@ -488,7 +488,7 @@
         {
           "name": "addMembers",
           "kind": "method",
-          "ref": "com.convohop:convohop-server-kotlin#CommunicationSuspendApi.addMembers",
+          "ref": "dev.instantrelay:relay-server-kotlin#CommunicationSuspendApi.addMembers",
           "anchor": "communicationsuspendapiaddmembers-method",
           "signatures": [
             "public suspend fun addMembers(input: AddMembersInput, requestId: String? = null): AddMembersPayload"
@@ -504,7 +504,7 @@
         {
           "name": "removeMember",
           "kind": "method",
-          "ref": "com.convohop:convohop-server-kotlin#CommunicationSuspendApi.removeMember",
+          "ref": "dev.instantrelay:relay-server-kotlin#CommunicationSuspendApi.removeMember",
           "anchor": "communicationsuspendapiremovemember-method",
           "signatures": [
             "public suspend fun removeMember(input: RemoveMemberRequestInput, requestId: String? = null): RemoveMemberReply"
@@ -520,7 +520,7 @@
         {
           "name": "historyGrant",
           "kind": "method",
-          "ref": "com.convohop:convohop-server-kotlin#CommunicationSuspendApi.historyGrant",
+          "ref": "dev.instantrelay:relay-server-kotlin#CommunicationSuspendApi.historyGrant",
           "anchor": "communicationsuspendapihistorygrant-method",
           "signatures": [
             "public suspend fun historyGrant(input: HistoryGrantRequestInput, requestId: String? = null): HistoryGrantReply"
@@ -536,7 +536,7 @@
         {
           "name": "sendMessage",
           "kind": "method",
-          "ref": "com.convohop:convohop-server-kotlin#CommunicationSuspendApi.sendMessage",
+          "ref": "dev.instantrelay:relay-server-kotlin#CommunicationSuspendApi.sendMessage",
           "anchor": "communicationsuspendapisendmessage-method",
           "signatures": [
             "public suspend fun sendMessage(input: SendMessageRequestInput, requestId: String? = null): SendMessageReply"
@@ -552,7 +552,7 @@
         {
           "name": "editMessage",
           "kind": "method",
-          "ref": "com.convohop:convohop-server-kotlin#CommunicationSuspendApi.editMessage",
+          "ref": "dev.instantrelay:relay-server-kotlin#CommunicationSuspendApi.editMessage",
           "anchor": "communicationsuspendapieditmessage-method",
           "signatures": [
             "public suspend fun editMessage(input: EditMessageRequestInput, requestId: String? = null): EditMessageReply"
@@ -568,7 +568,7 @@
         {
           "name": "deleteMessage",
           "kind": "method",
-          "ref": "com.convohop:convohop-server-kotlin#CommunicationSuspendApi.deleteMessage",
+          "ref": "dev.instantrelay:relay-server-kotlin#CommunicationSuspendApi.deleteMessage",
           "anchor": "communicationsuspendapideletemessage-method",
           "signatures": [
             "public suspend fun deleteMessage(input: DeleteMessageRequestInput, requestId: String? = null): DeleteMessageReply"
@@ -584,7 +584,7 @@
         {
           "name": "setBroadcastPermission",
           "kind": "method",
-          "ref": "com.convohop:convohop-server-kotlin#CommunicationSuspendApi.setBroadcastPermission",
+          "ref": "dev.instantrelay:relay-server-kotlin#CommunicationSuspendApi.setBroadcastPermission",
           "anchor": "communicationsuspendapisetbroadcastpermission-method",
           "signatures": [
             "public suspend fun setBroadcastPermission(input: SetBroadcastPermissionInput, requestId: String? = null): SetBroadcastPermissionPayload"
@@ -600,7 +600,7 @@
         {
           "name": "setConversationMute",
           "kind": "method",
-          "ref": "com.convohop:convohop-server-kotlin#CommunicationSuspendApi.setConversationMute",
+          "ref": "dev.instantrelay:relay-server-kotlin#CommunicationSuspendApi.setConversationMute",
           "anchor": "communicationsuspendapisetconversationmute-method",
           "signatures": [
             "public suspend fun setConversationMute(input: SetConversationMuteInput, requestId: String? = null): SetConversationMutePayload"
@@ -616,7 +616,7 @@
         {
           "name": "alertLiveSession",
           "kind": "method",
-          "ref": "com.convohop:convohop-server-kotlin#CommunicationSuspendApi.alertLiveSession",
+          "ref": "dev.instantrelay:relay-server-kotlin#CommunicationSuspendApi.alertLiveSession",
           "anchor": "communicationsuspendapialertlivesession-method",
           "signatures": [
             "public suspend fun alertLiveSession(input: AlertLiveSessionInput, requestId: String? = null): AlertLiveSessionPayload"
@@ -632,7 +632,7 @@
         {
           "name": "endLiveSession",
           "kind": "method",
-          "ref": "com.convohop:convohop-server-kotlin#CommunicationSuspendApi.endLiveSession",
+          "ref": "dev.instantrelay:relay-server-kotlin#CommunicationSuspendApi.endLiveSession",
           "anchor": "communicationsuspendapiendlivesession-method",
           "signatures": [
             "public suspend fun endLiveSession(input: EndLiveSessionInput, requestId: String? = null): EndLiveSessionPayload"
@@ -648,7 +648,7 @@
         {
           "name": "redeemCredential",
           "kind": "method",
-          "ref": "com.convohop:convohop-server-kotlin#CommunicationSuspendApi.redeemCredential",
+          "ref": "dev.instantrelay:relay-server-kotlin#CommunicationSuspendApi.redeemCredential",
           "anchor": "communicationsuspendapiredeemcredential-method",
           "signatures": [
             "public suspend fun redeemCredential(input: RedeemCredentialRequestInput, credentialDeliveryPermit: Map<String, Any?>, requestId: String? = null): RedeemCredentialReply"
@@ -664,7 +664,7 @@
         {
           "name": "acknowledgeCredential",
           "kind": "method",
-          "ref": "com.convohop:convohop-server-kotlin#CommunicationSuspendApi.acknowledgeCredential",
+          "ref": "dev.instantrelay:relay-server-kotlin#CommunicationSuspendApi.acknowledgeCredential",
           "anchor": "communicationsuspendapiacknowledgecredential-method",
           "signatures": [
             "public suspend fun acknowledgeCredential(input: AcknowledgeCredentialRequestInput, credentialDeliveryPermit: Map<String, Any?>, requestId: String? = null): AcknowledgeCredentialReply"
@@ -682,15 +682,15 @@
     {
       "name": "ManagementSuspendApi",
       "kind": "class",
-      "ref": "com.convohop:convohop-server-kotlin#ManagementSuspendApi",
+      "ref": "dev.instantrelay:relay-server-kotlin#ManagementSuspendApi",
       "anchor": "managementsuspendapi-class",
       "signatures": ["public class ManagementSuspendApi"],
-      "docs": "Suspending view of `ManagementApi`. Each call runs on `dispatcher`. Cancelling the calling\ncoroutine interrupts the blocking request and the call fails with a CancellationException\nwhose cause is the lost-request problem; a mutation stays in the client's recovery journal.\n\nPackage: `com.convohop.server.kotlin`.",
+      "docs": "Suspending view of `ManagementApi`. Each call runs on `dispatcher`. Cancelling the calling\ncoroutine interrupts the blocking request and the call fails with a CancellationException\nwhose cause is the lost-request problem; a mutation stays in the client's recovery journal.\n\nPackage: `dev.instantrelay.server.kotlin`.",
       "members": [
         {
           "name": "constructor",
           "kind": "constructor",
-          "ref": "com.convohop:convohop-server-kotlin#ManagementSuspendApi.constructor",
+          "ref": "dev.instantrelay:relay-server-kotlin#ManagementSuspendApi.constructor",
           "anchor": "managementsuspendapi-constructor",
           "signatures": [
             "public constructor(api: ManagementApi, dispatcher: CoroutineDispatcher = Dispatchers.IO)"
@@ -700,7 +700,7 @@
         {
           "name": "capabilities",
           "kind": "method",
-          "ref": "com.convohop:convohop-server-kotlin#ManagementSuspendApi.capabilities",
+          "ref": "dev.instantrelay:relay-server-kotlin#ManagementSuspendApi.capabilities",
           "anchor": "managementsuspendapicapabilities-method",
           "signatures": ["public suspend fun capabilities(): CapabilitiesReply"],
           "docs": "Suspending `ManagementApi.capabilities`.",
@@ -711,7 +711,7 @@
         {
           "name": "organizations",
           "kind": "method",
-          "ref": "com.convohop:convohop-server-kotlin#ManagementSuspendApi.organizations",
+          "ref": "dev.instantrelay:relay-server-kotlin#ManagementSuspendApi.organizations",
           "anchor": "managementsuspendapiorganizations-method",
           "signatures": ["public suspend fun organizations(): OrganizationsReply"],
           "docs": "Suspending `ManagementApi.organizations`.",
@@ -725,7 +725,7 @@
         {
           "name": "getOrganization",
           "kind": "method",
-          "ref": "com.convohop:convohop-server-kotlin#ManagementSuspendApi.getOrganization",
+          "ref": "dev.instantrelay:relay-server-kotlin#ManagementSuspendApi.getOrganization",
           "anchor": "managementsuspendapigetorganization-method",
           "signatures": [
             "public suspend fun getOrganization(input: GetOrganizationRequestInput): GetOrganizationReply"
@@ -741,7 +741,7 @@
         {
           "name": "getDeployment",
           "kind": "method",
-          "ref": "com.convohop:convohop-server-kotlin#ManagementSuspendApi.getDeployment",
+          "ref": "dev.instantrelay:relay-server-kotlin#ManagementSuspendApi.getDeployment",
           "anchor": "managementsuspendapigetdeployment-method",
           "signatures": [
             "public suspend fun getDeployment(input: GetDeploymentRequestInput): GetDeploymentReply"
@@ -757,7 +757,7 @@
         {
           "name": "getProject",
           "kind": "method",
-          "ref": "com.convohop:convohop-server-kotlin#ManagementSuspendApi.getProject",
+          "ref": "dev.instantrelay:relay-server-kotlin#ManagementSuspendApi.getProject",
           "anchor": "managementsuspendapigetproject-method",
           "signatures": [
             "public suspend fun getProject(input: GetProjectRequestInput): GetProjectReply"
@@ -770,7 +770,7 @@
         {
           "name": "deploymentHealth",
           "kind": "method",
-          "ref": "com.convohop:convohop-server-kotlin#ManagementSuspendApi.deploymentHealth",
+          "ref": "dev.instantrelay:relay-server-kotlin#ManagementSuspendApi.deploymentHealth",
           "anchor": "managementsuspendapideploymenthealth-method",
           "signatures": [
             "public suspend fun deploymentHealth(input: DeploymentHealthRequestInput): DeploymentHealthReply"
@@ -786,7 +786,7 @@
         {
           "name": "deploymentUsage",
           "kind": "method",
-          "ref": "com.convohop:convohop-server-kotlin#ManagementSuspendApi.deploymentUsage",
+          "ref": "dev.instantrelay:relay-server-kotlin#ManagementSuspendApi.deploymentUsage",
           "anchor": "managementsuspendapideploymentusage-method",
           "signatures": [
             "public suspend fun deploymentUsage(input: DeploymentUsageRequestInput): DeploymentUsageReply"
@@ -802,7 +802,7 @@
         {
           "name": "projectUsage",
           "kind": "method",
-          "ref": "com.convohop:convohop-server-kotlin#ManagementSuspendApi.projectUsage",
+          "ref": "dev.instantrelay:relay-server-kotlin#ManagementSuspendApi.projectUsage",
           "anchor": "managementsuspendapiprojectusage-method",
           "signatures": [
             "public suspend fun projectUsage(input: ProjectUsageRequestInput): ProjectUsageReply"
@@ -815,7 +815,7 @@
         {
           "name": "organizationUsage",
           "kind": "method",
-          "ref": "com.convohop:convohop-server-kotlin#ManagementSuspendApi.organizationUsage",
+          "ref": "dev.instantrelay:relay-server-kotlin#ManagementSuspendApi.organizationUsage",
           "anchor": "managementsuspendapiorganizationusage-method",
           "signatures": [
             "public suspend fun organizationUsage(input: OrganizationUsageRequestInput): OrganizationUsageReply"
@@ -831,7 +831,7 @@
         {
           "name": "organizationBilling",
           "kind": "method",
-          "ref": "com.convohop:convohop-server-kotlin#ManagementSuspendApi.organizationBilling",
+          "ref": "dev.instantrelay:relay-server-kotlin#ManagementSuspendApi.organizationBilling",
           "anchor": "managementsuspendapiorganizationbilling-method",
           "signatures": [
             "public suspend fun organizationBilling(input: OrganizationBillingRequestInput): OrganizationBillingReply"
@@ -841,7 +841,7 @@
         {
           "name": "webhookEndpoints",
           "kind": "method",
-          "ref": "com.convohop:convohop-server-kotlin#ManagementSuspendApi.webhookEndpoints",
+          "ref": "dev.instantrelay:relay-server-kotlin#ManagementSuspendApi.webhookEndpoints",
           "anchor": "managementsuspendapiwebhookendpoints-method",
           "signatures": [
             "public suspend fun webhookEndpoints(input: WebhookEndpointsRequestInput): WebhookEndpointsReply"
@@ -857,7 +857,7 @@
         {
           "name": "webhookDeliveries",
           "kind": "method",
-          "ref": "com.convohop:convohop-server-kotlin#ManagementSuspendApi.webhookDeliveries",
+          "ref": "dev.instantrelay:relay-server-kotlin#ManagementSuspendApi.webhookDeliveries",
           "anchor": "managementsuspendapiwebhookdeliveries-method",
           "signatures": [
             "public suspend fun webhookDeliveries(input: WebhookDeliveriesRequestInput): WebhookDeliveriesReply"
@@ -873,7 +873,7 @@
         {
           "name": "resolveRequest",
           "kind": "method",
-          "ref": "com.convohop:convohop-server-kotlin#ManagementSuspendApi.resolveRequest",
+          "ref": "dev.instantrelay:relay-server-kotlin#ManagementSuspendApi.resolveRequest",
           "anchor": "managementsuspendapiresolverequest-method",
           "signatures": [
             "public suspend fun resolveRequest(input: ResolveRequestRequestInput): ResolveRequestReply"
@@ -889,7 +889,7 @@
         {
           "name": "getOperation",
           "kind": "method",
-          "ref": "com.convohop:convohop-server-kotlin#ManagementSuspendApi.getOperation",
+          "ref": "dev.instantrelay:relay-server-kotlin#ManagementSuspendApi.getOperation",
           "anchor": "managementsuspendapigetoperation-method",
           "signatures": [
             "public suspend fun getOperation(input: GetOperationRequestInput): GetOperationReply"
@@ -900,77 +900,9 @@
           ]
         },
         {
-          "name": "agentSignupForApproval",
-          "kind": "method",
-          "ref": "com.convohop:convohop-server-kotlin#ManagementSuspendApi.agentSignupForApproval",
-          "anchor": "managementsuspendapiagentsignupforapproval-method",
-          "signatures": [
-            "public suspend fun agentSignupForApproval(input: AgentSignupForApprovalRequestInput): AgentSignupForApprovalReply"
-          ],
-          "docs": "Suspending `ManagementApi.agentSignupForApproval`."
-        },
-        {
-          "name": "agentSignup",
-          "kind": "method",
-          "ref": "com.convohop:convohop-server-kotlin#ManagementSuspendApi.agentSignup",
-          "anchor": "managementsuspendapiagentsignup-method",
-          "signatures": ["public suspend fun agentSignup(): AgentSignupReply"],
-          "docs": "Suspending `ManagementApi.agentSignup`."
-        },
-        {
-          "name": "agentGrants",
-          "kind": "method",
-          "ref": "com.convohop:convohop-server-kotlin#ManagementSuspendApi.agentGrants",
-          "anchor": "managementsuspendapiagentgrants-method",
-          "signatures": [
-            "public suspend fun agentGrants(input: AgentGrantsRequestInput): AgentGrantsReply"
-          ],
-          "docs": "Suspending `ManagementApi.agentGrants`."
-        },
-        {
-          "name": "agentGrantsPages",
-          "kind": "method",
-          "ref": "com.convohop:convohop-server-kotlin#ManagementSuspendApi.agentGrantsPages",
-          "anchor": "managementsuspendapiagentgrantspages-method",
-          "signatures": [
-            "public fun agentGrantsPages(input: AgentGrantsRequestInput): Flow<AgentGrantPage>"
-          ],
-          "docs": "`ManagementApi.agentGrantsPages` as a cold flow. Each collection starts again from `input`, and each page is requested\non `dispatcher` when the collector is ready for it."
-        },
-        {
-          "name": "agentAuditEvents",
-          "kind": "method",
-          "ref": "com.convohop:convohop-server-kotlin#ManagementSuspendApi.agentAuditEvents",
-          "anchor": "managementsuspendapiagentauditevents-method",
-          "signatures": [
-            "public suspend fun agentAuditEvents(input: AgentAuditEventsRequestInput): AgentAuditEventsReply"
-          ],
-          "docs": "Suspending `ManagementApi.agentAuditEvents`."
-        },
-        {
-          "name": "agentAuditEventsPages",
-          "kind": "method",
-          "ref": "com.convohop:convohop-server-kotlin#ManagementSuspendApi.agentAuditEventsPages",
-          "anchor": "managementsuspendapiagentauditeventspages-method",
-          "signatures": [
-            "public fun agentAuditEventsPages(input: AgentAuditEventsRequestInput): Flow<AgentAuditEventPage>"
-          ],
-          "docs": "`ManagementApi.agentAuditEventsPages` as a cold flow. Each collection starts again from `input`, and each page is requested\non `dispatcher` when the collector is ready for it."
-        },
-        {
-          "name": "organizationSpend",
-          "kind": "method",
-          "ref": "com.convohop:convohop-server-kotlin#ManagementSuspendApi.organizationSpend",
-          "anchor": "managementsuspendapiorganizationspend-method",
-          "signatures": [
-            "public suspend fun organizationSpend(input: OrganizationSpendRequestInput): OrganizationSpendReply"
-          ],
-          "docs": "Suspending `ManagementApi.organizationSpend`."
-        },
-        {
           "name": "createOrganization",
           "kind": "method",
-          "ref": "com.convohop:convohop-server-kotlin#ManagementSuspendApi.createOrganization",
+          "ref": "dev.instantrelay:relay-server-kotlin#ManagementSuspendApi.createOrganization",
           "anchor": "managementsuspendapicreateorganization-method",
           "signatures": [
             "public suspend fun createOrganization(input: CreateOrganizationRequestInput, requestId: String? = null): CreateOrganizationReply"
@@ -986,7 +918,7 @@
         {
           "name": "createDeployment",
           "kind": "method",
-          "ref": "com.convohop:convohop-server-kotlin#ManagementSuspendApi.createDeployment",
+          "ref": "dev.instantrelay:relay-server-kotlin#ManagementSuspendApi.createDeployment",
           "anchor": "managementsuspendapicreatedeployment-method",
           "signatures": [
             "public suspend fun createDeployment(input: CreateDeploymentRequestInput, requestId: String? = null): CreateDeploymentReply"
@@ -1002,7 +934,7 @@
         {
           "name": "createProject",
           "kind": "method",
-          "ref": "com.convohop:convohop-server-kotlin#ManagementSuspendApi.createProject",
+          "ref": "dev.instantrelay:relay-server-kotlin#ManagementSuspendApi.createProject",
           "anchor": "managementsuspendapicreateproject-method",
           "signatures": [
             "public suspend fun createProject(input: CreateProjectRequestInput, requestId: String? = null): CreateProjectReply"
@@ -1018,7 +950,7 @@
         {
           "name": "issueBackendKey",
           "kind": "method",
-          "ref": "com.convohop:convohop-server-kotlin#ManagementSuspendApi.issueBackendKey",
+          "ref": "dev.instantrelay:relay-server-kotlin#ManagementSuspendApi.issueBackendKey",
           "anchor": "managementsuspendapiissuebackendkey-method",
           "signatures": [
             "public suspend fun issueBackendKey(input: IssueBackendKeyRequestInput, requestId: String? = null): IssueBackendKeyReply"
@@ -1034,7 +966,7 @@
         {
           "name": "revokeBackendKey",
           "kind": "method",
-          "ref": "com.convohop:convohop-server-kotlin#ManagementSuspendApi.revokeBackendKey",
+          "ref": "dev.instantrelay:relay-server-kotlin#ManagementSuspendApi.revokeBackendKey",
           "anchor": "managementsuspendapirevokebackendkey-method",
           "signatures": [
             "public suspend fun revokeBackendKey(input: RevokeBackendKeyRequestInput, requestId: String? = null): RevokeBackendKeyReply"
@@ -1050,7 +982,7 @@
         {
           "name": "projectPolicy",
           "kind": "method",
-          "ref": "com.convohop:convohop-server-kotlin#ManagementSuspendApi.projectPolicy",
+          "ref": "dev.instantrelay:relay-server-kotlin#ManagementSuspendApi.projectPolicy",
           "anchor": "managementsuspendapiprojectpolicy-method",
           "signatures": [
             "public suspend fun projectPolicy(input: ProjectPolicyRequestInput, requestId: String? = null): ProjectPolicyReply"
@@ -1066,7 +998,7 @@
         {
           "name": "credentialPermit",
           "kind": "method",
-          "ref": "com.convohop:convohop-server-kotlin#ManagementSuspendApi.credentialPermit",
+          "ref": "dev.instantrelay:relay-server-kotlin#ManagementSuspendApi.credentialPermit",
           "anchor": "managementsuspendapicredentialpermit-method",
           "signatures": [
             "public suspend fun credentialPermit(input: CredentialPermitRequestInput, requestId: String? = null): CredentialPermitReply"
@@ -1082,7 +1014,7 @@
         {
           "name": "pauseOperation",
           "kind": "method",
-          "ref": "com.convohop:convohop-server-kotlin#ManagementSuspendApi.pauseOperation",
+          "ref": "dev.instantrelay:relay-server-kotlin#ManagementSuspendApi.pauseOperation",
           "anchor": "managementsuspendapipauseoperation-method",
           "signatures": [
             "public suspend fun pauseOperation(input: PauseOperationRequestInput, requestId: String? = null): PauseOperationReply"
@@ -1098,7 +1030,7 @@
         {
           "name": "resumeOperation",
           "kind": "method",
-          "ref": "com.convohop:convohop-server-kotlin#ManagementSuspendApi.resumeOperation",
+          "ref": "dev.instantrelay:relay-server-kotlin#ManagementSuspendApi.resumeOperation",
           "anchor": "managementsuspendapiresumeoperation-method",
           "signatures": [
             "public suspend fun resumeOperation(input: ResumeOperationRequestInput, requestId: String? = null): ResumeOperationReply"
@@ -1114,7 +1046,7 @@
         {
           "name": "createBillingCheckoutSession",
           "kind": "method",
-          "ref": "com.convohop:convohop-server-kotlin#ManagementSuspendApi.createBillingCheckoutSession",
+          "ref": "dev.instantrelay:relay-server-kotlin#ManagementSuspendApi.createBillingCheckoutSession",
           "anchor": "managementsuspendapicreatebillingcheckoutsession-method",
           "signatures": [
             "public suspend fun createBillingCheckoutSession(input: CreateBillingCheckoutSessionRequestInput, requestId: String? = null): CreateBillingCheckoutSessionReply"
@@ -1124,7 +1056,7 @@
         {
           "name": "createBillingPortalSession",
           "kind": "method",
-          "ref": "com.convohop:convohop-server-kotlin#ManagementSuspendApi.createBillingPortalSession",
+          "ref": "dev.instantrelay:relay-server-kotlin#ManagementSuspendApi.createBillingPortalSession",
           "anchor": "managementsuspendapicreatebillingportalsession-method",
           "signatures": [
             "public suspend fun createBillingPortalSession(input: CreateBillingPortalSessionRequestInput, requestId: String? = null): CreateBillingPortalSessionReply"
@@ -1134,7 +1066,7 @@
         {
           "name": "configureWebhook",
           "kind": "method",
-          "ref": "com.convohop:convohop-server-kotlin#ManagementSuspendApi.configureWebhook",
+          "ref": "dev.instantrelay:relay-server-kotlin#ManagementSuspendApi.configureWebhook",
           "anchor": "managementsuspendapiconfigurewebhook-method",
           "signatures": [
             "public suspend fun configureWebhook(input: ConfigureWebhookRequestInput, requestId: String? = null): ConfigureWebhookReply"
@@ -1150,7 +1082,7 @@
         {
           "name": "updateWebhook",
           "kind": "method",
-          "ref": "com.convohop:convohop-server-kotlin#ManagementSuspendApi.updateWebhook",
+          "ref": "dev.instantrelay:relay-server-kotlin#ManagementSuspendApi.updateWebhook",
           "anchor": "managementsuspendapiupdatewebhook-method",
           "signatures": [
             "public suspend fun updateWebhook(input: UpdateWebhookRequestInput, requestId: String? = null): UpdateWebhookReply"
@@ -1166,7 +1098,7 @@
         {
           "name": "rotateWebhookSecret",
           "kind": "method",
-          "ref": "com.convohop:convohop-server-kotlin#ManagementSuspendApi.rotateWebhookSecret",
+          "ref": "dev.instantrelay:relay-server-kotlin#ManagementSuspendApi.rotateWebhookSecret",
           "anchor": "managementsuspendapirotatewebhooksecret-method",
           "signatures": [
             "public suspend fun rotateWebhookSecret(input: RotateWebhookSecretRequestInput, requestId: String? = null): RotateWebhookSecretReply"
@@ -1182,7 +1114,7 @@
         {
           "name": "disableWebhook",
           "kind": "method",
-          "ref": "com.convohop:convohop-server-kotlin#ManagementSuspendApi.disableWebhook",
+          "ref": "dev.instantrelay:relay-server-kotlin#ManagementSuspendApi.disableWebhook",
           "anchor": "managementsuspendapidisablewebhook-method",
           "signatures": [
             "public suspend fun disableWebhook(input: DisableWebhookRequestInput, requestId: String? = null): DisableWebhookReply"
@@ -1198,7 +1130,7 @@
         {
           "name": "replayWebhookDeliveries",
           "kind": "method",
-          "ref": "com.convohop:convohop-server-kotlin#ManagementSuspendApi.replayWebhookDeliveries",
+          "ref": "dev.instantrelay:relay-server-kotlin#ManagementSuspendApi.replayWebhookDeliveries",
           "anchor": "managementsuspendapireplaywebhookdeliveries-method",
           "signatures": [
             "public suspend fun replayWebhookDeliveries(input: ReplayWebhookDeliveriesRequestInput, requestId: String? = null): ReplayWebhookDeliveriesReply"
@@ -1210,109 +1142,29 @@
               "page": "../../operations/management/replayWebhookDeliveries.md"
             }
           ]
-        },
-        {
-          "name": "requestAgentSignup",
-          "kind": "method",
-          "ref": "com.convohop:convohop-server-kotlin#ManagementSuspendApi.requestAgentSignup",
-          "anchor": "managementsuspendapirequestagentsignup-method",
-          "signatures": [
-            "public suspend fun requestAgentSignup(input: RequestAgentSignupRequestInput, requestId: String? = null): RequestAgentSignupReply"
-          ],
-          "docs": "Suspending `ManagementApi.requestAgentSignup`."
-        },
-        {
-          "name": "rejectAgentSignup",
-          "kind": "method",
-          "ref": "com.convohop:convohop-server-kotlin#ManagementSuspendApi.rejectAgentSignup",
-          "anchor": "managementsuspendapirejectagentsignup-method",
-          "signatures": [
-            "public suspend fun rejectAgentSignup(input: RejectAgentSignupRequestInput, requestId: String? = null): RejectAgentSignupReply"
-          ],
-          "docs": "Suspending `ManagementApi.rejectAgentSignup`."
-        },
-        {
-          "name": "approveAgentSignup",
-          "kind": "method",
-          "ref": "com.convohop:convohop-server-kotlin#ManagementSuspendApi.approveAgentSignup",
-          "anchor": "managementsuspendapiapproveagentsignup-method",
-          "signatures": [
-            "public suspend fun approveAgentSignup(input: ApproveAgentSignupRequestInput, requestId: String? = null): ApproveAgentSignupReply"
-          ],
-          "docs": "Suspending `ManagementApi.approveAgentSignup`."
-        },
-        {
-          "name": "issueAgentKey",
-          "kind": "method",
-          "ref": "com.convohop:convohop-server-kotlin#ManagementSuspendApi.issueAgentKey",
-          "anchor": "managementsuspendapiissueagentkey-method",
-          "signatures": [
-            "public suspend fun issueAgentKey(input: IssueAgentKeyRequestInput, requestId: String? = null): IssueAgentKeyReply"
-          ],
-          "docs": "Suspending `ManagementApi.issueAgentKey`."
-        },
-        {
-          "name": "agentCredentialPermit",
-          "kind": "method",
-          "ref": "com.convohop:convohop-server-kotlin#ManagementSuspendApi.agentCredentialPermit",
-          "anchor": "managementsuspendapiagentcredentialpermit-method",
-          "signatures": [
-            "public suspend fun agentCredentialPermit(input: AgentCredentialPermitRequestInput, requestId: String? = null): AgentCredentialPermitReply"
-          ],
-          "docs": "Suspending `ManagementApi.agentCredentialPermit`."
-        },
-        {
-          "name": "revokeAgentGrant",
-          "kind": "method",
-          "ref": "com.convohop:convohop-server-kotlin#ManagementSuspendApi.revokeAgentGrant",
-          "anchor": "managementsuspendapirevokeagentgrant-method",
-          "signatures": [
-            "public suspend fun revokeAgentGrant(input: RevokeAgentGrantRequestInput, requestId: String? = null): RevokeAgentGrantReply"
-          ],
-          "docs": "Suspending `ManagementApi.revokeAgentGrant`."
-        },
-        {
-          "name": "setSpendControls",
-          "kind": "method",
-          "ref": "com.convohop:convohop-server-kotlin#ManagementSuspendApi.setSpendControls",
-          "anchor": "managementsuspendapisetspendcontrols-method",
-          "signatures": [
-            "public suspend fun setSpendControls(input: SetSpendControlsRequestInput, requestId: String? = null): SetSpendControlsReply"
-          ],
-          "docs": "Suspending `ManagementApi.setSpendControls`."
-        },
-        {
-          "name": "purchaseAgentCredits",
-          "kind": "method",
-          "ref": "com.convohop:convohop-server-kotlin#ManagementSuspendApi.purchaseAgentCredits",
-          "anchor": "managementsuspendapipurchaseagentcredits-method",
-          "signatures": [
-            "public suspend fun purchaseAgentCredits(input: PurchaseAgentCreditsRequestInput, requestId: String? = null): PurchaseAgentCreditsReply"
-          ],
-          "docs": "Suspending `ManagementApi.purchaseAgentCredits`."
         }
       ]
     },
     {
       "name": "interruptible",
       "kind": "function",
-      "ref": "com.convohop:convohop-server-kotlin#interruptible",
+      "ref": "dev.instantrelay:relay-server-kotlin#interruptible",
       "anchor": "interruptible-function",
       "signatures": [
         "public suspend fun <T> interruptible(dispatcher: CoroutineDispatcher = Dispatchers.IO, call: () -> T): T"
       ],
-      "docs": "Runs a blocking SDK `call` on `dispatcher` and interrupts it when the calling coroutine is cancelled.\nThe suspending plane APIs run every call this way; use it for the blocking client helpers too, as in\n`interruptible { server.principals().create(accountId) }`.\n\nThe transport reports an interrupted request as a lost request whose outcome is unknown, not as an\n`InterruptedException`. Left alone, that problem would complete the cancelled coroutine as a failure\nand cancel its parent, so a failure that races cancellation becomes a `CancellationException` whose\ncause is the original problem. A mutation stays in the client's recovery journal either way.\n\nPackage: `com.convohop.server.kotlin`."
+      "docs": "Runs a blocking SDK `call` on `dispatcher` and interrupts it when the calling coroutine is cancelled.\nThe suspending plane APIs run every call this way; use it for the blocking client helpers too, as in\n`interruptible { server.principals().create(accountId) }`.\n\nThe transport reports an interrupted request as a lost request whose outcome is unknown, not as an\n`InterruptedException`. Left alone, that problem would complete the cancelled coroutine as a failure\nand cancel its parent, so a failure that races cancellation becomes a `CancellationException` whose\ncause is the original problem. A mutation stays in the client's recovery journal either way.\n\nPackage: `dev.instantrelay.server.kotlin`."
     },
     {
       "name": "suspending",
       "kind": "function",
-      "ref": "com.convohop:convohop-server-kotlin#suspending",
+      "ref": "dev.instantrelay:relay-server-kotlin#suspending",
       "anchor": "suspending-function",
       "signatures": [
         "public fun CommunicationApi.suspending(dispatcher: CoroutineDispatcher = Dispatchers.IO): CommunicationSuspendApi",
         "public fun ManagementApi.suspending(dispatcher: CoroutineDispatcher = Dispatchers.IO): ManagementSuspendApi"
       ],
-      "docs": "A suspending view of this plane API whose calls run on `dispatcher`.\n\nPackage: `com.convohop.server.kotlin`."
+      "docs": "A suspending view of this plane API whose calls run on `dispatcher`.\n\nPackage: `dev.instantrelay.server.kotlin`."
     }
   ]
 }

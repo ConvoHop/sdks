@@ -1,6 +1,6 @@
 import 'dart:async';
 
-import 'package:convohop/convohop.dart';
+import 'package:instantrelay/instantrelay.dart';
 import 'package:fake_async/fake_async.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:http/http.dart' as http;
@@ -56,7 +56,7 @@ final class _Authority {
     });
   });
 
-  ConvoHopClient client({SessionRefresh? refresh, RecoveryStorage? storage}) => ConvoHopClient(
+  RelayClient client({SessionRefresh? refresh, RecoveryStorage? storage}) => RelayClient(
     baseUrl: 'https://authority.example',
     projectId: projectId,
     principalId: principalId,
@@ -75,8 +75,8 @@ final class _Authority {
   ];
 }
 
-TypeMatcher<ConvoHopProblem> _problem(String code) =>
-    isA<ConvoHopProblem>().having((problem) => problem.code, 'code', code);
+TypeMatcher<RelayProblem> _problem(String code) =>
+    isA<RelayProblem>().having((problem) => problem.code, 'code', code);
 
 int _at(int minute, [int second = 0, int millisecond = 0]) =>
     DateTime.utc(2026, 10, 10, 12, minute, second, millisecond).millisecondsSinceEpoch;

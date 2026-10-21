@@ -26,7 +26,7 @@ export const runCommand: CommandRunner = (command, args, input) => new Promise((
   child.stdin.end(input);
 });
 
-/** The keychain service and Secret Service attribute that identify convohop's items. */
+/** The keychain service and Secret Service attribute that identify relay's items. */
 export const credentialService = "com.convohop.cli";
 
 /** Why an OS credential store failed. It never carries the store's output, which could echo the token. */
@@ -64,7 +64,7 @@ class KeychainVault implements Vault {
   async save(ref: string, profile: string, token: string): Promise<void> {
     // security -i reads the command from standard input, so the token never appears in a process listing. -X takes the
     // token as hex, which needs no quoting. security -i splits lines of 4095 bytes or more into separate commands.
-    const command = `add-generic-password -U -a ${ref} -s ${credentialService} -l convohop-cli/${profile} ` +
+    const command = `add-generic-password -U -a ${ref} -s ${credentialService} -l relay-cli/${profile} ` +
       `-X ${Buffer.from(token, "utf8").toString("hex")}\n`;
     if (command.length >= 4000) throw new CredentialStoreError("the token is too long for the keychain");
     const result = await invoke(this.run, "security", ["-i"], command);
@@ -95,7 +95,7 @@ class SecretServiceVault implements Vault {
   async save(ref: string, profile: string, token: string): Promise<void> {
     // secret-tool reads the secret from standard input.
     const result = await invoke(this.run, "secret-tool",
-      ["store", `--label=convohop-cli/${profile}`, "service", credentialService, "account", ref], token);
+      ["store", `--label=relay-cli/${profile}`, "service", credentialService, "account", ref], token);
     if (result.code !== 0) throw exited("secret-tool", result);
     if (await this.load(ref) !== token) {
       await this.remove(ref).catch(() => undefined);
@@ -137,7 +137,7 @@ export function vault(store: CredentialStore, files: ConfigFiles, run: CommandRu
   return new FileVault(files);
 }
 
-/** The OS store `--credential-store auto` tries first; undefined where convohop supports none. */
+/** The OS store `--credential-store auto` tries first; undefined where relay supports none. */
 export function platformStore(platform: NodeJS.Platform): CredentialStore | undefined {
   if (platform === "darwin") return "keychain";
   if (platform === "win32") return undefined;
@@ -151,6 +151,6 @@ export async function loadToken(store: Vault, ref: string): Promise<string | und
   } catch (error) {
     if (!(error instanceof CredentialStoreError)) throw error;
     throw new CliError(`Can't read the portal token from the ${store.store} credential store: ${error.message}. ` +
-      "Run convohop login again");
+      "Run relay login again");
   }
 }

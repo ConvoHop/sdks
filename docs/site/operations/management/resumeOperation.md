@@ -148,7 +148,7 @@ mutation ManagementResumeOperation($context: RequestContextInput!, $input: Resum
 | Language | Members |
 | --- | --- |
 | [TypeScript](../../typescript/reference/operations.md) | Not wrapped by a method |
-| [Python](../../python/reference/operations.md) | [`ConvoHopManagement.resume_operation`](../../python/reference/convohop.md#convohopmanagementresume_operation-method), [`AsyncConvoHopManagement.resume_operation`](../../python/reference/convohop.md#asyncconvohopmanagementresume_operation-method) |
+| [Python](../../python/reference/operations.md) | [`RelayManagement.resume_operation`](../../python/reference/instantrelay.md#relaymanagementresume_operation-method), [`AsyncRelayManagement.resume_operation`](../../python/reference/instantrelay.md#asyncrelaymanagementresume_operation-method) |
 | [.NET](../../dotnet/reference/operations.md) | [`ManagementApi.ResumeOperationAsync`](../../dotnet/reference/api.md#managementapiresumeoperationasync-method) |
 | [Java and Kotlin](../../jvm/reference/operations.md) | [`ManagementApi.resumeOperation`](../../jvm/reference/server.md#managementapiresumeoperation-method), [`ManagementSuspendApi.resumeOperation`](../../jvm/reference/server-kotlin.md#managementsuspendapiresumeoperation-method) |
-| [Go](../../go/reference/operations.md) | [`ManagementClient.ResumeOperation`](../../go/reference/convohop.md#managementclientresumeoperation-method) |
+| [Go](../../go/reference/operations.md) | [`ManagementClient.ResumeOperation`](../../go/reference/relay.md#managementclientresumeoperation-method) |

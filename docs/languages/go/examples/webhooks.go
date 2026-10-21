@@ -56,7 +56,7 @@ func ReceiveWebhook(secrets []string, enqueue func(webhookID string, event webho
 
 // Handlers is what your app does with the events it subscribes to.
 type Handlers interface {
-	ConversationChanged(ctx context.Context, conversation *convohop.Conversation) error
+	ConversationChanged(ctx context.Context, conversation *relay.Conversation) error
 	// Notify pushes to the recipient's devices.
 	Notify(ctx context.Context, notification *webhooks.Notification) error
 	// EndpointDisabled reports that another of your endpoints kept failing.
@@ -65,7 +65,7 @@ type Handlers interface {
 
 // HandleEvent is your queue worker. Events arrive at least once and in any
 // order.
-func HandleEvent(ctx context.Context, client *convohop.ProjectClient, event webhooks.Event, handlers Handlers) error {
+func HandleEvent(ctx context.Context, client *relay.ProjectClient, event webhooks.Event, handlers Handlers) error {
 	switch {
 	case !event.Known:
 		// A type this SDK doesn't know yet, or an event that doesn't match
@@ -75,7 +75,7 @@ func HandleEvent(ctx context.Context, client *convohop.ProjectClient, event webh
 		return handlers.Notify(ctx, event.Notification)
 	case event.EventType == webhooks.EventConversationCreated || event.EventType == webhooks.EventConversationUpdated:
 		// Events carry only IDs. Read the current state through the API.
-		conversation, err := client.GetConversation(ctx, convohop.GetConversationRequestInput{ConversationID: event.SubjectRef.ID})
+		conversation, err := client.GetConversation(ctx, relay.GetConversationRequestInput{ConversationID: event.SubjectRef.ID})
 		if err != nil {
 			return err
 		}

@@ -1,7 +1,7 @@
 import { randomUUID } from "node:crypto";
 import {
-  ConvoHopProblem, operationCatalog, type OperationInput, type OperationKey, type OperationPayload,
-} from "@convohop/server";
+  RelayProblem, operationCatalog, type OperationInput, type OperationKey, type OperationPayload,
+} from "@instantrelay/server";
 import { CliError, problemDetails } from "./output.js";
 import type { Context, Plane } from "./session.js";
 
@@ -18,7 +18,7 @@ export function isOperationKey(value: string): value is OperationKey {
 /** Tells the user how to look a request up, instead of sending it again. */
 export function resolveHint(plane: Plane, requestId: string): string {
   const where = plane.name === "communication" ? ` --plane communication --project ${plane.projectId ?? "ID"}` : "";
-  return `Don't run the command again: that sends a new request. Check it with convohop resolve --request ${requestId}${where}`;
+  return `Don't run the command again: that sends a new request. Check it with relay resolve --request ${requestId}${where}`;
 }
 
 /** Unknown outcomes that sending the request again doesn't change. */
@@ -31,7 +31,7 @@ async function again<T>(context: Context, send: () => Promise<T>): Promise<T> {
     try {
       return await send();
     } catch (error) {
-      const wait = error instanceof ConvoHopProblem && !finalCodes.has(error.code)
+      const wait = error instanceof RelayProblem && !finalCodes.has(error.code)
         ? error.retryAfter ?? (error.outcome === "unknown" ? attempt : undefined) : undefined;
       if (wait === undefined || wait > maxWait || attempt >= 3 || context.signal.aborted) throw error;
       await context.sleep(wait * 1000);
@@ -65,11 +65,11 @@ function recorded(plane: Plane, requestId: string): boolean {
 }
 
 function unknownOutcome(plane: Plane, requestId: string, error: unknown, message: string, exitCode = 3): CliError {
-  const details = error instanceof ConvoHopProblem ? problemDetails(error) : {};
+  const details = error instanceof RelayProblem ? problemDetails(error) : {};
   return new CliError(message, exitCode, { ...details, outcome: "unknown", requestId, next: resolveHint(plane, requestId) });
 }
 
-function rejected(problem: ConvoHopProblem): CliError {
+function rejected(problem: RelayProblem): CliError {
   const next = problem.outcome === "committed" || problem.outcome === "accepted" ? "The authority has the request. Don't send it again."
     : problem.retryAfter === undefined ? undefined : `The authority asked to wait ${problem.retryAfter} seconds before sending again.`;
   return new CliError(problem.message, 1, problemDetails(problem, next));
@@ -90,7 +90,7 @@ export async function mutate<K extends OperationKey>(context: Context, plane: Pl
       return { kind: "reply", requestId, payload: await plane.transport.execute(key, plane.projectId, input, requestId) };
     } catch (error) {
       failure = error;
-      if (!(error instanceof ConvoHopProblem) || error.requestId !== requestId || error.outcome !== "rejected" ||
+      if (!(error instanceof RelayProblem) || error.requestId !== requestId || error.outcome !== "rejected" ||
           error.retryAfter === undefined || error.retryAfter > maxWait || attempt >= 3 || context.signal.aborted) break;
       await context.sleep(error.retryAfter * 1000);
     }
@@ -98,7 +98,7 @@ export async function mutate<K extends OperationKey>(context: Context, plane: Pl
   // The transport records a mutation before sending it, so an unrecorded mutation was never sent.
   if (!recorded(plane, requestId)) throw failure;
   if (context.signal.aborted) throw unknownOutcome(plane, requestId, failure, "Interrupted; the request's outcome is unknown", 130);
-  if (failure instanceof ConvoHopProblem && failure.requestId === requestId) {
+  if (failure instanceof RelayProblem && failure.requestId === requestId) {
     if (failure.outcome !== "unknown") throw rejected(failure);
     if (failure.code === "RESOLUTION_REQUIRED") throw unknownOutcome(plane, requestId, failure, failure.message);
   }
@@ -109,7 +109,7 @@ async function recover<K extends OperationKey>(context: Context, plane: Plane, r
   failure: unknown): Promise<MutationResult<K>> {
   let last = failure;
   for (let round = 1; round <= 3; round += 1) {
-    const asked = last instanceof ConvoHopProblem ? last.retryAfter : undefined;
+    const asked = last instanceof RelayProblem ? last.retryAfter : undefined;
     if (asked !== undefined && asked > maxWait) break;
     try {
       await context.sleep((asked ?? 2 ** (round - 1)) * 1000);
@@ -123,7 +123,7 @@ async function recover<K extends OperationKey>(context: Context, plane: Plane, r
     } catch (error) {
       last = error;
       if (context.signal.aborted) throw unknownOutcome(plane, requestId, error, "Interrupted; the request's outcome is unknown", 130);
-      if (!(error instanceof ConvoHopProblem) || error.code === "RESOLUTION_REQUIRED") break;
+      if (!(error instanceof RelayProblem) || error.code === "RESOLUTION_REQUIRED") break;
       // A problem with this request's ID comes from the resend; others come from the lookup.
       if (error.requestId === requestId && error.outcome === "rejected" && error.retryAfter === undefined) throw rejected(error);
       if (error.outcome !== "unknown" && error.retryAfter === undefined) break;

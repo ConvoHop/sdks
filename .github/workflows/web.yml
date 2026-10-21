@@ -54,7 +54,7 @@ jobs:
       contents: read # check out the repository
     env:
       # The React tests check that they run on this major.
-      CONVOHOP_REACT_MAJOR: "18"
+      RELAY_REACT_MAJOR: "18"
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:

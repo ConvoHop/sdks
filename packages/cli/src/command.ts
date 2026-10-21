@@ -1,15 +1,15 @@
 import { echoable, globalOptions, type Args, type OptionSpec, type OptionSpecs } from "./args.js";
 import type { MutationResult } from "./call.js";
-import type { OperationKey } from "@convohop/server";
+import type { OperationKey } from "@instantrelay/server";
 import { UsageError } from "./output.js";
 import { uuidOption, type Context } from "./session.js";
 
-/** A convohop command, such as keys issue. */
+/** A relay command, such as keys issue. */
 export interface Command {
   /** The command's words. */
   readonly name: string;
   readonly summary: string;
-  /** The usage line after convohop and the name. */
+  /** The usage line after relay and the name. */
   readonly usage: string;
   readonly options: OptionSpecs;
   /** How many positional arguments it takes. */
@@ -51,7 +51,7 @@ export function operationRef(payload: unknown): string | undefined {
 export function printMutation<K extends OperationKey>(context: Context, result: MutationResult<K>): void {
   context.printer.data(result);
   const operationId = result.kind === "reply" ? operationRef(result.payload) : result.resolution.receipt?.operation?.operationId;
-  if (operationId) context.printer.note(`Follow it with convohop operation get --operation ${operationId}`);
+  if (operationId) context.printer.note(`Follow it with relay operation get --operation ${operationId}`);
 }
 
 function optionLines(options: OptionSpecs): string[] {
@@ -63,7 +63,7 @@ function optionLines(options: OptionSpecs): string[] {
 }
 
 export function commandHelp(command: Command): string {
-  const lines = [`Usage: convohop ${command.name} ${command.usage}`.trimEnd(), "", command.summary];
+  const lines = [`Usage: relay ${command.name} ${command.usage}`.trimEnd(), "", command.summary];
   if (command.details) lines.push("", command.details);
   if (Object.keys(command.options).length) lines.push("", "Options:", ...optionLines(command.options));
   lines.push("", "Global options:", ...optionLines(globalOptions));
@@ -77,26 +77,26 @@ function commandLines(commands: readonly Command[]): string[] {
 
 export function overview(commands: readonly Command[]): string {
   return [
-    "convohop: the ConvoHop command-line interface for project operators.",
+    "relay: the Relay command-line interface for project operators.",
     "",
-    "Usage: convohop [--profile NAME] COMMAND [options]",
+    "Usage: relay [--profile NAME] COMMAND [options]",
     "",
     "Commands:",
     ...commandLines(commands),
     "",
-    "Credentials come from convohop login, or CONVOHOP_PORTAL_TOKEN or CONVOHOP_PORTAL_TOKEN_FILE for management",
-    "commands, and CONVOHOP_BACKEND_KEY or CONVOHOP_BACKEND_KEY_FILE for communication operations. convohop never prints",
+    "Credentials come from relay login, or RELAY_PORTAL_TOKEN or RELAY_PORTAL_TOKEN_FILE for management",
+    "commands, and RELAY_BACKEND_KEY or RELAY_BACKEND_KEY_FILE for communication operations. relay never prints",
     "credentials. Exit codes: 0 success, 1 failure, 2 usage error, 3 unknown outcome, 130 interrupted.",
     "",
-    "Run convohop COMMAND --help for a command's options.",
+    "Run relay COMMAND --help for a command's options.",
     "",
   ].join("\n");
 }
 
 export function groupHelp(group: string, commands: readonly Command[]): string {
   const members = commands.filter(command => command.name.startsWith(`${group} `));
-  return ["Usage: convohop " + group + " COMMAND [options]", "", "Commands:", ...commandLines(members), "",
-    `Run convohop ${group} COMMAND --help for a command's options.`, ""].join("\n");
+  return ["Usage: relay " + group + " COMMAND [options]", "", "Commands:", ...commandLines(members), "",
+    `Run relay ${group} COMMAND --help for a command's options.`, ""].join("\n");
 }
 
 /** The longest command whose words start argv's words. */

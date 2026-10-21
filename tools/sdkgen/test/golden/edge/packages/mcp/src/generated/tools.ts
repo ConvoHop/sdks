@@ -49,16 +49,8 @@ export interface McpToolDefinition {
   readonly operation: McpToolOperation;
 }
 export const retryToolName = "retry_request";
-export const operationMetaKey = "com.convohop/operation";
-export const withheldOperations: Readonly<Record<string, string>> = {
-  "communication.issueSession": "returns a user session token",
-  "communication.renewSession": "returns a user session token",
-  "management.credentialPermit": "returns a credential delivery permit",
-  "management.createBillingCheckoutSession": "returns a hosted billing link that grants access to whoever holds it",
-  "management.createBillingPortalSession": "returns a hosted billing link that grants access to whoever holds it",
-  "management.agentCredentialPermit": "returns a credential delivery permit",
-  "management.approveAgentSignup": "records an owner's consent to an agent signup; the owner gives it from the emailed approval link"
-};
+export const operationMetaKey = "dev.instantrelay/operation";
+export const withheldOperations: Readonly<Record<string, string>> = {};
 export const mcpTools: readonly McpToolDefinition[] = [
   {
     "name": "alpha_capabilities",

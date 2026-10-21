@@ -321,7 +321,7 @@ wheels = [
 ]
 
 [[package]]
-name = "convohop"
+name = "instantrelay"
 source = { editable = "." }
 dependencies = [
     { name = "httpx" },

@@ -3,37 +3,13 @@
   "language": "flutter",
   "packages": [
     {
-      "name": "package:convohop/convohop.dart",
+      "name": "package:instantrelay/instantrelay.dart",
       "symbols": [
         {
           "name": "ActorRef",
           "kind": "class",
           "signatures": [
             "final class ActorRef {\n  const ActorRef({required String tenantId, required String objectId});\n  factory ActorRef.fromJson(Object? json);\n  final String tenantId;\n  final String objectId;\n  Map<String, Object?> toJson();\n}"
-          ],
-          "docs": ""
-        },
-        {
-          "name": "AgentGrant",
-          "kind": "class",
-          "signatures": [
-            "final class AgentGrant {\n  const AgentGrant({\n    required String grantId,\n    required String orgId,\n    required String signupId,\n    required String agentActorId,\n    String? projectId,\n    required List<String> scopes,\n    required String expiresAt,\n    String? revokedAt,\n    required String createdAt,\n    required List<AgentKey> keys,\n  });\n  factory AgentGrant.fromJson(Object? json);\n  final String grantId;\n  final String orgId;\n  final String signupId;\n  final String agentActorId;\n  final String? projectId;\n  final List<String> scopes;\n  final String expiresAt;\n  final String? revokedAt;\n  final String createdAt;\n  final List<AgentKey> keys;\n  Map<String, Object?> toJson();\n}"
-          ],
-          "docs": ""
-        },
-        {
-          "name": "AgentKey",
-          "kind": "class",
-          "signatures": [
-            "final class AgentKey {\n  const AgentKey({\n    required String operationId,\n    required String state,\n    required List<String> scopes,\n    required String expiresAt,\n    String? keyId,\n    String? deliveryId,\n    String? deliveryExpiresAt,\n  });\n  factory AgentKey.fromJson(Object? json);\n  final String operationId;\n  final String state;\n  final List<String> scopes;\n  final String expiresAt;\n  final String? keyId;\n  final String? deliveryId;\n  final String? deliveryExpiresAt;\n  Map<String, Object?> toJson();\n}"
-          ],
-          "docs": ""
-        },
-        {
-          "name": "AgentSignupStatus",
-          "kind": "class",
-          "signatures": [
-            "final class AgentSignupStatus {\n  const AgentSignupStatus({\n    required String signupId,\n    required String state,\n    String? orgId,\n    String? deploymentId,\n    String? projectId,\n    String? nextStep,\n    required List<String> scopes,\n    String? grantExpiresAt,\n    required List<AgentKey> keys,\n    String? incarnation,\n    String? servingEpoch,\n  });\n  factory AgentSignupStatus.fromJson(Object? json);\n  final String signupId;\n  final String state;\n  final String? orgId;\n  final String? deploymentId;\n  final String? projectId;\n  final String? nextStep;\n  final List<String> scopes;\n  final String? grantExpiresAt;\n  final List<AgentKey> keys;\n  final String? incarnation;\n  final String? servingEpoch;\n  Map<String, Object?> toJson();\n}"
           ],
           "docs": ""
         },
@@ -181,63 +157,63 @@
               "kind": "property",
               "signatures": ["final String eventId"],
               "docs": "Deduplicate on this: delivery is at least once.",
-              "inherited": "ConvoHopNotification"
+              "inherited": "RelayNotification"
             },
             {
               "name": "occurredAt",
               "kind": "property",
               "signatures": ["final String occurredAt"],
               "docs": "",
-              "inherited": "ConvoHopNotification"
+              "inherited": "RelayNotification"
             },
             {
               "name": "projectId",
               "kind": "property",
               "signatures": ["final String projectId"],
               "docs": "",
-              "inherited": "ConvoHopNotification"
+              "inherited": "RelayNotification"
             },
             {
               "name": "recipientId",
               "kind": "property",
               "signatures": ["final String recipientId"],
               "docs": "The principal the notification is for.",
-              "inherited": "ConvoHopNotification"
+              "inherited": "RelayNotification"
             },
             {
               "name": "conversationId",
               "kind": "property",
               "signatures": ["final String conversationId"],
               "docs": "",
-              "inherited": "ConvoHopNotification"
+              "inherited": "RelayNotification"
             },
             {
               "name": "senderId",
               "kind": "property",
               "signatures": ["final String senderId"],
               "docs": "Who sent the message or started the ringing.",
-              "inherited": "ConvoHopNotification"
+              "inherited": "RelayNotification"
             },
             {
               "name": "title",
               "kind": "property",
               "signatures": ["final String? title"],
               "docs": "Visible title, when the push had one.",
-              "inherited": "ConvoHopNotification"
+              "inherited": "RelayNotification"
             },
             {
               "name": "body",
               "kind": "property",
               "signatures": ["final String? body"],
               "docs": "Visible body, when the push had one. With previews off, a message\nnotification has none.",
-              "inherited": "ConvoHopNotification"
+              "inherited": "RelayNotification"
             },
             {
               "name": "isFor",
               "kind": "method",
-              "signatures": ["bool isFor(ConvoHopClient client)"],
+              "signatures": ["bool isFor(RelayClient client)"],
               "docs": "Whether this notification is for `client`'s user and project.",
-              "inherited": "ConvoHopNotification"
+              "inherited": "RelayNotification"
             }
           ]
         },
@@ -306,63 +282,63 @@
               "kind": "property",
               "signatures": ["final String eventId"],
               "docs": "Deduplicate on this: delivery is at least once.",
-              "inherited": "ConvoHopNotification"
+              "inherited": "RelayNotification"
             },
             {
               "name": "occurredAt",
               "kind": "property",
               "signatures": ["final String occurredAt"],
               "docs": "",
-              "inherited": "ConvoHopNotification"
+              "inherited": "RelayNotification"
             },
             {
               "name": "projectId",
               "kind": "property",
               "signatures": ["final String projectId"],
               "docs": "",
-              "inherited": "ConvoHopNotification"
+              "inherited": "RelayNotification"
             },
             {
               "name": "recipientId",
               "kind": "property",
               "signatures": ["final String recipientId"],
               "docs": "The principal the notification is for.",
-              "inherited": "ConvoHopNotification"
+              "inherited": "RelayNotification"
             },
             {
               "name": "conversationId",
               "kind": "property",
               "signatures": ["final String conversationId"],
               "docs": "",
-              "inherited": "ConvoHopNotification"
+              "inherited": "RelayNotification"
             },
             {
               "name": "senderId",
               "kind": "property",
               "signatures": ["final String senderId"],
               "docs": "Who sent the message or started the ringing.",
-              "inherited": "ConvoHopNotification"
+              "inherited": "RelayNotification"
             },
             {
               "name": "title",
               "kind": "property",
               "signatures": ["final String? title"],
               "docs": "Visible title, when the push had one.",
-              "inherited": "ConvoHopNotification"
+              "inherited": "RelayNotification"
             },
             {
               "name": "body",
               "kind": "property",
               "signatures": ["final String? body"],
               "docs": "Visible body, when the push had one. With previews off, a message\nnotification has none.",
-              "inherited": "ConvoHopNotification"
+              "inherited": "RelayNotification"
             },
             {
               "name": "isFor",
               "kind": "method",
-              "signatures": ["bool isFor(ConvoHopClient client)"],
+              "signatures": ["bool isFor(RelayClient client)"],
               "docs": "Whether this notification is for `client`'s user and project.",
-              "inherited": "ConvoHopNotification"
+              "inherited": "RelayNotification"
             }
           ]
         },
@@ -708,7 +684,7 @@
           "name": "ConversationActivity",
           "kind": "namespace",
           "signatures": ["extension ConversationActivity on ConversationSnapshot"],
-          "docs": "Members' recent activity in a conversation, from what its store holds.\n\nConvoHop doesn't publish online status to clients. This reflects what\nmembers visibly did in this conversation, the messages they wrote or\nedited and the receipts they reported, so treat it as \"recently active\",\nnot \"online\". It only covers what the store has loaded.",
+          "docs": "Members' recent activity in a conversation, from what its store holds.\n\nRelay doesn't publish online status to clients. This reflects what\nmembers visibly did in this conversation, the messages they wrote or\nedited and the receipts they reported, so treat it as \"recently active\",\nnot \"online\". It only covers what the store has loaded.",
           "members": [
             {
               "name": "lastActive",
@@ -735,7 +711,7 @@
             {
               "name": "client",
               "kind": "property",
-              "signatures": ["final ConvoHopClient client"],
+              "signatures": ["final RelayClient client"],
               "docs": ""
             },
             {
@@ -1004,20 +980,20 @@
           "name": "ConversationStore",
           "kind": "class",
           "signatures": ["final class ConversationStore"],
-          "docs": "A conversation kept current on this device: its newest messages, each\nmember's receipts and this user's optimistic sends.\n\nThe store loads the conversation's newest messages and receipts, then\nfollows its events with `ConvoHopClient.watch` from that point, fetching\neach new or changed message. After a transient failure it reconnects with\nbackoff and resumes after the last event it applied. It never skips\nhistory on its own: when the authority can't continue from its position,\nthe status becomes `ConversationStoreStatus.resyncRequired` until you call\n`resync`.\n\nPass the app's `ConvoHopOutbox` to `send` through it: queued, failed and\nunknown messages show in `ConversationSnapshot.pending` until their\ncommitted message arrives.\n\nWith `persist` on and `ConvoHopClient.storage` set, the store keeps up to\n200 of the newest messages, including their text, with its receipts and\nposition under `convohop.store:<project>:<principal>:<conversation>`, and\nshows them at once next time while it catches up. A stored conversation\nfrom another incarnation is discarded.\n\nUse one store per conversation and client. Don't call\n`ConvoHopClient.resyncAuthorizedHistory` for a conversation a store\nfollows; call `resync`.",
+          "docs": "A conversation kept current on this device: its newest messages, each\nmember's receipts and this user's optimistic sends.\n\nThe store loads the conversation's newest messages and receipts, then\nfollows its events with `RelayClient.watch` from that point, fetching\neach new or changed message. After a transient failure it reconnects with\nbackoff and resumes after the last event it applied. It never skips\nhistory on its own: when the authority can't continue from its position,\nthe status becomes `ConversationStoreStatus.resyncRequired` until you call\n`resync`.\n\nPass the app's `RelayOutbox` to `send` through it: queued, failed and\nunknown messages show in `ConversationSnapshot.pending` until their\ncommitted message arrives.\n\nWith `persist` on and `RelayClient.storage` set, the store keeps up to\n200 of the newest messages, including their text, with its receipts and\nposition under `convohop.store:<project>:<principal>:<conversation>`, and\nshows them at once next time while it catches up. A stored conversation\nfrom another incarnation is discarded.\n\nUse one store per conversation and client. Don't call\n`RelayClient.resyncAuthorizedHistory` for a conversation a store\nfollows; call `resync`.",
           "members": [
             {
               "name": "ConversationStore",
               "kind": "constructor",
               "signatures": [
-                "ConversationStore(\n  ConvoHopClient client,\n  String conversationId, {\n  ConvoHopOutbox? outbox,\n  bool persist = false,\n  int maxMessages = 1000,\n  ErrorListener? onError,\n  Random? random,\n})"
+                "ConversationStore(\n  RelayClient client,\n  String conversationId, {\n  RelayOutbox? outbox,\n  bool persist = false,\n  int maxMessages = 1000,\n  ErrorListener? onError,\n  Random? random,\n})"
               ],
               "docs": ""
             },
             {
               "name": "client",
               "kind": "property",
-              "signatures": ["final ConvoHopClient client"],
+              "signatures": ["final RelayClient client"],
               "docs": ""
             },
             {
@@ -1131,7 +1107,7 @@
             {
               "name": "client",
               "kind": "property",
-              "signatures": ["final ConvoHopClient client"],
+              "signatures": ["final RelayClient client"],
               "docs": ""
             },
             {
@@ -1164,587 +1140,6 @@
               "kind": "method",
               "signatures": ["void close()"],
               "docs": "Stops replay and realtime. Events already being applied finish."
-            }
-          ]
-        },
-        {
-          "name": "ConvoHopClient",
-          "kind": "class",
-          "signatures": ["final class ConvoHopClient"],
-          "docs": "A user-session client for one project, principal and device.\n\nIt keeps mutation recovery, replays conversation history from a stored\ncursor, continues it over realtime and renews the session through\n`SessionRefresh`. Never give it a backend or operator key.",
-          "members": [
-            {
-              "name": "ConvoHopClient",
-              "kind": "constructor",
-              "signatures": [
-                "factory ConvoHopClient({\n  required String baseUrl,\n  required String projectId,\n  required String sessionToken,\n  required String incarnation,\n  required String principalId,\n  RecoveryStorage? recoveryStorage,\n  http.Client? httpClient,\n  SessionRefresh? sessionRefresh,\n  RealtimeConnector? realtimeConnector,\n  Clock clock = systemClock,\n})"
-              ],
-              "docs": "Creates a client for `principalId`'s session in `projectId`.\n\n`baseUrl` is the authority origin (HTTPS, or loopback HTTP for local\ndevelopment). `recoveryStorage` keeps mutation recovery and replay\ncursors across restarts; it never receives tokens."
-            },
-            {
-              "name": "projectId",
-              "kind": "property",
-              "signatures": ["final String projectId"],
-              "docs": ""
-            },
-            {
-              "name": "principalId",
-              "kind": "property",
-              "signatures": ["final String principalId"],
-              "docs": ""
-            },
-            {
-              "name": "transport",
-              "kind": "property",
-              "signatures": ["final ConvoHopTransport transport"],
-              "docs": "The transport that runs this client's operations and keeps recovery."
-            },
-            {
-              "name": "storage",
-              "kind": "property",
-              "signatures": ["final RecoveryStorage? storage"],
-              "docs": "Where recovery records and replay cursors are kept, if anywhere."
-            },
-            {
-              "name": "operations",
-              "kind": "property",
-              "signatures": ["late final CommunicationOperations operations"],
-              "docs": "The generated operations, bound to this project and session."
-            },
-            {
-              "name": "requests",
-              "kind": "property",
-              "signatures": ["late final ClientRequests requests"],
-              "docs": "Resolve or retry earlier mutations by request ID."
-            },
-            {
-              "name": "liveAlerts",
-              "kind": "property",
-              "signatures": ["late final LiveAlerts liveAlerts"],
-              "docs": "Call alerts sent to this user."
-            },
-            {
-              "name": "sessionBinding",
-              "kind": "property",
-              "signatures": ["Session? get sessionBinding"],
-              "docs": "The session this client verified, once `initialize` ran with\n`SessionRefresh` configured."
-            },
-            {
-              "name": "sessionRefreshState",
-              "kind": "property",
-              "signatures": ["SessionRefreshState get sessionRefreshState"],
-              "docs": ""
-            },
-            {
-              "name": "initialize",
-              "kind": "method",
-              "signatures": ["Future<ProjectRoute> initialize()"],
-              "docs": "Reads and checks the signed route. With `SessionRefresh` configured, it\nalso verifies the current session once."
-            },
-            {
-              "name": "refreshSession",
-              "kind": "method",
-              "signatures": ["Future<Session> refreshSession()"],
-              "docs": "Replaces the session token through `SessionRefresh` before it expires.\n\nRequests wait while it runs and replay streams pause, then resume with\nthe new token. When neither the replacement nor the original session can\nbe verified, the client stays blocked: retire it and bootstrap a new one."
-            },
-            {
-              "name": "conversation",
-              "kind": "method",
-              "signatures": ["ConversationHandle conversation(String id)"],
-              "docs": "A handle for one conversation: messages, mute and calls."
-            },
-            {
-              "name": "getConversation",
-              "kind": "method",
-              "signatures": ["Future<Conversation> getConversation(String id)"],
-              "docs": ""
-            },
-            {
-              "name": "liveSession",
-              "kind": "method",
-              "signatures": ["Future<LiveSessionHandle> liveSession(String id)"],
-              "docs": "The call `id`, as this user sees it now."
-            },
-            {
-              "name": "messages",
-              "kind": "method",
-              "signatures": ["Future<MessagePage> messages(String id, {String? beforeSequence})"],
-              "docs": "One page of messages, newest first. Pass the oldest `beforeSequence`\nyou have to read further back."
-            },
-            {
-              "name": "send",
-              "kind": "method",
-              "signatures": [
-                "Future<MessageAck> send(\n  String id,\n  String text, {\n  Map<String, Object?> props = const {},\n  String? requestId,\n})"
-              ],
-              "docs": "Sends `text`. Pass the original `requestId` to retry the same send.\nEmpty or oversized text is the authority's call: it rejects it as\n`INVALID_REQUEST`."
-            },
-            {
-              "name": "edit",
-              "kind": "method",
-              "signatures": [
-                "Future<Message> edit(Message message, String text, {String? requestId})"
-              ],
-              "docs": "Replaces `message`'s text. Fails with `REVISION_CONFLICT` when the\nmessage changed since you read it."
-            },
-            {
-              "name": "delete",
-              "kind": "method",
-              "signatures": ["Future<Message> delete(Message message, {String? requestId})"],
-              "docs": ""
-            },
-            {
-              "name": "getMessage",
-              "kind": "method",
-              "signatures": ["Future<Message> getMessage(String conversationId, String messageId)"],
-              "docs": "One message, by ID."
-            },
-            {
-              "name": "events",
-              "kind": "method",
-              "signatures": ["Future<EventPage> events(String id, {Cursor? after})"],
-              "docs": "Up to 100 events after `after`, checked to stay in this conversation and\nin order."
-            },
-            {
-              "name": "reportRead",
-              "kind": "method",
-              "signatures": [
-                "Future<ReadReceipt> reportRead(\n  String id,\n  Member membership,\n  String throughSequence,\n)"
-              ],
-              "docs": "Reports that this user read through `throughSequence`. `membership` is\nthe user's current membership, as `getConversation` returns it."
-            },
-            {
-              "name": "receipts",
-              "kind": "method",
-              "signatures": ["Future<ReceiptPage> receipts(String id, {String? cursor})"],
-              "docs": ""
-            },
-            {
-              "name": "sendTyping",
-              "kind": "method",
-              "signatures": ["Future<TypingStatus> sendTyping(String id, {required bool isTyping})"],
-              "docs": "Sends a typing signal once. It is never recorded or retried."
-            },
-            {
-              "name": "inbox",
-              "kind": "method",
-              "signatures": ["Future<InboxPage> inbox({int limit = 50, String? cursor})"],
-              "docs": "This user's conversations, most recently active first."
-            },
-            {
-              "name": "search",
-              "kind": "method",
-              "signatures": [
-                "Future<SearchPage> search(\n  String query, {\n  List<String>? conversationIds,\n  String? cursor,\n})"
-              ],
-              "docs": ""
-            },
-            {
-              "name": "recoverPending",
-              "kind": "method",
-              "signatures": ["Future<void> recoverPending(ErrorListener onError)"],
-              "docs": "Resolves up to 16 mutations whose outcome isn't settled: pending,\nunknown, or rejected with a retryable code. It resends a request only\nwhile its original retry budget remains, and otherwise checks it\nread-only. Errors go to `onError`."
-            },
-            {
-              "name": "watch",
-              "kind": "method",
-              "signatures": [
-                "Future<ConversationStream> watch(\n  String conversationId,\n  EventApplier apply,\n  ErrorListener onError, {\n  Cursor? startAfter,\n})"
-              ],
-              "docs": "Replays `conversationId`'s history after the stored cursor through\n`apply`, then follows it over realtime. Resolves after the first\nreconciliation. Errors that end or interrupt the stream go to `onError`.\n\nPass `startAfter` when your state is already current through it, for\nexample the conversation's `latestSequence` after you loaded its newest\nmessages; the replay then starts after it instead of the stored cursor.\nWithout either, it starts at the beginning of the visible history."
-            },
-            {
-              "name": "storedCursor",
-              "kind": "method",
-              "signatures": ["Future<Cursor?> storedCursor(String conversationId)"],
-              "docs": "The replay cursor stored for `conversationId`: how far applied history\nreached. Null without storage or before anything was applied."
-            },
-            {
-              "name": "resyncAuthorizedHistory",
-              "kind": "method",
-              "signatures": [
-                "Future<ConversationStream> resyncAuthorizedHistory(\n  String conversationId,\n  EventApplier apply,\n  ErrorListener onError,\n)"
-              ],
-              "docs": "Closes `conversationId`'s streams and replays its currently visible\nhistory from the beginning. Use it after `HistoryResyncRequired`."
-            },
-            {
-              "name": "close",
-              "kind": "method",
-              "signatures": ["void close()"],
-              "docs": "Closes every stream and, when the client created it, the HTTP client."
-            }
-          ]
-        },
-        {
-          "name": "ConvoHopNotification",
-          "kind": "class",
-          "signatures": ["sealed class ConvoHopNotification"],
-          "docs": "A ConvoHop notification, parsed from a push payload's `convohop` object.\n\nNotifications carry identifiers. They carry message text only when the\nproject opted in to message previews (off by default) or your backend\nadded its own text, so `title` and `body` are often null: show your own\ngeneric text and fetch content with the user's session.",
-          "members": [
-            {
-              "name": "eventId",
-              "kind": "property",
-              "signatures": ["final String eventId"],
-              "docs": "Deduplicate on this: delivery is at least once."
-            },
-            {
-              "name": "eventType",
-              "kind": "property",
-              "signatures": ["String get eventType"],
-              "docs": "`notification.message`, `notification.call` or\n`notification.callCancelled`."
-            },
-            {
-              "name": "occurredAt",
-              "kind": "property",
-              "signatures": ["final String occurredAt"],
-              "docs": ""
-            },
-            {
-              "name": "projectId",
-              "kind": "property",
-              "signatures": ["final String projectId"],
-              "docs": ""
-            },
-            {
-              "name": "recipientId",
-              "kind": "property",
-              "signatures": ["final String recipientId"],
-              "docs": "The principal the notification is for."
-            },
-            {
-              "name": "conversationId",
-              "kind": "property",
-              "signatures": ["final String conversationId"],
-              "docs": ""
-            },
-            {
-              "name": "senderId",
-              "kind": "property",
-              "signatures": ["final String senderId"],
-              "docs": "Who sent the message or started the ringing."
-            },
-            {
-              "name": "title",
-              "kind": "property",
-              "signatures": ["final String? title"],
-              "docs": "Visible title, when the push had one."
-            },
-            {
-              "name": "body",
-              "kind": "property",
-              "signatures": ["final String? body"],
-              "docs": "Visible body, when the push had one. With previews off, a message\nnotification has none."
-            },
-            {
-              "name": "isFor",
-              "kind": "method",
-              "signatures": ["bool isFor(ConvoHopClient client)"],
-              "docs": "Whether this notification is for `client`'s user and project."
-            },
-            {
-              "name": "toJson",
-              "kind": "method",
-              "signatures": ["Map<String, Object?> toJson()"],
-              "docs": "The `convohop` object, for handing the notification to native code."
-            }
-          ]
-        },
-        {
-          "name": "ConvoHopNotifications",
-          "kind": "class",
-          "signatures": ["final class ConvoHopNotifications"],
-          "docs": "Handles ConvoHop push payloads on the device: parses and validates them,\ndeduplicates on `eventId`, and tracks which calls are ringing.\n\nDelivery is at least once and unordered, so a cancellation can arrive\nbefore its call. A call stops ringing once a cancellation with its\n`alertId` was seen or its `expiresAt` passed.",
-          "members": [
-            {
-              "name": "ConvoHopNotifications",
-              "kind": "constructor",
-              "signatures": ["ConvoHopNotifications({Clock? clock, int capacity = 1024})"],
-              "docs": "`capacity` bounds how many event IDs are remembered for deduplication."
-            },
-            {
-              "name": "rings",
-              "kind": "property",
-              "signatures": ["Stream<RingUpdate> get rings"],
-              "docs": "Ring changes: a call starts or stops ringing."
-            },
-            {
-              "name": "ringing",
-              "kind": "property",
-              "signatures": ["List<CallNotification> get ringing"],
-              "docs": "Calls that are ringing now."
-            },
-            {
-              "name": "isRinging",
-              "kind": "method",
-              "signatures": ["bool isRinging(String alertId)"],
-              "docs": "Whether the ring `alertId` is on."
-            },
-            {
-              "name": "handleNotification",
-              "kind": "method",
-              "signatures": [
-                "HandledNotification? handleNotification(Map<Object?, Object?> payload)"
-              ],
-              "docs": "Parses and records `payload`. Returns null when it isn't a ConvoHop\npayload, and throws a `FormatException` when it breaks the contract."
-            },
-            {
-              "name": "record",
-              "kind": "method",
-              "signatures": ["HandledNotification record(ConvoHopNotification notification)"],
-              "docs": "Records an already parsed `notification`."
-            },
-            {
-              "name": "stopRinging",
-              "kind": "method",
-              "signatures": ["bool stopRinging(String alertId, {String reason = 'declined'})"],
-              "docs": "Stops the ring `alertId` locally, for example after the user declined\nit in the call UI. Returns whether it was ringing."
-            },
-            {
-              "name": "stopCall",
-              "kind": "method",
-              "signatures": ["bool stopCall(String liveSessionId, {String reason = 'ended'})"],
-              "docs": "Stops every ring of the call `liveSessionId`, for example when the\ncall ended. Returns whether any was ringing."
-            },
-            {
-              "name": "applyEvent",
-              "kind": "method",
-              "signatures": ["bool applyEvent(Event event)"],
-              "docs": "Applies a conversation event from the user's realtime connection: a\n`live.ended` event stops the call's rings. Pass every event of the\nconversations the user can be called in, for example from\n`ConversationStore.events`, because pushes don't always report that a\nring stopped. Returns whether a ring stopped."
-            },
-            {
-              "name": "close",
-              "kind": "method",
-              "signatures": ["void close()"],
-              "docs": "Cancels ring timers and stops reporting on `rings`. Payloads are still\nparsed, deduplicated and tracked."
-            }
-          ]
-        },
-        {
-          "name": "ConvoHopOutbox",
-          "kind": "class",
-          "signatures": ["final class ConvoHopOutbox"],
-          "docs": "Sends messages in the background so the UI can show them at once\n(optimistic sends), in order within each conversation, across lost\nconnectivity and app restarts.\n\nEach message keeps one request ID for life. The outbox resends it only\nwithin the transport's original three-attempt, 60-second budget, and only\nafter a read-only check found that no earlier attempt was committed. It\nnever invents a new request ID on its own: `resend` does that when the\nuser asks.\n\nWhile the authority is unreachable, it checks read-only before a\nmessage's first submission, so waiting offline doesn't spend the budget.\nCall `flush` when connectivity returns.\n\nA message stays queued, and is tried again after a backoff that is never\nshorter than the authority's `ConvoHopProblem.retryAfter`, after an\nunknown outcome, a rejection the realtime stream would also retry (such as\n`RATE_LIMITED`), `WRONG_REGION`, after which the client routes again\nfirst, `RECOVERY_LIMIT` and an ended session. Any other rejection, such as\n`QUOTA_EXCEEDED` or `PLAN_LIMIT_EXCEEDED`, fails it at once.\n\nWhile the outbox is open, the transport never evicts the recovery record\nof a message the outbox may still send or check. A message attempted\nbefore the outbox loaded it may have lost its record meanwhile, evicted\nor lost with storage. Unless a read-only check finds it committed, such a\nmessage isn't sent again: it fails with `RESOLUTION_REQUIRED`, as\n`OutboxState.unknown` if an attempt may have reached the authority.\n\nWith `ConvoHopClient.storage` set and `persist` on, unsent messages,\nincluding their text, are stored under\n`convohop.outbox:<project>:<principal>` until sent or discarded.",
-          "members": [
-            {
-              "name": "ConvoHopOutbox",
-              "kind": "constructor",
-              "signatures": [
-                "ConvoHopOutbox(\n  ConvoHopClient client, {\n  ErrorListener? onError,\n  bool persist = true,\n  Clock clock = systemClock,\n  Random? random,\n})"
-              ],
-              "docs": ""
-            },
-            {
-              "name": "maxItems",
-              "kind": "property",
-              "signatures": ["static const int maxItems"],
-              "docs": "Unsent messages the outbox holds at most. Sending more throws a\n`StateError` until some are sent, resent or discarded.",
-              "static": true
-            },
-            {
-              "name": "client",
-              "kind": "property",
-              "signatures": ["final ConvoHopClient client"],
-              "docs": ""
-            },
-            {
-              "name": "changes",
-              "kind": "property",
-              "signatures": ["Stream<OutboxItem> get changes"],
-              "docs": "Every change to an item, including a sent or discarded item after the\noutbox drops it. `items` has the current list."
-            },
-            {
-              "name": "items",
-              "kind": "property",
-              "signatures": ["List<OutboxItem> get items"],
-              "docs": "Unsent messages, in the order the user sent them."
-            },
-            {
-              "name": "itemsFor",
-              "kind": "method",
-              "signatures": ["List<OutboxItem> itemsFor(String conversationId)"],
-              "docs": "`conversationId`'s unsent messages, in the order the user sent them."
-            },
-            {
-              "name": "offline",
-              "kind": "property",
-              "signatures": ["bool get offline"],
-              "docs": "Whether the last attempt to reach the authority failed without a\nresponse."
-            },
-            {
-              "name": "initialize",
-              "kind": "method",
-              "signatures": ["Future<void> initialize()"],
-              "docs": "Loads stored messages and starts sending. `send` awaits it too."
-            },
-            {
-              "name": "send",
-              "kind": "method",
-              "signatures": [
-                "Future<OutboxItem> send(\n  String conversationId,\n  String text, {\n  Map<String, Object?> props = const {},\n})"
-              ],
-              "docs": "Queues `text` for `conversationId` and returns the queued item at once.\nIt is stored before this returns."
-            },
-            {
-              "name": "flush",
-              "kind": "method",
-              "signatures": ["void flush()"],
-              "docs": "Retries every queued message now, for example when connectivity\nreturns, and checks read-only whether `OutboxState.unknown` messages\nwere committed."
-            },
-            {
-              "name": "resolve",
-              "kind": "method",
-              "signatures": ["Future<OutboxItem> resolve(String requestId)"],
-              "docs": "Asks the authority, read-only, whether `requestId`'s\n`OutboxState.unknown` or `OutboxState.failed` message was committed."
-            },
-            {
-              "name": "resend",
-              "kind": "method",
-              "signatures": ["Future<OutboxItem> resend(String requestId)"],
-              "docs": "Sends a `OutboxState.failed` or `OutboxState.unknown` message again as\na new message with a new request ID, at the end of its conversation's\nqueue. Resending an unknown message can duplicate it; ask the user\nfirst."
-            },
-            {
-              "name": "discard",
-              "kind": "method",
-              "signatures": ["Future<void> discard(String requestId)"],
-              "docs": "Drops `requestId`'s message. A message that is sending, or that isn't\nsent while an earlier attempt may have reached the authority\n(`OutboxItem.uncertain`), could still be committed, so it throws a\n`StateError` until the outcome is known."
-            },
-            {
-              "name": "close",
-              "kind": "method",
-              "signatures": ["Future<void> close()"],
-              "docs": "Stops sending, and completes once the outbox has stopped writing: what\nit was loading, sending and saving has settled. So on sign-out, await\nit before clearing the storage. Every call returns the same future,\nwhich never fails.\n\nA send in flight finishes, but the outbox emits no more changes and\nreports no more errors. Unsent messages stay stored for the next\noutbox."
-            }
-          ]
-        },
-        {
-          "name": "ConvoHopProblem",
-          "kind": "class",
-          "signatures": ["class ConvoHopProblem implements Exception"],
-          "docs": "A failure reported by the ConvoHop authority or detected by the SDK.\n\nClassify problems by `code`. `outcome` says what is known about a\nmutation: `rejected` (not applied), `committed` or `accepted` (applied),\nor `unknown` (resolve the original `requestId` before trying anything\nelse). Messages never contain credentials.",
-          "members": [
-            {
-              "name": "ConvoHopProblem",
-              "kind": "constructor",
-              "signatures": [
-                "ConvoHopProblem(\n  String code,\n  String requestId,\n  String outcome,\n  int status,\n  String message, {\n  int? retryAfter,\n  Object? cause,\n})"
-              ],
-              "docs": ""
-            },
-            {"name": "code", "kind": "property", "signatures": ["final String code"], "docs": ""},
-            {
-              "name": "requestId",
-              "kind": "property",
-              "signatures": ["final String requestId"],
-              "docs": "The request the problem belongs to. Retry or resolve with this ID."
-            },
-            {
-              "name": "outcome",
-              "kind": "property",
-              "signatures": ["final String outcome"],
-              "docs": ""
-            },
-            {
-              "name": "status",
-              "kind": "property",
-              "signatures": ["final int status"],
-              "docs": "The HTTP status, or 0 when no authority response was observed."
-            },
-            {
-              "name": "message",
-              "kind": "property",
-              "signatures": ["final String message"],
-              "docs": ""
-            },
-            {
-              "name": "retryAfter",
-              "kind": "property",
-              "signatures": ["final int? retryAfter"],
-              "docs": "Whole seconds to wait before resending the same request, when the\nauthority sent a delay (for example with `RATE_LIMITED`). Read from the\nerror's `extensions.retryAfter`, else from an HTTP `Retry-After` delay in\nseconds, or from a realtime close reason's `retryAfter=`. A request you\nsend is never resent on its own; when the SDK reconnects a stream or\nresends a queued outbox message, it waits at least this long first."
-            },
-            {
-              "name": "cause",
-              "kind": "property",
-              "signatures": ["final Object? cause"],
-              "docs": "The underlying failure, when there is one."
-            },
-            {"name": "toString", "kind": "method", "signatures": ["String toString()"], "docs": ""}
-          ]
-        },
-        {
-          "name": "ConvoHopTransport",
-          "kind": "class",
-          "signatures": ["final class ConvoHopTransport"],
-          "docs": "Sends generated operations to `/graphql` and keeps mutation recovery.\n\nA mutation keeps its request ID, payload, incarnation and retry budget\n(three attempts within 60 seconds) across retries and restarts. When the\noutcome is unknown, resolve the original request ID; the transport never\ntreats a lost response as a rejection or a commit.\n\nThe recovery journal holds at most 128 records. When a new mutation finds\nit full, the transport evicts the final record whose last attempt is\noldest and that no call is using and no caller retains. A record is final\nonce the SDK can't send its request again: committed, accepted, rejected\nwith a code that isn't retryable, or out of retry budget. When no record\ncan go, it refuses the new mutation before sending it, with\n`RECOVERY_LIMIT`. An evicted request can still be resolved by its ID.",
-          "members": [
-            {
-              "name": "ConvoHopTransport",
-              "kind": "constructor",
-              "signatures": [
-                "ConvoHopTransport({\n  required String baseUrl,\n  required String namespace,\n  required String incarnation,\n  String? credential,\n  RecoveryStorage? recoveryStorage,\n  http.Client? httpClient,\n  Clock clock = systemClock,\n})"
-              ],
-              "docs": ""
-            },
-            {
-              "name": "baseUrl",
-              "kind": "property",
-              "signatures": ["final String baseUrl"],
-              "docs": ""
-            },
-            {
-              "name": "incarnation",
-              "kind": "property",
-              "signatures": ["String incarnation"],
-              "docs": "The project incarnation every request is bound to."
-            },
-            {
-              "name": "servingEpoch",
-              "kind": "property",
-              "signatures": ["String? servingEpoch"],
-              "docs": "The serving epoch from the latest route, sent as `observedServingEpoch`."
-            },
-            {
-              "name": "durableRecovery",
-              "kind": "property",
-              "signatures": ["bool get durableRecovery"],
-              "docs": ""
-            },
-            {
-              "name": "initializeRecovery",
-              "kind": "method",
-              "signatures": ["Future<void> initializeRecovery()"],
-              "docs": "Loads stored recovery records. Every operation awaits it first."
-            },
-            {
-              "name": "recoveryStates",
-              "kind": "property",
-              "signatures": ["List<RecoveryState> get recoveryStates"],
-              "docs": "Copies of the stored recovery records. Await `initializeRecovery` first."
-            },
-            {
-              "name": "markMediaAdmissionAttempted",
-              "kind": "method",
-              "signatures": ["Future<void> markMediaAdmissionAttempted(String requestId)"],
-              "docs": "Records that a call connection used the committed credential grant from\n`requestId`. That grant is never reused for another connection."
-            },
-            {
-              "name": "execute",
-              "kind": "method",
-              "signatures": [
-                "Future<T> execute<T>(\n  OperationSpec<T> spec,\n  String projectId,\n  Map<String, Object?> input, {\n  String? requestId,\n})"
-              ],
-              "docs": "Runs `spec` in `projectId` with `input`. A mutation uses `requestId`\n(or a new one) and records it for recovery before sending."
-            },
-            {
-              "name": "retry",
-              "kind": "method",
-              "signatures": ["Future<RequestResolution> retry(String requestId)"],
-              "docs": "Resolves `requestId` and resends the same request only when the\nauthority hasn't observed it and its retry budget remains."
-            },
-            {
-              "name": "close",
-              "kind": "method",
-              "signatures": ["void close()"],
-              "docs": "Rejects later requests and closes the HTTP client when the transport\ncreated it."
             }
           ]
         },
@@ -1874,7 +1269,7 @@
           "signatures": [
             "abstract final class ErrorCodes {\n  static const String admissionLimit;\n  static const String agenticNotConfigured;\n  static const String agentConfirmationCodeInvalid;\n  static const String agentGrantExpired;\n  static const String agentGrantRevoked;\n  static const String agentKeyLimit;\n  static const String agentPurchaseLimitExceeded;\n  static const String agentScopeNotGranted;\n  static const String agentSignupClosed;\n  static const String agentSignupEmailRejected;\n  static const String agentSignupNotReady;\n  static const String agentSignupSuppressed;\n  static const String alreadyConnected;\n  static const String alreadyExists;\n  static const String authorityUnavailable;\n  static const String billingCatalogConflict;\n  static const String billingCatalogNotSynced;\n  static const String billingCustomerMissing;\n  static const String billingLinkExpired;\n  static const String billingNotConfigured;\n  static const String billingPlanUnavailable;\n  static const String billingProviderChanged;\n  static const String billingProviderRejected;\n  static const String billingSubscriptionActive;\n  static const String billingSuspended;\n  static const String credentialDeliveryExpired;\n  static const String credentialExpired;\n  static const String credentialRefreshRequired;\n  static const String credentialRequired;\n  static const String creditsExhausted;\n  static const String creditsRequireMeteredPlan;\n  static const String creditAmountOutOfRange;\n  static const String creditGrantLimitReached;\n  static const String cursorAhead;\n  static const String cursorExpired;\n  static const String cursorInvalid;\n  static const String cursorMismatch;\n  static const String cursorScopeMismatch;\n  static const String deliveryConsumed;\n  static const String deliveryNotRedeemed;\n  static const String deploymentNotReady;\n  static const String featureUnsupported;\n  static const String forbidden;\n  static const String generationConflict;\n  static const String graphqlError;\n  static const String graphqlInvalidRequest;\n  static const String graphqlQueryLimit;\n  static const String graphqlResponseLimit;\n  static const String httpFailure;\n  static const String idempotencyConflict;\n  static const String incarnationMismatch;\n  static const String invalidReplacement;\n  static const String invalidRequest;\n  static const String invalidResponse;\n  static const String liveAlertLimit;\n  static const String liveSessionClosed;\n  static const String liveSessionExists;\n  static const String mediaConnectFailed;\n  static const String mediaFenceRequired;\n  static const String mediaNotReady;\n  static const String mediaRecovering;\n  static const String membershipCountInvalid;\n  static const String memberLimit;\n  static const String messageDeleted;\n  static const String notASessionRequest;\n  static const String notFound;\n  static const String outcomeUnknown;\n  static const String pageItemTooLarge;\n  static const String participationMismatch;\n  static const String paymentDeclined;\n  static const String paymentRailNotConfigured;\n  static const String permitExpired;\n  static const String planLimitExceeded;\n  static const String quotaExceeded;\n  static const String rateLimited;\n  static const String recoveryLimit;\n  static const String recoveryStorageFailure;\n  static const String requestExpired;\n  static const String requestTooLarge;\n  static const String resolutionRequired;\n  static const String responseTooLarge;\n  static const String resyncRequired;\n  static const String retryExhausted;\n  static const String revisionConflict;\n  static const String scopeRequired;\n  static const String sessionReceiptBindingMismatch;\n  static const String sessionReceiptInvalid;\n  static const String sessionRefreshFailed;\n  static const String sessionRefreshRejected;\n  static const String sessionRefreshRequired;\n  static const String sessionRefreshUnverified;\n  static const String spendCapReached;\n  static const String spendUnverified;\n  static const String transportUnknown;\n  static const String unauthenticated;\n  static const String webhookDestinationDenied;\n  static const String webhookEndpointDisabled;\n  static const String webhookEndpointLimit;\n  static const String webhookRotationPending;\n  static const String webhookSecretUnacknowledged;\n  static const String wrongRegion;\n}"
           ],
-          "docs": "Error codes, for comparing with `ConvoHopProblem.code`."
+          "docs": "Error codes, for comparing with `RelayProblem.code`."
         },
         {
           "name": "ErrorListener",
@@ -1988,12 +1383,12 @@
           "name": "HandledNotification",
           "kind": "class",
           "signatures": ["final class HandledNotification"],
-          "docs": "What `ConvoHopNotifications.handleNotification` found.",
+          "docs": "What `RelayNotifications.handleNotification` found.",
           "members": [
             {
               "name": "notification",
               "kind": "property",
-              "signatures": ["final ConvoHopNotification notification"],
+              "signatures": ["final RelayNotification notification"],
               "docs": ""
             },
             {
@@ -2014,7 +1409,7 @@
           "name": "HistoryResyncRequired",
           "kind": "class",
           "signatures": ["final class HistoryResyncRequired implements Exception"],
-          "docs": "The authority can't continue this history from the applied cursor, for\nexample after the user's visible history changed. Call\n`ConvoHopClient.resyncAuthorizedHistory` to replay what is visible now.",
+          "docs": "The authority can't continue this history from the applied cursor, for\nexample after the user's visible history changed. Call\n`RelayClient.resyncAuthorizedHistory` to replay what is visible now.",
           "members": [
             {
               "name": "HistoryResyncRequired",
@@ -2136,7 +1531,7 @@
             {
               "name": "client",
               "kind": "property",
-              "signatures": ["final ConvoHopClient client"],
+              "signatures": ["final RelayClient client"],
               "docs": ""
             },
             {
@@ -2175,7 +1570,7 @@
               "signatures": [
                 "Future<LiveSessionOperationCompletion> completed({\n  Duration timeout = const Duration(seconds: 45),\n  Future<void>? abortTrigger,\n})"
               ],
-              "docs": "Polls every 500 ms until the action completes. A failed action throws\nits reason as a `ConvoHopProblem`; `RESOLUTION_REQUIRED` means it is\nstill running when `timeout` (at most 300 seconds) passes. Completing\n`abortTrigger` stops the wait with `LiveWaitAborted`."
+              "docs": "Polls every 500 ms until the action completes. A failed action throws\nits reason as a `RelayProblem`; `RESOLUTION_REQUIRED` means it is\nstill running when `timeout` (at most 300 seconds) passes. Completing\n`abortTrigger` stops the wait with `LiveWaitAborted`."
             }
           ]
         },
@@ -2304,7 +1699,7 @@
             {
               "name": "client",
               "kind": "property",
-              "signatures": ["final ConvoHopClient client"],
+              "signatures": ["final RelayClient client"],
               "docs": "",
               "inherited": "LiveAction"
             },
@@ -2349,7 +1744,7 @@
               "signatures": [
                 "Future<LiveSessionOperationCompletion> completed({\n  Duration timeout = const Duration(seconds: 45),\n  Future<void>? abortTrigger,\n})"
               ],
-              "docs": "Polls every 500 ms until the action completes. A failed action throws\nits reason as a `ConvoHopProblem`; `RESOLUTION_REQUIRED` means it is\nstill running when `timeout` (at most 300 seconds) passes. Completing\n`abortTrigger` stops the wait with `LiveWaitAborted`.",
+              "docs": "Polls every 500 ms until the action completes. A failed action throws\nits reason as a `RelayProblem`; `RESOLUTION_REQUIRED` means it is\nstill running when `timeout` (at most 300 seconds) passes. Completing\n`abortTrigger` stops the wait with `LiveWaitAborted`.",
               "inherited": "LiveAction"
             }
           ]
@@ -2446,7 +1841,7 @@
           "name": "LiveMediaRoom",
           "kind": "interface",
           "signatures": ["abstract interface class LiveMediaRoom"],
-          "docs": "A LiveKit room, as a call connection drives it.\n\n`package:convohop/calls.dart` provides one built on the official\n`livekit_client` package. The connection never starts capture on its own.",
+          "docs": "A LiveKit room, as a call connection drives it.\n\n`package:instantrelay/calls.dart` provides one built on the official\n`livekit_client` package. The connection never starts capture on its own.",
           "members": [
             {
               "name": "connect",
@@ -2458,7 +1853,7 @@
               "name": "localParticipantSid",
               "kind": "property",
               "signatures": ["String? get localParticipantSid"],
-              "docs": "The connected local participant's SID. ConvoHop's media server makes it\nthe participation's `nativeConnectionId`."
+              "docs": "The connected local participant's SID. Relay's media server makes it\nthe participation's `nativeConnectionId`."
             },
             {
               "name": "setMicrophoneEnabled",
@@ -2580,7 +1975,7 @@
               "signatures": [
                 "Future<LiveMediaConnection<R>> connect<R extends LiveMediaRoom>(\n  LiveMediaRoomFactory<R> createRoom, {\n  String? requestId,\n  void Function()? onDisconnected,\n})"
               ],
-              "docs": "Connects the call's media with new single-use credentials. Connecting\nnever starts the microphone or camera.\n\n`createRoom` makes the LiveKit room; see `package:convohop/calls.dart`.\n`onDisconnected` runs when the room disconnects on its own; call\n`LiveMediaConnection.reconnect` to continue with new credentials."
+              "docs": "Connects the call's media with new single-use credentials. Connecting\nnever starts the microphone or camera.\n\n`createRoom` makes the LiveKit room; see `package:instantrelay/calls.dart`.\n`onDisconnected` runs when the room disconnects on its own; call\n`LiveMediaConnection.reconnect` to continue with new credentials."
             },
             {
               "name": "leave",
@@ -2663,7 +2058,7 @@
             {
               "name": "client",
               "kind": "property",
-              "signatures": ["final ConvoHopClient client"],
+              "signatures": ["final RelayClient client"],
               "docs": ""
             },
             {
@@ -2865,7 +2260,7 @@
             {
               "name": "client",
               "kind": "property",
-              "signatures": ["final ConvoHopClient client"],
+              "signatures": ["final RelayClient client"],
               "docs": "",
               "inherited": "LiveAction"
             },
@@ -2910,7 +2305,7 @@
               "signatures": [
                 "Future<LiveSessionOperationCompletion> completed({\n  Duration timeout = const Duration(seconds: 45),\n  Future<void>? abortTrigger,\n})"
               ],
-              "docs": "Polls every 500 ms until the action completes. A failed action throws\nits reason as a `ConvoHopProblem`; `RESOLUTION_REQUIRED` means it is\nstill running when `timeout` (at most 300 seconds) passes. Completing\n`abortTrigger` stops the wait with `LiveWaitAborted`.",
+              "docs": "Polls every 500 ms until the action completes. A failed action throws\nits reason as a `RelayProblem`; `RESOLUTION_REQUIRED` means it is\nstill running when `timeout` (at most 300 seconds) passes. Completing\n`abortTrigger` stops the wait with `LiveWaitAborted`.",
               "inherited": "LiveAction"
             }
           ]
@@ -3035,7 +2430,7 @@
         {
           "name": "MessageNotification",
           "kind": "class",
-          "signatures": ["final class MessageNotification extends ConvoHopNotification"],
+          "signatures": ["final class MessageNotification extends RelayNotification"],
           "docs": "A new message for the user.",
           "members": [
             {
@@ -3053,7 +2448,7 @@
             {
               "name": "fetchMessage",
               "kind": "method",
-              "signatures": ["Future<Message> fetchMessage(ConvoHopClient client)"],
+              "signatures": ["Future<Message> fetchMessage(RelayClient client)"],
               "docs": "Fetches the message with the user's own session, for example when\n`body` is null because previews are off."
             },
             {
@@ -3067,63 +2462,63 @@
               "kind": "property",
               "signatures": ["final String eventId"],
               "docs": "Deduplicate on this: delivery is at least once.",
-              "inherited": "ConvoHopNotification"
+              "inherited": "RelayNotification"
             },
             {
               "name": "occurredAt",
               "kind": "property",
               "signatures": ["final String occurredAt"],
               "docs": "",
-              "inherited": "ConvoHopNotification"
+              "inherited": "RelayNotification"
             },
             {
               "name": "projectId",
               "kind": "property",
               "signatures": ["final String projectId"],
               "docs": "",
-              "inherited": "ConvoHopNotification"
+              "inherited": "RelayNotification"
             },
             {
               "name": "recipientId",
               "kind": "property",
               "signatures": ["final String recipientId"],
               "docs": "The principal the notification is for.",
-              "inherited": "ConvoHopNotification"
+              "inherited": "RelayNotification"
             },
             {
               "name": "conversationId",
               "kind": "property",
               "signatures": ["final String conversationId"],
               "docs": "",
-              "inherited": "ConvoHopNotification"
+              "inherited": "RelayNotification"
             },
             {
               "name": "senderId",
               "kind": "property",
               "signatures": ["final String senderId"],
               "docs": "Who sent the message or started the ringing.",
-              "inherited": "ConvoHopNotification"
+              "inherited": "RelayNotification"
             },
             {
               "name": "title",
               "kind": "property",
               "signatures": ["final String? title"],
               "docs": "Visible title, when the push had one.",
-              "inherited": "ConvoHopNotification"
+              "inherited": "RelayNotification"
             },
             {
               "name": "body",
               "kind": "property",
               "signatures": ["final String? body"],
               "docs": "Visible body, when the push had one. With previews off, a message\nnotification has none.",
-              "inherited": "ConvoHopNotification"
+              "inherited": "RelayNotification"
             },
             {
               "name": "isFor",
               "kind": "method",
-              "signatures": ["bool isFor(ConvoHopClient client)"],
+              "signatures": ["bool isFor(RelayClient client)"],
               "docs": "Whether this notification is for `client`'s user and project.",
-              "inherited": "ConvoHopNotification"
+              "inherited": "RelayNotification"
             }
           ]
         },
@@ -3214,14 +2609,6 @@
           "docs": ""
         },
         {
-          "name": "OrganizationSpend",
-          "kind": "class",
-          "signatures": [
-            "final class OrganizationSpend {\n  const OrganizationSpend({\n    required String orgId,\n    required String planId,\n    required String currency,\n    required String catalogVersion,\n    String? monthlySpendCap,\n    String? agentPurchaseLimit,\n    String? updatedAt,\n    String? monthlyMinimum,\n    String? periodStart,\n    String? periodEnd,\n    String? credits,\n    String? charges,\n    String? margin,\n    String? stop,\n    required List<String> refusedMeters,\n    String? evaluatedAt,\n    String? usageThrough,\n    String? validUntil,\n    String? minimumCredit,\n    String? chargeLimit,\n  });\n  factory OrganizationSpend.fromJson(Object? json);\n  final String orgId;\n  final String planId;\n  final String currency;\n  final String catalogVersion;\n  final String? monthlySpendCap;\n  final String? agentPurchaseLimit;\n  final String? updatedAt;\n  final String? monthlyMinimum;\n  final String? periodStart;\n  final String? periodEnd;\n  final String? credits;\n  final String? charges;\n  final String? margin;\n  final String? stop;\n  final List<String> refusedMeters;\n  final String? evaluatedAt;\n  final String? usageThrough;\n  final String? validUntil;\n  final String? minimumCredit;\n  final String? chargeLimit;\n  Map<String, Object?> toJson();\n}"
-          ],
-          "docs": ""
-        },
-        {
           "name": "OutboxItem",
           "kind": "class",
           "signatures": ["final class OutboxItem"],
@@ -3301,7 +2688,7 @@
           "name": "OutboxState",
           "kind": "enum",
           "signatures": ["enum OutboxState"],
-          "docs": "Where a message in the `ConvoHopOutbox` is.",
+          "docs": "Where a message in the `RelayOutbox` is.",
           "members": [
             {
               "name": "queued",
@@ -3325,13 +2712,13 @@
               "name": "failed",
               "kind": "case",
               "signatures": ["failed"],
-              "docs": "The authority rejected it, and no attempt is in doubt, so it wasn't\ncommitted. `ConvoHopOutbox.resend` sends the text as a new message."
+              "docs": "The authority rejected it, and no attempt is in doubt, so it wasn't\ncommitted. `RelayOutbox.resend` sends the text as a new message."
             },
             {
               "name": "unknown",
               "kind": "case",
               "signatures": ["unknown"],
-              "docs": "An attempt reached the authority without an answer, and the retry budget\nis spent, so it may or may not be committed. `ConvoHopOutbox.resolve`\nasks again. Resending it as a new message can duplicate it."
+              "docs": "An attempt reached the authority without an answer, and the retry budget\nis spent, so it may or may not be committed. `RelayOutbox.resolve`\nasks again. Resending it as a new message can duplicate it."
             }
           ]
         },
@@ -3399,7 +2786,7 @@
               "name": "stream",
               "kind": "property",
               "signatures": ["Stream<Object?> get stream"],
-              "docs": "Incoming frames: text as `String`, binary as `List<int>`. Connection\nfailures arrive as errors, and the stream is done once the connection\ncloses.\n\nWhen the server refuses the upgrade, a socket that can read the HTTP\nresponse may add its problem as a `ConvoHopProblem` error. The SDK then\nretries, routes again or stops as it would for that problem over HTTP.\nAfter any other error, it reconnects with backoff once the stream is\ndone."
+              "docs": "Incoming frames: text as `String`, binary as `List<int>`. Connection\nfailures arrive as errors, and the stream is done once the connection\ncloses.\n\nWhen the server refuses the upgrade, a socket that can read the HTTP\nresponse may add its problem as a `RelayProblem` error. The SDK then\nretries, routes again or stops as it would for that problem over HTTP.\nAfter any other error, it reconnects with backoff once the stream is\ndone."
             },
             {
               "name": "protocol",
@@ -3579,6 +2966,587 @@
           ]
         },
         {
+          "name": "RelayClient",
+          "kind": "class",
+          "signatures": ["final class RelayClient"],
+          "docs": "A user-session client for one project, principal and device.\n\nIt keeps mutation recovery, replays conversation history from a stored\ncursor, continues it over realtime and renews the session through\n`SessionRefresh`. Never give it a backend or operator key.",
+          "members": [
+            {
+              "name": "RelayClient",
+              "kind": "constructor",
+              "signatures": [
+                "factory RelayClient({\n  required String baseUrl,\n  required String projectId,\n  required String sessionToken,\n  required String incarnation,\n  required String principalId,\n  RecoveryStorage? recoveryStorage,\n  http.Client? httpClient,\n  SessionRefresh? sessionRefresh,\n  RealtimeConnector? realtimeConnector,\n  Clock clock = systemClock,\n})"
+              ],
+              "docs": "Creates a client for `principalId`'s session in `projectId`.\n\n`baseUrl` is the authority origin (HTTPS, or loopback HTTP for local\ndevelopment). `recoveryStorage` keeps mutation recovery and replay\ncursors across restarts; it never receives tokens."
+            },
+            {
+              "name": "projectId",
+              "kind": "property",
+              "signatures": ["final String projectId"],
+              "docs": ""
+            },
+            {
+              "name": "principalId",
+              "kind": "property",
+              "signatures": ["final String principalId"],
+              "docs": ""
+            },
+            {
+              "name": "transport",
+              "kind": "property",
+              "signatures": ["final RelayTransport transport"],
+              "docs": "The transport that runs this client's operations and keeps recovery."
+            },
+            {
+              "name": "storage",
+              "kind": "property",
+              "signatures": ["final RecoveryStorage? storage"],
+              "docs": "Where recovery records and replay cursors are kept, if anywhere."
+            },
+            {
+              "name": "operations",
+              "kind": "property",
+              "signatures": ["late final CommunicationOperations operations"],
+              "docs": "The generated operations, bound to this project and session."
+            },
+            {
+              "name": "requests",
+              "kind": "property",
+              "signatures": ["late final ClientRequests requests"],
+              "docs": "Resolve or retry earlier mutations by request ID."
+            },
+            {
+              "name": "liveAlerts",
+              "kind": "property",
+              "signatures": ["late final LiveAlerts liveAlerts"],
+              "docs": "Call alerts sent to this user."
+            },
+            {
+              "name": "sessionBinding",
+              "kind": "property",
+              "signatures": ["Session? get sessionBinding"],
+              "docs": "The session this client verified, once `initialize` ran with\n`SessionRefresh` configured."
+            },
+            {
+              "name": "sessionRefreshState",
+              "kind": "property",
+              "signatures": ["SessionRefreshState get sessionRefreshState"],
+              "docs": ""
+            },
+            {
+              "name": "initialize",
+              "kind": "method",
+              "signatures": ["Future<ProjectRoute> initialize()"],
+              "docs": "Reads and checks the signed route. With `SessionRefresh` configured, it\nalso verifies the current session once."
+            },
+            {
+              "name": "refreshSession",
+              "kind": "method",
+              "signatures": ["Future<Session> refreshSession()"],
+              "docs": "Replaces the session token through `SessionRefresh` before it expires.\n\nRequests wait while it runs and replay streams pause, then resume with\nthe new token. When neither the replacement nor the original session can\nbe verified, the client stays blocked: retire it and bootstrap a new one."
+            },
+            {
+              "name": "conversation",
+              "kind": "method",
+              "signatures": ["ConversationHandle conversation(String id)"],
+              "docs": "A handle for one conversation: messages, mute and calls."
+            },
+            {
+              "name": "getConversation",
+              "kind": "method",
+              "signatures": ["Future<Conversation> getConversation(String id)"],
+              "docs": ""
+            },
+            {
+              "name": "liveSession",
+              "kind": "method",
+              "signatures": ["Future<LiveSessionHandle> liveSession(String id)"],
+              "docs": "The call `id`, as this user sees it now."
+            },
+            {
+              "name": "messages",
+              "kind": "method",
+              "signatures": ["Future<MessagePage> messages(String id, {String? beforeSequence})"],
+              "docs": "One page of messages, newest first. Pass the oldest `beforeSequence`\nyou have to read further back."
+            },
+            {
+              "name": "send",
+              "kind": "method",
+              "signatures": [
+                "Future<MessageAck> send(\n  String id,\n  String text, {\n  Map<String, Object?> props = const {},\n  String? requestId,\n})"
+              ],
+              "docs": "Sends `text`. Pass the original `requestId` to retry the same send.\nEmpty or oversized text is the authority's call: it rejects it as\n`INVALID_REQUEST`."
+            },
+            {
+              "name": "edit",
+              "kind": "method",
+              "signatures": [
+                "Future<Message> edit(Message message, String text, {String? requestId})"
+              ],
+              "docs": "Replaces `message`'s text. Fails with `REVISION_CONFLICT` when the\nmessage changed since you read it."
+            },
+            {
+              "name": "delete",
+              "kind": "method",
+              "signatures": ["Future<Message> delete(Message message, {String? requestId})"],
+              "docs": ""
+            },
+            {
+              "name": "getMessage",
+              "kind": "method",
+              "signatures": ["Future<Message> getMessage(String conversationId, String messageId)"],
+              "docs": "One message, by ID."
+            },
+            {
+              "name": "events",
+              "kind": "method",
+              "signatures": ["Future<EventPage> events(String id, {Cursor? after})"],
+              "docs": "Up to 100 events after `after`, checked to stay in this conversation and\nin order."
+            },
+            {
+              "name": "reportRead",
+              "kind": "method",
+              "signatures": [
+                "Future<ReadReceipt> reportRead(\n  String id,\n  Member membership,\n  String throughSequence,\n)"
+              ],
+              "docs": "Reports that this user read through `throughSequence`. `membership` is\nthe user's current membership, as `getConversation` returns it."
+            },
+            {
+              "name": "receipts",
+              "kind": "method",
+              "signatures": ["Future<ReceiptPage> receipts(String id, {String? cursor})"],
+              "docs": ""
+            },
+            {
+              "name": "sendTyping",
+              "kind": "method",
+              "signatures": ["Future<TypingStatus> sendTyping(String id, {required bool isTyping})"],
+              "docs": "Sends a typing signal once. It is never recorded or retried."
+            },
+            {
+              "name": "inbox",
+              "kind": "method",
+              "signatures": ["Future<InboxPage> inbox({int limit = 50, String? cursor})"],
+              "docs": "This user's conversations, most recently active first."
+            },
+            {
+              "name": "search",
+              "kind": "method",
+              "signatures": [
+                "Future<SearchPage> search(\n  String query, {\n  List<String>? conversationIds,\n  String? cursor,\n})"
+              ],
+              "docs": ""
+            },
+            {
+              "name": "recoverPending",
+              "kind": "method",
+              "signatures": ["Future<void> recoverPending(ErrorListener onError)"],
+              "docs": "Resolves up to 16 mutations whose outcome isn't settled: pending,\nunknown, or rejected with a retryable code. It resends a request only\nwhile its original retry budget remains, and otherwise checks it\nread-only. Errors go to `onError`."
+            },
+            {
+              "name": "watch",
+              "kind": "method",
+              "signatures": [
+                "Future<ConversationStream> watch(\n  String conversationId,\n  EventApplier apply,\n  ErrorListener onError, {\n  Cursor? startAfter,\n})"
+              ],
+              "docs": "Replays `conversationId`'s history after the stored cursor through\n`apply`, then follows it over realtime. Resolves after the first\nreconciliation. Errors that end or interrupt the stream go to `onError`.\n\nPass `startAfter` when your state is already current through it, for\nexample the conversation's `latestSequence` after you loaded its newest\nmessages; the replay then starts after it instead of the stored cursor.\nWithout either, it starts at the beginning of the visible history."
+            },
+            {
+              "name": "storedCursor",
+              "kind": "method",
+              "signatures": ["Future<Cursor?> storedCursor(String conversationId)"],
+              "docs": "The replay cursor stored for `conversationId`: how far applied history\nreached. Null without storage or before anything was applied."
+            },
+            {
+              "name": "resyncAuthorizedHistory",
+              "kind": "method",
+              "signatures": [
+                "Future<ConversationStream> resyncAuthorizedHistory(\n  String conversationId,\n  EventApplier apply,\n  ErrorListener onError,\n)"
+              ],
+              "docs": "Closes `conversationId`'s streams and replays its currently visible\nhistory from the beginning. Use it after `HistoryResyncRequired`."
+            },
+            {
+              "name": "close",
+              "kind": "method",
+              "signatures": ["void close()"],
+              "docs": "Closes every stream and, when the client created it, the HTTP client."
+            }
+          ]
+        },
+        {
+          "name": "RelayNotification",
+          "kind": "class",
+          "signatures": ["sealed class RelayNotification"],
+          "docs": "A Relay notification, parsed from a push payload's `convohop` object.\n\nNotifications carry identifiers. They carry message text only when the\nproject opted in to message previews (off by default) or your backend\nadded its own text, so `title` and `body` are often null: show your own\ngeneric text and fetch content with the user's session.",
+          "members": [
+            {
+              "name": "eventId",
+              "kind": "property",
+              "signatures": ["final String eventId"],
+              "docs": "Deduplicate on this: delivery is at least once."
+            },
+            {
+              "name": "eventType",
+              "kind": "property",
+              "signatures": ["String get eventType"],
+              "docs": "`notification.message`, `notification.call` or\n`notification.callCancelled`."
+            },
+            {
+              "name": "occurredAt",
+              "kind": "property",
+              "signatures": ["final String occurredAt"],
+              "docs": ""
+            },
+            {
+              "name": "projectId",
+              "kind": "property",
+              "signatures": ["final String projectId"],
+              "docs": ""
+            },
+            {
+              "name": "recipientId",
+              "kind": "property",
+              "signatures": ["final String recipientId"],
+              "docs": "The principal the notification is for."
+            },
+            {
+              "name": "conversationId",
+              "kind": "property",
+              "signatures": ["final String conversationId"],
+              "docs": ""
+            },
+            {
+              "name": "senderId",
+              "kind": "property",
+              "signatures": ["final String senderId"],
+              "docs": "Who sent the message or started the ringing."
+            },
+            {
+              "name": "title",
+              "kind": "property",
+              "signatures": ["final String? title"],
+              "docs": "Visible title, when the push had one."
+            },
+            {
+              "name": "body",
+              "kind": "property",
+              "signatures": ["final String? body"],
+              "docs": "Visible body, when the push had one. With previews off, a message\nnotification has none."
+            },
+            {
+              "name": "isFor",
+              "kind": "method",
+              "signatures": ["bool isFor(RelayClient client)"],
+              "docs": "Whether this notification is for `client`'s user and project."
+            },
+            {
+              "name": "toJson",
+              "kind": "method",
+              "signatures": ["Map<String, Object?> toJson()"],
+              "docs": "The `convohop` object, for handing the notification to native code."
+            }
+          ]
+        },
+        {
+          "name": "RelayNotifications",
+          "kind": "class",
+          "signatures": ["final class RelayNotifications"],
+          "docs": "Handles Relay push payloads on the device: parses and validates them,\ndeduplicates on `eventId`, and tracks which calls are ringing.\n\nDelivery is at least once and unordered, so a cancellation can arrive\nbefore its call. A call stops ringing once a cancellation with its\n`alertId` was seen or its `expiresAt` passed.",
+          "members": [
+            {
+              "name": "RelayNotifications",
+              "kind": "constructor",
+              "signatures": ["RelayNotifications({Clock? clock, int capacity = 1024})"],
+              "docs": "`capacity` bounds how many event IDs are remembered for deduplication."
+            },
+            {
+              "name": "rings",
+              "kind": "property",
+              "signatures": ["Stream<RingUpdate> get rings"],
+              "docs": "Ring changes: a call starts or stops ringing."
+            },
+            {
+              "name": "ringing",
+              "kind": "property",
+              "signatures": ["List<CallNotification> get ringing"],
+              "docs": "Calls that are ringing now."
+            },
+            {
+              "name": "isRinging",
+              "kind": "method",
+              "signatures": ["bool isRinging(String alertId)"],
+              "docs": "Whether the ring `alertId` is on."
+            },
+            {
+              "name": "handleNotification",
+              "kind": "method",
+              "signatures": [
+                "HandledNotification? handleNotification(Map<Object?, Object?> payload)"
+              ],
+              "docs": "Parses and records `payload`. Returns null when it isn't a Relay\npayload, and throws a `FormatException` when it breaks the contract."
+            },
+            {
+              "name": "record",
+              "kind": "method",
+              "signatures": ["HandledNotification record(RelayNotification notification)"],
+              "docs": "Records an already parsed `notification`."
+            },
+            {
+              "name": "stopRinging",
+              "kind": "method",
+              "signatures": ["bool stopRinging(String alertId, {String reason = 'declined'})"],
+              "docs": "Stops the ring `alertId` locally, for example after the user declined\nit in the call UI. Returns whether it was ringing."
+            },
+            {
+              "name": "stopCall",
+              "kind": "method",
+              "signatures": ["bool stopCall(String liveSessionId, {String reason = 'ended'})"],
+              "docs": "Stops every ring of the call `liveSessionId`, for example when the\ncall ended. Returns whether any was ringing."
+            },
+            {
+              "name": "applyEvent",
+              "kind": "method",
+              "signatures": ["bool applyEvent(Event event)"],
+              "docs": "Applies a conversation event from the user's realtime connection: a\n`live.ended` event stops the call's rings. Pass every event of the\nconversations the user can be called in, for example from\n`ConversationStore.events`, because pushes don't always report that a\nring stopped. Returns whether a ring stopped."
+            },
+            {
+              "name": "close",
+              "kind": "method",
+              "signatures": ["void close()"],
+              "docs": "Cancels ring timers and stops reporting on `rings`. Payloads are still\nparsed, deduplicated and tracked."
+            }
+          ]
+        },
+        {
+          "name": "RelayOutbox",
+          "kind": "class",
+          "signatures": ["final class RelayOutbox"],
+          "docs": "Sends messages in the background so the UI can show them at once\n(optimistic sends), in order within each conversation, across lost\nconnectivity and app restarts.\n\nEach message keeps one request ID for life. The outbox resends it only\nwithin the transport's original three-attempt, 60-second budget, and only\nafter a read-only check found that no earlier attempt was committed. It\nnever invents a new request ID on its own: `resend` does that when the\nuser asks.\n\nWhile the authority is unreachable, it checks read-only before a\nmessage's first submission, so waiting offline doesn't spend the budget.\nCall `flush` when connectivity returns.\n\nA message stays queued, and is tried again after a backoff that is never\nshorter than the authority's `RelayProblem.retryAfter`, after an\nunknown outcome, a rejection the realtime stream would also retry (such as\n`RATE_LIMITED`), `WRONG_REGION`, after which the client routes again\nfirst, `RECOVERY_LIMIT` and an ended session. Any other rejection, such as\n`QUOTA_EXCEEDED` or `PLAN_LIMIT_EXCEEDED`, fails it at once.\n\nWhile the outbox is open, the transport never evicts the recovery record\nof a message the outbox may still send or check. A message attempted\nbefore the outbox loaded it may have lost its record meanwhile, evicted\nor lost with storage. Unless a read-only check finds it committed, such a\nmessage isn't sent again: it fails with `RESOLUTION_REQUIRED`, as\n`OutboxState.unknown` if an attempt may have reached the authority.\n\nWith `RelayClient.storage` set and `persist` on, unsent messages,\nincluding their text, are stored under\n`convohop.outbox:<project>:<principal>` until sent or discarded.",
+          "members": [
+            {
+              "name": "RelayOutbox",
+              "kind": "constructor",
+              "signatures": [
+                "RelayOutbox(\n  RelayClient client, {\n  ErrorListener? onError,\n  bool persist = true,\n  Clock clock = systemClock,\n  Random? random,\n})"
+              ],
+              "docs": ""
+            },
+            {
+              "name": "maxItems",
+              "kind": "property",
+              "signatures": ["static const int maxItems"],
+              "docs": "Unsent messages the outbox holds at most. Sending more throws a\n`StateError` until some are sent, resent or discarded.",
+              "static": true
+            },
+            {
+              "name": "client",
+              "kind": "property",
+              "signatures": ["final RelayClient client"],
+              "docs": ""
+            },
+            {
+              "name": "changes",
+              "kind": "property",
+              "signatures": ["Stream<OutboxItem> get changes"],
+              "docs": "Every change to an item, including a sent or discarded item after the\noutbox drops it. `items` has the current list."
+            },
+            {
+              "name": "items",
+              "kind": "property",
+              "signatures": ["List<OutboxItem> get items"],
+              "docs": "Unsent messages, in the order the user sent them."
+            },
+            {
+              "name": "itemsFor",
+              "kind": "method",
+              "signatures": ["List<OutboxItem> itemsFor(String conversationId)"],
+              "docs": "`conversationId`'s unsent messages, in the order the user sent them."
+            },
+            {
+              "name": "offline",
+              "kind": "property",
+              "signatures": ["bool get offline"],
+              "docs": "Whether the last attempt to reach the authority failed without a\nresponse."
+            },
+            {
+              "name": "initialize",
+              "kind": "method",
+              "signatures": ["Future<void> initialize()"],
+              "docs": "Loads stored messages and starts sending. `send` awaits it too."
+            },
+            {
+              "name": "send",
+              "kind": "method",
+              "signatures": [
+                "Future<OutboxItem> send(\n  String conversationId,\n  String text, {\n  Map<String, Object?> props = const {},\n})"
+              ],
+              "docs": "Queues `text` for `conversationId` and returns the queued item at once.\nIt is stored before this returns."
+            },
+            {
+              "name": "flush",
+              "kind": "method",
+              "signatures": ["void flush()"],
+              "docs": "Retries every queued message now, for example when connectivity\nreturns, and checks read-only whether `OutboxState.unknown` messages\nwere committed."
+            },
+            {
+              "name": "resolve",
+              "kind": "method",
+              "signatures": ["Future<OutboxItem> resolve(String requestId)"],
+              "docs": "Asks the authority, read-only, whether `requestId`'s\n`OutboxState.unknown` or `OutboxState.failed` message was committed."
+            },
+            {
+              "name": "resend",
+              "kind": "method",
+              "signatures": ["Future<OutboxItem> resend(String requestId)"],
+              "docs": "Sends a `OutboxState.failed` or `OutboxState.unknown` message again as\na new message with a new request ID, at the end of its conversation's\nqueue. Resending an unknown message can duplicate it; ask the user\nfirst."
+            },
+            {
+              "name": "discard",
+              "kind": "method",
+              "signatures": ["Future<void> discard(String requestId)"],
+              "docs": "Drops `requestId`'s message. A message that is sending, or that isn't\nsent while an earlier attempt may have reached the authority\n(`OutboxItem.uncertain`), could still be committed, so it throws a\n`StateError` until the outcome is known."
+            },
+            {
+              "name": "close",
+              "kind": "method",
+              "signatures": ["Future<void> close()"],
+              "docs": "Stops sending, and completes once the outbox has stopped writing: what\nit was loading, sending and saving has settled. So on sign-out, await\nit before clearing the storage. Every call returns the same future,\nwhich never fails.\n\nA send in flight finishes, but the outbox emits no more changes and\nreports no more errors. Unsent messages stay stored for the next\noutbox."
+            }
+          ]
+        },
+        {
+          "name": "RelayProblem",
+          "kind": "class",
+          "signatures": ["class RelayProblem implements Exception"],
+          "docs": "A failure reported by the Relay authority or detected by the SDK.\n\nClassify problems by `code`. `outcome` says what is known about a\nmutation: `rejected` (not applied), `committed` or `accepted` (applied),\nor `unknown` (resolve the original `requestId` before trying anything\nelse). Messages never contain credentials.",
+          "members": [
+            {
+              "name": "RelayProblem",
+              "kind": "constructor",
+              "signatures": [
+                "RelayProblem(\n  String code,\n  String requestId,\n  String outcome,\n  int status,\n  String message, {\n  int? retryAfter,\n  Object? cause,\n})"
+              ],
+              "docs": ""
+            },
+            {"name": "code", "kind": "property", "signatures": ["final String code"], "docs": ""},
+            {
+              "name": "requestId",
+              "kind": "property",
+              "signatures": ["final String requestId"],
+              "docs": "The request the problem belongs to. Retry or resolve with this ID."
+            },
+            {
+              "name": "outcome",
+              "kind": "property",
+              "signatures": ["final String outcome"],
+              "docs": ""
+            },
+            {
+              "name": "status",
+              "kind": "property",
+              "signatures": ["final int status"],
+              "docs": "The HTTP status, or 0 when no authority response was observed."
+            },
+            {
+              "name": "message",
+              "kind": "property",
+              "signatures": ["final String message"],
+              "docs": ""
+            },
+            {
+              "name": "retryAfter",
+              "kind": "property",
+              "signatures": ["final int? retryAfter"],
+              "docs": "Whole seconds to wait before resending the same request, when the\nauthority sent a delay (for example with `RATE_LIMITED`). Read from the\nerror's `extensions.retryAfter`, else from an HTTP `Retry-After` delay in\nseconds, or from a realtime close reason's `retryAfter=`. A request you\nsend is never resent on its own; when the SDK reconnects a stream or\nresends a queued outbox message, it waits at least this long first."
+            },
+            {
+              "name": "cause",
+              "kind": "property",
+              "signatures": ["final Object? cause"],
+              "docs": "The underlying failure, when there is one."
+            },
+            {"name": "toString", "kind": "method", "signatures": ["String toString()"], "docs": ""}
+          ]
+        },
+        {
+          "name": "RelayTransport",
+          "kind": "class",
+          "signatures": ["final class RelayTransport"],
+          "docs": "Sends generated operations to `/graphql` and keeps mutation recovery.\n\nA mutation keeps its request ID, payload, incarnation and retry budget\n(three attempts within 60 seconds) across retries and restarts. When the\noutcome is unknown, resolve the original request ID; the transport never\ntreats a lost response as a rejection or a commit.\n\nThe recovery journal holds at most 128 records. When a new mutation finds\nit full, the transport evicts the final record whose last attempt is\noldest and that no call is using and no caller retains. A record is final\nonce the SDK can't send its request again: committed, accepted, rejected\nwith a code that isn't retryable, or out of retry budget. When no record\ncan go, it refuses the new mutation before sending it, with\n`RECOVERY_LIMIT`. An evicted request can still be resolved by its ID.",
+          "members": [
+            {
+              "name": "RelayTransport",
+              "kind": "constructor",
+              "signatures": [
+                "RelayTransport({\n  required String baseUrl,\n  required String namespace,\n  required String incarnation,\n  String? credential,\n  RecoveryStorage? recoveryStorage,\n  http.Client? httpClient,\n  Clock clock = systemClock,\n})"
+              ],
+              "docs": ""
+            },
+            {
+              "name": "baseUrl",
+              "kind": "property",
+              "signatures": ["final String baseUrl"],
+              "docs": ""
+            },
+            {
+              "name": "incarnation",
+              "kind": "property",
+              "signatures": ["String incarnation"],
+              "docs": "The project incarnation every request is bound to."
+            },
+            {
+              "name": "servingEpoch",
+              "kind": "property",
+              "signatures": ["String? servingEpoch"],
+              "docs": "The serving epoch from the latest route, sent as `observedServingEpoch`."
+            },
+            {
+              "name": "durableRecovery",
+              "kind": "property",
+              "signatures": ["bool get durableRecovery"],
+              "docs": ""
+            },
+            {
+              "name": "initializeRecovery",
+              "kind": "method",
+              "signatures": ["Future<void> initializeRecovery()"],
+              "docs": "Loads stored recovery records. Every operation awaits it first."
+            },
+            {
+              "name": "recoveryStates",
+              "kind": "property",
+              "signatures": ["List<RecoveryState> get recoveryStates"],
+              "docs": "Copies of the stored recovery records. Await `initializeRecovery` first."
+            },
+            {
+              "name": "markMediaAdmissionAttempted",
+              "kind": "method",
+              "signatures": ["Future<void> markMediaAdmissionAttempted(String requestId)"],
+              "docs": "Records that a call connection used the committed credential grant from\n`requestId`. That grant is never reused for another connection."
+            },
+            {
+              "name": "execute",
+              "kind": "method",
+              "signatures": [
+                "Future<T> execute<T>(\n  OperationSpec<T> spec,\n  String projectId,\n  Map<String, Object?> input, {\n  String? requestId,\n})"
+              ],
+              "docs": "Runs `spec` in `projectId` with `input`. A mutation uses `requestId`\n(or a new one) and records it for recovery before sending."
+            },
+            {
+              "name": "retry",
+              "kind": "method",
+              "signatures": ["Future<RequestResolution> retry(String requestId)"],
+              "docs": "Resolves `requestId` and resends the same request only when the\nauthority hasn't observed it and its retry budget remains."
+            },
+            {
+              "name": "close",
+              "kind": "method",
+              "signatures": ["void close()"],
+              "docs": "Rejects later requests and closes the HTTP client when the transport\ncreated it."
+            }
+          ]
+        },
+        {
           "name": "ReportReceiptReply",
           "kind": "class",
           "signatures": [
@@ -3638,7 +3606,7 @@
           "name": "RetainedResult",
           "kind": "class",
           "signatures": [
-            "final class RetainedResult {\n  const RetainedResult({\n    AgentGrant? agentGrant,\n    AgentSignupStatus? agentSignupStatus,\n    BillingCheckoutSession? billingCheckoutSession,\n    BillingPortalSession? billingPortalSession,\n    BroadcastPermissionChanged? broadcastPermissionChanged,\n    Conversation? conversation,\n    ConversationMemberBatch? conversationMemberBatch,\n    ConversationMute? conversationMute,\n    CredentialDeliveryReceipt? credentialDeliveryReceipt,\n    DeliveryAck? deliveryAck,\n    LiveAlertBatch? liveAlertBatch,\n    LiveCredentialIssuance? liveCredentialIssuance,\n    LiveSessionEndRequested? liveSessionEndRequested,\n    LiveSessionJoined? liveSessionJoined,\n    LiveSessionLeft? liveSessionLeft,\n    LiveSessionStarted? liveSessionStarted,\n    Member? member,\n    Message? message,\n    MessageAck? messageAck,\n    Organization? organization,\n    OrganizationSpend? organizationSpend,\n    Principal? principal,\n    ReadReceipt? readReceipt,\n    SessionBootstrap? sessionBootstrap,\n    SessionRevocation? sessionRevocation,\n    Map<String, Object?>? signedProof,\n  });\n  factory RetainedResult.fromJson(Object? json);\n  final AgentGrant? agentGrant;\n  final AgentSignupStatus? agentSignupStatus;\n  final BillingCheckoutSession? billingCheckoutSession;\n  final BillingPortalSession? billingPortalSession;\n  final BroadcastPermissionChanged? broadcastPermissionChanged;\n  final Conversation? conversation;\n  final ConversationMemberBatch? conversationMemberBatch;\n  final ConversationMute? conversationMute;\n  final CredentialDeliveryReceipt? credentialDeliveryReceipt;\n  final DeliveryAck? deliveryAck;\n  final LiveAlertBatch? liveAlertBatch;\n  final LiveCredentialIssuance? liveCredentialIssuance;\n  final LiveSessionEndRequested? liveSessionEndRequested;\n  final LiveSessionJoined? liveSessionJoined;\n  final LiveSessionLeft? liveSessionLeft;\n  final LiveSessionStarted? liveSessionStarted;\n  final Member? member;\n  final Message? message;\n  final MessageAck? messageAck;\n  final Organization? organization;\n  final OrganizationSpend? organizationSpend;\n  final Principal? principal;\n  final ReadReceipt? readReceipt;\n  final SessionBootstrap? sessionBootstrap;\n  final SessionRevocation? sessionRevocation;\n  final Map<String, Object?>? signedProof;\n  Map<String, Object?> toJson();\n}"
+            "final class RetainedResult {\n  const RetainedResult({\n    BillingCheckoutSession? billingCheckoutSession,\n    BillingPortalSession? billingPortalSession,\n    BroadcastPermissionChanged? broadcastPermissionChanged,\n    Conversation? conversation,\n    ConversationMemberBatch? conversationMemberBatch,\n    ConversationMute? conversationMute,\n    CredentialDeliveryReceipt? credentialDeliveryReceipt,\n    DeliveryAck? deliveryAck,\n    LiveAlertBatch? liveAlertBatch,\n    LiveCredentialIssuance? liveCredentialIssuance,\n    LiveSessionEndRequested? liveSessionEndRequested,\n    LiveSessionJoined? liveSessionJoined,\n    LiveSessionLeft? liveSessionLeft,\n    LiveSessionStarted? liveSessionStarted,\n    Member? member,\n    Message? message,\n    MessageAck? messageAck,\n    Organization? organization,\n    Principal? principal,\n    ReadReceipt? readReceipt,\n    SessionBootstrap? sessionBootstrap,\n    SessionRevocation? sessionRevocation,\n    Map<String, Object?>? signedProof,\n  });\n  factory RetainedResult.fromJson(Object? json);\n  final BillingCheckoutSession? billingCheckoutSession;\n  final BillingPortalSession? billingPortalSession;\n  final BroadcastPermissionChanged? broadcastPermissionChanged;\n  final Conversation? conversation;\n  final ConversationMemberBatch? conversationMemberBatch;\n  final ConversationMute? conversationMute;\n  final CredentialDeliveryReceipt? credentialDeliveryReceipt;\n  final DeliveryAck? deliveryAck;\n  final LiveAlertBatch? liveAlertBatch;\n  final LiveCredentialIssuance? liveCredentialIssuance;\n  final LiveSessionEndRequested? liveSessionEndRequested;\n  final LiveSessionJoined? liveSessionJoined;\n  final LiveSessionLeft? liveSessionLeft;\n  final LiveSessionStarted? liveSessionStarted;\n  final Member? member;\n  final Message? message;\n  final MessageAck? messageAck;\n  final Organization? organization;\n  final Principal? principal;\n  final ReadReceipt? readReceipt;\n  final SessionBootstrap? sessionBootstrap;\n  final SessionRevocation? sessionRevocation;\n  final Map<String, Object?>? signedProof;\n  Map<String, Object?> toJson();\n}"
           ],
           "docs": "Exactly one typed field contains the retained, currently authorized receipt result."
         },
@@ -3661,7 +3629,7 @@
         {
           "name": "RingNotification",
           "kind": "class",
-          "signatures": ["sealed class RingNotification extends ConvoHopNotification"],
+          "signatures": ["sealed class RingNotification extends RelayNotification"],
           "docs": "A notification about one ring of a call.",
           "members": [
             {
@@ -3705,77 +3673,77 @@
               "kind": "property",
               "signatures": ["final String eventId"],
               "docs": "Deduplicate on this: delivery is at least once.",
-              "inherited": "ConvoHopNotification"
+              "inherited": "RelayNotification"
             },
             {
               "name": "eventType",
               "kind": "property",
               "signatures": ["String get eventType"],
               "docs": "`notification.message`, `notification.call` or\n`notification.callCancelled`.",
-              "inherited": "ConvoHopNotification"
+              "inherited": "RelayNotification"
             },
             {
               "name": "occurredAt",
               "kind": "property",
               "signatures": ["final String occurredAt"],
               "docs": "",
-              "inherited": "ConvoHopNotification"
+              "inherited": "RelayNotification"
             },
             {
               "name": "projectId",
               "kind": "property",
               "signatures": ["final String projectId"],
               "docs": "",
-              "inherited": "ConvoHopNotification"
+              "inherited": "RelayNotification"
             },
             {
               "name": "recipientId",
               "kind": "property",
               "signatures": ["final String recipientId"],
               "docs": "The principal the notification is for.",
-              "inherited": "ConvoHopNotification"
+              "inherited": "RelayNotification"
             },
             {
               "name": "conversationId",
               "kind": "property",
               "signatures": ["final String conversationId"],
               "docs": "",
-              "inherited": "ConvoHopNotification"
+              "inherited": "RelayNotification"
             },
             {
               "name": "senderId",
               "kind": "property",
               "signatures": ["final String senderId"],
               "docs": "Who sent the message or started the ringing.",
-              "inherited": "ConvoHopNotification"
+              "inherited": "RelayNotification"
             },
             {
               "name": "title",
               "kind": "property",
               "signatures": ["final String? title"],
               "docs": "Visible title, when the push had one.",
-              "inherited": "ConvoHopNotification"
+              "inherited": "RelayNotification"
             },
             {
               "name": "body",
               "kind": "property",
               "signatures": ["final String? body"],
               "docs": "Visible body, when the push had one. With previews off, a message\nnotification has none.",
-              "inherited": "ConvoHopNotification"
+              "inherited": "RelayNotification"
             },
             {
               "name": "isFor",
               "kind": "method",
-              "signatures": ["bool isFor(ConvoHopClient client)"],
+              "signatures": ["bool isFor(RelayClient client)"],
               "docs": "Whether this notification is for `client`'s user and project.",
-              "inherited": "ConvoHopNotification"
+              "inherited": "RelayNotification"
             },
             {
               "name": "toJson",
               "kind": "method",
               "signatures": ["Map<String, Object?> toJson()"],
               "docs": "The `convohop` object, for handing the notification to native code.",
-              "inherited": "ConvoHopNotification"
+              "inherited": "RelayNotification"
             }
           ]
         },
@@ -3816,7 +3784,7 @@
         {
           "name": "ScopeRequiredProblem",
           "kind": "class",
-          "signatures": ["final class ScopeRequiredProblem extends ConvoHopProblem"],
+          "signatures": ["final class ScopeRequiredProblem extends RelayProblem"],
           "docs": "`SCOPE_REQUIRED`: a credential lacks a scope the operation requires.",
           "members": [
             {
@@ -3838,56 +3806,56 @@
               "kind": "property",
               "signatures": ["final String code"],
               "docs": "",
-              "inherited": "ConvoHopProblem"
+              "inherited": "RelayProblem"
             },
             {
               "name": "requestId",
               "kind": "property",
               "signatures": ["final String requestId"],
               "docs": "The request the problem belongs to. Retry or resolve with this ID.",
-              "inherited": "ConvoHopProblem"
+              "inherited": "RelayProblem"
             },
             {
               "name": "outcome",
               "kind": "property",
               "signatures": ["final String outcome"],
               "docs": "",
-              "inherited": "ConvoHopProblem"
+              "inherited": "RelayProblem"
             },
             {
               "name": "status",
               "kind": "property",
               "signatures": ["final int status"],
               "docs": "The HTTP status, or 0 when no authority response was observed.",
-              "inherited": "ConvoHopProblem"
+              "inherited": "RelayProblem"
             },
             {
               "name": "message",
               "kind": "property",
               "signatures": ["final String message"],
               "docs": "",
-              "inherited": "ConvoHopProblem"
+              "inherited": "RelayProblem"
             },
             {
               "name": "retryAfter",
               "kind": "property",
               "signatures": ["final int? retryAfter"],
               "docs": "Whole seconds to wait before resending the same request, when the\nauthority sent a delay (for example with `RATE_LIMITED`). Read from the\nerror's `extensions.retryAfter`, else from an HTTP `Retry-After` delay in\nseconds, or from a realtime close reason's `retryAfter=`. A request you\nsend is never resent on its own; when the SDK reconnects a stream or\nresends a queued outbox message, it waits at least this long first.",
-              "inherited": "ConvoHopProblem"
+              "inherited": "RelayProblem"
             },
             {
               "name": "cause",
               "kind": "property",
               "signatures": ["final Object? cause"],
               "docs": "The underlying failure, when there is one.",
-              "inherited": "ConvoHopProblem"
+              "inherited": "RelayProblem"
             },
             {
               "name": "toString",
               "kind": "method",
               "signatures": ["String toString()"],
               "docs": "",
-              "inherited": "ConvoHopProblem"
+              "inherited": "RelayProblem"
             }
           ]
         },
@@ -3988,20 +3956,20 @@
           "name": "SessionRefresher",
           "kind": "class",
           "signatures": ["final class SessionRefresher"],
-          "docs": "Refreshes a client's session through its `SessionRefresh` before the\nsession expires, so the app doesn't schedule\n`ConvoHopClient.refreshSession` itself.\n\nCreate it once `ConvoHopClient.initialize` verified the session. It\nrefreshes when `lead` is left before the session expires, or halfway\nthrough a session that lasts less than twice `lead`, and again before\neach replacement expires. After a failure that left the client usable,\nit tries again with backoff while the session is still valid.\n\nIt stops for good once the session can't be refreshed any more: the\nsession expired, or neither the replacement nor the original session\ncould be verified. `active` is false by the time the error listener\nreceives the failure that stopped it. Then retire the client and\nbootstrap a new one. Errors the listener throws are ignored.\n\nTimers don't fire while the app is suspended, so call `check` when the\napp returns to the foreground. Close the refresher before the client.",
+          "docs": "Refreshes a client's session through its `SessionRefresh` before the\nsession expires, so the app doesn't schedule\n`RelayClient.refreshSession` itself.\n\nCreate it once `RelayClient.initialize` verified the session. It\nrefreshes when `lead` is left before the session expires, or halfway\nthrough a session that lasts less than twice `lead`, and again before\neach replacement expires. After a failure that left the client usable,\nit tries again with backoff while the session is still valid.\n\nIt stops for good once the session can't be refreshed any more: the\nsession expired, or neither the replacement nor the original session\ncould be verified. `active` is false by the time the error listener\nreceives the failure that stopped it. Then retire the client and\nbootstrap a new one. Errors the listener throws are ignored.\n\nTimers don't fire while the app is suspended, so call `check` when the\napp returns to the foreground. Close the refresher before the client.",
           "members": [
             {
               "name": "SessionRefresher",
               "kind": "constructor",
               "signatures": [
-                "SessionRefresher(\n  ConvoHopClient client, {\n  Duration lead = const Duration(minutes: 5),\n  ErrorListener? onError,\n  Clock clock = systemClock,\n  Random? random,\n})"
+                "SessionRefresher(\n  RelayClient client, {\n  Duration lead = const Duration(minutes: 5),\n  ErrorListener? onError,\n  Clock clock = systemClock,\n  Random? random,\n})"
               ],
-              "docs": "Throws a `SESSION_REFRESH_REQUIRED` `ConvoHopProblem` when the session\nexpires within a second."
+              "docs": "Throws a `SESSION_REFRESH_REQUIRED` `RelayProblem` when the session\nexpires within a second."
             },
             {
               "name": "client",
               "kind": "property",
-              "signatures": ["final ConvoHopClient client"],
+              "signatures": ["final RelayClient client"],
               "docs": ""
             },
             {
@@ -4086,14 +4054,14 @@
               "name": "TypingIndicator",
               "kind": "constructor",
               "signatures": [
-                "TypingIndicator(\n  ConvoHopClient client,\n  String conversationId, {\n  Duration throttle = const Duration(seconds: 3),\n  Duration idle = const Duration(seconds: 5),\n  ErrorListener? onError,\n  Clock clock = systemClock,\n})"
+                "TypingIndicator(\n  RelayClient client,\n  String conversationId, {\n  Duration throttle = const Duration(seconds: 3),\n  Duration idle = const Duration(seconds: 5),\n  ErrorListener? onError,\n  Clock clock = systemClock,\n})"
               ],
               "docs": ""
             },
             {
               "name": "client",
               "kind": "property",
-              "signatures": ["final ConvoHopClient client"],
+              "signatures": ["final RelayClient client"],
               "docs": ""
             },
             {
@@ -4190,7 +4158,7 @@
           "name": "authorityProblem",
           "kind": "function",
           "signatures": [
-            "ConvoHopProblem authorityProblem(\n  String code,\n  String requestId,\n  String outcome,\n  int status,\n  String message, {\n  int? retryAfter,\n})"
+            "RelayProblem authorityProblem(\n  String code,\n  String requestId,\n  String outcome,\n  int status,\n  String message, {\n  int? retryAfter,\n})"
           ],
           "docs": "Builds the most specific problem for an authority error code."
         },
@@ -4199,12 +4167,6 @@
           "kind": "function",
           "signatures": ["RealtimeSocket connectRealtime(Uri url, String protocol)"],
           "docs": "The default connector, built on `package:web_socket_channel`."
-        },
-        {
-          "name": "convoHopPackageVersion",
-          "kind": "constant",
-          "signatures": ["const String convoHopPackageVersion"],
-          "docs": "This package's version, the `version` in its pubspec."
         },
         {
           "name": "errorCodes",
@@ -4234,9 +4196,9 @@
           "name": "parseNotificationPayload",
           "kind": "function",
           "signatures": [
-            "ConvoHopNotification? parseNotificationPayload(Map<Object?, Object?> payload)"
+            "RelayNotification? parseNotificationPayload(Map<Object?, Object?> payload)"
           ],
-          "docs": "Parses a push payload: an APNs `userInfo` (`{aps, convohop: {...}}`), FCM\ndata (`{convohop: \"<JSON>\"}`) or a Web Push payload.\n\nReturns null when the payload isn't ConvoHop's, and throws a\n`FormatException` naming the first invalid field when it breaks the push\npayload contract. Fields it doesn't know are ignored, as the contract\nrequires of consumers."
+          "docs": "Parses a push payload: an APNs `userInfo` (`{aps, convohop: {...}}`), FCM\ndata (`{convohop: \"<JSON>\"}`) or a Web Push payload.\n\nReturns null when the payload isn't Relay's, and throws a\n`FormatException` naming the first invalid field when it breaks the push\npayload contract. Fields it doesn't know are ignored, as the contract\nrequires of consumers."
         },
         {
           "name": "realtimeChannels",
@@ -4256,11 +4218,17 @@
           "signatures": ["const Map<String, RealtimeEventSpec> realtimeEvents"],
           "docs": "The realtime event types, by type."
         },
+        {
+          "name": "relayPackageVersion",
+          "kind": "constant",
+          "signatures": ["const String relayPackageVersion"],
+          "docs": "This package's version, the `version` in its pubspec."
+        },
         {"name": "systemClock", "kind": "function", "signatures": ["int systemClock()"], "docs": ""}
       ]
     },
     {
-      "name": "package:convohop/calls.dart",
+      "name": "package:instantrelay/calls.dart",
       "symbols": [
         {
           "name": "LiveKitMediaRoom",
@@ -4284,7 +4252,7 @@
               "name": "localParticipantSid",
               "kind": "property",
               "signatures": ["String? get localParticipantSid"],
-              "docs": "The connected local participant's SID. ConvoHop's media server makes it\nthe participation's `nativeConnectionId`."
+              "docs": "The connected local participant's SID. Relay's media server makes it\nthe participation's `nativeConnectionId`."
             },
             {
               "name": "setMicrophoneEnabled",
@@ -4317,7 +4285,7 @@
       ]
     },
     {
-      "name": "package:convohop/push.dart",
+      "name": "package:instantrelay/push.dart",
       "symbols": [
         {
           "name": "ApnsRegistration",
@@ -4502,63 +4470,63 @@
               "kind": "property",
               "signatures": ["final String eventId"],
               "docs": "Deduplicate on this: delivery is at least once.",
-              "inherited": "ConvoHopNotification"
+              "inherited": "RelayNotification"
             },
             {
               "name": "occurredAt",
               "kind": "property",
               "signatures": ["final String occurredAt"],
               "docs": "",
-              "inherited": "ConvoHopNotification"
+              "inherited": "RelayNotification"
             },
             {
               "name": "projectId",
               "kind": "property",
               "signatures": ["final String projectId"],
               "docs": "",
-              "inherited": "ConvoHopNotification"
+              "inherited": "RelayNotification"
             },
             {
               "name": "recipientId",
               "kind": "property",
               "signatures": ["final String recipientId"],
               "docs": "The principal the notification is for.",
-              "inherited": "ConvoHopNotification"
+              "inherited": "RelayNotification"
             },
             {
               "name": "conversationId",
               "kind": "property",
               "signatures": ["final String conversationId"],
               "docs": "",
-              "inherited": "ConvoHopNotification"
+              "inherited": "RelayNotification"
             },
             {
               "name": "senderId",
               "kind": "property",
               "signatures": ["final String senderId"],
               "docs": "Who sent the message or started the ringing.",
-              "inherited": "ConvoHopNotification"
+              "inherited": "RelayNotification"
             },
             {
               "name": "title",
               "kind": "property",
               "signatures": ["final String? title"],
               "docs": "Visible title, when the push had one.",
-              "inherited": "ConvoHopNotification"
+              "inherited": "RelayNotification"
             },
             {
               "name": "body",
               "kind": "property",
               "signatures": ["final String? body"],
               "docs": "Visible body, when the push had one. With previews off, a message\nnotification has none.",
-              "inherited": "ConvoHopNotification"
+              "inherited": "RelayNotification"
             },
             {
               "name": "isFor",
               "kind": "method",
-              "signatures": ["bool isFor(ConvoHopClient client)"],
+              "signatures": ["bool isFor(RelayClient client)"],
               "docs": "Whether this notification is for `client`'s user and project.",
-              "inherited": "ConvoHopNotification"
+              "inherited": "RelayNotification"
             }
           ]
         },
@@ -4627,71 +4595,261 @@
               "kind": "property",
               "signatures": ["final String eventId"],
               "docs": "Deduplicate on this: delivery is at least once.",
-              "inherited": "ConvoHopNotification"
+              "inherited": "RelayNotification"
             },
             {
               "name": "occurredAt",
               "kind": "property",
               "signatures": ["final String occurredAt"],
               "docs": "",
-              "inherited": "ConvoHopNotification"
+              "inherited": "RelayNotification"
             },
             {
               "name": "projectId",
               "kind": "property",
               "signatures": ["final String projectId"],
               "docs": "",
-              "inherited": "ConvoHopNotification"
+              "inherited": "RelayNotification"
             },
             {
               "name": "recipientId",
               "kind": "property",
               "signatures": ["final String recipientId"],
               "docs": "The principal the notification is for.",
-              "inherited": "ConvoHopNotification"
+              "inherited": "RelayNotification"
             },
             {
               "name": "conversationId",
               "kind": "property",
               "signatures": ["final String conversationId"],
               "docs": "",
-              "inherited": "ConvoHopNotification"
+              "inherited": "RelayNotification"
             },
             {
               "name": "senderId",
               "kind": "property",
               "signatures": ["final String senderId"],
               "docs": "Who sent the message or started the ringing.",
-              "inherited": "ConvoHopNotification"
+              "inherited": "RelayNotification"
             },
             {
               "name": "title",
               "kind": "property",
               "signatures": ["final String? title"],
               "docs": "Visible title, when the push had one.",
-              "inherited": "ConvoHopNotification"
+              "inherited": "RelayNotification"
             },
             {
               "name": "body",
               "kind": "property",
               "signatures": ["final String? body"],
               "docs": "Visible body, when the push had one. With previews off, a message\nnotification has none.",
-              "inherited": "ConvoHopNotification"
+              "inherited": "RelayNotification"
             },
             {
               "name": "isFor",
               "kind": "method",
-              "signatures": ["bool isFor(ConvoHopClient client)"],
+              "signatures": ["bool isFor(RelayClient client)"],
               "docs": "Whether this notification is for `client`'s user and project.",
-              "inherited": "ConvoHopNotification"
+              "inherited": "RelayNotification"
             }
           ]
         },
         {
-          "name": "ConvoHopNotification",
+          "name": "FcmRegistration",
           "kind": "class",
-          "signatures": ["sealed class ConvoHopNotification"],
-          "docs": "A ConvoHop notification, parsed from a push payload's `convohop` object.\n\nNotifications carry identifiers. They carry message text only when the\nproject opted in to message previews (off by default) or your backend\nadded its own text, so `title` and `body` are often null: show your own\ngeneric text and fetch content with the user's session.",
+          "signatures": ["final class FcmRegistration extends PushRegistration"],
+          "docs": "An Android app registered with Firebase Cloud Messaging, by exactly one of\n`token` and `fid`. FCM issues registration tokens unless the app's\nmanifest switches it to Firebase installation IDs: see the package README.\nYour backend sends its FCM messages to the matching `token` or `fid`\ntarget.",
+          "members": [
+            {
+              "name": "FcmRegistration",
+              "kind": "constructor",
+              "signatures": [
+                "const FcmRegistration.token(String token)",
+                "const FcmRegistration.fid(String fid)"
+              ],
+              "docs": "**`FcmRegistration.token`**\n\nA registration by FCM registration token.\n\n**`FcmRegistration.fid`**\n\nA registration by Firebase installation ID."
+            },
+            {
+              "name": "token",
+              "kind": "property",
+              "signatures": ["final String? token"],
+              "docs": "The FCM registration token, unless FCM registered `fid`."
+            },
+            {
+              "name": "fid",
+              "kind": "property",
+              "signatures": ["final String? fid"],
+              "docs": "The Firebase installation ID (FID) that FCM registered, when the app's\nmanifest switches FCM to installation IDs."
+            },
+            {
+              "name": "kind",
+              "kind": "property",
+              "signatures": ["String get kind"],
+              "docs": "`fcm`, `apns` or `apnsVoip`."
+            },
+            {
+              "name": "toJson",
+              "kind": "method",
+              "signatures": ["Map<String, String> toJson()"],
+              "docs": "The registration as JSON: `{\"kind\": \"fcm\", \"token\": …}`,\n`{\"kind\": \"fcm\", \"fid\": …}` or `{\"kind\": \"apns\" | \"apnsVoip\", \"token\": …}`."
+            },
+            {
+              "name": "operator ==",
+              "kind": "method",
+              "signatures": ["bool operator ==(Object other)"],
+              "docs": ""
+            },
+            {"name": "hashCode", "kind": "property", "signatures": ["int get hashCode"], "docs": ""},
+            {"name": "toString", "kind": "method", "signatures": ["String toString()"], "docs": ""}
+          ]
+        },
+        {
+          "name": "HandledNotification",
+          "kind": "class",
+          "signatures": ["final class HandledNotification"],
+          "docs": "What `RelayNotifications.handleNotification` found.",
+          "members": [
+            {
+              "name": "notification",
+              "kind": "property",
+              "signatures": ["final RelayNotification notification"],
+              "docs": ""
+            },
+            {
+              "name": "duplicate",
+              "kind": "property",
+              "signatures": ["final bool duplicate"],
+              "docs": "Whether an earlier payload had the same event ID. Act on a notification\nonce."
+            },
+            {
+              "name": "ringing",
+              "kind": "property",
+              "signatures": ["final bool ringing"],
+              "docs": "For a `CallNotification`: whether the ring is still on, with no\ncancellation for its alert seen and its `expiresAt` in the future."
+            }
+          ]
+        },
+        {
+          "name": "MessageNotification",
+          "kind": "class",
+          "signatures": ["final class MessageNotification extends RelayNotification"],
+          "docs": "A new message for the user.",
+          "members": [
+            {
+              "name": "messageId",
+              "kind": "property",
+              "signatures": ["final String messageId"],
+              "docs": ""
+            },
+            {
+              "name": "eventType",
+              "kind": "property",
+              "signatures": ["String get eventType"],
+              "docs": "`notification.message`, `notification.call` or\n`notification.callCancelled`."
+            },
+            {
+              "name": "fetchMessage",
+              "kind": "method",
+              "signatures": ["Future<Message> fetchMessage(RelayClient client)"],
+              "docs": "Fetches the message with the user's own session, for example when\n`body` is null because previews are off."
+            },
+            {
+              "name": "toJson",
+              "kind": "method",
+              "signatures": ["Map<String, Object?> toJson()"],
+              "docs": "The `convohop` object, for handing the notification to native code."
+            },
+            {
+              "name": "eventId",
+              "kind": "property",
+              "signatures": ["final String eventId"],
+              "docs": "Deduplicate on this: delivery is at least once.",
+              "inherited": "RelayNotification"
+            },
+            {
+              "name": "occurredAt",
+              "kind": "property",
+              "signatures": ["final String occurredAt"],
+              "docs": "",
+              "inherited": "RelayNotification"
+            },
+            {
+              "name": "projectId",
+              "kind": "property",
+              "signatures": ["final String projectId"],
+              "docs": "",
+              "inherited": "RelayNotification"
+            },
+            {
+              "name": "recipientId",
+              "kind": "property",
+              "signatures": ["final String recipientId"],
+              "docs": "The principal the notification is for.",
+              "inherited": "RelayNotification"
+            },
+            {
+              "name": "conversationId",
+              "kind": "property",
+              "signatures": ["final String conversationId"],
+              "docs": "",
+              "inherited": "RelayNotification"
+            },
+            {
+              "name": "senderId",
+              "kind": "property",
+              "signatures": ["final String senderId"],
+              "docs": "Who sent the message or started the ringing.",
+              "inherited": "RelayNotification"
+            },
+            {
+              "name": "title",
+              "kind": "property",
+              "signatures": ["final String? title"],
+              "docs": "Visible title, when the push had one.",
+              "inherited": "RelayNotification"
+            },
+            {
+              "name": "body",
+              "kind": "property",
+              "signatures": ["final String? body"],
+              "docs": "Visible body, when the push had one. With previews off, a message\nnotification has none.",
+              "inherited": "RelayNotification"
+            },
+            {
+              "name": "isFor",
+              "kind": "method",
+              "signatures": ["bool isFor(RelayClient client)"],
+              "docs": "Whether this notification is for `client`'s user and project.",
+              "inherited": "RelayNotification"
+            }
+          ]
+        },
+        {
+          "name": "PushRegistration",
+          "kind": "class",
+          "signatures": ["sealed class PushRegistration"],
+          "docs": "Where your backend sends this device's pushes. Send each one to your\nbackend, which delivers Relay's notification events to it; Relay\nnever sees them. Every Relay client hands its app the same JSON shape,\nfrom `toJson`, so one backend endpoint can store registrations from\nbrowsers and native apps.",
+          "members": [
+            {
+              "name": "kind",
+              "kind": "property",
+              "signatures": ["String get kind"],
+              "docs": "`fcm`, `apns` or `apnsVoip`."
+            },
+            {
+              "name": "toJson",
+              "kind": "method",
+              "signatures": ["Map<String, String> toJson()"],
+              "docs": "The registration as JSON: `{\"kind\": \"fcm\", \"token\": …}`,\n`{\"kind\": \"fcm\", \"fid\": …}` or `{\"kind\": \"apns\" | \"apnsVoip\", \"token\": …}`."
+            }
+          ]
+        },
+        {
+          "name": "RelayNotification",
+          "kind": "class",
+          "signatures": ["sealed class RelayNotification"],
+          "docs": "A Relay notification, parsed from a push payload's `convohop` object.\n\nNotifications carry identifiers. They carry message text only when the\nproject opted in to message previews (off by default) or your backend\nadded its own text, so `title` and `body` are often null: show your own\ngeneric text and fetch content with the user's session.",
           "members": [
             {
               "name": "eventId",
@@ -4750,7 +4908,7 @@
             {
               "name": "isFor",
               "kind": "method",
-              "signatures": ["bool isFor(ConvoHopClient client)"],
+              "signatures": ["bool isFor(RelayClient client)"],
               "docs": "Whether this notification is for `client`'s user and project."
             },
             {
@@ -4762,15 +4920,15 @@
           ]
         },
         {
-          "name": "ConvoHopNotifications",
+          "name": "RelayNotifications",
           "kind": "class",
-          "signatures": ["final class ConvoHopNotifications"],
-          "docs": "Handles ConvoHop push payloads on the device: parses and validates them,\ndeduplicates on `eventId`, and tracks which calls are ringing.\n\nDelivery is at least once and unordered, so a cancellation can arrive\nbefore its call. A call stops ringing once a cancellation with its\n`alertId` was seen or its `expiresAt` passed.",
+          "signatures": ["final class RelayNotifications"],
+          "docs": "Handles Relay push payloads on the device: parses and validates them,\ndeduplicates on `eventId`, and tracks which calls are ringing.\n\nDelivery is at least once and unordered, so a cancellation can arrive\nbefore its call. A call stops ringing once a cancellation with its\n`alertId` was seen or its `expiresAt` passed.",
           "members": [
             {
-              "name": "ConvoHopNotifications",
+              "name": "RelayNotifications",
               "kind": "constructor",
-              "signatures": ["ConvoHopNotifications({Clock? clock, int capacity = 1024})"],
+              "signatures": ["RelayNotifications({Clock? clock, int capacity = 1024})"],
               "docs": "`capacity` bounds how many event IDs are remembered for deduplication."
             },
             {
@@ -4797,12 +4955,12 @@
               "signatures": [
                 "HandledNotification? handleNotification(Map<Object?, Object?> payload)"
               ],
-              "docs": "Parses and records `payload`. Returns null when it isn't a ConvoHop\npayload, and throws a `FormatException` when it breaks the contract."
+              "docs": "Parses and records `payload`. Returns null when it isn't a Relay\npayload, and throws a `FormatException` when it breaks the contract."
             },
             {
               "name": "record",
               "kind": "method",
-              "signatures": ["HandledNotification record(ConvoHopNotification notification)"],
+              "signatures": ["HandledNotification record(RelayNotification notification)"],
               "docs": "Records an already parsed `notification`."
             },
             {
@@ -4832,23 +4990,23 @@
           ]
         },
         {
-          "name": "ConvoHopPush",
+          "name": "RelayPush",
           "kind": "class",
-          "signatures": ["final class ConvoHopPush"],
-          "docs": "Push notifications and the system incoming-call UI on Android and iOS.\n\nThe plugin's native code shows ConvoHop pushes even while Dart isn't\nrunning. On Android, its Firebase messaging service builds a notification\nfor each FCM data message and rings with a full-screen call-style\nnotification. On iOS, the system shows APNs alerts, and VoIP pushes ring\nthrough CallKit once you `registerVoip`. Without `title` or `body` in the\npush, which is the default because message previews are off,\nnotifications show generic text: see the package README to localize it.\n\nListen to the streams, then call `start`. Send each registration from\n`registrations` to your backend.",
+          "signatures": ["final class RelayPush"],
+          "docs": "Push notifications and the system incoming-call UI on Android and iOS.\n\nThe plugin's native code shows Relay pushes even while Dart isn't\nrunning. On Android, its Firebase messaging service builds a notification\nfor each FCM data message and rings with a full-screen call-style\nnotification. On iOS, the system shows APNs alerts, and VoIP pushes ring\nthrough CallKit once you `registerVoip`. Without `title` or `body` in the\npush, which is the default because message previews are off,\nnotifications show generic text: see the package README to localize it.\n\nListen to the streams, then call `start`. Send each registration from\n`registrations` to your backend.",
           "members": [
             {
-              "name": "ConvoHopPush",
+              "name": "RelayPush",
               "kind": "constructor",
               "signatures": [
-                "ConvoHopPush({\n  ConvoHopNotifications? notifications,\n  ErrorListener? onError,\n  @visibleForTesting MethodChannel methods = const MethodChannel('convohop/push'),\n  @visibleForTesting EventChannel events = const EventChannel('convohop/push/events'),\n})"
+                "RelayPush({\n  RelayNotifications? notifications,\n  ErrorListener? onError,\n  @visibleForTesting MethodChannel methods = const MethodChannel('convohop/push'),\n  @visibleForTesting EventChannel events = const EventChannel('convohop/push/events'),\n})"
               ],
               "docs": ""
             },
             {
               "name": "notifications",
               "kind": "property",
-              "signatures": ["final ConvoHopNotifications notifications"],
+              "signatures": ["final RelayNotifications notifications"],
               "docs": "Deduplicates notifications and tracks rings."
             },
             {
@@ -4861,12 +5019,12 @@
               "name": "received",
               "kind": "property",
               "signatures": ["Stream<HandledNotification> get received"],
-              "docs": "ConvoHop pushes that reached the device while Dart was running, after\nnative code showed them. Check `HandledNotification.duplicate`. On iOS,\nalert pushes reach the app only while it's in the foreground."
+              "docs": "Relay pushes that reached the device while Dart was running, after\nnative code showed them. Check `HandledNotification.duplicate`. On iOS,\nalert pushes reach the app only while it's in the foreground."
             },
             {
               "name": "opened",
               "kind": "property",
-              "signatures": ["Stream<ConvoHopNotification> get opened"],
+              "signatures": ["Stream<RelayNotification> get opened"],
               "docs": "Notifications the user opened: open the conversation or the call."
             },
             {
@@ -4911,13 +5069,13 @@
               "signatures": [
                 "HandledNotification? handleNotification(Map<Object?, Object?> payload)"
               ],
-              "docs": "Records a push payload that reached Dart another way, for example\nthrough another push plugin, and reports it on `received`. Returns\nnull when the payload isn't ConvoHop's; throws a `FormatException`\nwhen it breaks the push payload contract."
+              "docs": "Records a push payload that reached Dart another way, for example\nthrough another push plugin, and reports it on `received`. Returns\nnull when the payload isn't Relay's; throws a `FormatException`\nwhen it breaks the push payload contract."
             },
             {
               "name": "showNotification",
               "kind": "method",
               "signatures": ["Future<bool> showNotification(Map<Object?, Object?> payload)"],
-              "docs": "Shows a ConvoHop FCM data message with the plugin's notifications, on\nAndroid, when another plugin's messaging service received it: call it\nwith the message's data from that plugin's foreground and background\nhandlers, instead of `handleNotification`. While a started\n`ConvoHopPush` runs, `received` reports it. Resolves false when\n`payload` isn't ConvoHop's, and on iOS, where the system shows APNs\nalerts."
+              "docs": "Shows a Relay FCM data message with the plugin's notifications, on\nAndroid, when another plugin's messaging service received it: call it\nwith the message's data from that plugin's foreground and background\nhandlers, instead of `handleNotification`. While a started\n`RelayPush` runs, `received` reports it. Resolves false when\n`payload` isn't Relay's, and on iOS, where the system shows APNs\nalerts."
             },
             {
               "name": "showIncomingCall",
@@ -4947,7 +5105,7 @@
               "name": "removeDeliveredNotifications",
               "kind": "method",
               "signatures": ["Future<void> removeDeliveredNotifications({String? conversationId})"],
-              "docs": "Removes ConvoHop's delivered message notifications, only\n`conversationId`'s when given, for example when the user opens the\nconversation. The app's own notifications stay."
+              "docs": "Removes Relay's delivered message notifications, only\n`conversationId`'s when given, for example when the user opens the\nconversation. The app's own notifications stay."
             },
             {
               "name": "setActiveConversation",
@@ -4964,199 +5122,9 @@
           ]
         },
         {
-          "name": "FcmRegistration",
-          "kind": "class",
-          "signatures": ["final class FcmRegistration extends PushRegistration"],
-          "docs": "An Android app registered with Firebase Cloud Messaging, by exactly one of\n`token` and `fid`. FCM issues registration tokens unless the app's\nmanifest switches it to Firebase installation IDs: see the package README.\nYour backend sends its FCM messages to the matching `token` or `fid`\ntarget.",
-          "members": [
-            {
-              "name": "FcmRegistration",
-              "kind": "constructor",
-              "signatures": [
-                "const FcmRegistration.token(String token)",
-                "const FcmRegistration.fid(String fid)"
-              ],
-              "docs": "**`FcmRegistration.token`**\n\nA registration by FCM registration token.\n\n**`FcmRegistration.fid`**\n\nA registration by Firebase installation ID."
-            },
-            {
-              "name": "token",
-              "kind": "property",
-              "signatures": ["final String? token"],
-              "docs": "The FCM registration token, unless FCM registered `fid`."
-            },
-            {
-              "name": "fid",
-              "kind": "property",
-              "signatures": ["final String? fid"],
-              "docs": "The Firebase installation ID (FID) that FCM registered, when the app's\nmanifest switches FCM to installation IDs."
-            },
-            {
-              "name": "kind",
-              "kind": "property",
-              "signatures": ["String get kind"],
-              "docs": "`fcm`, `apns` or `apnsVoip`."
-            },
-            {
-              "name": "toJson",
-              "kind": "method",
-              "signatures": ["Map<String, String> toJson()"],
-              "docs": "The registration as JSON: `{\"kind\": \"fcm\", \"token\": …}`,\n`{\"kind\": \"fcm\", \"fid\": …}` or `{\"kind\": \"apns\" | \"apnsVoip\", \"token\": …}`."
-            },
-            {
-              "name": "operator ==",
-              "kind": "method",
-              "signatures": ["bool operator ==(Object other)"],
-              "docs": ""
-            },
-            {"name": "hashCode", "kind": "property", "signatures": ["int get hashCode"], "docs": ""},
-            {"name": "toString", "kind": "method", "signatures": ["String toString()"], "docs": ""}
-          ]
-        },
-        {
-          "name": "HandledNotification",
-          "kind": "class",
-          "signatures": ["final class HandledNotification"],
-          "docs": "What `ConvoHopNotifications.handleNotification` found.",
-          "members": [
-            {
-              "name": "notification",
-              "kind": "property",
-              "signatures": ["final ConvoHopNotification notification"],
-              "docs": ""
-            },
-            {
-              "name": "duplicate",
-              "kind": "property",
-              "signatures": ["final bool duplicate"],
-              "docs": "Whether an earlier payload had the same event ID. Act on a notification\nonce."
-            },
-            {
-              "name": "ringing",
-              "kind": "property",
-              "signatures": ["final bool ringing"],
-              "docs": "For a `CallNotification`: whether the ring is still on, with no\ncancellation for its alert seen and its `expiresAt` in the future."
-            }
-          ]
-        },
-        {
-          "name": "MessageNotification",
-          "kind": "class",
-          "signatures": ["final class MessageNotification extends ConvoHopNotification"],
-          "docs": "A new message for the user.",
-          "members": [
-            {
-              "name": "messageId",
-              "kind": "property",
-              "signatures": ["final String messageId"],
-              "docs": ""
-            },
-            {
-              "name": "eventType",
-              "kind": "property",
-              "signatures": ["String get eventType"],
-              "docs": "`notification.message`, `notification.call` or\n`notification.callCancelled`."
-            },
-            {
-              "name": "fetchMessage",
-              "kind": "method",
-              "signatures": ["Future<Message> fetchMessage(ConvoHopClient client)"],
-              "docs": "Fetches the message with the user's own session, for example when\n`body` is null because previews are off."
-            },
-            {
-              "name": "toJson",
-              "kind": "method",
-              "signatures": ["Map<String, Object?> toJson()"],
-              "docs": "The `convohop` object, for handing the notification to native code."
-            },
-            {
-              "name": "eventId",
-              "kind": "property",
-              "signatures": ["final String eventId"],
-              "docs": "Deduplicate on this: delivery is at least once.",
-              "inherited": "ConvoHopNotification"
-            },
-            {
-              "name": "occurredAt",
-              "kind": "property",
-              "signatures": ["final String occurredAt"],
-              "docs": "",
-              "inherited": "ConvoHopNotification"
-            },
-            {
-              "name": "projectId",
-              "kind": "property",
-              "signatures": ["final String projectId"],
-              "docs": "",
-              "inherited": "ConvoHopNotification"
-            },
-            {
-              "name": "recipientId",
-              "kind": "property",
-              "signatures": ["final String recipientId"],
-              "docs": "The principal the notification is for.",
-              "inherited": "ConvoHopNotification"
-            },
-            {
-              "name": "conversationId",
-              "kind": "property",
-              "signatures": ["final String conversationId"],
-              "docs": "",
-              "inherited": "ConvoHopNotification"
-            },
-            {
-              "name": "senderId",
-              "kind": "property",
-              "signatures": ["final String senderId"],
-              "docs": "Who sent the message or started the ringing.",
-              "inherited": "ConvoHopNotification"
-            },
-            {
-              "name": "title",
-              "kind": "property",
-              "signatures": ["final String? title"],
-              "docs": "Visible title, when the push had one.",
-              "inherited": "ConvoHopNotification"
-            },
-            {
-              "name": "body",
-              "kind": "property",
-              "signatures": ["final String? body"],
-              "docs": "Visible body, when the push had one. With previews off, a message\nnotification has none.",
-              "inherited": "ConvoHopNotification"
-            },
-            {
-              "name": "isFor",
-              "kind": "method",
-              "signatures": ["bool isFor(ConvoHopClient client)"],
-              "docs": "Whether this notification is for `client`'s user and project.",
-              "inherited": "ConvoHopNotification"
-            }
-          ]
-        },
-        {
-          "name": "PushRegistration",
-          "kind": "class",
-          "signatures": ["sealed class PushRegistration"],
-          "docs": "Where your backend sends this device's pushes. Send each one to your\nbackend, which delivers ConvoHop's notification events to it; ConvoHop\nnever sees them. Every ConvoHop client hands its app the same JSON shape,\nfrom `toJson`, so one backend endpoint can store registrations from\nbrowsers and native apps.",
-          "members": [
-            {
-              "name": "kind",
-              "kind": "property",
-              "signatures": ["String get kind"],
-              "docs": "`fcm`, `apns` or `apnsVoip`."
-            },
-            {
-              "name": "toJson",
-              "kind": "method",
-              "signatures": ["Map<String, String> toJson()"],
-              "docs": "The registration as JSON: `{\"kind\": \"fcm\", \"token\": …}`,\n`{\"kind\": \"fcm\", \"fid\": …}` or `{\"kind\": \"apns\" | \"apnsVoip\", \"token\": …}`."
-            }
-          ]
-        },
-        {
           "name": "RingNotification",
           "kind": "class",
-          "signatures": ["sealed class RingNotification extends ConvoHopNotification"],
+          "signatures": ["sealed class RingNotification extends RelayNotification"],
           "docs": "A notification about one ring of a call.",
           "members": [
             {
@@ -5200,77 +5168,77 @@
               "kind": "property",
               "signatures": ["final String eventId"],
               "docs": "Deduplicate on this: delivery is at least once.",
-              "inherited": "ConvoHopNotification"
+              "inherited": "RelayNotification"
             },
             {
               "name": "eventType",
               "kind": "property",
               "signatures": ["String get eventType"],
               "docs": "`notification.message`, `notification.call` or\n`notification.callCancelled`.",
-              "inherited": "ConvoHopNotification"
+              "inherited": "RelayNotification"
             },
             {
               "name": "occurredAt",
               "kind": "property",
               "signatures": ["final String occurredAt"],
               "docs": "",
-              "inherited": "ConvoHopNotification"
+              "inherited": "RelayNotification"
             },
             {
               "name": "projectId",
               "kind": "property",
               "signatures": ["final String projectId"],
               "docs": "",
-              "inherited": "ConvoHopNotification"
+              "inherited": "RelayNotification"
             },
             {
               "name": "recipientId",
               "kind": "property",
               "signatures": ["final String recipientId"],
               "docs": "The principal the notification is for.",
-              "inherited": "ConvoHopNotification"
+              "inherited": "RelayNotification"
             },
             {
               "name": "conversationId",
               "kind": "property",
               "signatures": ["final String conversationId"],
               "docs": "",
-              "inherited": "ConvoHopNotification"
+              "inherited": "RelayNotification"
             },
             {
               "name": "senderId",
               "kind": "property",
               "signatures": ["final String senderId"],
               "docs": "Who sent the message or started the ringing.",
-              "inherited": "ConvoHopNotification"
+              "inherited": "RelayNotification"
             },
             {
               "name": "title",
               "kind": "property",
               "signatures": ["final String? title"],
               "docs": "Visible title, when the push had one.",
-              "inherited": "ConvoHopNotification"
+              "inherited": "RelayNotification"
             },
             {
               "name": "body",
               "kind": "property",
               "signatures": ["final String? body"],
               "docs": "Visible body, when the push had one. With previews off, a message\nnotification has none.",
-              "inherited": "ConvoHopNotification"
+              "inherited": "RelayNotification"
             },
             {
               "name": "isFor",
               "kind": "method",
-              "signatures": ["bool isFor(ConvoHopClient client)"],
+              "signatures": ["bool isFor(RelayClient client)"],
               "docs": "Whether this notification is for `client`'s user and project.",
-              "inherited": "ConvoHopNotification"
+              "inherited": "RelayNotification"
             },
             {
               "name": "toJson",
               "kind": "method",
               "signatures": ["Map<String, Object?> toJson()"],
               "docs": "The `convohop` object, for handing the notification to native code.",
-              "inherited": "ConvoHopNotification"
+              "inherited": "RelayNotification"
             }
           ]
         },
@@ -5310,14 +5278,14 @@
           "name": "parseNotificationPayload",
           "kind": "function",
           "signatures": [
-            "ConvoHopNotification? parseNotificationPayload(Map<Object?, Object?> payload)"
+            "RelayNotification? parseNotificationPayload(Map<Object?, Object?> payload)"
           ],
-          "docs": "Parses a push payload: an APNs `userInfo` (`{aps, convohop: {...}}`), FCM\ndata (`{convohop: \"<JSON>\"}`) or a Web Push payload.\n\nReturns null when the payload isn't ConvoHop's, and throws a\n`FormatException` naming the first invalid field when it breaks the push\npayload contract. Fields it doesn't know are ignored, as the contract\nrequires of consumers."
+          "docs": "Parses a push payload: an APNs `userInfo` (`{aps, convohop: {...}}`), FCM\ndata (`{convohop: \"<JSON>\"}`) or a Web Push payload.\n\nReturns null when the payload isn't Relay's, and throws a\n`FormatException` naming the first invalid field when it breaks the push\npayload contract. Fields it doesn't know are ignored, as the contract\nrequires of consumers."
         }
       ]
     },
     {
-      "name": "package:convohop/io.dart",
+      "name": "package:instantrelay/io.dart",
       "symbols": [
         {
           "name": "FileRecoveryStorage",

@@ -92,7 +92,7 @@ mutation CommunicationAddMember($context: RequestContextInput!, $input: AddMembe
 | Language | Members |
 | --- | --- |
 | [TypeScript](../../typescript/reference/operations.md) | [`ServerConversation.members.add`](../../typescript/reference/server.md#serverconversationmembersadd-method) |
-| [Python](../../python/reference/operations.md) | [`ConvoHop.add_member`](../../python/reference/convohop.md#convohopadd_member-method), [`AsyncConvoHop.add_member`](../../python/reference/convohop.md#asyncconvohopadd_member-method) |
-| [.NET](../../dotnet/reference/operations.md) | [`ServerMembers.AddAsync`](../../dotnet/reference/convohop.md#servermembersaddasync-method), [`CommunicationApi.AddMemberAsync`](../../dotnet/reference/api.md#communicationapiaddmemberasync-method) |
+| [Python](../../python/reference/operations.md) | [`Relay.add_member`](../../python/reference/instantrelay.md#relayadd_member-method), [`AsyncRelay.add_member`](../../python/reference/instantrelay.md#asyncrelayadd_member-method) |
+| [.NET](../../dotnet/reference/operations.md) | [`ServerMembers.AddAsync`](../../dotnet/reference/relay.md#servermembersaddasync-method), [`CommunicationApi.AddMemberAsync`](../../dotnet/reference/api.md#communicationapiaddmemberasync-method) |
 | [Java and Kotlin](../../jvm/reference/operations.md) | [`ServerConversation.members.add`](../../jvm/reference/server.md#serverconversationmembersadd-method), [`CommunicationApi.addMember`](../../jvm/reference/server.md#communicationapiaddmember-method), [`CommunicationSuspendApi.addMember`](../../jvm/reference/server-kotlin.md#communicationsuspendapiaddmember-method) |
-| [Go](../../go/reference/operations.md) | [`ProjectClient.AddMember`](../../go/reference/convohop.md#projectclientaddmember-method) |
+| [Go](../../go/reference/operations.md) | [`ProjectClient.AddMember`](../../go/reference/relay.md#projectclientaddmember-method) |

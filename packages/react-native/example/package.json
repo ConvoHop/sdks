@@ -1,7 +1,7 @@
 {
-  "name": "convohop-react-native-example",
+  "name": "relay-react-native-example",
   "private": true,
-  "description": "A React Native app that chats, receives push notifications and makes calls with @convohop/react-native.",
+  "description": "A React Native app that chats, receives push notifications and makes calls with @instantrelay/react-native.",
   "license": "Apache-2.0",
   "scripts": {
     "android": "react-native run-android",

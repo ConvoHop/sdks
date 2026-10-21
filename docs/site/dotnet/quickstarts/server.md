@@ -1,10 +1,10 @@
 # .NET server quickstart
 
-Call ConvoHop from your .NET backend with the `ConvoHop` package: connect with a backend key, sign in your users, create a conversation, send and read messages as a member, and recover a send whose response was lost.
+Call Relay from your .NET backend with the `Relay` package: connect with a backend key, sign in your users, create a conversation, send and read messages as a member, and recover a send whose response was lost.
 
 ## Before you start
 
-You need .NET 8 or later and the `ConvoHop` package ([install](../index.md#install)). For your project, you need the Communication API's base URL, the project ID, the project's incarnation and a backend key, which the [`management.issueBackendKey`](../../operations/management/issueBackendKey.md) operation delivers once.
+You need .NET 8 or later and the `Relay` package ([install](../index.md#install)). For your project, you need the Communication API's base URL, the project ID, the project's incarnation and a backend key, which the [`management.issueBackendKey`](../../operations/management/issueBackendKey.md) operation delivers once.
 
 Keep the backend key in your secret store. Its scopes limit what it can do. This quickstart needs `principalManage`, `sessionIssue`, `conversationManage`, `messageRead` and `messageWrite`.
 
@@ -16,8 +16,8 @@ using System.Linq;
 using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
-using ConvoHop;
-using ConvoHop.Models;
+using Relay;
+using Relay.Models;
 ```
 
 ## Connect
@@ -46,11 +46,11 @@ public static async Task<ProjectServerClient> ConnectAsync(ServerConfig config, 
 }
 ```
 
-`BaseUrl` is an HTTPS origin, or HTTP on a loopback host for local development. The client gives each request 12 seconds and never follows redirects. To pass your own `HttpClient`, create it with `AllowAutoRedirect = false`, as the [`ProjectServerClientOptions` reference](../reference/convohop.md#projectserverclientoptions-class) describes.
+`BaseUrl` is an HTTPS origin, or HTTP on a loopback host for local development. The client gives each request 12 seconds and never follows redirects. To pass your own `HttpClient`, create it with `AllowAutoRedirect = false`, as the [`ProjectServerClientOptions` reference](../reference/relay.md#projectserverclientoptions-class) describes.
 
 ## Sign in a user
 
-ConvoHop doesn't authenticate your users. After your own login succeeds, map the user to a principal and issue a session for the device. Return the result to the user's app, which passes it to a client SDK, as the [TypeScript client quickstart](../../typescript/quickstarts/client.md) shows.
+Relay doesn't authenticate your users. After your own login succeeds, map the user to a principal and issue a session for the device. Return the result to the user's app, which passes it to a client SDK, as the [TypeScript client quickstart](../../typescript/quickstarts/client.md) shows.
 
 ```cs snippet=docs/languages/dotnet/examples/src/Server.cs#bootstrap
 // What your login endpoint returns, as JSON, to the signed-in user's app.
@@ -121,7 +121,7 @@ public static async Task<IReadOnlyList<Message>> LatestMessagesAsync(
 
 ## Recover a lost response
 
-When a connection drops after a command is sent, the SDK can't tell whether the authority committed it, so it throws a `ConvoHopException` whose `Outcome` is `"unknown"`. Sending again with a new request ID could post the message twice. Instead, `Requests.RetryAsync` asks the authority about the original request. If the authority never received it, `RetryAsync` resends the original command first. A `committed` resolution carries the command's result.
+When a connection drops after a command is sent, the SDK can't tell whether the authority committed it, so it throws a `RelayException` whose `Outcome` is `"unknown"`. Sending again with a new request ID could post the message twice. Instead, `Requests.RetryAsync` asks the authority about the original request. If the authority never received it, `RetryAsync` resends the original command first. A `committed` resolution carries the command's result.
 
 ```cs snippet=docs/languages/dotnet/examples/src/Server.cs#recover
 // A lost response leaves the outcome unknown: the message may or may not exist. Ask about the
@@ -134,7 +134,7 @@ public static async Task<string?> SendOnceAsync(
     {
         return await SendAsAsync(server, conversationId, authorId, text, requestId, cancellationToken);
     }
-    catch (ConvoHopException exception) when (exception.Outcome == "unknown")
+    catch (RelayException exception) when (exception.Outcome == "unknown")
     {
         // Resolves the request first, and resends the original only if the authority never saw it.
         RequestResolution resolution = await server.Requests.RetryAsync(requestId, cancellationToken);
@@ -149,4 +149,4 @@ Retry with the same client, which keeps the original request in memory. It sends
 ## Next steps
 
 - [Webhooks quickstart](webhooks.md): react to events in your backend.
-- [`ProjectServerClient` reference](../reference/convohop.md#projectserverclient-class): every method, with the operation it sends.
+- [`ProjectServerClient` reference](../reference/relay.md#projectserverclient-class): every method, with the operation it sends.

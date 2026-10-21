@@ -19,8 +19,8 @@ function fails(action, message) {
   });
 }
 
-test("the extractor builds from its lockfile and runs on the language file from the root", () => {
-  assert.deepEqual(buildCommand(), ["swift", "build", "--package-path", PACKAGE, "--product", PRODUCT, "--force-resolved-versions", "--disable-keychain"]);
+test("the extractor builds from its lockfile with two jobs and runs on the language file from the root", () => {
+  assert.deepEqual(buildCommand(), ["swift", "build", "--package-path", PACKAGE, "--product", PRODUCT, "--force-resolved-versions", "--disable-keychain", "--jobs", "2"]);
   assert.deepEqual(extractCommand(ROOT, LANGUAGE_FILE), [`/repo/${EXECUTABLE}`, ROOT, `/repo/${LANGUAGE_FILE}`]);
   assert.deepEqual(extractCommand(ROOT, "/elsewhere/language.json"), [`/repo/${EXECUTABLE}`, ROOT, "/elsewhere/language.json"]);
 });

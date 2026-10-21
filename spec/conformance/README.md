@@ -1,13 +1,13 @@
-# ConvoHop conformance suite
+# Relay conformance suite
 
-Every ConvoHop SDK, in every language, must behave the same way against the
+Every Relay SDK, in every language, must behave the same way against the
 same service. This directory holds the language-neutral half of that
 guarantee: the scenarios, their JSON Schemas, the shared operation catalog
 and the webhook test vectors. The runner, the TypeScript reference driver and
 the deterministic mock target live in [`conformance/`](../../conformance).
 
 A scenario describes what an application does through an SDK and what it
-must observe. The runner executes it against a **target** (a ConvoHop
+must observe. The runner executes it against a **target** (a Relay
 deployment, or the built-in mock) through a **driver**: a small program,
 written in the SDK's own language, that reads JSON commands on stdin, calls
 the SDK and answers on stdout. An SDK conforms when its driver passes the

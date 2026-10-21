@@ -188,7 +188,7 @@ line comment marks a region:
 
 ```ts
 // #region connect
-import { ProjectServerClient } from "@convohop/server";
+import { ProjectServerClient } from "@instantrelay/server";
 // …
 // #endregion connect
 ```
@@ -206,7 +206,7 @@ the page. The fence names the code's source as a repository path:
 
 ````md
 ```ts snippet=docs/languages/typescript/examples/src/server.ts#connect
-import { ProjectServerClient } from "@convohop/server";
+import { ProjectServerClient } from "@instantrelay/server";
 …
 ```
 ````
@@ -245,7 +245,7 @@ to the page.
 
 A reference has the form `<package>#<Symbol>[.<member>...]`, with `:static`
 after the name of a static member, for example
-`@convohop/server#ServerConversation.messages.send`. Operation maps use the
+`@instantrelay/server#ServerConversation.messages.send`. Operation maps use the
 same references.
 
 ### llms.txt
@@ -262,7 +262,7 @@ the pages' links, point to `.md` paths.
 
 ### Rendering on a website
 
-A website, such as ConvoHop's, can render `docs/site` from a pinned commit
+A website, such as Relay's, can render `docs/site` from a pinned commit
 of this repository:
 
 1. Read `manifest.json`. Build routes and navigation from `pages`,
@@ -338,7 +338,7 @@ reads from it resolve inside it.
    TypeScript's extractor,
    [`tools/docgen/extractors/typescript.mjs`](../tools/docgen/extractors/typescript.mjs),
    reads the `.d.ts` files of the built packages. A listed package can be a
-   subpath export, such as `@convohop/client/push`: the extractor reads that
+   subpath export, such as `@instantrelay/client/push`: the extractor reads that
    entry's `types` condition, and the subpath's own declarations get no
    `origin`, because its package declares them. It follows bases by name,
    including through namespace imports such as `core.BaseClient`. It doesn't

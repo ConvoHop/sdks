@@ -66,11 +66,11 @@ query CommunicationConversationMute($context: RequestContextInput!, $input: Conv
 | Language | Members |
 | --- | --- |
 | [TypeScript](../../typescript/reference/operations.md) | [`ServerConversation.members.getMute`](../../typescript/reference/server.md#serverconversationmembersgetmute-method), [`ConversationHandle.mute.get`](../../typescript/reference/client.md#conversationhandlemuteget-property) |
-| [Python](../../python/reference/operations.md) | [`ConvoHop.conversation_mute`](../../python/reference/convohop.md#convohopconversation_mute-method), [`AsyncConvoHop.conversation_mute`](../../python/reference/convohop.md#asyncconvohopconversation_mute-method) |
-| [.NET](../../dotnet/reference/operations.md) | [`ServerMembers.GetMuteAsync`](../../dotnet/reference/convohop.md#servermembersgetmuteasync-method), [`CommunicationApi.ConversationMuteAsync`](../../dotnet/reference/api.md#communicationapiconversationmuteasync-method) |
+| [Python](../../python/reference/operations.md) | [`Relay.conversation_mute`](../../python/reference/instantrelay.md#relayconversation_mute-method), [`AsyncRelay.conversation_mute`](../../python/reference/instantrelay.md#asyncrelayconversation_mute-method) |
+| [.NET](../../dotnet/reference/operations.md) | [`ServerMembers.GetMuteAsync`](../../dotnet/reference/relay.md#servermembersgetmuteasync-method), [`CommunicationApi.ConversationMuteAsync`](../../dotnet/reference/api.md#communicationapiconversationmuteasync-method) |
 | [Java and Kotlin](../../jvm/reference/operations.md) | [`CommunicationApi.conversationMute`](../../jvm/reference/server.md#communicationapiconversationmute-method), [`CommunicationSuspendApi.conversationMute`](../../jvm/reference/server-kotlin.md#communicationsuspendapiconversationmute-method) |
-| [Go](../../go/reference/operations.md) | [`ProjectClient.ConversationMute`](../../go/reference/convohop.md#projectclientconversationmute-method) |
-| [Swift](../../swift/reference/operations.md) | [`ConversationMuteSetting.get`](../../swift/reference/convohop.md#conversationmutesettingget-method) |
+| [Go](../../go/reference/operations.md) | [`ProjectClient.ConversationMute`](../../go/reference/relay.md#projectclientconversationmute-method) |
+| [Swift](../../swift/reference/operations.md) | [`ConversationMuteSetting.get`](../../swift/reference/relay.md#conversationmutesettingget-method) |
 | [Android](../../android/reference/operations.md) | [`ConversationHandle.mute.get`](../../android/reference/android-core.md#conversationhandlemuteget-method) |
-| [Flutter](../../flutter/reference/operations.md) | [`ConversationMuteControl.get`](../../flutter/reference/convohop.md#conversationmutecontrolget-method), [`CommunicationOperations.conversationMute`](../../flutter/reference/convohop.md#communicationoperationsconversationmute-method) |
+| [Flutter](../../flutter/reference/operations.md) | [`ConversationMuteControl.get`](../../flutter/reference/instantrelay.md#conversationmutecontrolget-method), [`CommunicationOperations.conversationMute`](../../flutter/reference/instantrelay.md#communicationoperationsconversationmute-method) |
 | [React Native](../../react-native/reference/operations.md) | [`ConversationHandle.mute.get`](../../react-native/reference/client.md#conversationhandlemuteget-property) |

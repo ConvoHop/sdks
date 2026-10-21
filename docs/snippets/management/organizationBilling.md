@@ -1,6 +1,6 @@
 ## `organizationBilling`
 
-Read the billing state of an organization in any status: the plan whose limits apply, whether ConvoHop bills the organization and, when it does, its standing and subscription.
+Read the billing state of an organization in any status: the plan whose limits apply, whether Relay bills the organization and, when it does, its standing and subscription.
 
 - **Operation:** `management.organizationBilling`, a query sent as `ManagementOrganizationBilling`.
 - **Layer:** server (server SDKs).

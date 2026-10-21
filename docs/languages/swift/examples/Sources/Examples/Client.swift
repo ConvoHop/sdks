@@ -2,7 +2,7 @@
 // RenewalTests.swift runs the renewal against a stand-in for your backend.
 
 // #region imports
-import ConvoHop
+import Relay
 import Foundation
 import SwiftUI
 // #endregion imports
@@ -19,14 +19,14 @@ struct SignIn: Decodable, Sendable {
 
 // Storage for one project and user, so users who share a device don't share it.
 func userStorage(for signIn: SignIn) throws -> FileRecoveryStorage {
-    try .applicationSupport(subdirectory: "ConvoHop/\(signIn.projectId)/\(signIn.session.principalId)")
+    try .applicationSupport(subdirectory: "Relay/\(signIn.projectId)/\(signIn.session.principalId)")
 }
 
 func connectUser(
-    _ signIn: SignIn, storage: FileRecoveryStorage, refreshSession: ConvoHopSessionRefresh? = nil
-) async throws -> ConvoHopClient {
-    let client = try ConvoHopClient(
-        configuration: ConvoHopConfiguration(
+    _ signIn: SignIn, storage: FileRecoveryStorage, refreshSession: RelaySessionRefresh? = nil
+) async throws -> RelayClient {
+    let client = try RelayClient(
+        configuration: RelayConfiguration(
             baseURL: signIn.baseUrl,
             projectId: signIn.projectId,
             principalId: signIn.session.principalId,
@@ -47,7 +47,7 @@ func connectUser(
 // Pass renewal(from:) to connectUser as refreshSession. The client calls it with the session's metadata, never its
 // token. endpoint is your backend's, behind your app's own sign-in, so give it a URLSession that sends your app's
 // credentials. Your backend renews the session with the server SDK.
-func renewal(from endpoint: URL, session: URLSession = .shared) -> ConvoHopSessionRefresh {
+func renewal(from endpoint: URL, session: URLSession = .shared) -> RelaySessionRefresh {
     return { current in
         // The client's requests and streams wait until this settles.
         var request = URLRequest(url: endpoint, timeoutInterval: 10)
@@ -58,14 +58,14 @@ func renewal(from endpoint: URL, session: URLSession = .shared) -> ConvoHopSessi
         ])
         let (data, response) = try await session.data(for: request)
         guard (response as? HTTPURLResponse)?.statusCode == 200 else { throw URLError(.badServerResponse) }
-        // The client checks the renewed session with ConvoHop before it uses it.
+        // The client checks the renewed session with Relay before it uses it.
         return try JSONDecoder().decode(SessionBootstrap.self, from: data)
     }
 }
 
 // Renews the session a minute before it expires, and again before each renewal expires, until you cancel the
 // schedule or release it.
-func keepSessionAlive(_ client: ConvoHopClient, outbox: ConvoHopOutbox) throws -> ConvoHopSessionRefreshSchedule {
+func keepSessionAlive(_ client: RelayClient, outbox: RelayOutbox) throws -> RelaySessionRefreshSchedule {
     try client.scheduleSessionRefresh(
         onRefreshed: { _ in Task { await outbox.resume() } }, // Sends what an expired session paused.
         onError: { error in print("Couldn't renew the session: \(error)") }
@@ -77,28 +77,28 @@ func keepSessionAlive(_ client: ConvoHopClient, outbox: ConvoHopOutbox) throws -
 // One for the signed-in user. The store keeps conversations, and the outbox keeps unsent messages, in the client's
 // storage, so they survive app restarts.
 final class Chat: Sendable {
-    let client: ConvoHopClient
+    let client: RelayClient
     let storage: FileRecoveryStorage
-    let store: ConvoHopLocalStore
-    let outbox: ConvoHopOutbox
+    let store: RelayLocalStore
+    let outbox: RelayOutbox
 
-    init(client: ConvoHopClient, storage: FileRecoveryStorage) async throws {
+    init(client: RelayClient, storage: FileRecoveryStorage) async throws {
         self.client = client
         self.storage = storage
-        store = try ConvoHopLocalStore(client: client, storage: storage)
-        outbox = try ConvoHopOutbox(client: client)
+        store = try RelayLocalStore(client: client, storage: storage)
+        outbox = try RelayOutbox(client: client)
         try await outbox.start() // Loads what an earlier run left unsent, and starts sending it.
     }
 }
 
 @MainActor
-func model(of conversationId: String, in chat: Chat) throws -> ConvoHopConversationModel {
-    try ConvoHopConversationModel(
+func model(of conversationId: String, in chat: Chat) throws -> RelayConversationModel {
+    try RelayConversationModel(
         client: chat.client, conversationId: conversationId, store: chat.store, outbox: chat.outbox)
 }
 
 struct ConversationView: View {
-    @ObservedObject var model: ConvoHopConversationModel
+    @ObservedObject var model: RelayConversationModel
 
     var body: some View {
         List(model.entries) { entry in
@@ -118,14 +118,14 @@ struct ConversationView: View {
 // #region outbox
 // Shows the message at once, at the end of model.entries, and sends it through the outbox.
 @MainActor
-func sendDraft(_ draft: String, in model: ConvoHopConversationModel) async throws -> Bool {
+func sendDraft(_ draft: String, in model: RelayConversationModel) async throws -> Bool {
     let text = draft.trimmingCharacters(in: .whitespacesAndNewlines)
     guard !text.isEmpty else { return false }
     try await model.send(text)
     return true
 }
 
-func pendingLabel(_ item: ConvoHopOutbox.Item) -> String {
+func pendingLabel(_ item: RelayOutbox.Item) -> String {
     switch item.state {
     case .queued: "Waiting to send"
     case .sending: "Sending…"
@@ -135,10 +135,10 @@ func pendingLabel(_ item: ConvoHopOutbox.Item) -> String {
     }
 }
 
-// Sends the message again under a new request ID. For one that isn't confirmed yet, the outbox first asks ConvoHop
+// Sends the message again under a new request ID. For one that isn't confirmed yet, the outbox first asks Relay
 // whether it stored the original. If an earlier attempt is still in transit, the conversation can show the message
 // twice, so ask the user first.
-func sendAgain(_ item: ConvoHopOutbox.Item, in chat: Chat) async throws {
+func sendAgain(_ item: RelayOutbox.Item, in chat: Chat) async throws {
     try await chat.outbox.resend(item.id)
 }
 // #endregion outbox
@@ -146,7 +146,7 @@ func sendAgain(_ item: ConvoHopOutbox.Item, in chat: Chat) async throws {
 // #region typing
 // Call it whenever the user edits the draft.
 @MainActor
-func draftChanged(_ draft: String, in model: ConvoHopConversationModel) {
+func draftChanged(_ draft: String, in model: RelayConversationModel) {
     guard !draft.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else { return }
     model.textChanged()
 }
@@ -155,13 +155,13 @@ func draftChanged(_ draft: String, in model: ConvoHopConversationModel) {
 // #region receipts
 // Call it when the newest messages are on screen.
 @MainActor
-func messagesSeen(in model: ConvoHopConversationModel) {
+func messagesSeen(in model: RelayConversationModel) {
     model.markRead()
 }
 
 // Who read through the message, apart from its author.
 @MainActor
-func seenBy(_ message: Message, in model: ConvoHopConversationModel) -> [String] {
+func seenBy(_ message: Message, in model: RelayConversationModel) -> [String] {
     model.receipts.values
         .filter { receipt in
             guard receipt.principalId != message.authorId, let read = receipt.readThroughSequence else { return false }
@@ -177,7 +177,7 @@ func isAtLeast(_ sequence: String, _ other: String) -> Bool {
 }
 
 @MainActor
-func activityLabel(of principalId: String, in model: ConvoHopConversationModel, now: Date = Date()) -> String? {
+func activityLabel(of principalId: String, in model: RelayConversationModel, now: Date = Date()) -> String? {
     guard let last = model.lastActivity(of: principalId) else { return nil }
     if now.timeIntervalSince(last) < 5 * 60 { return "Recently active" }
     let formatter = RelativeDateTimeFormatter()
@@ -188,7 +188,7 @@ func activityLabel(of principalId: String, in model: ConvoHopConversationModel, 
 
 // #region sign-out
 // Stop the conversation models and close your streams first.
-func signOut(_ chat: Chat, renewal: ConvoHopSessionRefreshSchedule?) async throws {
+func signOut(_ chat: Chat, renewal: RelaySessionRefreshSchedule?) async throws {
     renewal?.cancel()
     await chat.outbox.stop() // Waits for the send in flight.
     try await chat.outbox.removeAll()
@@ -200,7 +200,7 @@ func signOut(_ chat: Chat, renewal: ConvoHopSessionRefreshSchedule?) async throw
 // #region watch
 // Shows the conversation's messages, oldest first, and shows them again whenever its events say they changed.
 func watchConversation(
-    _ client: ConvoHopClient, _ conversationId: String, show: @escaping @MainActor @Sendable ([Message]) -> Void
+    _ client: RelayClient, _ conversationId: String, show: @escaping @MainActor @Sendable ([Message]) -> Void
 ) async throws -> ConversationStream {
     @Sendable func refresh() async throws {
         let page = try await client.messages(in: conversationId) // The newest messages first.
@@ -222,7 +222,7 @@ func watchConversation(
 // requestId identifies the message. Create it with the draft, for example with UUID().uuidString.lowercased(), and
 // keep it until you know the outcome.
 func sendMessage(
-    _ client: ConvoHopClient, to conversationId: String, text: String, requestId: String
+    _ client: RelayClient, to conversationId: String, text: String, requestId: String
 ) async throws -> String {
     let receipt = try await client.send(text, to: conversationId, requestId: requestId)
     return receipt.messageId

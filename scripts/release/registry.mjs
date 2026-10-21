@@ -6,11 +6,11 @@ import { pathToFileURL } from 'node:url';
 import { main, parseArgs, REPO_ROOT, REPOSITORY, run, setOutput, sha256Sums } from './lib.mjs';
 
 const REGISTRIES = {
-  pypi: { component: 'python', package: 'convohop' },
-  nuget: { component: 'dotnet', package: 'ConvoHop' },
-  pubdev: { component: 'flutter', package: 'convohop' },
-  'maven-jvm': { component: 'jvm', package: 'com.convohop' },
-  'maven-android': { component: 'android', package: 'com.convohop' },
+  pypi: { component: 'python', package: 'instantrelay' },
+  nuget: { component: 'dotnet', package: 'InstantRelay' },
+  pubdev: { component: 'flutter', package: 'instantrelay' },
+  'maven-jvm': { component: 'jvm', package: 'dev.instantrelay', modules: ['relay-server', 'relay-server-kotlin'] },
+  'maven-android': { component: 'android', package: 'dev.instantrelay', modules: ['relay-android', 'relay-android-core', 'relay-android-push'] },
 };
 
 function registryOf(registry) {
@@ -55,7 +55,6 @@ export function planRegistryRelease({
   if (eventName === 'push' && !tagged) throw new Error('pub.dev automation requires a release tag push');
   if (typeof publish !== 'boolean' || typeof enabled !== 'boolean') throw new Error('Publication switches must be booleans');
   if (publish) {
-    if (registry.startsWith('maven-')) throw new Error('Maven Central publication is paused pending domain namespace verification');
     if (!tagged) throw new Error('Publication requires the exact immutable release tag, never main');
     if (!enabled) throw new Error('Configure registry trust and the protected environment before setting its PUBLISH_ENABLED variable to true');
     if (registry === 'pubdev') {
@@ -73,10 +72,10 @@ export function planRegistryRelease({
 export function artifactFiles(registry, version) {
   registryOf(registry);
   requireVersion(version);
-  if (registry === 'pypi') return [`convohop-${version}-py3-none-any.whl`, `convohop-${version}.tar.gz`].sort();
-  if (registry === 'nuget') return [`ConvoHop.${version}.nupkg`, `ConvoHop.${version}.snupkg`].sort();
-  if (registry === 'pubdev') return [`convohop-${version}.tar.gz`];
-  return [`convohop-${registry}-${version}-unsigned.tar.gz`];
+  if (registry === 'pypi') return [`instantrelay-${version}-py3-none-any.whl`, `instantrelay-${version}.tar.gz`].sort();
+  if (registry === 'nuget') return [`InstantRelay.${version}.nupkg`, `InstantRelay.${version}.snupkg`].sort();
+  if (registry === 'pubdev') return [`instantrelay-${version}.tar.gz`];
+  return [`instantrelay-${registry}-${version}-unsigned.tar.gz`];
 }
 
 function descriptor({ registry, version, sha, sourceRef }) {
@@ -170,7 +169,7 @@ export async function stageRegistrySource({ registry, version, sha, root = REPO_
   mkdirSync(dirname(out), { recursive: true });
   if (existsSync(out)) throw new Error('The source staging directory already exists');
   mkdirSync(out);
-  const archiveDirectory = mkdtempSync(join(tmpdir(), 'convohop-registry-'));
+  const archiveDirectory = mkdtempSync(join(tmpdir(), 'relay-registry-'));
   try {
     const source = registry === 'pypi' ? 'python' : 'flutter';
     const archive = join(archiveDirectory, 'source.tar');
@@ -183,7 +182,7 @@ export async function stageRegistrySource({ registry, version, sha, root = REPO_
       let metadata = replaceOnce(readFileSync(project, 'utf8'), /^ *"Private :: Do Not Upload",?\r?\n/gm, '', 'private upload classifier');
       metadata = metadata.replace(/^ *# Registry publishing is not approved yet; PyPI rejects uploads that carry this classifier\.\r?\n/m, '');
       writeFileSync(project, metadata);
-      const versionFile = join(out, 'python/src/convohop/_version.py');
+      const versionFile = join(out, 'python/src/instantrelay/_version.py');
       writeFileSync(versionFile, replaceOnce(readFileSync(versionFile, 'utf8'), /^__version__ = "[^"]+"$/gm, `__version__ = "${version}"`, 'Python version'));
     } else {
       if (!assets) throw new Error('Flutter staging needs an artifact output directory');
@@ -195,8 +194,8 @@ export async function stageRegistrySource({ registry, version, sha, root = REPO_
       writeFileSync(pubspec, metadata);
       const versionFile = join(packageRoot, 'lib/src/version.dart');
       writeFileSync(versionFile, replaceOnce(readFileSync(versionFile, 'utf8'),
-        /^const convoHopPackageVersion = '[^']+';$/gm,
-        `const convoHopPackageVersion = '${version}';`, 'Flutter package version'));
+        /^const relayPackageVersion = '[^']+';$/gm,
+        `const relayPackageVersion = '${version}';`, 'Flutter package version'));
       const changelog = join(packageRoot, 'CHANGELOG.md');
       if (!existsSync(changelog)) {
         writeFileSync(changelog, `# Changelog\n\n## ${version}\n\nPrepared from the [release source](https://github.com/${REPOSITORY}/tree/${sha}/flutter) at ${sha}.\n`);
@@ -212,14 +211,77 @@ export async function stageRegistrySource({ registry, version, sha, root = REPO_
 }
 
 export async function requirePubdevPackage({ fetch = globalThis.fetch } = {}) {
-  const response = await fetch('https://pub.dev/api/packages/convohop', { signal: AbortSignal.timeout(30_000) });
+  const response = await fetch('https://pub.dev/api/packages/instantrelay', { signal: AbortSignal.timeout(30_000) });
   if (response.status === 404) throw new Error('Complete the first real publication manually before enabling pub.dev automation');
   if (!response.ok) throw new Error(`pub.dev bootstrap check failed with HTTP ${response.status}`);
   const body = await response.json();
-  if (body?.name !== 'convohop' || !Array.isArray(body.versions) || body.versions.length === 0
+  if (body?.name !== 'instantrelay' || !Array.isArray(body.versions) || body.versions.length === 0
     || !body.versions.every((entry) => typeof entry?.version === 'string' && entry.version !== '')) {
-    throw new Error('pub.dev returned malformed package evidence for convohop');
+    throw new Error('pub.dev returned malformed package evidence for instantrelay');
   }
+}
+
+export async function publishMaven({
+  registry, version, bundle, username, password, fetch = globalThis.fetch,
+  wait = (milliseconds) => new Promise((resolve) => setTimeout(resolve, milliseconds)),
+  attempts = 120, onDeployment = () => {},
+}) {
+  const { package: group, modules } = registryOf(registry);
+  if (!modules) throw new Error('Expected a Maven publication target');
+  requireVersion(version);
+  if (typeof username !== 'string' || !username || /[:\s]/.test(username)
+    || typeof password !== 'string' || !password || /[\r\n]/.test(password)) {
+    throw new Error('Configure the existing Central user token username and password in the maven environment');
+  }
+  if (!Buffer.isBuffer(bundle) || bundle.length === 0) throw new Error('The verified signed Central bundle is required');
+  if (!Number.isSafeInteger(attempts) || attempts < 1 || attempts > 120) throw new Error('Invalid Central polling budget');
+  const authorization = `Bearer ${Buffer.from(`${username}:${password}`).toString('base64')}`;
+  const request = async (path, body) => {
+    let response;
+    try {
+      response = await fetch(`https://central.sonatype.com/api/v1/publisher/${path}`, {
+        method: 'POST', headers: { Authorization: authorization }, body,
+        redirect: 'error', signal: AbortSignal.timeout(30_000),
+      });
+    } catch (error) {
+      if (!(error instanceof TypeError || error instanceof DOMException)) throw error;
+      throw new Error('Central request failed; check the Portal deployment before retrying because the upload outcome may be unknown');
+    }
+    if (!response.ok) throw new Error(`Central returned HTTP ${response.status}; inspect the Portal deployment before retrying`);
+    return response;
+  };
+  const form = new FormData();
+  form.append('bundle', new Blob([bundle], { type: 'application/octet-stream' }), `relay-${registry}-${version}.zip`);
+  const uploaded = await request(`upload?publishingType=AUTOMATIC&name=${encodeURIComponent(`Relay ${registry} ${version}`)}`, form);
+  const deploymentId = (await uploaded.text()).trim();
+  if (!/^[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}$/i.test(deploymentId)) {
+    throw new Error('Central returned an invalid deployment ID; inspect the Portal before retrying');
+  }
+  onDeployment(deploymentId);
+  const expected = modules.map((module) => `pkg:maven/${group}/${module}@${version}`).sort();
+  for (let attempt = 0; attempt < attempts; attempt += 1) {
+    const response = await request(`status?id=${deploymentId}`);
+    let status;
+    try {
+      status = await response.json();
+    } catch (error) {
+      if (!(error instanceof SyntaxError)) throw error;
+      throw new Error(`Central returned malformed status for deployment ${deploymentId}`);
+    }
+    if (status?.deploymentId !== deploymentId) throw new Error(`Central status does not identify deployment ${deploymentId}`);
+    if (status.deploymentState === 'PUBLISHED') {
+      if (!Array.isArray(status.purls) || status.purls.some((purl) => typeof purl !== 'string')
+        || JSON.stringify([...status.purls].sort()) !== JSON.stringify(expected)) {
+        throw new Error(`Central published unexpected coordinates for deployment ${deploymentId}`);
+      }
+      return deploymentId;
+    }
+    if (!['PENDING', 'VALIDATING', 'PUBLISHING'].includes(status.deploymentState)) {
+      throw new Error(`Central deployment ${deploymentId} did not publish; inspect its validation state in the Portal`);
+    }
+    if (attempt + 1 < attempts) await wait(5_000);
+  }
+  throw new Error(`Central deployment ${deploymentId} is not confirmed published; inspect the Portal before retrying`);
 }
 
 function boolean(value, name) {
@@ -239,7 +301,7 @@ if (import.meta.url === pathToFileURL(process.argv[1] ?? '').href) {
   await main(async () => {
     const command = process.argv[2];
     const args = parseArgs(process.argv.slice(3), {
-      options: ['registry', 'version', 'sha', 'source-ref', 'out', 'directory', 'repository'],
+      options: ['registry', 'version', 'sha', 'source-ref', 'out', 'directory', 'repository', 'bundle'],
     });
     if (command === 'plan') {
       const plan = await planFromGit();
@@ -267,8 +329,17 @@ if (import.meta.url === pathToFileURL(process.argv[1] ?? '').href) {
       ]);
     } else if (command === 'pubdev-ready') {
       await requirePubdevPackage();
+    } else if (command === 'maven-publish') {
+      await publishMaven({
+        registry: args.registry, version: args.version, bundle: readFileSync(args.bundle),
+        username: process.env.MAVEN_CENTRAL_USERNAME, password: process.env.MAVEN_CENTRAL_PASSWORD,
+        onDeployment: (id) => {
+          console.log(`Central deployment ${id}; inspect this ID before retrying an uncertain upload.`);
+          setOutput('deployment-id', id);
+        },
+      });
     } else {
-      throw new Error('Expected plan, stage, seal, verify, maven-bundle or pubdev-ready');
+      throw new Error('Expected plan, stage, seal, verify, maven-bundle, maven-publish or pubdev-ready');
     }
   });
 }

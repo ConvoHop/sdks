@@ -1,31 +1,31 @@
 # Android client quickstart
 
-Use ConvoHop in your Android app with `com.convohop:convohop-android`: connect with the session your backend issued and keep it renewed, show a conversation from a local store and keep it current, and send messages optimistically through an outbox that survives dropped connections and restarts.
+Use Relay in your Android app with `dev.instantrelay:relay-android`: connect with the session your backend issued and keep it renewed, show a conversation from a local store and keep it current, and send messages optimistically through an outbox that survives dropped connections and restarts.
 
 ## Before you start
 
-Your backend signs the user in and returns a session from ConvoHop, with the project's base URL and ID, as the [Java and Kotlin server quickstart](../../jvm/quickstarts/server.md#sign-in-a-user) shows. The SDK never holds a backend key. You need Android 7.0 (API 24) or later and the SDK ([install](../index.md#install)). Its suspending calls are main-safe, so call them from a coroutine, such as one from `lifecycleScope.launch`.
+Your backend signs the user in and returns a session from Relay, with the project's base URL and ID, as the [Java and Kotlin server quickstart](../../jvm/quickstarts/server.md#sign-in-a-user) shows. The SDK never holds a backend key. You need Android 7.0 (API 24) or later and the SDK ([install](../index.md#install)). Its suspending calls are main-safe, so call them from a coroutine, such as one from `lifecycleScope.launch`.
 
 The samples on this page use these imports:
 
-```kotlin snippet=docs/languages/android/examples/src/main/kotlin/com/convohop/examples/Client.kt#imports
+```kotlin snippet=docs/languages/android/examples/src/main/kotlin/dev/instantrelay/examples/Client.kt#imports
 import android.content.Context
 import android.util.Log
-import com.convohop.android.NetworkMonitor
-import com.convohop.android.SharedPreferencesRecoveryStorage
-import com.convohop.android.SqliteLocalStore
-import com.convohop.android.core.ConversationStream
-import com.convohop.android.core.ConvoHopClient
-import com.convohop.android.core.ConvoHopClientOptions
-import com.convohop.android.core.ConvoHopStore
-import com.convohop.android.core.PendingMessage
-import com.convohop.android.core.PendingState
-import com.convohop.android.core.SessionRefresh
-import com.convohop.android.core.Timeline
-import com.convohop.android.core.TimelineItem
-import com.convohop.android.generated.Message
-import com.convohop.android.generated.Session
-import com.convohop.android.generated.SessionBootstrap
+import dev.instantrelay.android.NetworkMonitor
+import dev.instantrelay.android.SharedPreferencesRecoveryStorage
+import dev.instantrelay.android.SqliteLocalStore
+import dev.instantrelay.android.core.ConversationStream
+import dev.instantrelay.android.core.RelayClient
+import dev.instantrelay.android.core.RelayClientOptions
+import dev.instantrelay.android.core.RelayStore
+import dev.instantrelay.android.core.PendingMessage
+import dev.instantrelay.android.core.PendingState
+import dev.instantrelay.android.core.SessionRefresh
+import dev.instantrelay.android.core.Timeline
+import dev.instantrelay.android.core.TimelineItem
+import dev.instantrelay.android.generated.Message
+import dev.instantrelay.android.generated.Session
+import dev.instantrelay.android.generated.SessionBootstrap
 import java.util.concurrent.TimeUnit
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -43,14 +43,14 @@ import okhttp3.RequestBody.Companion.toRequestBody
 
 ## Connect
 
-```kotlin snippet=docs/languages/android/examples/src/main/kotlin/com/convohop/examples/Client.kt#connect
-/** What your backend's sign-in endpoint returns: the project's address and a user session from ConvoHop. */
+```kotlin snippet=docs/languages/android/examples/src/main/kotlin/dev/instantrelay/examples/Client.kt#connect
+/** What your backend's sign-in endpoint returns: the project's address and a user session from Relay. */
 class SignIn(val baseUrl: String, val projectId: String, val bootstrap: SessionBootstrap)
 
-suspend fun connectUser(context: Context, signIn: SignIn, sessionRefresh: SessionRefresh? = null): ConvoHopClient {
+suspend fun connectUser(context: Context, signIn: SignIn, sessionRefresh: SessionRefresh? = null): RelayClient {
     val session = checkNotNull(signIn.bootstrap.session) { "The sign-in carries no session" }
-    val client = ConvoHopClient(
-        ConvoHopClientOptions(
+    val client = RelayClient(
+        RelayClientOptions(
             baseUrl = signIn.baseUrl,
             projectId = signIn.projectId,
             sessionToken = signIn.bootstrap.sessionToken, // The client keeps it in memory only.
@@ -77,20 +77,20 @@ suspend fun connectUser(context: Context, signIn: SignIn, sessionRefresh: Sessio
 
 `baseUrl` must be HTTPS, or loopback HTTP for local development. The client keeps the session token in memory only. `initialize()` loads the project's signed route before the first call.
 
-`recoveryStorage` keeps the sends that ConvoHop hasn't confirmed: their request IDs, inputs, including message text, and outcomes, but never tokens. Name it after the project and user, as the sample does, so that users who share a device don't share it. At startup, `recoverPending` settles up to 16 sends that may still go through: those whose outcome is unknown, and those refused with a problem that resending can fix, such as `RATE_LIMITED`. It resends one under its original request ID when its last attempt failed transiently, such as with a lost connection, and its retry budget lasts. Otherwise it looks up its outcome without sending it again.
+`recoveryStorage` keeps the sends that Relay hasn't confirmed: their request IDs, inputs, including message text, and outcomes, but never tokens. Name it after the project and user, as the sample does, so that users who share a device don't share it. At startup, `recoverPending` settles up to 16 sends that may still go through: those whose outcome is unknown, and those refused with a problem that resending can fix, such as `RATE_LIMITED`. It resends one under its original request ID when its last attempt failed transiently, such as with a lost connection, and its retry budget lasts. Otherwise it looks up its outcome without sending it again.
 
 ## Renew the session
 
 Sessions expire. To renew the user's session before it does, pass a `SessionRefresh` to `connectUser`, then call `keepSessionAlive`:
 
-```kotlin snippet=docs/languages/android/examples/src/main/kotlin/com/convohop/examples/Client.kt#renew
+```kotlin snippet=docs/languages/android/examples/src/main/kotlin/dev/instantrelay/examples/Client.kt#renew
 /** Pass it to connectUser. The client calls it with the session's metadata, never its token. */
 class BackendSessionRefresh(
     private val renewUrl: String, // Your backend's endpoint, behind your app's own sign-in.
     private val http: OkHttpClient, // Your app's client, which carries that sign-in.
 ) : SessionRefresh {
     override suspend fun refresh(current: Session): SessionBootstrap = withContext(Dispatchers.IO) {
-        // Your backend renews exactly this session with ConvoHop and returns the SessionBootstrap it received.
+        // Your backend renews exactly this session with Relay and returns the SessionBootstrap it received.
         val body = buildJsonObject {
             put("sessionId", current.sessionId)
             put("expectedRevision", current.sessionRevision)
@@ -103,31 +103,31 @@ class BackendSessionRefresh(
         val call = http.newBuilder().callTimeout(10, TimeUnit.SECONDS).build().newCall(request)
         call.execute().use { response ->
             check(response.isSuccessful) { "Session renewal failed with HTTP ${response.code}" }
-            // The client checks the renewed session with ConvoHop before it uses it.
+            // The client checks the renewed session with Relay before it uses it.
             SessionBootstrap.fromJson(Json.parseToJsonElement(checkNotNull(response.body).string()))
         }
     }
 }
 
 /** Renews the session 5 minutes to 30 seconds before it expires, until you close the result. */
-fun keepSessionAlive(client: ConvoHopClient): AutoCloseable =
+fun keepSessionAlive(client: RelayClient): AutoCloseable =
     client.refreshAutomatically { error -> Log.w("Chat", "Couldn't renew the session", error) }
 ```
 
 The renewal endpoint is your backend's, behind your app's own sign-in. It renews the session with [`sessions().renew`](../../jvm/reference/server.md#projectserverclientsessionsrenew-method), taking the principal and device from that sign-in rather than from the request, and returns the `SessionBootstrap` it received.
 
-`refreshAutomatically` renews 5 minutes to 30 seconds before the session expires, and retries failures with backoff. Concurrent renewals share one request. The client's live connections pause while the session renews, and it checks the renewed session with ConvoHop before it uses it. Don't call the client from `refresh`: the call would wait for the renewal.
+`refreshAutomatically` renews 5 minutes to 30 seconds before the session expires, and retries failures with backoff. Concurrent renewals share one request. The client's live connections pause while the session renews, and it checks the renewed session with Relay before it uses it. Don't call the client from `refresh`: the call would wait for the renewal.
 
 `client.sessionRefreshState` says where renewal stands. `BLOCKED` means that a renewal couldn't be verified, and requests stay blocked: close the client and sign the user in again.
 
 ## Show a conversation
 
-```kotlin snippet=docs/languages/android/examples/src/main/kotlin/com/convohop/examples/Client.kt#store
+```kotlin snippet=docs/languages/android/examples/src/main/kotlin/dev/instantrelay/examples/Client.kt#store
 /** The signed-in user's chat. Messages and unsent ones stay in SQLite, and the outbox sends while the device is online. */
-class Chat(context: Context, val client: ConvoHopClient) {
+class Chat(context: Context, val client: RelayClient) {
     val network = NetworkMonitor(context)
     val local = SqliteLocalStore(context, client)
-    val store = ConvoHopStore(client, local, network.online) { error -> Log.w("Chat", "Chat error", error) }
+    val store = RelayStore(client, local, network.online) { error -> Log.w("Chat", "Chat error", error) }
 }
 
 /** Shows the stored messages at once, then keeps them current. Close the timeline when the screen goes away. */
@@ -139,15 +139,15 @@ fun showConversation(chat: Chat, conversationId: String, scope: CoroutineScope, 
 }
 ```
 
-`ConvoHopStore` keeps each conversation's messages, and the user's messages that aren't sent yet, in SQLite. A timeline shows them at once, then catches up with ConvoHop and follows the conversation live. Keep one store per signed-in user, and close each timeline when its screen goes away.
+`RelayStore` keeps each conversation's messages, and the user's messages that aren't sent yet, in SQLite. A timeline shows them at once, then catches up with Relay and follows the conversation live. Keep one store per signed-in user, and close each timeline when its screen goes away.
 
-- `timeline.items` lists the sent messages, `TimelineItem.Sent`, oldest first, then this device's `TimelineItem.Pending` messages until ConvoHop's history shows them. Use `item.key` as the list key.
+- `timeline.items` lists the sent messages, `TimelineItem.Sent`, oldest first, then this device's `TimelineItem.Pending` messages until Relay's history shows them. Use `item.key` as the list key.
 - `timeline.loadOlder()` loads the previous page while `timeline.hasOlder` is true.
 - `timeline.replay` is `CATCHING_UP`, `LIVE`, `RECONNECTING`, `PAUSED` or `CLOSED`.
 
 ## Send a message
 
-```kotlin snippet=docs/languages/android/examples/src/main/kotlin/com/convohop/examples/Client.kt#outbox
+```kotlin snippet=docs/languages/android/examples/src/main/kotlin/dev/instantrelay/examples/Client.kt#outbox
 /** Sends a draft. It shows at once as a TimelineItem.Pending, and the outbox delivers it while the device is online. */
 suspend fun sendDraft(timeline: Timeline, draft: String): PendingMessage = timeline.send(draft)
 
@@ -165,17 +165,17 @@ suspend fun sendAgain(chat: Chat, message: PendingMessage): PendingMessage =
     chat.store.outbox.sendAgain(message.requestId)
 ```
 
-Sends are optimistic: `timeline.send` stores the message and returns at once, and the outbox delivers it while the device is online, oldest first within each conversation. Every attempt reuses the message's request ID and payload, so ConvoHop applies it at most once. `store.outbox.pending` holds each unsent message's state:
+Sends are optimistic: `timeline.send` stores the message and returns at once, and the outbox delivers it while the device is online, oldest first within each conversation. Every attempt reuses the message's request ID and payload, so Relay applies it at most once. `store.outbox.pending` holds each unsent message's state:
 
 | `PendingState` | Meaning |
 | --- | --- |
-| `QUEUED` | Waiting to be sent. Nothing was applied: it wasn't submitted yet, or ConvoHop refused the attempt, for example because the session expired. |
+| `QUEUED` | Waiting to be sent. Nothing was applied: it wasn't submitted yet, or Relay refused the attempt, for example because the session expired. |
 | `SENDING` | It may have been submitted. Until its outcome is known, it's resent only under the same request ID. |
 | `SENT` | Committed. It leaves the outbox when the timeline shows it. |
-| `UNCONFIRMED` | Three attempts or 60 seconds passed, and ConvoHop hasn't seen it. It may still commit, so it's never resent on its own. |
-| `FAILED` | Not sent. ConvoHop rejected it, or three attempts or 60 seconds passed and none could have been applied. `errorCode` says why. |
+| `UNCONFIRMED` | Three attempts or 60 seconds passed, and Relay hasn't seen it. It may still commit, so it's never resent on its own. |
+| `FAILED` | Not sent. Relay rejected it, or three attempts or 60 seconds passed and none could have been applied. `errorCode` says why. |
 
-A refusal that resending can't change, such as `QUOTA_EXCEEDED` or `PLAN_LIMIT_EXCEEDED`, fails the message at once. After other failures, such as a lost connection or `RATE_LIMITED`, the outbox keeps the message and tries again with backoff, never sooner than the `retryAfter` that ConvoHop asked for, even when the device comes back online.
+A refusal that resending can't change, such as `QUOTA_EXCEEDED` or `PLAN_LIMIT_EXCEEDED`, fails the message at once. After other failures, such as a lost connection or `RATE_LIMITED`, the outbox keeps the message and tries again with backoff, never sooner than the `retryAfter` that Relay asked for, even when the device comes back online.
 
 `sendAgain` sends a copy of an `UNCONFIRMED` or `FAILED` message under a new request ID. An unconfirmed original may still commit and show twice, so ask the user first. `store.outbox.discard(requestId)` removes a message unless it's `SENDING`.
 
@@ -183,24 +183,24 @@ If the app is killed during a send, the next start resends the message under the
 
 ## Reconnect and resume
 
-Timelines reconnect on their own. After a dropped connection, they catch up over HTTP from the last event they applied, then follow the conversation live again. While the session renews they pause, and they resume on the renewed session. When the network comes back, the store reconnects at once instead of waiting out its backoff, though never sooner than a `retryAfter` that ConvoHop asked for, and the outbox delivers what it holds.
+Timelines reconnect on their own. After a dropped connection, they catch up over HTTP from the last event they applied, then follow the conversation live again. While the session renews they pause, and they resume on the renewed session. When the network comes back, the store reconnects at once instead of waiting out its backoff, though never sooner than a `retryAfter` that Relay asked for, and the outbox delivers what it holds.
 
 A problem that reconnecting can't fix, such as `NOT_FOUND`, `FORBIDDEN` or `QUOTA_EXCEEDED`, or a response that breaks the protocol, stops the timeline: `timeline.replay` becomes `CLOSED`, and the store's error callback gets the error. Open a new timeline to try again.
 
-When the organization's prepaid credits run out or it reaches its monthly spend cap, the timeline closes with a 402 `CREDITS_EXHAUSTED` or `SPEND_CAP_REACHED` problem; open a new one once the organization can pay again. While ConvoHop can't verify current spend, the timeline reports `SPEND_UNVERIFIED` and reconnects no sooner than its `retryAfter`, even if the network comes back sooner.
+When the organization's prepaid credits run out or it reaches its monthly spend cap, the timeline closes with a 402 `CREDITS_EXHAUSTED` or `SPEND_CAP_REACHED` problem; open a new one once the organization can pay again. While Relay can't verify current spend, the timeline reports `SPEND_UNVERIFIED` and reconnects no sooner than its `retryAfter`, even if the network comes back sooner.
 
 ## Typing and read receipts
 
-```kotlin snippet=docs/languages/android/examples/src/main/kotlin/com/convohop/examples/Client.kt#typing
+```kotlin snippet=docs/languages/android/examples/src/main/kotlin/dev/instantrelay/examples/Client.kt#typing
 /** Call it whenever the draft changes, for example from doAfterTextChanged. */
 fun onDraftChanged(timeline: Timeline, draft: String) {
     if (draft.isBlank()) timeline.typing.stop() else timeline.typing.keystroke()
 }
 ```
 
-`keystroke()` signals that the user is typing at most every 3 seconds, and signals that they stopped 5 seconds after the last keystroke. `timeline.send` stops it too. Typing signals are ephemeral: they're never retried, and failures go to the store's error callback. Signal only when `client.capabilities().features?.typing` is true. ConvoHop doesn't deliver other members' typing to clients yet, and has no presence.
+`keystroke()` signals that the user is typing at most every 3 seconds, and signals that they stopped 5 seconds after the last keystroke. `timeline.send` stops it too. Typing signals are ephemeral: they're never retried, and failures go to the store's error callback. Signal only when `client.capabilities().features?.typing` is true. Relay doesn't deliver other members' typing to clients yet, and has no presence.
 
-```kotlin snippet=docs/languages/android/examples/src/main/kotlin/com/convohop/examples/Client.kt#receipts
+```kotlin snippet=docs/languages/android/examples/src/main/kotlin/dev/instantrelay/examples/Client.kt#receipts
 /** Call it when the newest message is on screen. It returns false when there's nothing new to report. */
 suspend fun onMessagesSeen(timeline: Timeline): Boolean = timeline.markRead()
 
@@ -216,7 +216,7 @@ fun seenBy(timeline: Timeline, message: Message, me: String): List<String> =
 
 ## Sign out
 
-```kotlin snippet=docs/languages/android/examples/src/main/kotlin/com/convohop/examples/Client.kt#sign-out
+```kotlin snippet=docs/languages/android/examples/src/main/kotlin/dev/instantrelay/examples/Client.kt#sign-out
 /** Deletes the user's cached and unsent messages and the client's recovery file. */
 suspend fun signOut(context: Context, chat: Chat, renewal: AutoCloseable?) {
     renewal?.close()
@@ -236,9 +236,9 @@ You can also watch a conversation and send messages without the store.
 
 ### Watch a conversation's events
 
-```kotlin snippet=docs/languages/android/examples/src/main/kotlin/com/convohop/examples/Client.kt#watch
+```kotlin snippet=docs/languages/android/examples/src/main/kotlin/dev/instantrelay/examples/Client.kt#watch
 /** Without a store: keeps [messages] at the conversation's newest page, oldest first. Collect it to render them. */
-suspend fun watchConversation(client: ConvoHopClient, conversationId: String, messages: MutableStateFlow<List<Message>>): ConversationStream {
+suspend fun watchConversation(client: RelayClient, conversationId: String, messages: MutableStateFlow<List<Message>>): ConversationStream {
     suspend fun newest() = client.messages(conversationId).items.asReversed()
     messages.value = newest()
     // Replays from the stored cursor, so nothing is missed. apply runs on the client's dispatcher, one batch at a time.
@@ -253,23 +253,23 @@ suspend fun watchConversation(client: ConvoHopClient, conversationId: String, me
 
 `watch` replays the conversation's events from the cursor in recovery storage, or from the start, then follows the conversation live. Batches reach `apply` in order, and the cursor advances only after `apply` returns. Events say what changed, so read the current messages when one did. Close the stream when the screen goes away, and call `client.reconnectNow()` when the network comes back.
 
-If ConvoHop requires a resynchronization, or the session no longer authorizes the replay, the stream closes and reports the error instead of skipping history. The SDK never resets a cursor on its own: `client.resyncAuthorizedHistory(conversationId, apply, onError)` replays the authorized history from the start.
+If Relay requires a resynchronization, or the session no longer authorizes the replay, the stream closes and reports the error instead of skipping history. The SDK never resets a cursor on its own: `client.resyncAuthorizedHistory(conversationId, apply, onError)` replays the authorized history from the start.
 
 ### Send with your own request ID
 
-```kotlin snippet=docs/languages/android/examples/src/main/kotlin/com/convohop/examples/Client.kt#send
+```kotlin snippet=docs/languages/android/examples/src/main/kotlin/dev/instantrelay/examples/Client.kt#send
 /** Without a store: sends once. Keep the request ID with the draft and reuse it to retry, so it's applied once. */
-suspend fun sendMessage(client: ConvoHopClient, conversationId: String, text: String, requestId: String): String =
+suspend fun sendMessage(client: RelayClient, conversationId: String, text: String, requestId: String): String =
     client.conversation(conversationId).messages.send(text, requestId = requestId).messageId
 ```
 
-Create the request ID when the user writes the message, for example with `UUID.randomUUID().toString()`, and keep it with the draft. If the connection drops during a send, `send` throws a `ConvoHopProblem` whose `outcome` is `unknown`. Sending the same text again with the same request ID posts it once, whether or not the first attempt reached ConvoHop. The SDK sends a request at most three times, within 60 seconds of the first attempt. Reusing a request ID with different text throws `IDEMPOTENCY_CONFLICT`.
+Create the request ID when the user writes the message, for example with `UUID.randomUUID().toString()`, and keep it with the draft. If the connection drops during a send, `send` throws a `RelayProblem` whose `outcome` is `unknown`. Sending the same text again with the same request ID posts it once, whether or not the first attempt reached Relay. The SDK sends a request at most three times, within 60 seconds of the first attempt. Reusing a request ID with different text throws `IDEMPOTENCY_CONFLICT`.
 
-Recovery storage keeps at most 128 requests. When it's full, a new request makes room by forgetting one that can't be sent again: one that ConvoHop committed or rejected for good, or one whose three attempts or 60 seconds are spent. If there's none, `send` throws a `ConvoHopProblem` with code `RECOVERY_LIMIT` before sending anything. Resend or resolve the outstanding requests first.
+Recovery storage keeps at most 128 requests. When it's full, a new request makes room by forgetting one that can't be sent again: one that Relay committed or rejected for good, or one whose three attempts or 60 seconds are spent. If there's none, `send` throws a `RelayProblem` with code `RECOVERY_LIMIT` before sending anything. Resend or resolve the outstanding requests first.
 
 ## Next steps
 
 - [Calling quickstart](calling.md): start, join and answer calls in a conversation.
 - [Push notifications quickstart](push.md): show notifications for messages and calls when your app isn't open.
-- [`ConvoHopClient` reference](../reference/android-core.md#convohopclient-class): every method, with the operation it sends.
-- [`ConvoHopStore` reference](../reference/android-core.md#convohopstore-class): the store, its outbox and timelines.
+- [`RelayClient` reference](../reference/android-core.md#relayclient-class): every method, with the operation it sends.
+- [`RelayStore` reference](../reference/android-core.md#relaystore-class): the store, its outbox and timelines.

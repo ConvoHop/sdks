@@ -1,11 +1,11 @@
 // Checks the shared push payload vectors in spec/push-payload/: the committed file is the generator
-// output and matches the schema, the @convohop/server builders and webhook verifier reproduce it,
+// output and matches the schema, the @instantrelay/server builders and webhook verifier reproduce it,
 // and every expected request follows spec/push-payload/README.md. The rules below are written from
 // the README without the builders, so the vectors don't merely restate the implementation.
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import { before, describe, test } from "node:test";
-import { PushPayloadError, push, webhooks } from "@convohop/server";
+import { PushPayloadError, push, webhooks } from "@instantrelay/server";
 import { compileDefinition, compileSchema, formatErrors } from "../lib/json-schema.mjs";
 import {
   ELLIPSIS, PUSH_BUILDERS, PUSH_LIMITS, PUSH_SCHEMA_FILE, PUSH_VECTOR_FILE, buildPushVectors, canonicalBytes, measuredPart,
@@ -180,7 +180,7 @@ describe("push payload vectors", () => {
     for (const vector of vectors) for (const builder of PUSH_BUILDERS) checkExpected(vector, builder);
   });
 
-  test("the @convohop/server builders return every expected request, with or without unknown fields", () => {
+  test("the @instantrelay/server builders return every expected request, with or without unknown fields", () => {
     for (const vector of vectors) for (const builder of PUSH_BUILDERS) {
       const expected = comparable(builder, vector.expected[builder]?.request ?? null);
       for (const event of [vector.event, { ...vector.event, ...vector.unknownFields }])

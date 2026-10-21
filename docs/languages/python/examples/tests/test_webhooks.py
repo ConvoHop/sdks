@@ -4,9 +4,9 @@ from typing import Any
 from uuid import uuid4
 
 import pytest
-from convohop import WebhookVerificationError
-from convohop.types import Conversation
-from convohop.webhooks import WebhookEvent, WebhookNotificationEvent
+from instantrelay import WebhookVerificationError
+from instantrelay.types import Conversation
+from instantrelay.webhooks import WebhookEvent, WebhookNotificationEvent
 
 from deliveries import new_secret, sign_delivery, wire_json
 from server import ServerConfig, bootstrap_user, connect, create_conversation
@@ -107,7 +107,7 @@ def test_handle_event_reads_changed_conversations_and_routes_notifications(confi
             envelope("message.created", "message", str(uuid4()), config.project_id),
             notification,
             envelope("webhook.endpointDisabled", "webhookEndpoint", "endpoint-orders", config.project_id),
-            envelope("thread.archived", "thread", str(uuid4()), config.project_id),  # A type from a newer ConvoHop.
+            envelope("thread.archived", "thread", str(uuid4()), config.project_id),  # A type from a newer Relay.
         ]:
             signed = delivery(event, secret)
             assert receive_webhook(signed.headers, signed.body, [secret], queue.enqueue) == 204

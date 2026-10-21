@@ -2,16 +2,16 @@
 // the conformance mock, with and without a message preview.
 
 // #region notification-service-imports
-import ConvoHop
-import ConvoHopNotificationService
+import Relay
+import RelayNotificationService
 import Foundation
 import UserNotifications
 // #endregion notification-service-imports
 
 // #region notification-service
 final class NotificationService: UNNotificationServiceExtension {
-    private let service = ConvoHopNotificationService(
-        ledger: ConvoHopNotificationLedger(suiteName: "group.com.example.chat")
+    private let service = RelayNotificationService(
+        ledger: RelayNotificationLedger(suiteName: "group.com.example.chat")
     ) { notification in
         // A client for notification.recipientId with its own short-lived session, kept in memory
         // (for example, fetched from your backend), or nil.
@@ -34,9 +34,9 @@ final class NotificationService: UNNotificationServiceExtension {
 // #region extension-client
 // The extension runs apart from your app and can't use its client. Fetch a short-lived session for the push's
 // recipient from your backend, and keep it in memory only.
-func extensionClient(_ signIn: SignIn) throws -> ConvoHopClient {
-    try ConvoHopClient(
-        configuration: ConvoHopConfiguration(
+func extensionClient(_ signIn: SignIn) throws -> RelayClient {
+    try RelayClient(
+        configuration: RelayConfiguration(
             baseURL: signIn.baseUrl,
             projectId: signIn.projectId,
             principalId: signIn.session.principalId,
@@ -49,14 +49,14 @@ func extensionClient(_ signIn: SignIn) throws -> ConvoHopClient {
 
 // Stands in for your backend call. The tests set provider.
 enum ExtensionSession {
-    typealias Provider = @Sendable (ConvoHopNotification) async throws -> ConvoHopClient?
+    typealias Provider = @Sendable (RelayNotification) async throws -> RelayClient?
 
     static var provider: Provider? {
         get { box.withLock { $0 } }
         set { box.withLock { $0 = newValue } }
     }
 
-    static func client(for notification: ConvoHopNotification) async throws -> ConvoHopClient? {
+    static func client(for notification: RelayNotification) async throws -> RelayClient? {
         guard let provider else { return nil }
         return try await provider(notification)
     }

@@ -1,6 +1,6 @@
 // The test page. It holds only a user's session token, never a backend key: the tests create users and sessions
 // in Node and pass the page what a browser app would receive from its own backend.
-import { ConversationStore, ConvoHopClient, Outbox } from "@convohop/client";
+import { ConversationStore, RelayClient, Outbox } from "@instantrelay/client";
 
 let current;
 
@@ -28,7 +28,7 @@ window.harness = {
    */
   async open({ projectId, incarnation, principalId, sessionToken, conversationId, persist = false, held = false }) {
     const errors = [], report = error => errors.push(error.message);
-    const client = new ConvoHopClient({ baseUrl: location.origin, projectId, incarnation, principalId, sessionToken,
+    const client = new RelayClient({ baseUrl: location.origin, projectId, incarnation, principalId, sessionToken,
       recoveryStorage: localStorage });
     const connectivity = held ? heldConnectivity() : undefined;
     const outbox = new Outbox(client, { persist, connectivity, onError: report });

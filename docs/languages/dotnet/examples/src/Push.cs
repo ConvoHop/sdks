@@ -6,7 +6,7 @@ using System.Collections.Generic;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
-using ConvoHop;
+using Relay;
 using FirebaseAdmin.Messaging;
 using Lib.Net.Http.WebPush;
 using Lib.Net.Http.WebPush.Authentication;

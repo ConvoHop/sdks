@@ -1,7 +1,7 @@
 {
-  "name": "convohop-docs-react-native-examples",
+  "name": "relay-docs-react-native-examples",
   "private": true,
-  "description": "Tested snippets for the React Native docs. Imports @convohop/*, react-native and LiveKit's React Native SDK and runs tsc through the repository root's workspace, so run npm ci and npm run build at the root first. The tests run the samples on Node.js, with packages/react-native's stand-ins for React Native and its native modules.",
+  "description": "Tested snippets for the React Native docs. Imports @instantrelay/*, react-native and LiveKit's React Native SDK and runs tsc through the repository root's workspace, so run npm ci and npm run build at the root first. The tests run the samples on Node.js, with packages/react-native's stand-ins for React Native and its native modules.",
   "license": "Apache-2.0",
   "type": "module",
   "engines": {

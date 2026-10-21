@@ -2,7 +2,7 @@ using System;
 using System.Linq;
 using Microsoft.CodeAnalysis;
 
-namespace ConvoHop.Docgen;
+namespace Relay.Docgen;
 
 /// <summary>A declaration or input the extractor can't document. The message names the file and the declaration.</summary>
 internal sealed class ExtractException : Exception

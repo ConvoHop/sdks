@@ -1,6 +1,6 @@
 # Flutter client quickstart
 
-Use ConvoHop in your users' Flutter apps with `package:convohop`: connect with the session your backend issued, show a conversation and keep it current, and send messages that survive dropped connections and app restarts.
+Use Relay in your users' Flutter apps with `package:instantrelay`: connect with the session your backend issued, show a conversation and keep it current, and send messages that survive dropped connections and app restarts.
 
 ## Before you start
 
@@ -25,7 +25,7 @@ Sessions expire, after 15 minutes by default. To renew the user's session before
 
 The renewal endpoint is your backend's, behind your app's own sign-in. It renews the session with the [`renewSession`](../../operations/communication/renewSession.md) operation through a server SDK, taking the principal and device from that sign-in rather than from the request, and returns the session bootstrap.
 
-While `sessionRefresh` runs, the client's requests wait and its streams pause. It checks the renewed session with ConvoHop before it uses it. Don't call the client from `sessionRefresh`: the call would wait for the renewal. Timers don't run while the app is suspended, so call `refresher.check()` when the app returns to the foreground.
+While `sessionRefresh` runs, the client's requests wait and its streams pause. It checks the renewed session with Relay before it uses it. Don't call the client from `sessionRefresh`: the call would wait for the renewal. Timers don't run while the app is suspended, so call `refresher.check()` when the app returns to the foreground.
 
 ## Show a conversation
 
@@ -51,7 +51,7 @@ The outbox sends each conversation's messages in order, and gives each message o
 
 `markRead()` reports that the user read through the newest message, unless their receipt already covers it. A change to what the user can see invalidates older receipts.
 
-ConvoHop doesn't publish online status to clients. A snapshot derives recent activity from when each member last wrote, edited or reported a receipt in the conversation, so show it as "recently active", not "online":
+Relay doesn't publish online status to clients. A snapshot derives recent activity from when each member last wrote, edited or reported a receipt in the conversation, so show it as "recently active", not "online":
 
 ```dart include=examples/lib/client.dart#activity
 ```
@@ -61,7 +61,7 @@ ConvoHop doesn't publish online status to clients. A snapshot derives recent act
 ```dart include=examples/lib/client.dart#typing
 ```
 
-`TypingIndicator` signals at most once every 3 seconds while the user types, and stops by itself 5 seconds after the last keystroke. Signals are single attempts that are never retried. They're outbound only: ConvoHop doesn't deliver other members' typing to clients. When the project doesn't offer typing, the indicator reports `FEATURE_UNSUPPORTED` to `onError` and stops signaling.
+`TypingIndicator` signals at most once every 3 seconds while the user types, and stops by itself 5 seconds after the last keystroke. Signals are single attempts that are never retried. They're outbound only: Relay doesn't deliver other members' typing to clients. When the project doesn't offer typing, the indicator reports `FEATURE_UNSUPPORTED` to `onError` and stops signaling.
 
 ## Sign out
 
@@ -90,11 +90,11 @@ Close the stream when the view goes away. If the authority can't continue from t
 ```dart include=examples/lib/client.dart#send
 ```
 
-Create the request ID when the user writes the message, for example with `newRequestId()`, and keep it with the draft. If the connection drops during a send, `client.send` throws a `ConvoHopProblem` whose `outcome` is `unknown`. Sending the same text again with the same request ID posts it once, whether or not the first attempt reached the authority. The SDK sends a request at most three times, within 60 seconds of the first attempt. Reusing a request ID with different text throws `IDEMPOTENCY_CONFLICT`.
+Create the request ID when the user writes the message, for example with `newRequestId()`, and keep it with the draft. If the connection drops during a send, `client.send` throws a `RelayProblem` whose `outcome` is `unknown`. Sending the same text again with the same request ID posts it once, whether or not the first attempt reached the authority. The SDK sends a request at most three times, within 60 seconds of the first attempt. Reusing a request ID with different text throws `IDEMPOTENCY_CONFLICT`.
 
 ## Next steps
 
 - [Calling quickstart](calling.md): start and join calls in a conversation.
 - [Push notifications quickstart](push.md): register devices, open notifications and answer calls.
-- [`ConvoHopClient` reference](../reference/convohop.md#convohopclient-class): every method, with the operation it sends.
+- [`RelayClient` reference](../reference/instantrelay.md#relayclient-class): every method, with the operation it sends.
 - [The SDK's README](https://github.com/ConvoHop/sdks/blob/main/flutter/README.md): platform setup, the data the SDK keeps on the device, and its limitations.

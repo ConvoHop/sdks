@@ -1,8 +1,8 @@
 import {
-  ConvoHopProblem, parseCounter, parseId, parseObject, parseString,
+  RelayProblem, parseCounter, parseId, parseObject, parseString,
   type Conversation, type ConversationMessage, type ItemPage, type ProtocolObject,
-} from "@convohop/core";
-import type { ConversationStream, ConvoHopClient, ReadReceipt } from "./client.js";
+} from "@instantrelay/core";
+import type { ConversationStream, RelayClient, ReadReceipt } from "./client.js";
 import { Outbox, type OutboxEntry } from "./outbox.js";
 import { asError, frozen, notify } from "./util.js";
 
@@ -46,7 +46,7 @@ class Superseded extends Error {
   constructor() { super("Conversation store work was superseded"); }
 }
 function needsResync(error: unknown): boolean {
-  return error instanceof ConvoHopProblem ? resyncCodes.has(error.code)
+  return error instanceof RelayProblem ? resyncCodes.has(error.code)
     : error instanceof Error && /resynchronization required/u.test(error.message);
 }
 function counter(value: unknown): bigint { return BigInt(parseCounter(value)); }
@@ -92,7 +92,7 @@ async function each<T>(items: T[], concurrency: number, work: (item: T) => Promi
  * Keep one store per conversation and client: stores of the same conversation share the saved replay position.
  */
 export class ConversationStore {
-  readonly client: ConvoHopClient;
+  readonly client: RelayClient;
   readonly conversationId: string;
   readonly outbox: Outbox;
   readonly #ownsOutbox: boolean;
@@ -119,7 +119,7 @@ export class ConversationStore {
   #snapshot: ConversationSnapshot | undefined;
   #messageList: readonly ConversationMessage[] | undefined;
   #receiptList: readonly ReadReceipt[] | undefined;
-  constructor(client: ConvoHopClient, conversationId: string, options: ConversationStoreOptions = {}) {
+  constructor(client: RelayClient, conversationId: string, options: ConversationStoreOptions = {}) {
     this.client = client; this.conversationId = parseId(conversationId);
     this.#onEvent = options.onEvent; this.#onError = options.onError;
     if (options.outbox && options.outbox.client !== client) throw new TypeError("The outbox belongs to another client");
@@ -309,7 +309,7 @@ export class ConversationStore {
     }
     await each(singles, 4, async id => {
       try { fetched.set(id, await this.client.getMessage(this.conversationId, id)); }
-      catch (error) { if (!(error instanceof ConvoHopProblem && error.code === "NOT_FOUND")) throw error; }
+      catch (error) { if (!(error instanceof RelayProblem && error.code === "NOT_FOUND")) throw error; }
     });
     const conversation = conversationChanged ? await this.client.getConversation(this.conversationId) : undefined;
     if (conversation && conversation.conversationId !== this.conversationId) throw new TypeError("Conversation does not match the request");
@@ -346,7 +346,7 @@ export class ConversationStore {
       return;
     }
     if (this.#stream === stream) this.#stream = undefined;
-    if (error instanceof ConvoHopProblem && error.code === "UNAUTHENTICATED" && !this.#refreshTried &&
+    if (error instanceof RelayProblem && error.code === "UNAUTHENTICATED" && !this.#refreshTried &&
         this.client.sessionRefreshState === "ready") {
       // One verified session refresh per interruption, then follow the conversation again from the loaded state.
       this.#refreshTried = true;
@@ -401,7 +401,7 @@ export class ConversationStore {
         return true;
       } catch (error) {
         // The membership changed since it was loaded: report again once with the current epochs.
-        if (attempt > 0 || !(error instanceof ConvoHopProblem && error.code === "REVISION_CONFLICT")) throw error;
+        if (attempt > 0 || !(error instanceof RelayProblem && error.code === "REVISION_CONFLICT")) throw error;
         const conversation = await this.client.getConversation(this.conversationId);
         if (generation !== this.#generation || conversation.conversationId !== this.conversationId) throw error;
         this.#conversation = frozen(conversation); this.#changed();

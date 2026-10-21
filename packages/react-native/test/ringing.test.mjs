@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { watchRingingCalls } from "@convohop/react-native";
+import { watchRingingCalls } from "@instantrelay/react-native";
 import { reported } from "react-native";
 import { linkCalls, snapshot, turn, uuid } from "./support/native.mjs";
 
@@ -285,7 +285,7 @@ test("a failed snapshot or stop is reported, and watching continues", async t =>
 test("watchRingingCalls checks its arguments", () => {
   linkCalls();
   const client = fakeClient();
-  assert.throws(() => watchRingingCalls(undefined), { name: "TypeError", message: "client must be a ConvoHopClient" });
+  assert.throws(() => watchRingingCalls(undefined), { name: "TypeError", message: "client must be a RelayClient" });
   assert.throws(() => watchRingingCalls({ liveAlerts: {}, liveSession: async () => {} }), { name: "TypeError" });
   assert.throws(() => watchRingingCalls(client, null), { name: "TypeError", message: "options must be an object" });
   for (const intervalMs of [999, 60001, 1500.5, "3000", Number.NaN])

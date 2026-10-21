@@ -84,10 +84,10 @@ jobs:
       - name: Check the publications
         working-directory: android
         run: |
-          python3 - build/repo/com/convohop <<'EOF'
+          python3 - build/repo/dev/instantrelay <<'EOF'
           import pathlib, re, sys, zipfile
           root = pathlib.Path(sys.argv[1])
-          for artifact, packaging in (("convohop-android", "aar"), ("convohop-android-push", "aar"), ("convohop-android-core", "jar")):
+          for artifact, packaging in (("relay-android", "aar"), ("relay-android-push", "aar"), ("relay-android-core", "jar")):
               versions = [path for path in (root / artifact).iterdir() if path.is_dir()]
               if len(versions) != 1:
                   sys.exit(f"{artifact}: expected one version, found {versions}")
@@ -173,7 +173,7 @@ jobs:
         # only those.
         run: >-
           npm run conformance --
-          --driver conformance/drivers/android/build/install/convohop-conformance-android/bin/convohop-conformance-android
+          --driver conformance/drivers/android/build/install/relay-conformance-android/bin/relay-conformance-android
           --reports conformance/reports/android
       - name: Fail on any other skip
         run: |
@@ -181,7 +181,7 @@ jobs:
           import { readFileSync } from "node:fs";
           const allowed = [
             /^it only uses (?:backend|management)(?:, (?:backend|management))* clients, which the driver under test does not declare$/,
-            /^driver convohop-android does not declare feature webhooks\.verify$/,
+            /^driver relay-android does not declare feature webhooks\.verify$/,
           ];
           const summary = JSON.parse(readFileSync("conformance/reports/android/summary.json", "utf8"));
           const scenarios = summary.suites.flatMap((suite) => suite.scenarios);
@@ -193,7 +193,7 @@ jobs:
             console.log(`::error::${scenario.id} ${scenario.status}: ${scenario.reason ?? "no reason"}`);
           }
           console.log(`${summary.driver.name}: ${passed.length} of ${scenarios.length} passed`);
-          if (summary.driver.name !== "convohop-android" || passed.length === 0 || other.length > 0) process.exit(1);
+          if (summary.driver.name !== "relay-android" || passed.length === 0 || other.length > 0) process.exit(1);
           SCRIPT
       - name: Upload JUnit and summary reports
         if: always()
@@ -205,7 +205,7 @@ jobs:
           retention-days: 14
 
   # Like the dev-stack job in conformance.yml, runs the scenarios against the
-  # ConvoHop dev stack: the private, development-only linux/arm64 image that
+  # Relay dev stack: the private, development-only linux/arm64 image that
   # runs the whole platform in one container (see spec/conformance/targets.md),
   # which conformance/dev-stack.mjs starts. The job runs only when the
   # CONVOHOP_DEV_STACK_IMAGE repository variable names the image, and never for
@@ -254,7 +254,7 @@ jobs:
         run: >-
           npm run conformance --
           --target conformance/targets/dev-stack.json
-          --driver conformance/drivers/android/build/install/convohop-conformance-android/bin/convohop-conformance-android
+          --driver conformance/drivers/android/build/install/relay-conformance-android/bin/relay-conformance-android
           --reports conformance/reports/android-dev-stack
       - name: Show why the dev stack stopped
         if: failure()

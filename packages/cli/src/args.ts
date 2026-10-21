@@ -14,11 +14,11 @@ export type OptionSpecs = Readonly<Record<string, OptionSpec>>;
 
 /** Options every command accepts. They can also come before the command. */
 export const globalOptions: OptionSpecs = {
-  profile: { kind: "string", value: "NAME", description: "Profile to use. Default: CONVOHOP_PROFILE, or default." },
+  profile: { kind: "string", value: "NAME", description: "Profile to use. Default: RELAY_PROFILE, or default." },
   "management-url": { kind: "string", value: "URL",
-    description: "Management authority origin. Default: CONVOHOP_MANAGEMENT_URL, or the profile's." },
+    description: "Management authority origin. Default: RELAY_MANAGEMENT_URL, or the profile's." },
   "communication-url": { kind: "string", value: "URL",
-    description: "Communication authority origin. Default: CONVOHOP_COMMUNICATION_URL, or the profile's." },
+    description: "Communication authority origin. Default: RELAY_COMMUNICATION_URL, or the profile's." },
   help: { kind: "boolean", description: "Show help." },
 };
 

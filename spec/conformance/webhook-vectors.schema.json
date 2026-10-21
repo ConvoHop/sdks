@@ -1,7 +1,7 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "urn:convohop:conformance:webhook-vectors",
-  "title": "ConvoHop webhook signature test vectors",
+  "title": "Relay webhook signature test vectors",
   "description": "Inputs and expected results for webhook verification; see spec/conformance/webhook-signatures.md.",
   "type": "object",
   "additionalProperties": false,
@@ -14,7 +14,7 @@
   },
   "$defs": {
     "secret": {
-      "description": "whsec_ followed by canonical padded standard Base64 of a 24- to 64-byte key. ConvoHop issues 32-byte keys.",
+      "description": "whsec_ followed by canonical padded standard Base64 of a 24- to 64-byte key. Relay issues 32-byte keys.",
       "type": "string",
       "pattern": "^whsec_(?:(?:[A-Za-z0-9+/]{4}){8,20}(?:[A-Za-z0-9+/][AQgw]==|[A-Za-z0-9+/]{2}[AEIMQUYcgkosw048]=)?|(?:[A-Za-z0-9+/]{4}){21}(?:[A-Za-z0-9+/][AQgw]==)?)$"
     },

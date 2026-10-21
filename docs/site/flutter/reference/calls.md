@@ -1,4 +1,4 @@
-# `package:convohop/calls.dart`
+# `package:instantrelay/calls.dart`
 
 Call media through the official `livekit_client` package.
 
@@ -42,7 +42,7 @@ doesn't connect.
 String? get localParticipantSid
 ```
 
-The connected local participant's SID. ConvoHop's media server makes it
+The connected local participant's SID. Relay's media server makes it
 the participation's `nativeConnectionId`.
 
 #### `LiveKitMediaRoom.setMicrophoneEnabled` method

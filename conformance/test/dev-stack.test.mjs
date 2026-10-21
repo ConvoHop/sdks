@@ -37,7 +37,7 @@ const sorted = values => [...values].sort();
 
 let work, bin, runs = 0;
 before(async () => {
-  work = await mkdtemp(join(tmpdir(), "convohop-dev-stack-"));
+  work = await mkdtemp(join(tmpdir(), "relay-dev-stack-"));
   bin = join(work, "bin");
   await mkdir(bin);
   // A shell wrapper runs the fake under this Node binary, whatever PATH holds.
@@ -124,7 +124,7 @@ describe("seed.env and the dev-stack descriptor", () => {
       "2026-10-09T08:00:00.000000001Z [dev-stack] starting cockroach",
       "2026-10-09T08:00:01.5Z [cockroach] [dev-stack] a platform line that quotes the supervisor",
       "[dev-stack] a line without a timestamp",
-      "2026-10-09T08:00:02Z convohop-dev-stack: backend exited with status 1",
+      "2026-10-09T08:00:02Z relay-dev-stack: backend exited with status 1",
       "2026-10-09T08:00:03Z [backend] platform output",
       "2026-10-09T08:00:04Z  [dev-stack] after two spaces",
       "backend [dev-stack] after another prefix",
@@ -144,9 +144,9 @@ describe("node conformance/dev-stack.mjs start", () => {
       ["login", "ghcr.io", "--username", "octocat", "--password-stdin"],
       ["pull", "--quiet", IMAGE],
       ["logout", "ghcr.io"],
-      ["run", "--detach", "--name", "convohop-dev-stack", "--network", "host", IMAGE],
-      ["exec", "convohop-dev-stack", "convohop-dev-stack", "wait", "--timeout", "900"],
-      ["exec", "convohop-dev-stack", "cat", "/run/convohop/dev-stack/seed.env"],
+      ["run", "--detach", "--name", "relay-dev-stack", "--network", "host", IMAGE],
+      ["exec", "relay-dev-stack", "relay-dev-stack", "wait", "--timeout", "900"],
+      ["exec", "relay-dev-stack", "cat", "/run/convohop/dev-stack/seed.env"],
     ]);
     // The token reaches docker only on login's stdin, never in arguments or the environment.
     assert.deepEqual(result.calls.map(call => call.stdin), [TOKEN, null, null, null, null, null]);
@@ -190,7 +190,7 @@ describe("node conformance/dev-stack.mjs start", () => {
   test("exports nothing when the stack is not ready or seed.env is malformed", async () => {
     const notReady = await devStack(["start"], { fail: ["wait"] });
     assert.equal(notReady.code, 1);
-    assert.deepEqual(notReady.calls.at(-1).args.slice(2, 4), ["convohop-dev-stack", "wait"]);
+    assert.deepEqual(notReady.calls.at(-1).args.slice(2, 4), ["relay-dev-stack", "wait"]);
     assert.match(notReady.stderr, /^dev-stack: waiting for the dev stack failed: docker exited with code 1$/m);
     assert.equal(notReady.exported, "");
 
@@ -239,13 +239,13 @@ describe("node conformance/dev-stack.mjs logs", () => {
       ["stderr", "2026-10-09T08:00:01.000000001Z [backend] a private platform line"],
       ["stderr", "2026-10-09T08:00:02.000000001Z [dev-stack] backend exited with status 1"],
       ["stdout", "2026-10-09T08:00:03.000000001Z [cockroach] another private platform line"],
-      ["stdout", "2026-10-09T08:00:04.000000001Z convohop-dev-stack: the stack stopped"],
+      ["stdout", "2026-10-09T08:00:04.000000001Z relay-dev-stack: the stack stopped"],
     ];
     const result = await devStack(["logs"], { state: { Status: "exited", ExitCode: 1, OOMKilled: true }, logs });
     assert.equal(result.code, 0, result.output);
     assert.deepEqual(result.calls.map(call => call.args), [
-      ["inspect", "--type", "container", "--format", "{{json .State}}", "convohop-dev-stack"],
-      ["logs", "--timestamps", "convohop-dev-stack"],
+      ["inspect", "--type", "container", "--format", "{{json .State}}", "relay-dev-stack"],
+      ["logs", "--timestamps", "relay-dev-stack"],
     ]);
     assert.equal(result.stdout, [
       "Dev-stack container: exited, exit code 1, killed when it ran out of memory",

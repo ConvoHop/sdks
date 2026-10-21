@@ -1,15 +1,15 @@
 import { buildGraphqlRequest, operationPayload, operationKey, validateOperationPayload,
   type OperationInput, type OperationPayload } from "./graphql.js";
 import { operationCatalog, type OperationKey } from "./generated/operations.js";
-import { ConvoHopProblem, authorityProblem, boolean, canonical, fingerprint, jsonClone, origin, timestamp, parseCounter, parseId, parseObject,
+import { RelayProblem, authorityProblem, boolean, canonical, fingerprint, jsonClone, origin, timestamp, parseCounter, parseId, parseObject,
   parseString, type AsyncRecoveryStorage, type ProtocolObject, type RecoveryState, type RecoveryStorage } from "./protocol.js";
-import { deadline, randomUUID, validatePlatform, type ConvoHopPlatform } from "./platform.js";
+import { deadline, randomUUID, validatePlatform, type RelayPlatform } from "./platform.js";
 import { retryableCode, retryDelay } from "./retry.js";
-export interface ConvoHopTransportOptions {
+export interface RelayTransportOptions {
   baseUrl: string; credential?: string; namespace: string; incarnation?: string;
   recoveryStorage?: RecoveryStorage; asyncRecoveryStorage?: AsyncRecoveryStorage; fetch?: typeof fetch;
-  /** Runtime services that replace missing globals, such as in React Native. See {@link ConvoHopPlatform}. */
-  platform?: ConvoHopPlatform;
+  /** Runtime services that replace missing globals, such as in React Native. See {@link RelayPlatform}. */
+  platform?: RelayPlatform;
 }
 type SessionProbe = "communication.route" | "communication.currentSession";
 export interface TransportAuthentication {
@@ -18,13 +18,13 @@ export interface TransportAuthentication {
   probe: <K extends SessionProbe>(key: K, projectId: string, credential: string,
     observedServingEpoch?: string) => Promise<OperationPayload<K>>;
 }
-const transportAuthentication = new WeakMap<ConvoHopTransport, TransportAuthentication>();
+const transportAuthentication = new WeakMap<RelayTransport, TransportAuthentication>();
 /** Each transport's {@link beforeSubmitting} hooks by request ID. */
-const submissionHooks = new WeakMap<ConvoHopTransport, Map<string, () => void | Promise<void>>>();
+const submissionHooks = new WeakMap<RelayTransport, Map<string, () => void | Promise<void>>>();
 /** Each transport's {@link adoptRecovery}. */
-const recoveryAdoption = new WeakMap<ConvoHopTransport, (requestId: string) => Promise<boolean>>();
+const recoveryAdoption = new WeakMap<RelayTransport, (requestId: string) => Promise<boolean>>();
 /** Each transport's {@link retainRecovery} callers, each listing the request IDs whose records it still needs. */
-const recoveryRetainers = new WeakMap<ConvoHopTransport, Set<() => Iterable<string>>>();
+const recoveryRetainers = new WeakMap<RelayTransport, Set<() => Iterable<string>>>();
 /** A journal keeps at most this many records. */
 const journalLimit = 128;
 /**
@@ -106,8 +106,8 @@ function final(state: RecoveryState, now: number): boolean {
     state.attemptCount >= 3 || now > state.retryDeadline;
 }
 /** The refusal to hold one more record while the journal is full of records that aren't final. */
-function recoveryLimit(requestId: string, outcome: string): ConvoHopProblem {
-  return new ConvoHopProblem("RECOVERY_LIMIT", requestId, outcome, 409,
+function recoveryLimit(requestId: string, outcome: string): RelayProblem {
+  return new RelayProblem("RECOVERY_LIMIT", requestId, outcome, 409,
     `Recovery storage already holds ${journalLimit} requests that aren't final; retry or resolve them first`);
 }
 /** The outcome a problem reports of a recorded request: unknown until an attempt's answer says otherwise. */
@@ -140,18 +140,18 @@ function absorb(target: RecoveryState, other: RecoveryState): void {
   if (other.mediaAdmissionAttempted === true) target.mediaAdmissionAttempted = true;
 }
 /** The failure of an asynchronous journal read or write. The request keeps the outcome already known of it. */
-function storageFailure(requestId: string, state: RecoveryState | undefined, cause: unknown, read = false): ConvoHopProblem {
-  return new ConvoHopProblem("RECOVERY_STORAGE_FAILURE", requestId,
+function storageFailure(requestId: string, state: RecoveryState | undefined, cause: unknown, read = false): RelayProblem {
+  return new RelayProblem("RECOVERY_STORAGE_FAILURE", requestId,
     state === undefined || state.resolutionState === "pending" ? "unknown" : state.resolutionState, 0,
     read ? "Recovery storage could not be read; retain the original request and its outcome"
       : "Recovery storage did not confirm durability; retain the original request and its outcome", { cause });
 }
-export class ConvoHopTransport {
+export class RelayTransport {
   readonly baseUrl: string;
   readonly durableRecovery: boolean;
   readonly #authentication: TransportAuthentication;
   readonly #fetch: typeof fetch;
-  readonly #platform: Readonly<ConvoHopPlatform>;
+  readonly #platform: Readonly<RelayPlatform>;
   readonly #storage: RecoveryStorage | undefined;
   readonly #asyncStorage: AsyncRecoveryStorage | undefined;
   readonly #storageKey: string;
@@ -162,7 +162,7 @@ export class ConvoHopTransport {
   #writes: Promise<void> | undefined;
   incarnation: string;
   servingEpoch: string | undefined;
-  constructor(options: ConvoHopTransportOptions) {
+  constructor(options: RelayTransportOptions) {
     if (options.recoveryStorage !== undefined && options.asyncRecoveryStorage !== undefined)
       throw new TypeError("Choose recoveryStorage or asyncRecoveryStorage, not both");
     this.#platform = validatePlatform(options.platform);
@@ -298,7 +298,7 @@ export class ConvoHopTransport {
     const created = unsent === "creating";
     this.#learn(stored, unsent === undefined ? undefined : state);
     if (unsent !== undefined && this.#states.get(state.requestId) !== state)
-      throw new ConvoHopProblem("IDEMPOTENCY_CONFLICT", state.requestId, "unknown", 409, "Preserve the original request and payload");
+      throw new RelayProblem("IDEMPOTENCY_CONFLICT", state.requestId, "unknown", 409, "Preserve the original request and payload");
     const journal = new Map<string, JournalEntry>();
     for (const [requestId, entry] of stored) {
       const held = this.#states.get(requestId);
@@ -355,7 +355,7 @@ export class ConvoHopTransport {
     const authentication = this.#authentication;
     if (authentication.blocked) {
       const state = this.#states.get(requestId);
-      return Promise.reject(new ConvoHopProblem("SESSION_REFRESH_REQUIRED", requestId,
+      return Promise.reject(new RelayProblem("SESSION_REFRESH_REQUIRED", requestId,
         state ? state.resolutionState === "pending" ? "unknown" : state.resolutionState : "rejected", 409,
         "Session authority is unverified; recover the original renewal or explicitly retire this client"));
     }
@@ -371,7 +371,7 @@ export class ConvoHopTransport {
     this.#plan(key, projectId, body, requestId, credentialDeliveryPermit);
     await this.initializeRecovery();
     if (this.incarnation !== incarnation)
-      throw new ConvoHopProblem("INCARNATION_MISMATCH", requestId, "unknown", 409, "Explicit recovery is required for this incarnation");
+      throw new RelayProblem("INCARNATION_MISMATCH", requestId, "unknown", 409, "Explicit recovery is required for this incarnation");
     // Ephemeral signals are neither deduplicated nor resolvable, so they keep no recovery state.
     const result = operationPayload(key, recorded(operation)
       ? await this.#mutate(key, projectId, body, requestId, credential, credentialDeliveryPermit)
@@ -380,9 +380,9 @@ export class ConvoHopTransport {
       const state = this.#states.get(parseString(body.requestId)), resolution = parseObject(parseObject(result).result);
       if (resolution.requestId !== body.requestId ||
           (resolution.receipt != null && parseObject(resolution.receipt).requestId !== body.requestId))
-        throw new ConvoHopProblem("INVALID_RESPONSE", requestId, "unknown", 503, "Request resolution identity changed");
+        throw new RelayProblem("INVALID_RESPONSE", requestId, "unknown", 503, "Request resolution identity changed");
       if (state && (state.projectId !== projectId || state.incarnation !== this.incarnation))
-        throw new ConvoHopProblem("RESOLUTION_REQUIRED", requestId, "unknown", 409, "Resolve within the original project and incarnation");
+        throw new RelayProblem("RESOLUTION_REQUIRED", requestId, "unknown", 409, "Resolve within the original project and incarnation");
       if (state && (resolution.state === "committed" || resolution.state === "accepted")) {
         if (state.resolutionState !== "committed") state.resolutionState = resolution.state;
         state.lastAttemptClassification = "authorityReceipt"; await this.#persist(state);
@@ -397,19 +397,19 @@ export class ConvoHopTransport {
     const active = this.#active.get(requestId);
     if (active) {
       if (active.identity !== identity)
-        throw new ConvoHopProblem("IDEMPOTENCY_CONFLICT", requestId, "unknown", 409, "Preserve the original request and payload");
+        throw new RelayProblem("IDEMPOTENCY_CONFLICT", requestId, "unknown", 409, "Preserve the original request and payload");
       return active.work;
     }
     const work = (async () => {
       const hash = await fingerprint({ operation, projectId: projectId ?? null, input }, this.#platform);
       if (this.incarnation !== incarnation)
-        throw new ConvoHopProblem("INCARNATION_MISMATCH", requestId, "unknown", 409, "Explicit recovery is required for this incarnation");
+        throw new RelayProblem("INCARNATION_MISMATCH", requestId, "unknown", 409, "Explicit recovery is required for this incarnation");
       let state = this.#states.get(requestId);
       if (state && (state.payloadFingerprint !== hash || state.incarnation !== incarnation ||
           state.operation !== operation || state.projectId !== projectId || canonical(state.input) !== canonical(input)))
-        throw new ConvoHopProblem("IDEMPOTENCY_CONFLICT", requestId, "unknown", 409, "Preserve the original request and payload");
+        throw new RelayProblem("IDEMPOTENCY_CONFLICT", requestId, "unknown", 409, "Preserve the original request and payload");
       if (retry && (!state || ["committed", "accepted"].includes(state.resolutionState) || state.mediaAdmissionAttempted))
-        throw new ConvoHopProblem("RESOLUTION_REQUIRED", requestId, "unknown", 409, "The original request is no longer eligible for resend");
+        throw new RelayProblem("RESOLUTION_REQUIRED", requestId, "unknown", 409, "The original request is no longer eligible for resend");
       if (!state) {
         this.#reserve(requestId, "rejected");
         const now = Date.now();
@@ -428,10 +428,10 @@ export class ConvoHopTransport {
   async #submit(state: RecoveryState, credential: string | undefined,
     credentialDeliveryPermit?: ProtocolObject, retry = false): Promise<ProtocolObject> {
     if (state.incarnation !== this.incarnation)
-      throw new ConvoHopProblem("INCARNATION_MISMATCH", state.requestId, "unknown", 409, "Explicit recovery is required for this incarnation");
+      throw new RelayProblem("INCARNATION_MISMATCH", state.requestId, "unknown", 409, "Explicit recovery is required for this incarnation");
     const now = Date.now();
     if (state.attemptCount >= 3 || now > state.retryDeadline || now < state.firstSubmittedAt || now < state.lastAttemptAt)
-      throw new ConvoHopProblem("RESOLUTION_REQUIRED", state.requestId, "unknown", 409, "Retry budget expired or clock changed; resolve this request read-only");
+      throw new RelayProblem("RESOLUTION_REQUIRED", state.requestId, "unknown", 409, "Retry budget expired or clock changed; resolve this request read-only");
     const hook = submissionHooks.get(this)?.get(state.requestId);
     if (hook) await hook();
     // Until its first attempt is stored, nothing of this request has been sent: it still yields to another saved under its ID.
@@ -441,21 +441,21 @@ export class ConvoHopTransport {
     if (state.resolutionState === "pending" || state.resolutionState === "rejected") state.resolutionState = "unknown";
     state.lastAttemptClassification = "submitted"; await this.#persist(state, unsent ? "submitting" : undefined);
     if (state.incarnation !== this.incarnation)
-      throw new ConvoHopProblem("INCARNATION_MISMATCH", state.requestId, "unknown", 409, "Explicit recovery is required for this incarnation");
+      throw new RelayProblem("INCARNATION_MISMATCH", state.requestId, "unknown", 409, "Explicit recovery is required for this incarnation");
     const submittingAt = Date.now();
     if (submittingAt > state.retryDeadline || submittingAt < state.firstSubmittedAt || submittingAt < state.lastAttemptAt ||
         (retry && (["committed", "accepted"].includes(state.resolutionState) || state.mediaAdmissionAttempted)))
-      throw new ConvoHopProblem("RESOLUTION_REQUIRED", state.requestId, "unknown", 409, "The original request is no longer eligible for resend");
+      throw new RelayProblem("RESOLUTION_REQUIRED", state.requestId, "unknown", 409, "The original request is no longer eligible for resend");
     let result: ProtocolObject, outcome: "committed" | "accepted";
     try {
       result = await this.#request(state.operation, state.projectId, state.input, state.requestId, credential, credentialDeliveryPermit);
       if (result.status !== "committed" && result.status !== "accepted") throw new TypeError("A mutation requires authority receipt evidence");
       outcome = result.status;
     } catch (error) {
-      state.lastAttemptClassification = error instanceof ConvoHopProblem ? error.code : "opaqueTransportFailure";
+      state.lastAttemptClassification = error instanceof RelayProblem ? error.code : "opaqueTransportFailure";
       // A rejection is the request's outcome only if every attempt was rejected: those known before this one, and any
       // other client's attempt that the record took in since, which would have changed its count or time.
-      if (error instanceof ConvoHopProblem && error.outcome === "rejected" && (prior === "pending" || prior === "rejected") &&
+      if (error instanceof RelayProblem && error.outcome === "rejected" && (prior === "pending" || prior === "rejected") &&
           state.resolutionState === "unknown" && state.attemptCount === attempt && state.lastAttemptAt === now)
         state.resolutionState = "rejected";
       await this.#persist(state); throw error;
@@ -473,12 +473,12 @@ export class ConvoHopTransport {
     await this.#refresh(requestId);
     const state = this.#states.get(requestId);
     if (!state) throw new Error("No recovery record exists; do not invent a replacement identity");
-    if (state.incarnation !== this.incarnation) throw new ConvoHopProblem("INCARNATION_MISMATCH", requestId, "unknown", 409, "Explicit recovery is required for this incarnation");
+    if (state.incarnation !== this.incarnation) throw new RelayProblem("INCARNATION_MISMATCH", requestId, "unknown", 409, "Explicit recovery is required for this incarnation");
     if (state.operation === "communication.redeemCredential" || state.operation === "communication.acknowledgeCredential")
-      throw new ConvoHopProblem("CREDENTIAL_REQUIRED", requestId, "unknown", 409,
+      throw new RelayProblem("CREDENTIAL_REQUIRED", requestId, "unknown", 409,
         "Delivery permits cannot authorize request lookup; obtain a current permit and submit the same delivery identity explicitly");
     if (operationCatalog[state.operation].idempotency === "replayOnly")
-      throw new ConvoHopProblem("INVALID_REQUEST", requestId, "unknown", 400,
+      throw new RelayProblem("INVALID_REQUEST", requestId, "unknown", 400,
         "The operation's requests cannot be looked up; send the same request ID and payload again explicitly");
     const key = operationCatalog[state.operation].plane === "management" ? "management.resolveRequest" : "communication.resolveRequest";
     const resolution = (await this.#execute(key, state.projectId, { requestId }, randomUUID(this.#platform),
@@ -487,7 +487,7 @@ export class ConvoHopTransport {
     if (resolution.state === "committed" || resolution.state === "accepted") return resolution;
     if (resolution.state !== "notObservedYet") throw new TypeError("Unknown request resolution state");
     if (["committed", "accepted"].includes(state.resolutionState) || state.mediaAdmissionAttempted) {
-      throw new ConvoHopProblem("RESOLUTION_REQUIRED", requestId, "unknown", 409,
+      throw new RelayProblem("RESOLUTION_REQUIRED", requestId, "unknown", 409,
         "Previously observed commit or native admission cannot be retried from absent evidence");
     }
     if (await fingerprint({ operation: state.operation, projectId: state.projectId ?? null, input: state.input }, this.#platform) !==
@@ -509,7 +509,7 @@ export class ConvoHopTransport {
         ...(this.incarnation === "management" ? {} : { incarnation: this.incarnation }),
         ...(observedServingEpoch === undefined ? {} : { observedServingEpoch }) });
     } catch (error) {
-      throw new ConvoHopProblem("INVALID_REQUEST", requestId, "rejected", 400,
+      throw new RelayProblem("INVALID_REQUEST", requestId, "rejected", 400,
         error instanceof Error ? error.message : "Invalid SDK operation");
     }
   }
@@ -525,19 +525,19 @@ export class ConvoHopTransport {
       try {
         response = await this.#fetch(url, { method: "POST", headers, redirect: "error", cache: "no-store",
           credentials: "omit", ...(timeout.signal ? { signal: timeout.signal } : {}), body: canonical(plan.body) });
-      } catch { throw new ConvoHopProblem("TRANSPORT_UNKNOWN", requestId, "unknown", 0, "Authority response unavailable; resolve the original request"); }
+      } catch { throw new RelayProblem("TRANSPORT_UNKNOWN", requestId, "unknown", 0, "Authority response unavailable; resolve the original request"); }
       // Some runtimes, such as React Native, follow redirects despite `redirect: "error"`. Another URL's answer isn't the authority's.
       if (response.redirected === true || (typeof response.url === "string" && response.url !== "" && response.url !== url))
-        throw new ConvoHopProblem("TRANSPORT_UNKNOWN", requestId, "unknown", 0, "Authority response was redirected; resolve the original request");
+        throw new RelayProblem("TRANSPORT_UNKNOWN", requestId, "unknown", 0, "Authority response was redirected; resolve the original request");
       try { text = await response.text(); }
-      catch { throw new ConvoHopProblem("TRANSPORT_UNKNOWN", requestId, "unknown", 0, "Incomplete authority response; resolve the original request"); }
+      catch { throw new RelayProblem("TRANSPORT_UNKNOWN", requestId, "unknown", 0, "Incomplete authority response; resolve the original request"); }
     } finally { timeout.clear(); }
-    if (text.length > 1_048_576) throw new ConvoHopProblem("INVALID_RESPONSE", requestId, "unknown", response.status, "Authority response exceeds the bound");
+    if (text.length > 1_048_576) throw new RelayProblem("INVALID_RESPONSE", requestId, "unknown", response.status, "Authority response exceeds the bound");
     let decoded: unknown;
     try { decoded = JSON.parse(text); } catch {
       // A proxy's or gateway's error page isn't JSON, but its Retry-After still bounds the next attempt.
       const retryAfter = retryDelay(response.headers.get("retry-after"));
-      throw new ConvoHopProblem("INVALID_RESPONSE", requestId, "unknown", response.status, "Unrecognized authority response",
+      throw new RelayProblem("INVALID_RESPONSE", requestId, "unknown", response.status, "Unrecognized authority response",
         retryAfter === undefined ? undefined : { retryAfter });
     }
     try {
@@ -561,7 +561,7 @@ export class ConvoHopTransport {
       const value = parseObject(raw);
       validateOperationPayload(plan.operation, value);
       if (!["ok", "committed", "accepted"].includes(parseString(value.status))) throw new TypeError("Unrecognized authority envelope");
-      if (parseId(value.requestId) !== requestId) throw new ConvoHopProblem("INVALID_RESPONSE", requestId, "unknown", response.status, "Mismatched authority request identity");
+      if (parseId(value.requestId) !== requestId) throw new RelayProblem("INVALID_RESPONSE", requestId, "unknown", response.status, "Mismatched authority request identity");
       if (recorded(plan.operation)) {
         if (value.status === "committed") {
           parseId(value.receiptId); timestamp(value.committedAt); boolean(value.replayed);
@@ -572,7 +572,7 @@ export class ConvoHopTransport {
       return value;
     } catch (error) {
       if (!(error instanceof TypeError)) throw error;
-      throw new ConvoHopProblem("INVALID_RESPONSE", requestId, "unknown", response.status, "Malformed authority response; resolve the original request");
+      throw new RelayProblem("INVALID_RESPONSE", requestId, "unknown", response.status, "Malformed authority response; resolve the original request");
     }
   }
 }
@@ -580,10 +580,10 @@ function recorded(operation: { kind: string; idempotency: string }): boolean {
   return operation.kind === "mutation" && operation.idempotency !== "ephemeral";
 }
 /** @internal Returns authentication state only to the code that constructs the transport. */
-export function authenticatedTransport(options: ConvoHopTransportOptions): {
-  transport: ConvoHopTransport; authentication: TransportAuthentication;
+export function authenticatedTransport(options: RelayTransportOptions): {
+  transport: RelayTransport; authentication: TransportAuthentication;
 } {
-  const transport = new ConvoHopTransport(options);
+  const transport = new RelayTransport(options);
   const authentication = transportAuthentication.get(transport);
   if (!authentication) throw new Error("Missing transport authentication state");
   return { transport, authentication };
@@ -595,7 +595,7 @@ export function authenticatedTransport(options: ConvoHopTransportOptions): {
  * the record that recovers the request. If the hook throws, nothing is sent and the submission fails with its error.
  * Returns a function that removes the hook.
  */
-export function beforeSubmitting(transport: ConvoHopTransport, requestId: string, hook: () => void | Promise<void>): () => void {
+export function beforeSubmitting(transport: RelayTransport, requestId: string, hook: () => void | Promise<void>): () => void {
   const key = parseId(requestId);
   const hooks = submissionHooks.get(transport) ?? new Map<string, () => void | Promise<void>>();
   submissionHooks.set(transport, hooks);
@@ -607,7 +607,7 @@ export function beforeSubmitting(transport: ConvoHopTransport, requestId: string
  * by another tab sharing the journal, and takes it over, so the request is recovered rather than resolved as lost.
  * Resolves to whether the transport now holds a record of `requestId`.
  */
-export async function adoptRecovery(transport: ConvoHopTransport, requestId: string): Promise<boolean> {
+export async function adoptRecovery(transport: RelayTransport, requestId: string): Promise<boolean> {
   const adopt = recoveryAdoption.get(transport);
   if (!adopt) throw new Error("Missing transport recovery");
   return adopt(parseId(requestId));
@@ -617,7 +617,7 @@ export async function adoptRecovery(transport: ConvoHopTransport, requestId: str
  * being forgotten or dropped, though they are final: a caller that may still resend or report a request retains its
  * record. Returns a function that stops retaining them.
  */
-export function retainRecovery(transport: ConvoHopTransport, requestIds: () => Iterable<string>): () => void {
+export function retainRecovery(transport: RelayTransport, requestIds: () => Iterable<string>): () => void {
   const retainers = recoveryRetainers.get(transport) ?? new Set<() => Iterable<string>>();
   recoveryRetainers.set(transport, retainers);
   const retainer = () => requestIds();

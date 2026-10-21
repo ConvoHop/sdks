@@ -2,7 +2,7 @@
   "$schema": "./ir.schema.json",
   "api": {
     "name": "edge",
-    "summary": "Edge-case fixture for the sdkgen tests. It is not a ConvoHop API."
+    "summary": "Edge-case fixture for the sdkgen tests. It is not a Relay API."
   },
   "sources": {
     "graphql": ["schema/alpha.graphql", "schema/beta.graphql"],

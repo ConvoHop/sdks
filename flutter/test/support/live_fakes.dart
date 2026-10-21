@@ -1,4 +1,4 @@
-import 'package:convohop/convohop.dart';
+import 'package:instantrelay/instantrelay.dart';
 
 final class FakeMediaRoom implements LiveMediaRoom {
   FakeMediaRoom({this.sid = '77777777-7777-4777-8777-777777777777'});

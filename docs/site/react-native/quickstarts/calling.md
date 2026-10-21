@@ -1,6 +1,6 @@
 # React Native calling quickstart
 
-Add voice and video calls to a conversation with `@convohop/react-native`: start a call and ring other members, join it with LiveKit's React Native SDK, answer incoming calls from CallKit or Android's Telecom, and leave or end a call.
+Add voice and video calls to a conversation with `@instantrelay/react-native`: start a call and ring other members, join it with LiveKit's React Native SDK, answer incoming calls from CallKit or Android's Telecom, and leave or end a call.
 
 ## Before you start
 
@@ -14,7 +14,7 @@ The samples on this page use these imports:
 import { AudioSession } from "@livekit/react-native";
 import { ConnectionState, type Room } from "livekit-client";
 import { AppState, Platform } from "react-native";
-import { ConvoHopProblem, type ConvoHopClient, type LiveConnector, type LiveParticipationHandle } from "@convohop/client";
+import { RelayProblem, type RelayClient, type LiveConnector, type LiveParticipationHandle } from "@instantrelay/client";
 import {
   canUseFullScreenIntent,
   endCall,
@@ -28,15 +28,15 @@ import {
   subscribeAnsweredCalls,
   watchRingingCalls,
   type Call,
-} from "@convohop/react-native";
-import { createRoom, createRoomConnector, type RoomConnection } from "@convohop/react-native/media";
+} from "@instantrelay/react-native";
+import { createRoom, createRoomConnector, type RoomConnection } from "@instantrelay/react-native/media";
 ```
 
 ## Set up media
 
 ```ts snippet=docs/languages/react-native/examples/src/setup.ts#setup
 // src/setup.ts. Import it first in index.js, before any module that imports LiveKit: import "./src/setup";
-import { setupMedia } from "@convohop/react-native/media";
+import { setupMedia } from "@instantrelay/react-native/media";
 
 // Registers LiveKit's WebRTC globals. On iOS, CallKit activates each call's audio session, and LiveKit's audio follows.
 setupMedia({ callKit: true });
@@ -50,7 +50,7 @@ setupMedia({ callKit: true });
 // Starts a voice call in a conversation, joins it and rings other members. If the conversation already has a call, it
 // joins that one instead. title is what CallKit shows for the call, such as the conversation's name.
 export async function startCall(
-  client: ConvoHopClient,
+  client: RelayClient,
   conversationId: string,
   title: string,
   ring: string[],
@@ -66,14 +66,14 @@ export async function startCall(
   return call;
 }
 
-async function startOrFindCall(client: ConvoHopClient, conversationId: string) {
+async function startOrFindCall(client: RelayClient, conversationId: string) {
   const live = client.conversation(conversationId).live;
   try {
     const start = await live.startVoice(); // startVideo() for video.
     await start.completed(); // Waits until the call can be joined.
     return { liveSessionId: start.liveSessionId, started: true };
   } catch (error) {
-    if (!(error instanceof ConvoHopProblem) || error.code !== "LIVE_SESSION_EXISTS") throw error;
+    if (!(error instanceof RelayProblem) || error.code !== "LIVE_SESSION_EXISTS") throw error;
     const current = await live.current(); // Someone else started a call here first.
     if (!current) throw error;
     return { liveSessionId: current.liveSessionId, started: false };
@@ -111,7 +111,7 @@ export interface JoinedCall {
 
 // Joins a call and connects its media. systemCall is the call in the system's call UI, if it has one.
 export async function joinCall(
-  client: ConvoHopClient,
+  client: RelayClient,
   liveSessionId: string,
   systemCall?: Pick<Call, "id" | "muted" | "state">,
 ): Promise<JoinedCall> {
@@ -236,7 +236,7 @@ export async function setMuted(call: JoinedCall, muted: boolean): Promise<void> 
 ```
 
 - The user can mute, hold or end a call in the system's call UI, or from a headset or a car. The sample follows the system call's `changed` and `ended` events, and turns the microphone off while the call is muted or held.
-- `setMuted` mutes the system call, and its `changed` event then turns the microphone off, so your app and the system agree. `setHeld` works the same way, and on iOS needs the `supportsHolding` option of `ConvoHopReactNative.configure`. A call that the user starts on Android has no system call, so the sample keeps that mute in the app.
+- `setMuted` mutes the system call, and its `changed` event then turns the microphone off, so your app and the system agree. `setHeld` works the same way, and on iOS needs the `supportsHolding` option of `RelayReactNative.configure`. A call that the user starts on Android has no system call, so the sample keeps that mute in the app.
 - To move the call's audio, for example to the speaker, call `setAudioRoute` with one of the call's `availableAudioRoutes` on Android. On iOS, show the system route picker, such as LiveKit's `AudioSession.showAudioRoutePicker()`.
 
 ## Answer incoming calls
@@ -246,7 +246,7 @@ A call's push rings on the device, even while JavaScript isn't running: through 
 ```ts snippet=docs/languages/react-native/examples/src/calling.ts#answer-call
 // Joins each call the user answers, and stops rings that ended elsewhere. Start it after sign-in, and call the
 // function it returns when the user signs out.
-export function answerCalls(client: ConvoHopClient, onJoined: (call: JoinedCall) => void): () => void {
+export function answerCalls(client: RelayClient, onJoined: (call: JoinedCall) => void): () => void {
   let answering = true;
   // Replays the calls answered before it started, such as one answered on the lock screen as the app launched.
   const stopAnswering = subscribeAnsweredCalls(answered => {
@@ -273,7 +273,7 @@ export function answerCalls(client: ConvoHopClient, onJoined: (call: JoinedCall)
 - Start `answerCalls` once the user's client is connected. `subscribeAnsweredCalls` first replays the answered calls that are still current, so a call that the user answered before JavaScript started isn't lost. It calls back once for each call, and never for a call that the user starts.
 - When the user signs out, call the function that `answerCalls` returned. A call that is still joining then is left as soon as it joins, and never reaches `onJoined`.
 - iOS gets no push when a ring stops, because iOS would make the app report it as a new call. While a call rings, `watchRingingCalls` lists the user's live alerts, and stops the ring once another of the user's devices answered it, the caller hung up or it expired. On Android, it also stops a ring whose cancellation push arrives late.
-- `endCall` on a ringing call declines it on this device only. ConvoHop has no decline operation, so nobody else is told and the call goes on.
+- `endCall` on a ringing call declines it on this device only. Relay has no decline operation, so nobody else is told and the call goes on.
 
 On Android 14 and later, incoming calls ring full screen only while the app may use full-screen intents:
 
@@ -307,7 +307,7 @@ export function allowFullScreenCalls(): Promise<void> {
 ```
 
 - Android 14 grants `USE_FULL_SCREEN_INTENT` only to calling and alarm apps, and users can revoke it. Without it, incoming calls ring as a heads-up notification. Show a banner while `watchFullScreenCalls` reports `false`, with a button that calls `allowFullScreenCalls`. iOS always resolves `true`.
-- The full-screen intent opens your launch activity, or the `incomingCallIntent` of the options that you pass to `ConvoHopReactNative.configure`. Give that activity `showWhenLocked` and `turnScreenOn`, and answer there with `answerCall`. On a device locked with a PIN or another secure lock, the notification's Answer button asks the user to unlock first, so to answer without unlocking, the user answers on your full-screen screen.
+- The full-screen intent opens your launch activity, or the `incomingCallIntent` of the options that you pass to `RelayReactNative.configure`. Give that activity `showWhenLocked` and `turnScreenOn`, and answer there with `answerCall`. On a device locked with a PIN or another secure lock, the notification's Answer button asks the user to unlock first, so to answer without unlocking, the user answers on your full-screen screen.
 - The SDK starts no foreground service. To keep a call going while your app is in the background on Android, start your own [foreground service](https://developer.android.com/develop/background-work/services/fgs/service-types#phone-call) of type `phoneCall`, which needs the `FOREGROUND_SERVICE_PHONE_CALL` permission.
 
 ## Leave or end a call
@@ -333,13 +333,13 @@ export async function leaveCall(call: JoinedCall): Promise<void> {
 export async function endCallForEveryone(call: JoinedCall): Promise<void> {
   await leaveCall(call);
   const ending = await call.participation.live.end();
-  await ending.completed(); // Resolves once ConvoHop has cut off everyone's media.
+  await ending.completed(); // Resolves once Relay has cut off everyone's media.
 }
 ```
 
 Leaving hangs up the system call, ends this device's participation and, on Android, stops LiveKit's audio session. The call goes on for everyone else. `leaveCall` takes every step even when one fails, so the media disconnects even if the system call won't hang up. It then throws the first failure and logs the others: call `leaveCall` again, and `leave()` reuses the original request.
 
-Ending stops the call for everyone, and only the call's creator or a moderator can end it. `completed()` returns once ConvoHop has cut off everyone's media. If it times out, it throws `ConvoHopProblem` with the code `RESOLUTION_REQUIRED`, and the end may still complete: call `end()` on the same live session again, which reuses the original request, and wait again. `REVISION_CONFLICT` means the call changed since `end()` read it: call `end` with a new `requestId`, which reads the call again. `LIVE_SESSION_CLOSED` means the call has already ended.
+Ending stops the call for everyone, and only the call's creator or a moderator can end it. `completed()` returns once Relay has cut off everyone's media. If it times out, it throws `RelayProblem` with the code `RESOLUTION_REQUIRED`, and the end may still complete: call `end()` on the same live session again, which reuses the original request, and wait again. `REVISION_CONFLICT` means the call changed since `end()` read it: call `end` with a new `requestId`, which reads the call again. `LIVE_SESSION_CLOSED` means the call has already ended.
 
 ## Sign out
 
@@ -363,7 +363,7 @@ When the user signs out, in this order:
 
 ## How the samples are tested
 
-CI typechecks every calling sample. A real call needs CallKit or Android's Telecom, LiveKit's native WebRTC and a ConvoHop project with calls, so the tests run only `joinCall`, `answerCalls` and `leaveCall`, on Node.js with stand-ins for the package's native modules, the client and LiveKit's audio session. The tests check:
+CI typechecks every calling sample. A real call needs CallKit or Android's Telecom, LiveKit's native WebRTC and a Relay project with calls, so the tests run only `joinCall`, `answerCalls` and `leaveCall`, on Node.js with stand-ins for the package's native modules, the client and LiveKit's audio session. The tests check:
 
 - that `leaveCall` leaves the call and stops its audio when the system call won't hang up, throws that failure, and hangs up when called again;
 - that `joinCall` gives this device's place back and hangs up when the join or the first connection fails, and throws the error that stopped it even when hanging up fails too;

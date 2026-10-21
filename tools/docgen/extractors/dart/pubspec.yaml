@@ -1,5 +1,5 @@
-name: convohop_docgen_dart
-description: Extracts the public API of the convohop Dart package for the docs pipeline (docs/docs-pipeline.md).
+name: relay_docgen_dart
+description: Extracts the public API of the instantrelay Dart package for the docs pipeline (docs/docs-pipeline.md).
 publish_to: none
 
 environment:

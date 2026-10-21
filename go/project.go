@@ -1,4 +1,4 @@
-package convohop
+package relay
 
 import (
 	"context"
@@ -30,7 +30,7 @@ type ProjectConfig struct {
 // project. It sends nothing until a method is called.
 func NewProjectClient(config ProjectConfig, options ...Option) (*ProjectClient, error) {
 	if !isUUID(config.ProjectID) || !isUUID(config.Incarnation) {
-		return nil, errors.New("convohop: the project ID and incarnation must be canonical lowercase UUIDs")
+		return nil, errors.New("relay: the project ID and incarnation must be canonical lowercase UUIDs")
 	}
 	s, err := newSettings(options)
 	if err != nil {

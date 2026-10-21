@@ -3,13 +3,13 @@
 // HTTP server. messageText runs against the conformance mock.
 
 // #region register
-import type { ConvoHopClient } from "@convohop/client";
+import type { RelayClient } from "@instantrelay/client";
 import {
   registerForPush,
   requestPushPermission,
   setPushRecipient,
   type NativePushRegistration,
-} from "@convohop/react-native";
+} from "@instantrelay/react-native";
 import type { Backend } from "./client.ts";
 
 export interface Push {
@@ -21,7 +21,7 @@ export interface Push {
 }
 
 // After connectUser, at every launch. The app works without pushes, so this registers in the background.
-export function startPush(client: ConvoHopClient, backend: Backend): Push {
+export function startPush(client: RelayClient, backend: Backend): Push {
   const registering = new AbortController();
   const registered = (async () => {
     // From now on, the device shows and rings only this user's pushes, even one that starts the app before
@@ -71,16 +71,16 @@ export async function allowNotifications(): Promise<boolean> {
 // #endregion register
 
 // #region open
-import type { PushNotification } from "@convohop/client/push";
-import { onNotification, takeInitialNotification, type NotificationResponse } from "@convohop/react-native";
+import type { PushNotification } from "@instantrelay/client/push";
+import { onNotification, takeInitialNotification, type NotificationResponse } from "@instantrelay/react-native";
 
 // A device keeps its registrations across sign-ins, so a push for an earlier user can still arrive.
-export const isFor = (client: ConvoHopClient, { projectId, recipientId }: PushNotification): boolean =>
+export const isFor = (client: RelayClient, { projectId, recipientId }: PushNotification): boolean =>
   projectId === client.projectId && recipientId === client.principalId;
 
 // Opens the conversation of each notification that the user taps, including the one that launched the app. Call it
 // once the user is signed in, and the function it returns at sign-out.
-export function openNotifications(client: ConvoHopClient, open: (conversationId: string) => void): () => void {
+export function openNotifications(client: RelayClient, open: (conversationId: string) => void): () => void {
   let listening = true;
   const handle = ({ action, notification }: NotificationResponse) => {
     if (!listening || !isFor(client, notification)) return;
@@ -103,12 +103,12 @@ export function openNotifications(client: ConvoHopClient, open: (conversationId:
 // #endregion open
 
 // #region message-text
-import type { MessagePushNotification } from "@convohop/client/push";
+import type { MessagePushNotification } from "@instantrelay/client/push";
 
 // A message push's text, for example for a banner in the app. Message previews are off by default, so a push carries
 // no text unless the project turned them on or your backend set a body. Then this reads the message.
 export async function messageText(
-  client: ConvoHopClient,
+  client: RelayClient,
   notification: MessagePushNotification,
 ): Promise<string | undefined> {
   const { body, conversationId, messageId } = notification;
@@ -118,14 +118,14 @@ export async function messageText(
 
 // #region sign-out
 import { Platform } from "react-native";
-import { unregisterFromPush } from "@convohop/react-native";
+import { unregisterFromPush } from "@instantrelay/react-native";
 
 // When the user signs out, before you sign out with your backend, which deletes the push registrations that it stored
 // for this sign-in. Then sign out as the client quickstart shows.
 export async function stopPush(push: Push): Promise<void> {
   await push.stop();
   const warn = (error: unknown) => console.warn("Couldn't stop push notifications", error); // Sign out anyway.
-  // The device drops every ConvoHop push from now on, including those your backend sends before it deletes the
+  // The device drops every Relay push from now on, including those your backend sends before it deletes the
   // registrations.
   await setPushRecipient(null).catch(warn);
   // Android: FCM stops sending to this device, even if your backend can't be reached. iOS can't unregister: Apple

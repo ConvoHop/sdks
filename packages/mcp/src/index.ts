@@ -2,9 +2,9 @@ import { randomUUID } from "node:crypto";
 import { readFileSync } from "node:fs";
 import { McpServer, fromJsonSchema, type CallToolResult } from "@modelcontextprotocol/server";
 import {
-  ConvoHopProblem, ConvoHopTransport, ProjectServerClient, ScopeRequiredProblem, operationCatalog,
+  RelayProblem, RelayTransport, ProjectServerClient, ScopeRequiredProblem, operationCatalog,
   type OperationInput, type OperationKey,
-} from "@convohop/server";
+} from "@instantrelay/server";
 import { mcpTools, operationMetaKey, retryToolName, type McpToolDefinition } from "./generated/tools.js";
 import { REDACTED, redactObject } from "./redact.js";
 
@@ -15,7 +15,7 @@ export { REDACTED, redact, redactObject, redactedFields } from "./redact.js";
  * Configure the management plane, the communication plane of one project, or both. Each plane's tools are registered
  * only when all of its options are set. Run the server only in a trusted runtime: it holds the credentials.
  */
-export interface ConvoHopMcpServerOptions {
+export interface RelayMcpServerOptions {
   /** Management authority origin. Set it with portalToken. */
   managementUrl?: string;
   /** Portal credential that authenticates the management tools. */
@@ -48,7 +48,7 @@ export type ToolFailure = {
 };
 
 interface Plane {
-  readonly transport: ConvoHopTransport;
+  readonly transport: RelayTransport;
   readonly projectId: string | undefined;
   /** Routes to the project before the first communication request. */
   ready(): Promise<void>;
@@ -56,13 +56,13 @@ interface Plane {
   reroute(): void;
 }
 
-function configurePlanes(options: ConvoHopMcpServerOptions): Map<string, Plane> {
+function configurePlanes(options: RelayMcpServerOptions): Map<string, Plane> {
   const planes = new Map<string, Plane>();
   const fetch = options.fetch === undefined ? {} : { fetch: options.fetch };
   const { managementUrl, portalToken, communicationUrl, projectId, incarnation, backendKey } = options;
   if (managementUrl !== undefined || portalToken !== undefined) {
     if (!managementUrl || !portalToken) throw new TypeError("Set managementUrl and portalToken together");
-    const transport = new ConvoHopTransport({ baseUrl: managementUrl, credential: portalToken, namespace: "mcp:management", ...fetch });
+    const transport = new RelayTransport({ baseUrl: managementUrl, credential: portalToken, namespace: "mcp:management", ...fetch });
     planes.set("management", { transport, projectId: undefined, ready: () => Promise.resolve(), reroute: () => undefined });
   }
   const communication = [communicationUrl, projectId, incarnation, backendKey];
@@ -88,13 +88,13 @@ function configurePlanes(options: ConvoHopMcpServerOptions): Map<string, Plane> 
 function packageVersion(): string {
   const manifest: unknown = JSON.parse(readFileSync(new URL("../package.json", import.meta.url), "utf8"));
   const version = manifest !== null && typeof manifest === "object" && "version" in manifest ? manifest.version : undefined;
-  if (typeof version !== "string") throw new TypeError("The @convohop/mcp package manifest has no version");
+  if (typeof version !== "string") throw new TypeError("The @instantrelay/mcp package manifest has no version");
   return version;
 }
 
 function instructions(readOnly: boolean): string {
   return [
-    "Each ConvoHop tool runs one ConvoHop operation with the credential this server was started with.",
+    "Each Relay tool runs one Relay operation with the credential this server was started with.",
     `The tool's _meta["${operationMetaKey}"] carries the operation's annotations: credential, scopes, idempotency, ` +
       "destructiveness, pagination and polling.",
     "Every call sends a new request, and its result or error carries the requestId.",
@@ -110,7 +110,7 @@ function catalogKey(tool: McpToolDefinition): OperationKey {
   const id = tool.operation.id;
   const isKey = (value: string): value is OperationKey => Object.hasOwn(operationCatalog, value);
   if (!isKey(id) || operationCatalog[id].plane !== tool.operation.plane || operationCatalog[id].kind !== tool.operation.kind)
-    throw new Error(`Tool ${tool.name} does not match the SDK operation catalog; rebuild @convohop/mcp`);
+    throw new Error(`Tool ${tool.name} does not match the SDK operation catalog; rebuild @instantrelay/mcp`);
   return id;
 }
 
@@ -139,7 +139,7 @@ function nextStep(failure: ToolFailure, query: boolean, resolvable: boolean): st
 function describe(error: unknown, requestId: string, plane: Plane, query: boolean): ToolFailure {
   const recorded = recordedOutcome(plane, requestId);
   let failure: ToolFailure;
-  if (error instanceof ConvoHopProblem) {
+  if (error instanceof RelayProblem) {
     if (error.code === "WRONG_REGION") plane.reroute();
     failure = {
       code: error.code,
@@ -159,7 +159,7 @@ function describe(error: unknown, requestId: string, plane: Plane, query: boolea
 }
 
 function routeFailure(error: unknown, requestId: string, outcome: string, consequence: string): ToolFailure {
-  const problem = error instanceof ConvoHopProblem ? error : undefined;
+  const problem = error instanceof RelayProblem ? error : undefined;
   return {
     ...(problem ? { code: problem.code, status: problem.status } : {}),
     outcome, requestId,
@@ -176,7 +176,7 @@ function succeeded(value: object, secrets: readonly string[]): CallToolResult {
 function failed(failure: ToolFailure, secrets: readonly string[]): CallToolResult {
   const structuredContent = redactObject(failure, secrets);
   const lines = [
-    `ConvoHop ${typeof structuredContent.code === "string" ? structuredContent.code : "error"}: ${String(structuredContent.message)}`,
+    `Relay ${typeof structuredContent.code === "string" ? structuredContent.code : "error"}: ${String(structuredContent.message)}`,
     `outcome: ${String(structuredContent.outcome)}`,
     `requestId: ${String(structuredContent.requestId)}`,
     ...(typeof structuredContent.next === "string" ? [`next: ${structuredContent.next}`] : []),
@@ -224,14 +224,14 @@ async function retry(planes: Map<string, Plane>, args: unknown, secrets: readonl
 }
 
 /**
- * An MCP server whose tools run ConvoHop operations: one tool per management or backend-key query and mutation in the
+ * An MCP server whose tools run Relay operations: one tool per management or backend-key query and mutation in the
  * schema (see mcpTools), plus retry_request. Connect it to a transport, such as StdioServerTransport.
  */
-export function createConvoHopMcpServer(options: ConvoHopMcpServerOptions): McpServer {
+export function createRelayMcpServer(options: RelayMcpServerOptions): McpServer {
   const planes = configurePlanes(options);
   const secrets = [options.portalToken, options.backendKey].filter((value): value is string => !!value);
   const readOnly = options.readOnly === true;
-  const server = new McpServer({ name: "convohop", title: "ConvoHop", version: packageVersion() },
+  const server = new McpServer({ name: "relay", title: "Relay", version: packageVersion() },
     { instructions: instructions(readOnly) });
   for (const tool of mcpTools) {
     const plane = planes.get(tool.operation.plane);
@@ -266,12 +266,12 @@ export function createConvoHopMcpServer(options: ConvoHopMcpServerOptions): McpS
 }
 
 /**
- * Reads server options from CONVOHOP_MANAGEMENT_URL, CONVOHOP_PORTAL_TOKEN, CONVOHOP_COMMUNICATION_URL,
- * CONVOHOP_PROJECT_ID, CONVOHOP_INCARNATION, CONVOHOP_BACKEND_KEY and CONVOHOP_MCP_READ_ONLY. Instead of
- * CONVOHOP_PORTAL_TOKEN or CONVOHOP_BACKEND_KEY, the matching _FILE variable can name a file that holds the secret.
+ * Reads server options from RELAY_MANAGEMENT_URL, RELAY_PORTAL_TOKEN, RELAY_COMMUNICATION_URL,
+ * RELAY_PROJECT_ID, RELAY_INCARNATION, RELAY_BACKEND_KEY and RELAY_MCP_READ_ONLY. Instead of
+ * RELAY_PORTAL_TOKEN or RELAY_BACKEND_KEY, the matching _FILE variable can name a file that holds the secret.
  * Empty variables count as unset. Throws a TypeError naming the variables to set when a plane is partly configured.
  */
-export function serverOptionsFromEnvironment(env: Readonly<Record<string, string | undefined>>): ConvoHopMcpServerOptions {
+export function serverOptionsFromEnvironment(env: Readonly<Record<string, string | undefined>>): RelayMcpServerOptions {
   const value = (name: string): string | undefined => (env[name] === "" ? undefined : env[name]);
   const secret = (name: string): string | undefined => {
     const inline = value(name), file = value(`${name}_FILE`);
@@ -281,20 +281,20 @@ export function serverOptionsFromEnvironment(env: Readonly<Record<string, string
     if (!text) throw new TypeError(`${name}_FILE names an empty file`);
     return text;
   };
-  const flag = value("CONVOHOP_MCP_READ_ONLY");
+  const flag = value("RELAY_MCP_READ_ONLY");
   if (flag !== undefined && !["0", "1", "false", "true"].includes(flag))
-    throw new TypeError("CONVOHOP_MCP_READ_ONLY must be 1, true, 0 or false");
-  const managementUrl = value("CONVOHOP_MANAGEMENT_URL"), portalToken = secret("CONVOHOP_PORTAL_TOKEN");
-  const communicationUrl = value("CONVOHOP_COMMUNICATION_URL"), projectId = value("CONVOHOP_PROJECT_ID");
-  const incarnation = value("CONVOHOP_INCARNATION"), backendKey = secret("CONVOHOP_BACKEND_KEY");
+    throw new TypeError("RELAY_MCP_READ_ONLY must be 1, true, 0 or false");
+  const managementUrl = value("RELAY_MANAGEMENT_URL"), portalToken = secret("RELAY_PORTAL_TOKEN");
+  const communicationUrl = value("RELAY_COMMUNICATION_URL"), projectId = value("RELAY_PROJECT_ID");
+  const incarnation = value("RELAY_INCARNATION"), backendKey = secret("RELAY_BACKEND_KEY");
   const management = [managementUrl, portalToken], communication = [communicationUrl, projectId, incarnation, backendKey];
   if (management.some(item => item !== undefined) && management.includes(undefined))
-    throw new TypeError("Set CONVOHOP_MANAGEMENT_URL and CONVOHOP_PORTAL_TOKEN or CONVOHOP_PORTAL_TOKEN_FILE together");
+    throw new TypeError("Set RELAY_MANAGEMENT_URL and RELAY_PORTAL_TOKEN or RELAY_PORTAL_TOKEN_FILE together");
   if (communication.some(item => item !== undefined) && communication.includes(undefined))
-    throw new TypeError("Set CONVOHOP_COMMUNICATION_URL, CONVOHOP_PROJECT_ID, CONVOHOP_INCARNATION and " +
-      "CONVOHOP_BACKEND_KEY or CONVOHOP_BACKEND_KEY_FILE together");
+    throw new TypeError("Set RELAY_COMMUNICATION_URL, RELAY_PROJECT_ID, RELAY_INCARNATION and " +
+      "RELAY_BACKEND_KEY or RELAY_BACKEND_KEY_FILE together");
   if (managementUrl === undefined && communicationUrl === undefined)
-    throw new TypeError("Set CONVOHOP_MANAGEMENT_URL, CONVOHOP_COMMUNICATION_URL or both");
+    throw new TypeError("Set RELAY_MANAGEMENT_URL, RELAY_COMMUNICATION_URL or both");
   return {
     ...(managementUrl === undefined ? {} : { managementUrl }),
     ...(portalToken === undefined ? {} : { portalToken }),

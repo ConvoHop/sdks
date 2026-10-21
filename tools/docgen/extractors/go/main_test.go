@@ -78,7 +78,7 @@ func TestLanguageFileErrors(t *testing.T) {
 		},
 		{
 			name:  "another language",
-			files: map[string]string{languagePath: `{"id": "python", "packages": [{"name": "convohop", "source": "python"}]}`},
+			files: map[string]string{languagePath: `{"id": "python", "packages": [{"name": "instantrelay", "source": "python"}]}`},
 			want:  ": isn't the Go language config",
 		},
 		{

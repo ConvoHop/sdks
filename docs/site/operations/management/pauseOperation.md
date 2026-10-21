@@ -148,7 +148,7 @@ mutation ManagementPauseOperation($context: RequestContextInput!, $input: PauseO
 | Language | Members |
 | --- | --- |
 | [TypeScript](../../typescript/reference/operations.md) | Not wrapped by a method |
-| [Python](../../python/reference/operations.md) | [`ConvoHopManagement.pause_operation`](../../python/reference/convohop.md#convohopmanagementpause_operation-method), [`AsyncConvoHopManagement.pause_operation`](../../python/reference/convohop.md#asyncconvohopmanagementpause_operation-method) |
+| [Python](../../python/reference/operations.md) | [`RelayManagement.pause_operation`](../../python/reference/instantrelay.md#relaymanagementpause_operation-method), [`AsyncRelayManagement.pause_operation`](../../python/reference/instantrelay.md#asyncrelaymanagementpause_operation-method) |
 | [.NET](../../dotnet/reference/operations.md) | [`ManagementApi.PauseOperationAsync`](../../dotnet/reference/api.md#managementapipauseoperationasync-method) |
 | [Java and Kotlin](../../jvm/reference/operations.md) | [`ManagementApi.pauseOperation`](../../jvm/reference/server.md#managementapipauseoperation-method), [`ManagementSuspendApi.pauseOperation`](../../jvm/reference/server-kotlin.md#managementsuspendapipauseoperation-method) |
-| [Go](../../go/reference/operations.md) | [`ManagementClient.PauseOperation`](../../go/reference/convohop.md#managementclientpauseoperation-method) |
+| [Go](../../go/reference/operations.md) | [`ManagementClient.PauseOperation`](../../go/reference/relay.md#managementclientpauseoperation-method) |

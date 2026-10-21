@@ -3,8 +3,8 @@
 # #region receive
 from collections.abc import Callable, Sequence
 
-from convohop import WebhookVerificationError, webhooks
-from convohop.webhooks import WebhookEvent, WebhookHeaders
+from instantrelay import WebhookVerificationError, webhooks
+from instantrelay.webhooks import WebhookEvent, WebhookHeaders
 
 
 # Call this from your web framework's route, and answer with the HTTP status it returns. secrets are the
@@ -33,9 +33,9 @@ def receive_webhook(
 # #region handle
 from typing import Protocol
 
-from convohop import ConvoHop
-from convohop.types import Conversation
-from convohop.webhooks import (
+from instantrelay import Relay
+from instantrelay.types import Conversation
+from instantrelay.webhooks import (
     WebhookCallCancelledNotificationEvent,
     WebhookCallNotificationEvent,
     WebhookEndpointDisabledEvent,
@@ -53,7 +53,7 @@ class EventHandlers(Protocol):
 
 
 # Your queue worker. Events arrive at least once and in any order.
-def handle_event(server: ConvoHop, event: WebhookEvent, handlers: EventHandlers) -> None:
+def handle_event(server: Relay, event: WebhookEvent, handlers: EventHandlers) -> None:
     match event:
         case WebhookResourceEvent(event_type="conversation.created" | "conversation.updated"):
             # Events carry only IDs. Read the current state through the API.

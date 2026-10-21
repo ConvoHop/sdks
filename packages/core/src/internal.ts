@@ -1,5 +1,5 @@
 /**
- * Implementation surface shared by `@convohop/client` and `@convohop/server`.
+ * Implementation surface shared by `@instantrelay/client` and `@instantrelay/server`.
  * Not public API: no semver guarantee; it may change in any release.
  * @packageDocumentation
  * @internal

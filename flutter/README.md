@@ -1,6 +1,6 @@
-# ConvoHop Flutter SDK
+# Relay Flutter SDK
 
-`convohop` is the ConvoHop client SDK for Flutter apps on Android and iOS. It
+`instantrelay` is the Relay client SDK for Flutter apps on Android and iOS. It
 runs one signed-in user's session: conversations and their history, realtime
 updates that resume after reconnects, a local conversation store, an offline
 outbox with optimistic sends, read receipts, typing, recent activity, calls
@@ -31,7 +31,7 @@ can configure the later approval-gated tag-push automation.
   `device_info_plus`, which from version 12.4.0 calls an API that the iOS
   26.1 SDK added.
 - Your backend, with a [server SDK](../README.md#available-as-source), signs
-  the user in and issues and renews their ConvoHop session.
+  the user in and issues and renews their Relay session.
 
 ## Install
 
@@ -39,7 +39,7 @@ Add the package as a Git dependency pinned to a commit of this repository:
 
 ```yaml
 dependencies:
-  convohop:
+  instantrelay:
     git:
       url: https://github.com/ConvoHop/sdks.git
       path: flutter
@@ -51,28 +51,28 @@ The generated code is committed, so there's no build step. Then set up
 
 | Library | Contents |
 | --- | --- |
-| `package:convohop/convohop.dart` | The client, conversations, the store, the outbox, receipts, typing, recent activity, calls without media, notification payloads and the generated models. Pure Dart. |
-| `package:convohop/calls.dart` | `liveKitRooms()`, call media through `livekit_client` |
-| `package:convohop/push.dart` | `ConvoHopPush`: push registration, notifications and the system call UI, through the plugin's platform code |
-| `package:convohop/io.dart` | `FileRecoveryStorage`, file-backed storage for platforms with `dart:io` |
+| `package:instantrelay/instantrelay.dart` | The client, conversations, the store, the outbox, receipts, typing, recent activity, calls without media, notification payloads and the generated models. Pure Dart. |
+| `package:instantrelay/calls.dart` | `liveKitRooms()`, call media through `livekit_client` |
+| `package:instantrelay/push.dart` | `RelayPush`: push registration, notifications and the system call UI, through the plugin's platform code |
+| `package:instantrelay/io.dart` | `FileRecoveryStorage`, file-backed storage for platforms with `dart:io` |
 
 ## Sign in
 
 Your backend authenticates the user with your app's own sign-in, then issues
-a ConvoHop session with the server SDK (`sessions.issue`) and returns the
+a Relay session with the server SDK (`sessions.issue`) and returns the
 bootstrap to the app. Create the client from it:
 
 ```dart
 import 'dart:io';
 
-import 'package:convohop/convohop.dart';
-import 'package:convohop/io.dart';
+import 'package:instantrelay/instantrelay.dart';
+import 'package:instantrelay/io.dart';
 import 'package:path_provider/path_provider.dart';
 
 final bootstrap = SessionBootstrap.fromJson(json['bootstrap']);
 final session = bootstrap.session!;
 final support = await getApplicationSupportDirectory();
-final client = ConvoHopClient(
+final client = RelayClient(
   baseUrl: json['baseUrl'] as String,
   projectId: json['projectId'] as String,
   incarnation: session.incarnation,
@@ -124,7 +124,7 @@ final results = await client.search('invoice');
 
 `client.conversation(id)` returns a handle with `get()`, `messages` (`send`,
 `list`, `edit` and `delete`), `mute` and `live` for calls. Failures throw a
-`ConvoHopProblem` with a `code`, the `requestId` and an `outcome`:
+`RelayProblem` with a `code`, the `requestId` and an `outcome`:
 `rejected`, `committed`, `accepted`, or `unknown` when a mutation may or may
 not have been applied. The SDK retries a mutation only with its original
 request ID, payload and retry budget. Resolve an `unknown` outcome with
@@ -183,7 +183,7 @@ store.changes.listen((snapshot) {
 `store.events` reports each event it applied, such as `live.*` events for a
 call UI. Use one store per conversation and client, and call
 `store.reconnect()` when connectivity returns to skip the backoff; it never
-reconnects sooner than a `retryAfter` from ConvoHop. Without a
+reconnects sooner than a `retryAfter` from Relay. Without a
 store, `client.watch(conversationId, apply, onError)` replays a
 conversation's events from the stored cursor through your own `apply` and
 follows them over realtime.
@@ -192,18 +192,18 @@ When the organization's prepaid credits run out or it reaches its monthly
 spend cap, the stream closes with a 402 `CREDITS_EXHAUSTED` or
 `SPEND_CAP_REACHED` problem and doesn't reconnect: the store is `failed`
 until you call `store.reconnect()` once the organization can pay again.
-While ConvoHop can't verify current spend, the store reports
+While Relay can't verify current spend, the store reports
 `SPEND_UNVERIFIED` and reconnects no sooner than its `retryAfter`;
 `store.reconnect()` doesn't cut that wait short.
 
 ## Offline queue and optimistic sends
 
-`ConvoHopOutbox` sends messages in the background, in order within each
+`RelayOutbox` sends messages in the background, in order within each
 conversation, across lost connectivity and app restarts. Create one per
 client and pass it to each store:
 
 ```dart
-final outbox = ConvoHopOutbox(client, onError: report);
+final outbox = RelayOutbox(client, onError: report);
 await outbox.initialize();
 
 await store.send('On my way'); // Shows in snapshot.pending at once.
@@ -265,12 +265,12 @@ text.isEmpty ? typing.stop() : typing.keystroke();
 
 It signals at most once every 3 seconds while the user types and stops by
 itself 5 seconds after the last keystroke. Signals are single attempts that
-are never retried. They're outbound only: ConvoHop doesn't deliver other
+are never retried. They're outbound only: Relay doesn't deliver other
 members' typing to clients.
 
 ## Recent activity
 
-ConvoHop doesn't publish online status to clients. The `ConversationActivity`
+Relay doesn't publish online status to clients. The `ConversationActivity`
 extension derives recent activity from what a store holds: when each member
 last wrote, edited or reported a receipt in the conversation.
 
@@ -284,7 +284,7 @@ Show it as "recently active", not "online".
 ## Calls
 
 ```dart
-import 'package:convohop/calls.dart';
+import 'package:instantrelay/calls.dart';
 
 final live = client.conversation(conversationId).live;
 final call = await live.current() ?? await (await live.startVoice()).ready();
@@ -317,7 +317,7 @@ mode on iOS and the Android permissions.
 
 ## Push notifications
 
-ConvoHop doesn't send pushes for you
+Relay doesn't send pushes for you
 ([bring your own](../docs/sdk-strategy.md#push-notifications-bring-your-own)).
 It sends your backend a webhook for each `notification.message`,
 `notification.call` and `notification.callCancelled` event, and your backend
@@ -325,7 +325,7 @@ builds the APNs or FCM request with a server SDK's push builders and sends it
 to the push registrations that the app gave it. The requests follow the
 [push payload contract](../spec/push-payload/README.md).
 
-`ConvoHopPush` is the app side. The plugin's native code shows ConvoHop pushes
+`RelayPush` is the app side. The plugin's native code shows Relay pushes
 even while Dart isn't running: on Android, its Firebase messaging service
 builds a notification for each FCM data message and rings with a full-screen,
 call-style notification; on iOS, the system shows APNs alerts, and VoIP
@@ -334,9 +334,9 @@ pushes ring through CallKit.
 ```dart
 import 'dart:io' show Platform;
 
-import 'package:convohop/push.dart';
+import 'package:instantrelay/push.dart';
 
-final push = ConvoHopPush(onError: report);
+final push = RelayPush(onError: report);
 push.registrations.listen(backend.registerPush); // Send each one to your backend.
 push.opened.listen(openConversationOrCall);      // The user tapped a notification.
 push.callActions.listen(handleCallAction);       // Answer, decline, end, mute, unmute.
@@ -352,7 +352,7 @@ A `PushRegistration` is an `FcmRegistration` on Android or an
 `ApnsRegistration` with the APNs `token` on iOS. An `FcmRegistration` carries
 the FCM registration `token`, or the Firebase installation ID (`fid`) when the
 app's manifest switches FCM to installation IDs
-([Android setup](#android-setup)). Its `toJson()` is the shape every ConvoHop
+([Android setup](#android-setup)). Its `toJson()` is the shape every Relay
 client gives its app: `{"kind": "fcm", "token": …}` or
 `{"kind": "fcm", "fid": …}`, and `{"kind": "apns", "token": …}` or, for
 PushKit, `{"kind": "apnsVoip", "token": …}`. Your backend sends each FCM
@@ -379,7 +379,7 @@ sign-ins.
 delivery is at least once.
 
 ```dart
-void openConversationOrCall(ConvoHopNotification notification) {
+void openConversationOrCall(RelayNotification notification) {
   if (!notification.isFor(client)) return;
   switch (notification) {
     case MessageNotification(:final conversationId):
@@ -412,7 +412,7 @@ and the [iOS localized strings](#ios-setup).
 
 ### Rings
 
-`push.notifications` (`ConvoHopNotifications`) de-duplicates pushes and
+`push.notifications` (`RelayNotifications`) de-duplicates pushes and
 tracks rings. A ring stops when a `notification.callCancelled` arrives, at its
 `expiresAt`, or when `notifications.applyEvent(event)` sees the call's
 `live.ended` event, for example from `store.events`. On iOS, VoIP pushes are
@@ -428,33 +428,33 @@ alert ([calls on iOS](../spec/push-payload/README.md#calls-on-ios)).
 | `showIncomingCall(call)` | Ring for a `CallNotification` that reached Dart another way. Throws a `PlatformException` with the code `CALL_FAILED` when the system refuses the call, for example under iOS Do Not Disturb. |
 | `canUseFullScreenIntent()` | Whether Android lets the app show full-screen incoming calls. Since Android 14 users and app stores can turn it off; rings then show as heads-up notifications. |
 | `setActiveConversation(id)` | While the app is in the foreground, show no notification for this conversation's messages. They still arrive on `received`. |
-| `removeDeliveredNotifications(conversationId: id)` | Remove a conversation's delivered ConvoHop message notifications, for example when the user opens it. |
+| `removeDeliveredNotifications(conversationId: id)` | Remove a conversation's delivered Relay message notifications, for example when the user opens it. |
 
 ### Other push plugins
 
 `handleNotification(payload)` records a payload that reached Dart another
 way and reports it on `received`. It accepts the APNs `userInfo`, the FCM
 data and the Web Push payload, returns null for a payload that isn't
-ConvoHop's, and throws a `FormatException` for one that breaks the contract.
+Relay's, and throws a `FormatException` for one that breaks the contract.
 
 Android delivers each FCM message to one messaging service. If the app uses
-another one, such as `firebase_messaging`'s, remove ConvoHop's service from
+another one, such as `firebase_messaging`'s, remove Relay's service from
 the merged manifest and pass each message's data to
 `push.showNotification(message.data)` from that plugin's foreground and
 background handlers, so the plugin still shows the notification or rings:
 
 ```xml
 <service
-    android:name="com.convohop.flutter.ConvoHopMessagingService"
+    android:name="dev.instantrelay.flutter.RelayMessagingService"
     tools:node="remove" />
 ```
 
 `register()` still delivers the registration, but FCM reports later changes
 to the other plugin's service, so `registrations` doesn't see them: call
 `register()` at each launch. A native `FirebaseMessagingService` calls
-`ConvoHopMessaging.handleMessage(context, message.getData())` from
-`onMessageReceived`, `ConvoHopMessaging.handleNewToken(token)` from
-`onNewToken` and `ConvoHopMessaging.handleRegistered(installationId)` from
+`RelayMessaging.handleMessage(context, message.getData())` from
+`onMessageReceived`, `RelayMessaging.handleNewToken(token)` from
+`onNewToken` and `RelayMessaging.handleRegistered(installationId)` from
 `onRegistered` instead. On iOS the system shows
 APNs alerts itself, and the plugin receives notification callbacks through
 Flutter's app delegate: it sets the notification center's delegate at launch
@@ -490,10 +490,10 @@ unless something else already has.
    ```xml
    <application>
        <meta-data
-           android:name="com.convohop.flutter.notification_icon"
+           android:name="dev.instantrelay.flutter.notification_icon"
            android:resource="@drawable/ic_notification" />
        <meta-data
-           android:name="com.convohop.flutter.notification_color"
+           android:name="dev.instantrelay.flutter.notification_color"
            android:resource="@color/notification" />
    </application>
    ```
@@ -518,7 +518,7 @@ for calling and alarm apps; an app that doesn't ring removes it:
 
 Notification taps open the app's launcher activity, which other apps can
 start too. The plugin's notification intents carry a random secret that it
-keeps in the app's private storage, and the plugin ignores ConvoHop intents
+keeps in the app's private storage, and the plugin ignores Relay intents
 without it.
 
 ## iOS setup
@@ -526,7 +526,7 @@ without it.
 1. In Xcode, add the Push Notifications capability and, if the app rings
    through CallKit, the Background Modes capability with Voice over IP and
    Audio.
-2. Call `ConvoHopPlugin.handleLaunch()` in the app delegate before
+2. Call `RelayPlugin.handleLaunch()` in the app delegate before
    `super.application(_:didFinishLaunchingWithOptions:)`. Apps with scenes,
    including those that `flutter create` makes today, register plugins after
    launch, but iOS terminates an app that a VoIP push launched unless it
@@ -536,7 +536,7 @@ without it.
    ```swift
    import Flutter
    import UIKit
-   import convohop
+   import instantrelay
 
    @main
    @objc class AppDelegate: FlutterAppDelegate, FlutterImplicitEngineDelegate {
@@ -544,7 +544,7 @@ without it.
        _ application: UIApplication,
        didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?
      ) -> Bool {
-       ConvoHopPlugin.handleLaunch()
+       RelayPlugin.handleLaunch()
        return super.application(application, didFinishLaunchingWithOptions: launchOptions)
      }
 
@@ -564,7 +564,7 @@ without it.
    ```
 
    CallKit shows `CONVOHOP_CALL` as the caller when the push has no title.
-4. Optionally add a template image named `ConvoHopCallIcon` to the asset
+4. Optionally add a template image named `RelayCallIcon` to the asset
    catalog for CallKit's call UI.
 
 APNs alerts carry `mutable-content`, so a Notification Service Extension

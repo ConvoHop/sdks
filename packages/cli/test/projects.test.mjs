@@ -49,11 +49,11 @@ test("projects get and operation get report what doesn't exist", async t => {
   const missingProject = await run(cli, ["projects", "get", "--project", projectId], authority);
   assert.equal(missingProject.code, 1);
   assert.equal(missingProject.stdout, "");
-  assert.equal(missingProject.stderr, `convohop: NOT_FOUND: Project ${projectId} doesn't exist\n`);
+  assert.equal(missingProject.stderr, `relay: NOT_FOUND: Project ${projectId} doesn't exist\n`);
   const missingOperation = await run(cli, ["operation", "get", "--operation", operationId], authority);
   assert.equal(missingOperation.code, 1);
   assert.equal(missingOperation.stdout, "");
-  assert.equal(missingOperation.stderr, `convohop: NOT_FOUND: Operation ${operationId} doesn't exist\n`);
+  assert.equal(missingOperation.stderr, `relay: NOT_FOUND: Operation ${operationId} doesn't exist\n`);
 });
 
 test("reads are sent again, each with a new request ID, when their outcome is unknown or the authority asks to wait", async t => {
@@ -85,21 +85,21 @@ test("reads are sent again, each with a new request ID, when their outcome is un
   assert.deepEqual(unknown.waits, [1000, 2000]);
   const sent = requestIds();
   assert.equal(new Set(sent).size, 3);
-  assert.equal(unknown.stderr, "convohop: TRANSPORT_UNKNOWN: Authority response unavailable; resolve the original request\n" +
+  assert.equal(unknown.stderr, "relay: TRANSPORT_UNKNOWN: Authority response unavailable; resolve the original request\n" +
     `  outcome: unknown\n  requestId: ${sent[2]}\n`);
 
   plan.push(31);
   const tooLong = await get();
   assert.equal(tooLong.code, 1);
   assert.deepEqual(tooLong.waits, []);
-  assert.equal(tooLong.stderr, `convohop: RATE_LIMITED: Slow down\n  outcome: rejected\n  requestId: ${requestIds()[0]}\n` +
+  assert.equal(tooLong.stderr, `relay: RATE_LIMITED: Slow down\n  outcome: rejected\n  requestId: ${requestIds()[0]}\n` +
     "  retryAfter: 31s\n");
 
   plan.push("forbidden");
   const forbidden = await get();
   assert.equal(forbidden.code, 1);
   assert.deepEqual(forbidden.waits, []);
-  assert.equal(forbidden.stderr, "convohop: FORBIDDEN: The token can't read this project\n  outcome: rejected\n" +
+  assert.equal(forbidden.stderr, "relay: FORBIDDEN: The token can't read this project\n  outcome: rejected\n" +
     `  requestId: ${requestIds()[0]}\n`);
   assert.equal(plan.length, 0);
 });
@@ -112,7 +112,7 @@ test("projects create sends the project's settings and says how to follow its op
     "production", "--backend-principal-name", "chat-backend"];
   const result = await run(cli, create, authority);
   assert.equal(result.code, 0, result.stderr);
-  assert.equal(result.stderr, `Follow it with convohop operation get --operation ${operationId}\n`);
+  assert.equal(result.stderr, `Follow it with relay operation get --operation ${operationId}\n`);
   const output = JSON.parse(result.stdout);
   assert.equal(output.kind, "reply");
   assert.equal(output.requestId, authority.requests[0].variables.context.requestId);
@@ -182,6 +182,6 @@ test("resolve looks a management request up by default and rejects a missing res
   const missing = await run(cli, ["resolve", "--request", requestId], authority);
   assert.equal(missing.code, 1);
   assert.equal(missing.stdout, "");
-  assert.equal(missing.stderr, "convohop: Invalid protocol object\n");
+  assert.equal(missing.stderr, "relay: Invalid protocol object\n");
   assertUsage(await cli(["resolve"]), "--request is required", "resolve");
 });

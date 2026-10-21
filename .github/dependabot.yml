@@ -185,7 +185,7 @@ updates:
     # change the public API, so it needs its own change with the README.
     ignore:
       # Kotlin 2.3 deprecates language version 2.0, which
-      # convohop-android-push compiles for with warnings as errors. The other
+      # relay-android-push compiles for with warnings as errors. The other
       # modules don't pin a language version, so a newer compiler also raises
       # the Kotlin that apps need.
       - dependency-name: "org.jetbrains.kotlin.*"
@@ -197,7 +197,7 @@ updates:
       - dependency-name: "org.jetbrains.kotlinx:kotlinx-serialization-*"
         versions: [">= 1.10.0"]
       # androidx.core 1.15 and later need compileSdk 35 or later, and apps
-      # that use only convohop-android-push compile against API 34.
+      # that use only relay-android-push compile against API 34.
       - dependency-name: "androidx.core:core"
         versions: [">= 1.15.0"]
       # OkHttpEngine and OkHttpRealtimeConnector take an OkHttpClient, so

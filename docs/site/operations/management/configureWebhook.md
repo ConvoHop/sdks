@@ -134,7 +134,7 @@ mutation ManagementConfigureWebhook($context: RequestContextInput!, $input: Conf
 | Language | Members |
 | --- | --- |
 | [TypeScript](../../typescript/reference/operations.md) | Not wrapped by a method |
-| [Python](../../python/reference/operations.md) | [`ConvoHopManagement.configure_webhook`](../../python/reference/convohop.md#convohopmanagementconfigure_webhook-method), [`AsyncConvoHopManagement.configure_webhook`](../../python/reference/convohop.md#asyncconvohopmanagementconfigure_webhook-method) |
+| [Python](../../python/reference/operations.md) | [`RelayManagement.configure_webhook`](../../python/reference/instantrelay.md#relaymanagementconfigure_webhook-method), [`AsyncRelayManagement.configure_webhook`](../../python/reference/instantrelay.md#asyncrelaymanagementconfigure_webhook-method) |
 | [.NET](../../dotnet/reference/operations.md) | [`ManagementApi.ConfigureWebhookAsync`](../../dotnet/reference/api.md#managementapiconfigurewebhookasync-method) |
 | [Java and Kotlin](../../jvm/reference/operations.md) | [`ManagementApi.configureWebhook`](../../jvm/reference/server.md#managementapiconfigurewebhook-method), [`ManagementSuspendApi.configureWebhook`](../../jvm/reference/server-kotlin.md#managementsuspendapiconfigurewebhook-method) |
-| [Go](../../go/reference/operations.md) | [`ManagementClient.ConfigureWebhook`](../../go/reference/convohop.md#managementclientconfigurewebhook-method) |
+| [Go](../../go/reference/operations.md) | [`ManagementClient.ConfigureWebhook`](../../go/reference/relay.md#managementclientconfigurewebhook-method) |

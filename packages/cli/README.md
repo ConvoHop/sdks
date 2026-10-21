@@ -1,10 +1,10 @@
-# ConvoHop CLI
+# Relay CLI
 
-`convohop` is the command-line interface for ConvoHop project operators. It
+`relay` is the command-line interface for Relay project operators. It
 logs in to the management authority, shows and creates projects, issues,
 redeems and revokes backend keys, follows and replays webhook deliveries,
 builds push payloads from a signed notification webhook, and runs any
-operation in the schema with `convohop call`. It's built on `@convohop/server`.
+operation in the schema with `relay call`. It's built on `@instantrelay/server`.
 `tools/sdkgen` generates its operation catalog from the shared schema and its
 annotations.
 
@@ -17,11 +17,11 @@ this repository. License: [Apache-2.0](LICENSE).
 ```sh
 npm ci
 npm run build -w packages/cli
-alias convohop="node $PWD/packages/cli/dist/bin.js"
-convohop --help
+alias relay="node $PWD/packages/cli/dist/bin.js"
+relay --help
 ```
 
-`convohop COMMAND --help` shows a command's options. Data goes to stdout as
+`relay COMMAND --help` shows a command's options. Data goes to stdout as
 JSON, and diagnostics go to stderr.
 
 | Exit code | Meaning |
@@ -35,7 +35,7 @@ JSON, and diagnostics go to stderr.
 ## Log in
 
 ```sh
-convohop login --management-url https://management.example.com \
+relay login --management-url https://management.example.com \
   --communication-url https://communication.example.com
 ```
 
@@ -49,26 +49,26 @@ Secret Service (GNOME Keyring, KWallet) through `secret-tool` on Linux. Where
 neither works, or with `--credential-store file`, it goes to
 `credentials.json` in the configuration directory, created readable only by
 you. The profile's URLs go to `config.json` in the same directory. That
-directory is `CONVOHOP_CONFIG_DIR`, else `$XDG_CONFIG_HOME/convohop`, else
-`~/Library/Application Support/convohop` on macOS, `%APPDATA%\convohop` on
-Windows and `~/.config/convohop` elsewhere.
+directory is `RELAY_CONFIG_DIR`, else `$XDG_CONFIG_HOME/relay`, else
+`~/Library/Application Support/relay` on macOS, `%APPDATA%\relay` on
+Windows and `~/.config/relay` elsewhere.
 
-`convohop status` shows the profile, its authorities and where the token comes
-from, without the token. `convohop logout` removes the profile and its token.
-`--profile NAME` or `CONVOHOP_PROFILE` selects a profile.
+`relay status` shows the profile, its authorities and where the token comes
+from, without the token. `relay logout` removes the profile and its token.
+`--profile NAME` or `RELAY_PROFILE` selects a profile.
 
 Environment variables take precedence over the profile:
 
 | Variable | Meaning |
 | --- | --- |
-| `CONVOHOP_MANAGEMENT_URL` | Management authority origin. |
-| `CONVOHOP_COMMUNICATION_URL` | Communication authority origin, which redeeming credentials and `call` with communication operations need. |
-| `CONVOHOP_PORTAL_TOKEN` or `CONVOHOP_PORTAL_TOKEN_FILE` | Portal token for management commands, or a file that holds it. |
-| `CONVOHOP_BACKEND_KEY` or `CONVOHOP_BACKEND_KEY_FILE` | Backend key for communication operations, or a file that holds it. |
-| `CONVOHOP_PROJECT_ID`, `CONVOHOP_INCARNATION` | The project and incarnation of communication operations. |
-| `CONVOHOP_WEBHOOK_SECRET` or `CONVOHOP_WEBHOOK_SECRET_FILE` | The endpoint secret that `push test` signs with. |
-| `CONVOHOP_PROFILE` | The profile to use. Default: `default`. |
-| `CONVOHOP_CONFIG_DIR` | The configuration directory. |
+| `RELAY_MANAGEMENT_URL` | Management authority origin. |
+| `RELAY_COMMUNICATION_URL` | Communication authority origin, which redeeming credentials and `call` with communication operations need. |
+| `RELAY_PORTAL_TOKEN` or `RELAY_PORTAL_TOKEN_FILE` | Portal token for management commands, or a file that holds it. |
+| `RELAY_BACKEND_KEY` or `RELAY_BACKEND_KEY_FILE` | Backend key for communication operations, or a file that holds it. |
+| `RELAY_PROJECT_ID`, `RELAY_INCARNATION` | The project and incarnation of communication operations. |
+| `RELAY_WEBHOOK_SECRET` or `RELAY_WEBHOOK_SECRET_FILE` | The endpoint secret that `push test` signs with. |
+| `RELAY_PROFILE` | The profile to use. Default: `default`. |
+| `RELAY_CONFIG_DIR` | The configuration directory. |
 
 Prefer the `_FILE` variables, which keep secrets out of your environment
 listing and shell history.
@@ -90,24 +90,24 @@ listing and shell history.
 | `call` | Run any operation in the schema by its ID. |
 
 ```sh
-convohop projects get --project 6f1c2a7e-0b8d-4e5f-9a3c-2d1e0f9b8a7c
+relay projects get --project 6f1c2a7e-0b8d-4e5f-9a3c-2d1e0f9b8a7c
 
 # Issue a key and redeem it into a new file that only you can read.
-convohop keys issue --project 6f1c2a7e-0b8d-4e5f-9a3c-2d1e0f9b8a7c --name chat-backend \
+relay keys issue --project 6f1c2a7e-0b8d-4e5f-9a3c-2d1e0f9b8a7c --name chat-backend \
   --scope conversationManage --scope messageWrite --expires-in 90d --out ./backend-key
 
-convohop webhooks tail --project 6f1c2a7e-0b8d-4e5f-9a3c-2d1e0f9b8a7c \
+relay webhooks tail --project 6f1c2a7e-0b8d-4e5f-9a3c-2d1e0f9b8a7c \
   --endpoint 0b8d4e5f-9a3c-4d1e-8f9b-8a7c6f1c2a7e
-convohop webhooks replay --project 6f1c2a7e-0b8d-4e5f-9a3c-2d1e0f9b8a7c \
+relay webhooks replay --project 6f1c2a7e-0b8d-4e5f-9a3c-2d1e0f9b8a7c \
   --endpoint 0b8d4e5f-9a3c-4d1e-8f9b-8a7c6f1c2a7e --since 2026-10-08T00:00:00Z
 
-convohop push test --type call --bundle-id com.example.chat
-convohop call --list
-convohop call management.projectUsage --help
-convohop call management.projectUsage --input '{"projectId": "6f1c2a7e-0b8d-4e5f-9a3c-2d1e0f9b8a7c"}'
+relay push test --type call --bundle-id com.example.chat
+relay call --list
+relay call management.projectUsage --help
+relay call management.projectUsage --input '{"projectId": "6f1c2a7e-0b8d-4e5f-9a3c-2d1e0f9b8a7c"}'
 ```
 
-`convohop keys scopes` lists the scopes a key can grant. `convohop call
+`relay keys scopes` lists the scopes a key can grant. `relay call
 OPERATION --help` shows an operation's input, credentials, scopes and
 idempotency from the schema's annotations.
 
@@ -115,8 +115,8 @@ idempotency from the schema's annotations.
 
 `keys issue` never prints the key. With `--out FILE`, it waits for the key's
 credential delivery, redeems the key into `FILE` and acknowledges the
-delivery. `FILE` must not exist; convohop creates it readable only by you.
-Without `--out`, it prints the request and the `convohop redeem` command that
+delivery. `FILE` must not exist; relay creates it readable only by you.
+Without `--out`, it prints the request and the `relay redeem` command that
 redeems the key later. A delivery can be redeemed once.
 
 `keys revoke` and the destructive operations of `call` ask before they run;
@@ -139,13 +139,13 @@ which receivers deduplicate them.
 `push test` signs a sample notification event, or the webhook body that
 `--event` names, as a Standard Webhooks delivery. It verifies the delivery with
 `webhooks.verify` and builds each platform's push request with the
-`@convohop/server` push builders, as your webhook receiver would. It prints the
+`@instantrelay/server` push builders, as your webhook receiver would. It prints the
 event, each request and its size, measured as in
 [`spec/push-payload`](../../spec/push-payload/README.md). Nothing reaches a
 push provider.
 
 Without a secret, it signs with a new secret for the run. With
-`--secret-file`, `CONVOHOP_WEBHOOK_SECRET` or `CONVOHOP_WEBHOOK_SECRET_FILE`,
+`--secret-file`, `RELAY_WEBHOOK_SECRET` or `RELAY_WEBHOOK_SECRET_FILE`,
 it signs as your endpoint's sender, and `--deliver URL` also posts the signed
 delivery to your endpoint: https, or http on localhost. It doesn't follow
 redirects and never prints the URL.
@@ -154,31 +154,31 @@ redirects and never prints the URL.
 
 Reads are sent again with a new request ID when their outcome is unknown or
 the authority asks to wait. Mutations aren't: when a mutation's outcome is
-unknown, convohop looks the request up and resends the same request only while
+unknown, relay looks the request up and resends the same request only while
 the authority hasn't seen it, within its retry budget of 3 attempts in 60
-seconds. If the outcome stays unknown, convohop exits with code 3 and prints
+seconds. If the outcome stays unknown, relay exits with code 3 and prints
 the request ID. Don't run the command again, which sends a new request: run
-`convohop resolve --request ID` instead. convohop keeps no requests after it
+`relay resolve --request ID` instead. relay keeps no requests after it
 exits, so `resolve` looks a request up but can't resend it.
 
 Credential delivery permits are the exception. A permit authorizes one
-redemption, and looking its request up can't return it, so convohop sends the
+redemption, and looking its request up can't return it, so relay sends the
 permit request again with the same request ID, which the authority
 deduplicates. If the permit's outcome stays unknown, nothing was redeemed:
-convohop exits with code 1, and running `redeem` again requests a new permit.
+relay exits with code 1, and running `redeem` again requests a new permit.
 
 ## Secrets
 
-convohop never prints a portal token, backend key, webhook secret or redeemed
+relay never prints a portal token, backend key, webhook secret or redeemed
 credential, and redacts the credential fields of every reply, such as
 `sessionToken`, `connectToken` and `secret`. Its errors don't quote the URLs
 you give it, which can carry tokens. `call` doesn't run the operations whose
 results are credentials, such as `communication.issueSession` and the hosted
 billing links of `management.createBillingCheckoutSession` and
 `management.createBillingPortalSession`; `keys issue --out` and `redeem` write credentials only to a new file that only
-you can read. Nor does it run `management.approveAgentSignup`: approving an
-agent's signup records the owner's consent, which the owner gives from the
-emailed approval link, not a script.
+you can read. The launch catalog has 61 callable operations and five withheld
+operations, all from the 79-operation launch contract; agent signup and
+spend-management operations are not included.
 
 ## What the schema doesn't offer yet
 

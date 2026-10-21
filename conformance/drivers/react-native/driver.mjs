@@ -1,6 +1,6 @@
-// ConvoHop conformance driver for @convohop/react-native (spec/conformance/driver-protocol.md). It runs the reference
+// Relay conformance driver for @instantrelay/react-native (spec/conformance/driver-protocol.md). It runs the reference
 // driver's protocol loop, ../ts/dist/driver.mjs, with ./sdk.mjs in place of the reference's SDK module, in a Node
-// process that looks like a React Native app: the package's test stand-ins replace react-native, a fake ConvoHopPlatform
+// process that looks like a React Native app: the package's test stand-ins replace react-native, a fake RelayPlatform
 // TurboModule supplies random bytes, and the globals Hermes lacks are gone. It doesn't run Hermes or native code.
 import module from "node:module";
 

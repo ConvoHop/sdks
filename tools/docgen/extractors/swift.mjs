@@ -33,7 +33,7 @@ export class ExtractError extends Error {}
  * responding in a headless session, such as CI, as swift/README.md notes.
  */
 export function buildCommand() {
-  return ["swift", "build", "--package-path", PACKAGE, "--product", PRODUCT, "--force-resolved-versions", "--disable-keychain"];
+  return ["swift", "build", "--package-path", PACKAGE, "--product", PRODUCT, "--force-resolved-versions", "--disable-keychain", "--jobs", "2"];
 }
 
 /** The command that runs the extractor on a language file, to run from root. */

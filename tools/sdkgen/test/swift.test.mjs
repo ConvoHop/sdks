@@ -26,8 +26,8 @@ function documentLiteral(operations, id) {
 
 test("Swift names keep GraphQL names, prefix reserved type names and escape keywords", () => {
   assert.equal(swiftTypeName("Message"), "Message");
-  assert.equal(swiftTypeName("Operation"), "ConvoHopOperation", "Foundation declares Operation");
-  assert.equal(swiftTypeName("JSONValue"), "ConvoHopJSONValue", "the generated support types keep their names");
+  assert.equal(swiftTypeName("Operation"), "RelayOperation", "Foundation declares Operation");
+  assert.equal(swiftTypeName("JSONValue"), "RelayJSONValue", "the generated support types keep their names");
   assert.equal(swiftIdentifier("repeat"), "`repeat`");
   assert.equal(swiftIdentifier("type"), "type");
   assert.throws(() => swiftIdentifier("a-b"), new EmitterError('swift: "a-b" is not a Swift identifier'));
@@ -100,7 +100,7 @@ test("output shapes cover exactly the output types, and error codes cover the cl
   const client = ir.operations.filter(operation => CLIENT_LAYERS.has(operation.layer));
   const expected = ir.errors.codes.filter(code => code.origin === "sdk" || client.some(operation => operation.errors?.codes.includes(code.name)))
     .map(code => code.name).sort(codeUnitCompare);
-  const declared = [...operations.matchAll(/ConvoHopErrorCode\(rawValue: "(\w+)"\)/g)].map(match => match[1]);
+  const declared = [...operations.matchAll(/RelayErrorCode\(rawValue: "(\w+)"\)/g)].map(match => match[1]);
   assert.deepEqual(declared, expected);
   assert.match(operations, /enum GraphQLRealtime \{[\s\S]*static let eventStream = GraphQLRealtimeChannel\([\s\S]*connectionInit: \["tenant", "token"\],[\s\S]*jitterMs: 0,\n {8}terminalCloseCodes: \[4401, 4403\]\n/);
 });
@@ -132,8 +132,8 @@ test("keyword fields are escaped and reserved type names are prefixed throughout
   const operations = renderSwiftOperations(ir);
   assert.match(types, /public var `repeat`: Int\?\n/);
   assert.match(types, /self\.`repeat` = `repeat`\n/);
-  assert.match(types, /public struct ConvoHopResult: Codable, Hashable, Sendable \{/);
-  assert.match(operations, /public static let alphaResolveRequest = GraphQLOperation<ResolveInput, ConvoHopResult>/);
+  assert.match(types, /public struct RelayResult: Codable, Hashable, Sendable \{/);
+  assert.match(operations, /public static let alphaResolveRequest = GraphQLOperation<ResolveInput, RelayResult>/);
   assert.match(operations, /resultType: "Result!"/, "the catalog keeps GraphQL type names");
   assert.match(operations, /"Result": \.object\(/);
 });
@@ -141,8 +141,8 @@ test("keyword fields are escaped and reserved type names are prefixed throughout
 test("the Swift emitter rejects schemas whose names collide in Swift", () => {
   const values = edgeIr({ planes: { alpha: text => replaceOnce(text, "  apple9\n", "  apple9\n  bananaSplit\n  BANANA_SPLIT\n") } });
   assert.throws(() => renderSwiftTypes(values), new EmitterError('swift: enum Fruit values "bananaSplit" and "BANANA_SPLIT" both map to bananaSplit'));
-  const types = edgeIr({ planes: { alpha: text => text.replaceAll(/\bReceipt\b/g, "Result").replaceAll(/\bSubjectRef\b/g, "ConvoHopResult") } });
-  assert.throws(() => renderSwiftTypes(types), new EmitterError('swift: types "ConvoHopResult" and "Result" both map to ConvoHopResult'));
+  const types = edgeIr({ planes: { alpha: text => text.replaceAll(/\bReceipt\b/g, "Result").replaceAll(/\bSubjectRef\b/g, "RelayResult") } });
+  assert.throws(() => renderSwiftTypes(types), new EmitterError('swift: types "RelayResult" and "Result" both map to RelayResult'));
 });
 
 test("the repository renders one typed operation per client operation into the configured directory", () => {
@@ -153,5 +153,5 @@ test("the repository renders one typed operation per client operation into the c
   const client = ir.operations.filter(operation => CLIENT_LAYERS.has(operation.layer)).map(operation => operation.id);
   assert.deepEqual([...operations.matchAll(/GraphQLCatalog\.operations\["([\w.]+)"\]!\)/g)].map(match => match[1]), client);
   assert.ok(client.length > 0 && client.every(id => id.startsWith("communication.")), "client operations are on the communication plane");
-  assert.match(files[0].contents, /public struct ConvoHopOperation: Codable, Hashable, Sendable \{/);
+  assert.match(files[0].contents, /public struct RelayOperation: Codable, Hashable, Sendable \{/);
 });

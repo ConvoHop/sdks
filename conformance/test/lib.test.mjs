@@ -28,7 +28,7 @@ const mismatch = (actual, pattern, text) => {
 let spec, temp;
 before(async () => {
   spec = await loadSpec();
-  temp = await mkdtemp(join(tmpdir(), "convohop-conformance-lib-"));
+  temp = await mkdtemp(join(tmpdir(), "relay-conformance-lib-"));
 });
 after(() => rm(temp, { recursive: true, force: true }));
 
@@ -372,7 +372,7 @@ describe("reports", () => {
 
   test("JUnit escapes attributes, splits CDATA terminators and drops XML-invalid characters", () => {
     const xml = junit(summary);
-    assert.match(xml, /^<\?xml version="1\.0" encoding="UTF-8"\?>\n<testsuites name="ConvoHop conformance" tests="4" failures="2" errors="0" skipped="1" time="1\.234">/);
+    assert.match(xml, /^<\?xml version="1\.0" encoding="UTF-8"\?>\n<testsuites name="Relay conformance" tests="4" failures="2" errors="0" skipped="1" time="1\.234">/);
     assert.match(xml, /<testcase classname="conformance\.probe" name="probe\.pass" time="0\.010"\/>/);
     assert.match(xml, /<skipped message="needs a\|b&#10;feature"\/>/);
     assert.match(xml, /<failure message="step 3 \(invoke\): bad &lt;&amp;&quot;&gt; value \]\]&gt; \uFFFD end" type="invoke">/);

@@ -10,15 +10,15 @@
   "snippetRoots": ["examples/lib"],
   "packages": [
     {
-      "name": "package:convohop/convohop.dart",
-      "slug": "convohop",
+      "name": "package:instantrelay/instantrelay.dart",
+      "slug": "instantrelay",
       "layer": "client",
       "summary": "Client SDK for Flutter apps on end-user devices: one signed-in user's conversations, realtime events, conversation store, offline outbox, read receipts, typing, recent activity and call control.",
       "runtime": "Flutter 3.38 or later (Dart 3.10 or later) on Android 7.0 (API level 24) or later and iOS 13 or later.",
       "source": "flutter"
     },
     {
-      "name": "package:convohop/calls.dart",
+      "name": "package:instantrelay/calls.dart",
       "slug": "calls",
       "layer": "client",
       "summary": "Call media through the official `livekit_client` package.",
@@ -26,7 +26,7 @@
       "source": "flutter"
     },
     {
-      "name": "package:convohop/push.dart",
+      "name": "package:instantrelay/push.dart",
       "slug": "push",
       "layer": "client",
       "summary": "Push registration, notification payloads and the system incoming-call UI, through the package's own platform code.",
@@ -34,7 +34,7 @@
       "source": "flutter"
     },
     {
-      "name": "package:convohop/io.dart",
+      "name": "package:instantrelay/io.dart",
       "slug": "io",
       "layer": "client",
       "summary": "File-backed recovery storage for the conversation store and the outbox.",

@@ -1,6 +1,6 @@
-// Package webhooks verifies ConvoHop webhook deliveries.
+// Package webhooks verifies Relay webhook deliveries.
 //
-// ConvoHop signs deliveries with the Standard Webhooks symmetric scheme:
+// Relay signs deliveries with the Standard Webhooks symmetric scheme:
 // HMAC-SHA256 over the delivery's webhook-id, webhook-timestamp and raw body,
 // carried as v1 signatures. Verify the body exactly as received, before
 // parsing or re-encoding it, respond 2xx within 5 seconds and process the

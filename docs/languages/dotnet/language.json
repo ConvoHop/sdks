@@ -10,28 +10,28 @@
   "snippetRoots": ["examples/src"],
   "packages": [
     {
-      "name": "ConvoHop",
-      "slug": "convohop",
+      "name": "Relay",
+      "slug": "relay",
       "layer": "server",
       "summary": "Server SDK for trusted .NET backends: project and management clients for backend-key calls, typed errors, recovery storage, webhook verification and push payload builders.",
       "runtime": ".NET 8 or later. The `netstandard2.0` build also targets .NET Framework 4.7.2 or later, which isn't tested yet.",
-      "source": "dotnet/src/ConvoHop"
+      "source": "dotnet/src/Relay"
     },
     {
-      "name": "ConvoHop.Api",
+      "name": "Relay.Api",
       "slug": "api",
       "layer": "server",
       "summary": "Generated APIs with a method for every communication and management operation a backend can send, and async page streams for paginated ones.",
       "runtime": ".NET 8 or later. The `netstandard2.0` build also targets .NET Framework 4.7.2 or later, which isn't tested yet.",
-      "source": "dotnet/src/ConvoHop"
+      "source": "dotnet/src/Relay"
     },
     {
-      "name": "ConvoHop.Models",
+      "name": "Relay.Models",
       "slug": "models",
       "layer": "server",
-      "summary": "Generated input and result models of the ConvoHop GraphQL API.",
+      "summary": "Generated input and result models of the Relay GraphQL API.",
       "runtime": ".NET 8 or later. The `netstandard2.0` build also targets .NET Framework 4.7.2 or later, which isn't tested yet.",
-      "source": "dotnet/src/ConvoHop"
+      "source": "dotnet/src/Relay"
     }
   ],
   "quickstarts": ["server", "webhooks", "push"],
@@ -40,7 +40,7 @@
     "command": ["node", "tools/docgen/extractors/dotnet.mjs", "docs/languages/dotnet/language.json"]
   },
   "test": {
-    "install": ["dotnet", "restore", "docs/languages/dotnet/examples/ConvoHop.Docs.Examples.csproj", "--locked-mode"],
-    "command": ["dotnet", "test", "docs/languages/dotnet/examples/ConvoHop.Docs.Examples.csproj", "--no-restore", "-maxcpucount:2"]
+    "install": ["dotnet", "restore", "docs/languages/dotnet/examples/Relay.Docs.Examples.csproj", "--locked-mode"],
+    "command": ["dotnet", "test", "docs/languages/dotnet/examples/Relay.Docs.Examples.csproj", "--no-restore", "-maxcpucount:2"]
   }
 }

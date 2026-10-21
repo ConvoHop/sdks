@@ -1,4 +1,4 @@
-"""Signs deliveries the way ConvoHop does: Standard Webhooks v1, HMAC-SHA256 over "id.timestamp.body"."""
+"""Signs deliveries the way Relay does: Standard Webhooks v1, HMAC-SHA256 over "id.timestamp.body"."""
 
 import base64
 import hashlib
@@ -13,7 +13,7 @@ def new_secret() -> str:
     return "whsec_" + base64.b64encode(os.urandom(32)).decode()
 
 
-# A body as ConvoHop sends it: compact JSON, with text left as UTF-8 rather than \u escapes.
+# A body as Relay sends it: compact JSON, with text left as UTF-8 rather than \u escapes.
 def wire_json(event: object) -> str:
     return json.dumps(event, ensure_ascii=False, separators=(",", ":"))
 

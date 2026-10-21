@@ -4,8 +4,8 @@
  * edits this file. See docs/docs-pipeline.md.
  */
 export default {
-  title: "ConvoHop SDK documentation",
-  description: "Reference documentation, quickstarts and tested examples for the ConvoHop SDKs.",
+  title: "Relay SDK documentation",
+  description: "Reference documentation, quickstarts and tested examples for the Relay SDKs.",
   /** Language directories, each with a language.json (spec/docs/language.schema.json). */
   languagesDirectory: "docs/languages",
   /** Generated, committed output. docgen owns every file in it. */
@@ -19,7 +19,7 @@ export default {
     {
       id: "server",
       title: "Server",
-      summary: "Call ConvoHop from your backend with a backend key: principals, sessions, conversations and messages.",
+      summary: "Call Relay from your backend with a backend key: principals, sessions, conversations and messages.",
     },
     {
       id: "client",

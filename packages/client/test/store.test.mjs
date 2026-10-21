@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { ConversationStore, ConvoHopProblem, Outbox } from "@convohop/client";
+import { ConversationStore, RelayProblem, Outbox } from "@instantrelay/client";
 
 const id = () => crypto.randomUUID();
 const at = "2026-10-08T12:00:00.000Z";
@@ -9,7 +9,7 @@ async function until(predicate, message = "condition") {
   for (let index = 0; index < 1000 && !predicate(); index++) await turn();
   assert.ok(predicate(), "timed out waiting for " + message);
 }
-const problem = (code, status = 409, outcome = "rejected") => new ConvoHopProblem(code, id(), outcome, status, "Fixture " + code);
+const problem = (code, status = 409, outcome = "rejected") => new RelayProblem(code, id(), outcome, status, "Fixture " + code);
 const later = (a, b) => a === null ? b : b === null ? a : BigInt(a) >= BigInt(b) ? a : b;
 const sequences = store => store.snapshot.messages.map(message => message.sequence);
 const offline = { online: false, subscribe: () => () => undefined };

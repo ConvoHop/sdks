@@ -10,7 +10,7 @@ import 'protocol.dart';
 import 'storage.dart';
 import 'transport.dart';
 
-/// Where a message in the [ConvoHopOutbox] is.
+/// Where a message in the [RelayOutbox] is.
 enum OutboxState {
   /// Waiting for its turn, the network or a backoff.
   queued,
@@ -23,11 +23,11 @@ enum OutboxState {
   sent,
 
   /// The authority rejected it, and no attempt is in doubt, so it wasn't
-  /// committed. [ConvoHopOutbox.resend] sends the text as a new message.
+  /// committed. [RelayOutbox.resend] sends the text as a new message.
   failed,
 
   /// An attempt reached the authority without an answer, and the retry budget
-  /// is spent, so it may or may not be committed. [ConvoHopOutbox.resolve]
+  /// is spent, so it may or may not be committed. [RelayOutbox.resolve]
   /// asks again. Resending it as a new message can duplicate it.
   unknown,
 }
@@ -221,7 +221,7 @@ const _waitingCodes = {...sessionCodes, 'RECOVERY_LIMIT'};
 /// Call [flush] when connectivity returns.
 ///
 /// A message stays queued, and is tried again after a backoff that is never
-/// shorter than the authority's [ConvoHopProblem.retryAfter], after an
+/// shorter than the authority's [RelayProblem.retryAfter], after an
 /// unknown outcome, a rejection the realtime stream would also retry (such as
 /// `RATE_LIMITED`), `WRONG_REGION`, after which the client routes again
 /// first, `RECOVERY_LIMIT` and an ended session. Any other rejection, such as
@@ -234,11 +234,11 @@ const _waitingCodes = {...sessionCodes, 'RECOVERY_LIMIT'};
 /// message isn't sent again: it fails with `RESOLUTION_REQUIRED`, as
 /// [OutboxState.unknown] if an attempt may have reached the authority.
 ///
-/// With [ConvoHopClient.storage] set and [persist] on, unsent messages,
+/// With [RelayClient.storage] set and [persist] on, unsent messages,
 /// including their text, are stored under
 /// `convohop.outbox:<project>:<principal>` until sent or discarded.
-final class ConvoHopOutbox {
-  ConvoHopOutbox(this.client, {ErrorListener? onError, bool persist = true, Clock clock = systemClock, Random? random})
+final class RelayOutbox {
+  RelayOutbox(this.client, {ErrorListener? onError, bool persist = true, Clock clock = systemClock, Random? random})
     : _onError = onError,
       _storage = persist ? client.storage : null,
       _clock = clock,
@@ -257,7 +257,7 @@ final class ConvoHopOutbox {
   static const int _firstDelay = 1000;
   static const int _maxDelay = 30000;
 
-  final ConvoHopClient client;
+  final RelayClient client;
   final ErrorListener? _onError;
   final RecoveryStorage? _storage;
   final Clock _clock;
@@ -394,7 +394,7 @@ final class ConvoHopOutbox {
     final RequestResolution resolution;
     try {
       resolution = await client.requests.resolve(entry.requestId);
-    } on ConvoHopProblem catch (problem) {
+    } on RelayProblem catch (problem) {
       if (problem.code == 'TRANSPORT_UNKNOWN') _unreachable();
       rethrow;
     }
@@ -549,7 +549,7 @@ final class ConvoHopOutbox {
       _reached();
       if (_settled.contains(resolution.state)) return _Delivered(_ackFrom(entry, resolution));
       if (resolution.state != 'notObservedYet') {
-        throw ConvoHopProblem('INVALID_RESPONSE', entry.requestId, 'unknown', 503, 'Unknown request resolution state');
+        throw RelayProblem('INVALID_RESPONSE', entry.requestId, 'unknown', 503, 'Unknown request resolution state');
       }
       final record = _record(entry.requestId);
       if (record != null && _settled.contains(record.resolutionState)) return const _Delivered(null);
@@ -557,7 +557,7 @@ final class ConvoHopOutbox {
         // The transport stored the request's record before the attempt, so
         // the record was evicted while no outbox held it, or lost with
         // storage: the request can't be resent safely.
-        throw ConvoHopProblem(
+        throw RelayProblem(
           'RESOLUTION_REQUIRED',
           entry.requestId,
           'unknown',
@@ -591,7 +591,7 @@ final class ConvoHopOutbox {
           ..attempted = wasAttempted
           ..uncertain = wasUncertain
           ..attempts = attempts;
-      } else if (error is ConvoHopProblem && error.outcome == 'rejected') {
+      } else if (error is RelayProblem && error.outcome == 'rejected') {
         entry.uncertain = wasUncertain;
       }
       rethrow;
@@ -615,7 +615,7 @@ final class ConvoHopOutbox {
         ack.status != 'sent' ||
         (cursor != null && (cursor.conversationId != entry.conversationId || cursor.sequence != ack.sequence))) {
       _report(
-        ConvoHopProblem('INVALID_RESPONSE', entry.requestId, resolution.state, 503, 'Invalid send receipt scope'),
+        RelayProblem('INVALID_RESPONSE', entry.requestId, resolution.state, 503, 'Invalid send receipt scope'),
       );
       return null;
     }
@@ -634,7 +634,7 @@ final class ConvoHopOutbox {
 
   void _failed(_Entry entry, Object error) {
     entry.error = error;
-    final problem = error is ConvoHopProblem ? error : null;
+    final problem = error is RelayProblem ? error : null;
     entry.errorCode = problem?.code;
     final committed = problem != null
         ? _settled.contains(problem.outcome)
@@ -691,7 +691,7 @@ final class ConvoHopOutbox {
 
   // Unreachable authorities already show as [offline].
   void _reportReachable(Object error) {
-    if (error is! ConvoHopProblem || error.code != 'TRANSPORT_UNKNOWN') _report(error);
+    if (error is! RelayProblem || error.code != 'TRANSPORT_UNKNOWN') _report(error);
   }
 
   void _report(Object error) {

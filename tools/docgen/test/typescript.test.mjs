@@ -21,7 +21,7 @@ test("parseDoc turns TSDoc into Markdown with parameters, links, returns, throws
       " * @param [options] Optional settings,",
       " *   over two lines.",
       " * @returns The sent message.",
-      " * @throws {@link ConvoHopError} when the request fails.",
+      " * @throws {@link RelayError} when the request fails.",
       " * @remarks Retries keep the request ID.",
       " * @defaultValue `{}`",
       " * @deprecated Use `Conversation.send`.",
@@ -33,7 +33,7 @@ test("parseDoc turns TSDoc into Markdown with parameters, links, returns, throws
       "Sends a message. See `Conversation.send` and [the guide](https://example.com/guide).",
       "Parameters:\n\n- `conversationId`: The conversation.\n- `options`: Optional settings,\n  over two lines.",
       "Returns: The sent message.",
-      "Throws: `ConvoHopError` when the request fails.",
+      "Throws: `RelayError` when the request fails.",
       "Retries keep the request ID.",
       "Default: `{}`",
     ].join("\n\n"),
@@ -355,8 +355,8 @@ test("extractTypeScript follows workspace re-exports, inherits members and keeps
 });
 
 test("splitSpecifier splits a package name from its exports subpath", () => {
-  assert.deepEqual(splitSpecifier("@convohop/client"), { name: "@convohop/client", subpath: "." });
-  assert.deepEqual(splitSpecifier("@convohop/client/push"), { name: "@convohop/client", subpath: "./push" });
+  assert.deepEqual(splitSpecifier("@instantrelay/client"), { name: "@instantrelay/client", subpath: "." });
+  assert.deepEqual(splitSpecifier("@instantrelay/client/push"), { name: "@instantrelay/client", subpath: "./push" });
   assert.deepEqual(splitSpecifier("web-push"), { name: "web-push", subpath: "." });
   assert.deepEqual(splitSpecifier("pkg/a/b"), { name: "pkg", subpath: "./a/b" });
   for (const specifier of ["", "./local.js", "../up.js", "/abs", "@scope", "@scope/"]) assert.equal(splitSpecifier(specifier), null, specifier);

@@ -1,9 +1,9 @@
 import 'dart:async';
 import 'dart:convert';
 
-import 'package:convohop/convohop.dart';
-import 'package:convohop/src/protocol.dart' show fingerprint;
-import 'package:convohop/src/transport.dart' show beforeSubmitting, retainRecovery;
+import 'package:instantrelay/instantrelay.dart';
+import 'package:instantrelay/src/protocol.dart' show fingerprint;
+import 'package:instantrelay/src/transport.dart' show beforeSubmitting, retainRecovery;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:http/http.dart' as http;
 
@@ -72,7 +72,7 @@ final class _Authority {
     return jsonResponse(gqlEnvelope('sendMessage', id, messageAck(), status: 'committed'));
   });
 
-  ConvoHopTransport transport(MemoryRecoveryStorage storage, {int Function() clock = fixedClock}) => ConvoHopTransport(
+  RelayTransport transport(MemoryRecoveryStorage storage, {int Function() clock = fixedClock}) => RelayTransport(
     baseUrl: 'https://authority.example',
     namespace: 'test',
     incarnation: incarnation,
@@ -83,22 +83,22 @@ final class _Authority {
   );
 }
 
-Future<SendMessageReply> _send(ConvoHopTransport transport, String id) =>
+Future<SendMessageReply> _send(RelayTransport transport, String id) =>
     transport.execute(Operations.communicationSendMessage, projectId, _input(id), requestId: id);
 
-List<String> _held(ConvoHopTransport transport) => [for (final state in transport.recoveryStates) state.requestId];
+List<String> _held(RelayTransport transport) => [for (final state in transport.recoveryStates) state.requestId];
 
 List<String> _saved(MemoryRecoveryStorage storage) => [
   for (final record in jsonDecode(storage.items[_key]!) as List<Object?>)
     (record! as Map<String, Object?>)['requestId']! as String,
 ];
 
-TypeMatcher<ConvoHopProblem> _problem(String code, {String? outcome}) => isA<ConvoHopProblem>()
+TypeMatcher<RelayProblem> _problem(String code, {String? outcome}) => isA<RelayProblem>()
     .having((problem) => problem.code, 'code', code)
     .having((problem) => problem.outcome, 'outcome', outcome ?? anything);
 
 /// The refusal of new request [id] while no record can make room.
-Matcher _recoveryLimit(String id) => isA<ConvoHopProblem>()
+Matcher _recoveryLimit(String id) => isA<RelayProblem>()
     .having((problem) => problem.code, 'code', 'RECOVERY_LIMIT')
     .having((problem) => problem.requestId, 'requestId', id)
     .having((problem) => problem.outcome, 'outcome', 'rejected')
@@ -123,7 +123,7 @@ void main() {
         ..rejection = (code: 'RATE_LIMITED', status: 429);
       await expectLater(_send(transport, lost), throwsA(_problem('RATE_LIMITED')));
 
-      Map<String, List<Object>> summary(ConvoHopTransport transport) => {
+      Map<String, List<Object>> summary(RelayTransport transport) => {
         for (final state in transport.recoveryStates)
           state.requestId: [state.resolutionState, state.lastAttemptClassification, state.attemptCount],
       };
@@ -318,7 +318,7 @@ void main() {
       final transport = authority.transport(storage);
       final spent = _id(1);
       int sent() => authority.sends.where((id) => id == spent).length;
-      TypeMatcher<ConvoHopProblem> failure(String code, String outcome) =>
+      TypeMatcher<RelayProblem> failure(String code, String outcome) =>
           _problem(code, outcome: outcome).having((problem) => problem.requestId, 'requestId', spent);
       authority.lost = true;
       for (var attempt = 0; attempt < 3; attempt++) {
@@ -451,7 +451,7 @@ void main() {
     });
 
     test("a gateway's error page that isn't JSON keeps its status and Retry-After", () async {
-      final transport = ConvoHopTransport(
+      final transport = RelayTransport(
         baseUrl: 'https://authority.example',
         namespace: 'test',
         incarnation: incarnation,

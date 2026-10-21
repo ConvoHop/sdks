@@ -12,7 +12,7 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.Text;
 
-namespace ConvoHop.Docgen;
+namespace Relay.Docgen;
 
 /// <summary>A source file: its repository-relative path and its text.</summary>
 internal sealed record SourceFile(string Path, string Text);

@@ -1,8 +1,8 @@
 {
-  "name": "@convohop/react",
+  "name": "@instantrelay/react",
   "version": "0.1.0",
   "private": true,
-  "description": "React hooks for the ConvoHop client SDK: conversations, the outbox, typing, session refresh, live sessions and browser media.",
+  "description": "React hooks for the Relay client SDK: conversations, the outbox, typing, session refresh, live sessions and browser media.",
   "license": "Apache-2.0",
   "repository": {
     "type": "git",
@@ -33,7 +33,7 @@
     "check:package": "publint --strict && attw --pack . --profile esm-only"
   },
   "peerDependencies": {
-    "@convohop/client": "*",
+    "@instantrelay/client": "*",
     "react": ">=18"
   },
   "devDependencies": {

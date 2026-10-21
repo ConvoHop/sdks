@@ -1,4 +1,4 @@
-import 'package:convohop/convohop.dart';
+import 'package:instantrelay/instantrelay.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'support/test_data.dart';
@@ -8,7 +8,7 @@ void main() {
     test('initializes route and verifies session refresh state', () async {
       var refreshes = 0;
       var currentSessionReads = 0;
-      final client = ConvoHopClient(
+      final client = RelayClient(
         baseUrl: 'https://authority.example',
         projectId: projectId,
         principalId: principalId,
@@ -171,7 +171,7 @@ void main() {
         }),
         storage: storage,
       );
-      await expectLater(client.send(conversationId, 'offline', requestId: requestId), throwsA(isA<ConvoHopProblem>()));
+      await expectLater(client.send(conversationId, 'offline', requestId: requestId), throwsA(isA<RelayProblem>()));
       online = true;
       await client.recoverPending(errors.add);
       expect(errors, isNotEmpty);

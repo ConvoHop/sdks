@@ -3,7 +3,7 @@
   "language": "react-native",
   "packages": [
     {
-      "name": "@convohop/react-native",
+      "name": "@instantrelay/react-native",
       "symbols": [
         {
           "name": "AbortSignalLike",
@@ -230,7 +230,7 @@
           "name": "NotificationResponse",
           "kind": "interface",
           "signatures": ["interface NotificationResponse"],
-          "docs": "A ConvoHop push the app received while running (`received`) or that the user opened (`opened`).",
+          "docs": "A Relay push the app received while running (`received`) or that the user opened (`opened`).",
           "members": [
             {
               "name": "action",
@@ -327,7 +327,7 @@
           "name": "PushRecipient",
           "kind": "interface",
           "signatures": ["interface PushRecipient"],
-          "docs": "The user whose ConvoHop pushes this device accepts: the signed-in user.",
+          "docs": "The user whose Relay pushes this device accepts: the signed-in user.",
           "members": [
             {
               "name": "projectId",
@@ -346,8 +346,8 @@
         {
           "name": "ReactNativePlatform",
           "kind": "interface",
-          "signatures": ["interface ReactNativePlatform extends ConvoHopPlatform"],
-          "docs": "A `ConvoHopPlatform` for React Native: pass it as `ConvoHopClient`'s `platform` option.",
+          "signatures": ["interface ReactNativePlatform extends RelayPlatform"],
+          "docs": "A `RelayPlatform` for React Native: pass it as `RelayClient`'s `platform` option.",
           "members": [
             {
               "name": "randomUUID",
@@ -390,7 +390,7 @@
               "kind": "property",
               "signatures": ["WebSocket?: PlatformWebSocketConstructor"],
               "docs": "Opens the realtime connection. Default: the global `WebSocket`.",
-              "inherited": "ConvoHopPlatform"
+              "inherited": "RelayPlatform"
             }
           ]
         },
@@ -440,16 +440,14 @@
           "name": "RemoteMessageResult",
           "kind": "type",
           "signatures": [
-            "type RemoteMessageResult = \"notConvoHop\" | \"invalid\" | \"ignored\" | \"message\" | \"ringing\" | \"stopped\" | \"missed\""
+            "type RemoteMessageResult = \"notRelay\" | \"invalid\" | \"ignored\" | \"message\" | \"ringing\" | \"stopped\" | \"missed\""
           ],
-          "docs": "What the native handler did with an Android data message:\n- `notConvoHop`: the message isn't a ConvoHop push. Handle it yourself.\n- `invalid`: it is a ConvoHop push that doesn't match the push payload contract. It was dropped.\n- `ignored`: a duplicate, or a ring for a call that already stopped.\n- `message`: it showed a message notification.\n- `ringing`: it started ringing an incoming call.\n- `stopped`: it stopped a ring that was answered or declined, on any device.\n- `missed`: it stopped a ring nobody answered and showed a missed call."
+          "docs": "What the native handler did with an Android data message:\n- `notRelay`: the message isn't a Relay push. Handle it yourself.\n- `invalid`: it is a Relay push that doesn't match the push payload contract. It was dropped.\n- `ignored`: a duplicate, or a ring for a call that already stopped.\n- `message`: it showed a message notification.\n- `ringing`: it started ringing an incoming call.\n- `stopped`: it stopped a ring that was answered or declined, on any device.\n- `missed`: it stopped a ring nobody answered and showed a missed call."
         },
         {
           "name": "RingingClient",
           "kind": "type",
-          "signatures": [
-            "type RingingClient = Pick<ConvoHopClient, \"liveAlerts\" | \"liveSession\">"
-          ],
+          "signatures": ["type RingingClient = Pick<RelayClient, \"liveAlerts\" | \"liveSession\">"],
           "docs": "The client methods `watchRingingCalls` uses."
         },
         {
@@ -488,7 +486,7 @@
           "name": "createPlatform",
           "kind": "function",
           "signatures": ["function createPlatform(options?: PlatformOptions): ReactNativePlatform"],
-          "docs": "Creates the React Native platform for `@convohop/client`. It listens to `AppState`, and to NetInfo when you pass\nit, from creation until `ReactNativePlatform.dispose`. Create one for the app and share it between clients."
+          "docs": "Creates the React Native platform for `@instantrelay/client`. It listens to `AppState`, and to NetInfo when you pass\nit, from creation until `ReactNativePlatform.dispose`. Create one for the app and share it between clients."
         },
         {
           "name": "endCall",
@@ -526,7 +524,7 @@
           "signatures": [
             "function handleRemoteMessage(data: Readonly<Record<string, string>>): Promise<RemoteMessageResult>"
           ],
-          "docs": "Android: hands an FCM data message to the native ConvoHop handler, which shows message notifications and rings\ncalls. Use it when another library, such as React Native Firebase, owns your `FirebaseMessagingService`. Without\none, the ConvoHop service receives pushes itself and you don't need this."
+          "docs": "Android: hands an FCM data message to the native Relay handler, which shows message notifications and rings\ncalls. Use it when another library, such as React Native Firebase, owns your `FirebaseMessagingService`. Without\none, the Relay service receives pushes itself and you don't need this."
         },
         {
           "name": "onCallEvent",
@@ -540,7 +538,7 @@
           "signatures": [
             "function onNotification(listener: (response: NotificationResponse) => void): () => void"
           ],
-          "docs": "Calls `listener` for each ConvoHop push the app receives while running and each one the user opens. The native\nmodules present pushes and ring calls themselves; use this to update your UI or navigate."
+          "docs": "Calls `listener` for each Relay push the app receives while running and each one the user opens. The native\nmodules present pushes and ring calls themselves; use this to update your UI or navigate."
         },
         {
           "name": "openFullScreenIntentSettings",
@@ -554,7 +552,7 @@
           "signatures": [
             "function registerForPush(options: RegisterForPushOptions): Promise<() => void>"
           ],
-          "docs": "Registers this device for ConvoHop pushes. It starts the platform's registration and passes each registration to\nyour `register` callback, which stores it with your backend. It resolves once the APNs token (iOS) or the FCM\nregistration (Android) is stored, and keeps passing new registrations until you call the function it resolves or\nabort `signal`. It rejects when the platform can't register, `register` fails for that registration, `timeoutMs`\npasses first, or `signal` aborts first.\n\nCall it after sign-in on every launch, after `setPushRecipient`: registrations change, and your backend should keep\nthe latest for each user. The same registration arrives again on later launches, so store it idempotently. On\nsign-out, abort `signal` or call the function it resolves, then `unregisterFromPush` on Android. Android follows\nyour app's FCM mode: it registers by FID when the app manifest sets `firebase_messaging_installation_id_enabled`,\nand by registration token otherwise; see the README. Tokens and FIDs address this device for your push provider.\nDon't log them."
+          "docs": "Registers this device for Relay pushes. It starts the platform's registration and passes each registration to\nyour `register` callback, which stores it with your backend. It resolves once the APNs token (iOS) or the FCM\nregistration (Android) is stored, and keeps passing new registrations until you call the function it resolves or\nabort `signal`. It rejects when the platform can't register, `register` fails for that registration, `timeoutMs`\npasses first, or `signal` aborts first.\n\nCall it after sign-in on every launch, after `setPushRecipient`: registrations change, and your backend should keep\nthe latest for each user. The same registration arrives again on later launches, so store it idempotently. On\nsign-out, abort `signal` or call the function it resolves, then `unregisterFromPush` on Android. Android follows\nyour app's FCM mode: it registers by FID when the app manifest sets `firebase_messaging_installation_id_enabled`,\nand by registration token otherwise; see the README. Tokens and FIDs address this device for your push provider.\nDon't log them."
         },
         {
           "name": "reportConnected",
@@ -602,7 +600,7 @@
           "signatures": [
             "function setPushRecipient(recipient: PushRecipient | null): Promise<void>"
           ],
-          "docs": "Sets the user whose ConvoHop pushes this device shows and rings, or `null` for nobody. Call it with the client's\n`projectId` and `principalId` after sign-in, before `registerForPush`, and with `null` when sign-out starts. The\ndevice keeps the two IDs, never a credential, so the filter also applies to a push that starts the app before\nJavaScript runs.\n\nThe native handlers drop every ConvoHop push for anyone else, and `onNotification` and `takeInitialNotification`\nnever see it. Until the first call, and after `null`, they drop every ConvoHop push, so a registration your backend\nfailed to delete reaches nobody. iOS still reports a dropped VoIP push to CallKit, which ends it at once. On iOS, a\nmessage push that arrives while the app isn't in the foreground is shown by iOS itself: see the README."
+          "docs": "Sets the user whose Relay pushes this device shows and rings, or `null` for nobody. Call it with the client's\n`projectId` and `principalId` after sign-in, before `registerForPush`, and with `null` when sign-out starts. The\ndevice keeps the two IDs, never a credential, so the filter also applies to a push that starts the app before\nJavaScript runs.\n\nThe native handlers drop every Relay push for anyone else, and `onNotification` and `takeInitialNotification`\nnever see it. Until the first call, and after `null`, they drop every Relay push, so a registration your backend\nfailed to delete reaches nobody. iOS still reports a dropped VoIP push to CallKit, which ends it at once. On iOS, a\nmessage push that arrives while the app isn't in the foreground is shown by iOS itself: see the README."
         },
         {
           "name": "startOutgoingCall",
@@ -632,7 +630,7 @@
           "name": "takeInitialNotification",
           "kind": "function",
           "signatures": ["function takeInitialNotification(): Promise<NotificationResponse | null>"],
-          "docs": "The ConvoHop notification the user opened to launch the app. Resolves it once, then `null`."
+          "docs": "The Relay notification the user opened to launch the app. Resolves it once, then `null`."
         },
         {
           "name": "unregisterFromPush",
@@ -657,7 +655,7 @@
       ]
     },
     {
-      "name": "@convohop/react-native/media",
+      "name": "@instantrelay/react-native/media",
       "symbols": [
         {
           "name": "MediaSetupOptions",
@@ -669,7 +667,7 @@
               "name": "callKit",
               "kind": "property",
               "signatures": ["callKit?: boolean"],
-              "docs": "iOS: CallKit owns the audio session. Set it when calls go through CallKit, as incoming calls rung by\n`@convohop/react-native` do: LiveKit then leaves the session to CallKit, and the SDK tells WebRTC each time CallKit\nactivates or deactivates it. Start every call with CallKit, including outgoing calls with `startOutgoingCall`,\nor it has no audio. Ignored on Android. Default `false`."
+              "docs": "iOS: CallKit owns the audio session. Set it when calls go through CallKit, as incoming calls rung by\n`@instantrelay/react-native` do: LiveKit then leaves the session to CallKit, and the SDK tells WebRTC each time CallKit\nactivates or deactivates it. Start every call with CallKit, including outgoing calls with `startOutgoingCall`,\nor it has no audio. Ignored on Android. Default `false`."
             }
           ]
         },
@@ -744,7 +742,7 @@
           "name": "createRoom",
           "kind": "function",
           "signatures": ["function createRoom(): Room"],
-          "docs": "A LiveKit room with ConvoHop's media policy, the same as the Web SDK's: one peer connection per direction, no\nsimulcast, adaptive stream or dynacast, and VP8 video at up to 320x240, 15 frames per second and 350 kbit/s."
+          "docs": "A LiveKit room with Relay's media policy, the same as the Web SDK's: one peer connection per direction, no\nsimulcast, adaptive stream or dynacast, and VP8 video at up to 320x240, 15 frames per second and 350 kbit/s."
         },
         {
           "name": "createRoomConnector",
@@ -763,14 +761,14 @@
       ]
     },
     {
-      "name": "@convohop/client",
+      "name": "@instantrelay/client",
       "symbols": [
         {
           "name": "AsyncRecoveryStorage",
           "kind": "interface",
           "signatures": ["interface AsyncRecoveryStorage"],
           "docs": "",
-          "origin": "@convohop/core",
+          "origin": "@instantrelay/core",
           "members": [
             {
               "name": "getItem",
@@ -797,7 +795,7 @@
           "kind": "interface",
           "signatures": ["interface CommandOptions"],
           "docs": "",
-          "origin": "@convohop/core",
+          "origin": "@instantrelay/core",
           "members": [
             {
               "name": "requestId",
@@ -812,7 +810,7 @@
           "kind": "interface",
           "signatures": ["interface Connectivity"],
           "docs": "Network reachability.",
-          "origin": "@convohop/core",
+          "origin": "@instantrelay/core",
           "members": [
             {
               "name": "online",
@@ -835,7 +833,7 @@
             "type Conversation = NonNullable<OperationPayload<\"communication.getConversation\">[\"result\"]>"
           ],
           "docs": "",
-          "origin": "@convohop/core"
+          "origin": "@instantrelay/core"
         },
         {
           "name": "ConversationCursor",
@@ -844,7 +842,7 @@
             "type ConversationCursor = NonNullable<NonNullable<OperationPayload<\"communication.events\">[\"result\"]>[\"nextCursor\"]>"
           ],
           "docs": "",
-          "origin": "@convohop/core"
+          "origin": "@instantrelay/core"
         },
         {
           "name": "ConversationHandle",
@@ -855,7 +853,7 @@
             {
               "name": "client",
               "kind": "property",
-              "signatures": ["readonly client: ConvoHopClient"],
+              "signatures": ["readonly client: RelayClient"],
               "docs": ""
             },
             {
@@ -873,7 +871,7 @@
             {
               "name": "constructor",
               "kind": "constructor",
-              "signatures": ["constructor(client: ConvoHopClient, conversationId: string)"],
+              "signatures": ["constructor(client: RelayClient, conversationId: string)"],
               "docs": ""
             },
             {
@@ -902,7 +900,7 @@
                   "name": "list",
                   "kind": "property",
                   "signatures": [
-                    "list: (beforeSequence?: string) => Promise<import(\"@convohop/core\").ItemPage<{\n    messageId: string;\n    conversationId: string;\n    authorId: string;\n    sequence: string;\n    revision: string;\n    revisionSequence: string;\n    createdAt: string;\n    deleted: boolean;\n    text: string | null;\n    props: Record<string, unknown> | null;\n    editedAt: string | null;\n}>>"
+                    "list: (beforeSequence?: string) => Promise<import(\"@instantrelay/core\").ItemPage<{\n    messageId: string;\n    conversationId: string;\n    authorId: string;\n    sequence: string;\n    revision: string;\n    revisionSequence: string;\n    createdAt: string;\n    deleted: boolean;\n    text: string | null;\n    props: Record<string, unknown> | null;\n    editedAt: string | null;\n}>>"
                   ],
                   "docs": ""
                 },
@@ -1009,7 +1007,7 @@
             "type ConversationMessage = NonNullable<OperationPayload<\"communication.getMessage\">[\"result\"]>"
           ],
           "docs": "",
-          "origin": "@convohop/core"
+          "origin": "@instantrelay/core"
         },
         {
           "name": "ConversationMute",
@@ -1018,7 +1016,7 @@
             "type ConversationMute = OperationPayload<\"communication.conversationMute\">[\"result\"]"
           ],
           "docs": "Whether a member muted message push notifications for a conversation, and until when.",
-          "origin": "@convohop/core"
+          "origin": "@instantrelay/core"
         },
         {
           "name": "ConversationSnapshot",
@@ -1093,7 +1091,7 @@
             {
               "name": "client",
               "kind": "property",
-              "signatures": ["readonly client: ConvoHopClient"],
+              "signatures": ["readonly client: RelayClient"],
               "docs": ""
             },
             {
@@ -1112,7 +1110,7 @@
               "name": "constructor",
               "kind": "constructor",
               "signatures": [
-                "constructor(client: ConvoHopClient, conversationId: string, options?: ConversationStoreOptions)"
+                "constructor(client: RelayClient, conversationId: string, options?: ConversationStoreOptions)"
               ],
               "docs": ""
             },
@@ -1207,7 +1205,7 @@
             {
               "name": "client",
               "kind": "property",
-              "signatures": ["readonly client: ConvoHopClient"],
+              "signatures": ["readonly client: RelayClient"],
               "docs": ""
             },
             {
@@ -1244,7 +1242,7 @@
               "name": "constructor",
               "kind": "constructor",
               "signatures": [
-                "constructor(client: ConvoHopClient, conversationId: string, route: ProjectRoute, token: string, apply: (events: ProtocolObject[]) => Promise<void>, onError: (error: Error) => void, onClose?: (() => void) | undefined)"
+                "constructor(client: RelayClient, conversationId: string, route: ProjectRoute, token: string, apply: (events: ProtocolObject[]) => Promise<void>, onError: (error: Error) => void, onClose?: (() => void) | undefined)"
               ],
               "docs": ""
             },
@@ -1288,551 +1286,11 @@
           ]
         },
         {
-          "name": "ConvoHopClient",
-          "kind": "class",
-          "signatures": ["class ConvoHopClient"],
-          "docs": "",
-          "members": [
-            {
-              "name": "projectId",
-              "kind": "property",
-              "signatures": ["readonly projectId: string"],
-              "docs": ""
-            },
-            {
-              "name": "principalId",
-              "kind": "property",
-              "signatures": ["readonly principalId: string"],
-              "docs": ""
-            },
-            {
-              "name": "http",
-              "kind": "property",
-              "signatures": ["readonly http: ConvoHopTransport"],
-              "docs": ""
-            },
-            {
-              "name": "storage",
-              "kind": "property",
-              "signatures": ["readonly storage: RecoveryStorage | undefined"],
-              "docs": ""
-            },
-            {
-              "name": "asyncStorage",
-              "kind": "property",
-              "signatures": ["readonly asyncStorage: AsyncRecoveryStorage | undefined"],
-              "docs": "The configured `asyncRecoveryStorage`, if any."
-            },
-            {
-              "name": "platform",
-              "kind": "property",
-              "signatures": ["readonly platform: Readonly<ConvoHopPlatform>"],
-              "docs": "The validated `platform` option, frozen. Empty when every service comes from globals."
-            },
-            {
-              "name": "constructor",
-              "kind": "constructor",
-              "signatures": ["constructor(options: ConvoHopClientOptions)"],
-              "docs": ""
-            },
-            {
-              "name": "sessionBinding",
-              "kind": "property",
-              "signatures": ["get sessionBinding(): Readonly<SessionMetadata> | undefined"],
-              "docs": ""
-            },
-            {
-              "name": "sessionRefreshState",
-              "kind": "property",
-              "signatures": ["get sessionRefreshState(): SessionRefreshState"],
-              "docs": ""
-            },
-            {
-              "name": "initialize",
-              "kind": "method",
-              "signatures": ["initialize(): Promise<ProjectRoute>"],
-              "docs": ""
-            },
-            {
-              "name": "refreshSession",
-              "kind": "method",
-              "signatures": ["refreshSession(): Promise<SessionMetadata>"],
-              "docs": ""
-            },
-            {
-              "name": "scheduleSessionRefresh",
-              "kind": "method",
-              "signatures": ["scheduleSessionRefresh(options?: SessionRefreshSchedule): () => void"],
-              "docs": "Renews the session `leadMs` before it expires, and again after each renewal, until the returned function is\ncalled. A failed renewal that leaves the current session verified is retried with backoff before expiry, so the\n`sessionRefresh` hook can run again; any other failure stops the schedule. Every failure goes to `onError`.\nReturning to the foreground (`platform.lifecycle`) re-checks a waiting renewal at once, since suspended apps'\ntimers can fire late."
-            },
-            {
-              "name": "conversation",
-              "kind": "method",
-              "signatures": ["conversation(id: string): ConversationHandle"],
-              "docs": ""
-            },
-            {
-              "name": "getConversation",
-              "kind": "method",
-              "signatures": ["getConversation(id: string): Promise<Conversation>"],
-              "docs": ""
-            },
-            {
-              "name": "requests",
-              "kind": "property",
-              "signatures": ["readonly requests: { … }"],
-              "docs": "",
-              "members": [
-                {
-                  "name": "resolve",
-                  "kind": "property",
-                  "signatures": [
-                    "resolve: (requestId: string) => Promise<NonNullable<OperationPayload<\"communication.resolveRequest\">[\"result\"]>>"
-                  ],
-                  "docs": ""
-                },
-                {
-                  "name": "retry",
-                  "kind": "property",
-                  "signatures": [
-                    "retry: (requestId: string) => Promise<NonNullable<OperationPayload<\"communication.resolveRequest\">[\"result\"]>>"
-                  ],
-                  "docs": ""
-                }
-              ]
-            },
-            {
-              "name": "liveSession",
-              "kind": "method",
-              "signatures": ["liveSession(id: string): Promise<LiveSessionHandle>"],
-              "docs": ""
-            },
-            {
-              "name": "liveAlerts",
-              "kind": "property",
-              "signatures": ["readonly liveAlerts: { … }"],
-              "docs": "",
-              "members": [
-                {
-                  "name": "list",
-                  "kind": "property",
-                  "signatures": [
-                    "list: (options?: PageOptions) => Promise<OperationPayload<\"communication.liveSessionAlerts\">[\"result\"]>"
-                  ],
-                  "docs": ""
-                }
-              ]
-            },
-            {
-              "name": "messages",
-              "kind": "method",
-              "signatures": [
-                "messages(id: string, beforeSequence?: string, limit?: number): Promise<ItemPage<ConversationMessage>>"
-              ],
-              "docs": "Up to `limit` (1..100, default 100) messages before `beforeSequence` or the newest, newest first. Pages can hold fewer."
-            },
-            {
-              "name": "send",
-              "kind": "method",
-              "signatures": [
-                "send(id: string, text: string, requestId?: string, props?: ProtocolObject): Promise<SendReceipt>"
-              ],
-              "docs": ""
-            },
-            {
-              "name": "edit",
-              "kind": "method",
-              "signatures": [
-                "edit(message: ConversationMessage, text: string, requestId?: string): Promise<ConversationMessage>"
-              ],
-              "docs": ""
-            },
-            {
-              "name": "delete",
-              "kind": "method",
-              "signatures": [
-                "delete(message: ConversationMessage, requestId?: string): Promise<ConversationMessage>"
-              ],
-              "docs": ""
-            },
-            {
-              "name": "events",
-              "kind": "method",
-              "signatures": [
-                "events(id: string, after?: ConversationCursor): Promise<ItemPage<ProtocolObject> & {\n    nextCursor: ConversationCursor;\n}>"
-              ],
-              "docs": ""
-            },
-            {
-              "name": "reportRead",
-              "kind": "method",
-              "signatures": [
-                "reportRead(id: string, membership: Membership, throughSequence: string): Promise<ReadReceipt>"
-              ],
-              "docs": "Reports reading through a message's sequence, which also covers its delivery. Returns the user's current receipt."
-            },
-            {
-              "name": "reportDelivered",
-              "kind": "method",
-              "signatures": [
-                "reportDelivered(id: string, membership: Membership, throughSequence: string): Promise<ReadReceipt>"
-              ],
-              "docs": "Reports delivery through a message's sequence. Returns the user's current receipt."
-            },
-            {
-              "name": "receipts",
-              "kind": "method",
-              "signatures": [
-                "receipts(id: string, cursor?: string): Promise<ItemPage<ReadReceipt>>"
-              ],
-              "docs": ""
-            },
-            {
-              "name": "getMessage",
-              "kind": "method",
-              "signatures": [
-                "getMessage(id: string, messageId: string): Promise<ConversationMessage>"
-              ],
-              "docs": ""
-            },
-            {
-              "name": "members",
-              "kind": "method",
-              "signatures": [
-                "members(id: string, options?: PageOptions): Promise<ItemPage<Membership>>"
-              ],
-              "docs": ""
-            },
-            {
-              "name": "inbox",
-              "kind": "method",
-              "signatures": ["inbox(options?: PageOptions): Promise<InboxPage>"],
-              "docs": ""
-            },
-            {
-              "name": "capabilities",
-              "kind": "method",
-              "signatures": ["capabilities(): Promise<ProjectCapabilities>"],
-              "docs": ""
-            },
-            {
-              "name": "typing",
-              "kind": "method",
-              "signatures": ["typing(id: string, isTyping: boolean): Promise<boolean>"],
-              "docs": "Sends one ephemeral typing signal and returns whether the authority accepted it. Signals are never recorded,\nretried or resolved. Check `features?.typing` in `capabilities` first."
-            },
-            {
-              "name": "search",
-              "kind": "method",
-              "signatures": [
-                "search(query: string, conversationIds?: string[]): Promise<ItemPage<SearchHit>>"
-              ],
-              "docs": ""
-            },
-            {
-              "name": "recoverPending",
-              "kind": "method",
-              "signatures": ["recoverPending(onError: (error: Error) => void): Promise<void>"],
-              "docs": ""
-            },
-            {
-              "name": "watch",
-              "kind": "method",
-              "signatures": [
-                "watch(conversationId: string, apply: (events: ProtocolObject[]) => Promise<void>, onError: (error: Error) => void): Promise<ConversationStream>"
-              ],
-              "docs": ""
-            },
-            {
-              "name": "resyncAuthorizedHistory",
-              "kind": "method",
-              "signatures": [
-                "resyncAuthorizedHistory(conversationId: string, apply: (events: ProtocolObject[]) => Promise<void>, onError: (error: Error) => void): Promise<ConversationStream>"
-              ],
-              "docs": ""
-            }
-          ]
-        },
-        {
-          "name": "ConvoHopClientOptions",
-          "kind": "interface",
-          "signatures": ["interface ConvoHopClientOptions"],
-          "docs": "",
-          "members": [
-            {"name": "baseUrl", "kind": "property", "signatures": ["baseUrl: string"], "docs": ""},
-            {
-              "name": "projectId",
-              "kind": "property",
-              "signatures": ["projectId: string"],
-              "docs": ""
-            },
-            {
-              "name": "sessionToken",
-              "kind": "property",
-              "signatures": ["sessionToken: string"],
-              "docs": ""
-            },
-            {
-              "name": "incarnation",
-              "kind": "property",
-              "signatures": ["incarnation: string"],
-              "docs": ""
-            },
-            {
-              "name": "principalId",
-              "kind": "property",
-              "signatures": ["principalId: string"],
-              "docs": ""
-            },
-            {
-              "name": "recoveryStorage",
-              "kind": "property",
-              "signatures": ["recoveryStorage?: RecoveryStorage"],
-              "docs": "Synchronous storage, such as `localStorage`, for mutation recovery records and replay cursors. Never tokens."
-            },
-            {
-              "name": "asyncRecoveryStorage",
-              "kind": "property",
-              "signatures": ["asyncRecoveryStorage?: AsyncRecoveryStorage"],
-              "docs": "Asynchronous storage, such as React Native's AsyncStorage, used instead of `recoveryStorage`. Recovery records load\nbefore the first command; replay cursors load when a replay starts."
-            },
-            {
-              "name": "fetch",
-              "kind": "property",
-              "signatures": ["fetch?: typeof fetch"],
-              "docs": ""
-            },
-            {
-              "name": "sessionRefresh",
-              "kind": "property",
-              "signatures": ["sessionRefresh?: SessionRefresh"],
-              "docs": ""
-            },
-            {
-              "name": "platform",
-              "kind": "property",
-              "signatures": ["platform?: ConvoHopPlatform"],
-              "docs": "Runtime services that replace missing browser globals, such as in React Native. See `ConvoHopPlatform`."
-            }
-          ]
-        },
-        {
-          "name": "ConvoHopPlatform",
-          "kind": "interface",
-          "signatures": ["interface ConvoHopPlatform"],
-          "docs": "Runtime services for runtimes that lack a browser global, such as React Native. Every field is optional and\nfalls back to the global of the same name, looked up when it is used. The transport uses `randomUUID`, `sha256`\nand `URL`; `@convohop/client` also uses `WebSocket`, `connectivity` and `lifecycle`.",
-          "origin": "@convohop/core",
-          "members": [
-            {
-              "name": "randomUUID",
-              "kind": "property",
-              "signatures": ["randomUUID?: () => string"],
-              "docs": "A new random UUID in canonical lowercase form. Default: `crypto.randomUUID()`."
-            },
-            {
-              "name": "sha256",
-              "kind": "property",
-              "signatures": ["sha256?: (data: Uint8Array) => Promise<Uint8Array>"],
-              "docs": "The 32-byte SHA-256 digest of `data`. Default: `crypto.subtle.digest(\"SHA-256\", data)`."
-            },
-            {
-              "name": "URL",
-              "kind": "property",
-              "signatures": ["URL?: PlatformURLConstructor"],
-              "docs": "A WHATWG URL constructor. Default: the global `URL`. The SDK checks it before first use and refuses one that doesn't conform."
-            },
-            {
-              "name": "WebSocket",
-              "kind": "property",
-              "signatures": ["WebSocket?: PlatformWebSocketConstructor"],
-              "docs": "Opens the realtime connection. Default: the global `WebSocket`."
-            },
-            {
-              "name": "connectivity",
-              "kind": "property",
-              "signatures": ["connectivity?: Connectivity"],
-              "docs": "Network reachability. The outbox waits while offline. Coming online starts a waiting outbox entry and realtime\nreconnection at once. Default in browsers: `navigator.onLine` and `online`/`offline` events; elsewhere always online."
-            },
-            {
-              "name": "lifecycle",
-              "kind": "property",
-              "signatures": ["lifecycle?: Lifecycle"],
-              "docs": "Foreground state. Returning to `active` starts waiting realtime reconnection, due outbox entries and due session\nrenewal at once. It never changes retry budgets, request IDs or payloads. Default in browsers: page visibility."
-            }
-          ]
-        },
-        {
-          "name": "ConvoHopProblem",
-          "kind": "class",
-          "signatures": ["class ConvoHopProblem extends Error"],
-          "docs": "",
-          "origin": "@convohop/core",
-          "members": [
-            {
-              "name": "code",
-              "kind": "property",
-              "signatures": ["readonly code: string"],
-              "docs": ""
-            },
-            {
-              "name": "requestId",
-              "kind": "property",
-              "signatures": ["readonly requestId: string"],
-              "docs": ""
-            },
-            {
-              "name": "outcome",
-              "kind": "property",
-              "signatures": ["readonly outcome: string"],
-              "docs": ""
-            },
-            {
-              "name": "status",
-              "kind": "property",
-              "signatures": ["readonly status: number"],
-              "docs": ""
-            },
-            {
-              "name": "retryAfter",
-              "kind": "property",
-              "signatures": ["readonly retryAfter?: number"],
-              "docs": "Whole seconds to wait before resending the same request, when the authority sent a delay (for example with\n`RATE_LIMITED`). Read from the error's `extensions.retryAfter`, else from an HTTP `Retry-After` delay in seconds,\nor from a realtime close reason's `retryAfter=`. A request the caller sends is never resent on its own; when\n`@convohop/client` reconnects its stream or resends a queued message, it waits at least this long first."
-            },
-            {
-              "name": "constructor",
-              "kind": "constructor",
-              "signatures": [
-                "constructor(code: string, requestId: string, outcome: string, status: number, message: string, options?: ErrorOptions & {\n    retryAfter?: number;\n})"
-              ],
-              "docs": ""
-            }
-          ]
-        },
-        {
-          "name": "ConvoHopTransport",
-          "kind": "class",
-          "signatures": ["class ConvoHopTransport"],
-          "docs": "",
-          "origin": "@convohop/core",
-          "members": [
-            {
-              "name": "baseUrl",
-              "kind": "property",
-              "signatures": ["readonly baseUrl: string"],
-              "docs": ""
-            },
-            {
-              "name": "durableRecovery",
-              "kind": "property",
-              "signatures": ["readonly durableRecovery: boolean"],
-              "docs": ""
-            },
-            {
-              "name": "incarnation",
-              "kind": "property",
-              "signatures": ["incarnation: string"],
-              "docs": ""
-            },
-            {
-              "name": "servingEpoch",
-              "kind": "property",
-              "signatures": ["servingEpoch: string | undefined"],
-              "docs": ""
-            },
-            {
-              "name": "constructor",
-              "kind": "constructor",
-              "signatures": ["constructor(options: ConvoHopTransportOptions)"],
-              "docs": ""
-            },
-            {
-              "name": "initializeRecovery",
-              "kind": "method",
-              "signatures": ["initializeRecovery(): Promise<void>"],
-              "docs": ""
-            },
-            {
-              "name": "recoveryStates",
-              "kind": "property",
-              "signatures": ["get recoveryStates(): readonly RecoveryState[]"],
-              "docs": ""
-            },
-            {
-              "name": "execute",
-              "kind": "method",
-              "signatures": [
-                "execute<K extends OperationKey>(key: K, projectId: string | undefined, input: OperationInput<K>, requestId?: string, credentialDeliveryPermit?: ProtocolObject): Promise<OperationPayload<K>>"
-              ],
-              "docs": ""
-            },
-            {
-              "name": "retry",
-              "kind": "method",
-              "signatures": [
-                "retry(requestId: string): Promise<NonNullable<OperationPayload<\"communication.resolveRequest\">[\"result\"]>>"
-              ],
-              "docs": ""
-            }
-          ]
-        },
-        {
-          "name": "ConvoHopTransportOptions",
-          "kind": "interface",
-          "signatures": ["interface ConvoHopTransportOptions"],
-          "docs": "",
-          "origin": "@convohop/core",
-          "members": [
-            {"name": "baseUrl", "kind": "property", "signatures": ["baseUrl: string"], "docs": ""},
-            {
-              "name": "credential",
-              "kind": "property",
-              "signatures": ["credential?: string"],
-              "docs": ""
-            },
-            {
-              "name": "namespace",
-              "kind": "property",
-              "signatures": ["namespace: string"],
-              "docs": ""
-            },
-            {
-              "name": "incarnation",
-              "kind": "property",
-              "signatures": ["incarnation?: string"],
-              "docs": ""
-            },
-            {
-              "name": "recoveryStorage",
-              "kind": "property",
-              "signatures": ["recoveryStorage?: RecoveryStorage"],
-              "docs": ""
-            },
-            {
-              "name": "asyncRecoveryStorage",
-              "kind": "property",
-              "signatures": ["asyncRecoveryStorage?: AsyncRecoveryStorage"],
-              "docs": ""
-            },
-            {
-              "name": "fetch",
-              "kind": "property",
-              "signatures": ["fetch?: typeof fetch"],
-              "docs": ""
-            },
-            {
-              "name": "platform",
-              "kind": "property",
-              "signatures": ["platform?: ConvoHopPlatform"],
-              "docs": "Runtime services that replace missing globals, such as in React Native. See `ConvoHopPlatform`."
-            }
-          ]
-        },
-        {
           "name": "GraphqlTypes",
           "kind": "namespace",
           "signatures": ["namespace GraphqlTypes"],
           "docs": "",
-          "origin": "@convohop/core"
+          "origin": "@instantrelay/core"
         },
         {
           "name": "InboxItem",
@@ -1853,7 +1311,7 @@
           "kind": "interface",
           "signatures": ["interface ItemPage<T>"],
           "docs": "",
-          "origin": "@convohop/core",
+          "origin": "@instantrelay/core",
           "members": [
             {"name": "items", "kind": "property", "signatures": ["items: T[]"], "docs": ""},
             {
@@ -1881,7 +1339,7 @@
           "kind": "interface",
           "signatures": ["interface Lifecycle"],
           "docs": "Whether the app is in the foreground.",
-          "origin": "@convohop/core",
+          "origin": "@instantrelay/core",
           "members": [
             {
               "name": "state",
@@ -1902,7 +1360,7 @@
           "kind": "type",
           "signatures": ["type LifecycleState = \"active\" | \"background\""],
           "docs": "",
-          "origin": "@convohop/core"
+          "origin": "@instantrelay/core"
         },
         {
           "name": "LiveConnectOptions",
@@ -2065,14 +1523,14 @@
               "name": "constructor",
               "kind": "constructor",
               "signatures": [
-                "constructor(client: ConvoHopClient, receipt: OperationPayload<\"communication.endLiveSession\">)"
+                "constructor(client: RelayClient, receipt: OperationPayload<\"communication.endLiveSession\">)"
               ],
               "docs": ""
             },
             {
               "name": "client",
               "kind": "property",
-              "signatures": ["readonly client: ConvoHopClient"],
+              "signatures": ["readonly client: RelayClient"],
               "docs": "",
               "inherited": "LiveAction"
             },
@@ -2215,7 +1673,7 @@
             {
               "name": "client",
               "kind": "property",
-              "signatures": ["readonly client: ConvoHopClient"],
+              "signatures": ["readonly client: RelayClient"],
               "docs": ""
             },
             {
@@ -2245,14 +1703,14 @@
             {
               "name": "constructor",
               "kind": "constructor",
-              "signatures": ["constructor(client: ConvoHopClient, snapshot: LiveSession)"],
+              "signatures": ["constructor(client: RelayClient, snapshot: LiveSession)"],
               "docs": ""
             },
             {
               "name": "get",
               "kind": "method",
               "signatures": [
-                "static get(client: ConvoHopClient, liveSessionId: string): Promise<LiveSessionHandle>"
+                "static get(client: RelayClient, liveSessionId: string): Promise<LiveSessionHandle>"
               ],
               "docs": "",
               "static": true
@@ -2325,7 +1783,7 @@
               "name": "constructor",
               "kind": "constructor",
               "signatures": [
-                "constructor(client: ConvoHopClient, receipt: OperationPayload<\"communication.startLiveSession\">)"
+                "constructor(client: RelayClient, receipt: OperationPayload<\"communication.startLiveSession\">)"
               ],
               "docs": ""
             },
@@ -2338,7 +1796,7 @@
             {
               "name": "client",
               "kind": "property",
-              "signatures": ["readonly client: ConvoHopClient"],
+              "signatures": ["readonly client: RelayClient"],
               "docs": "",
               "inherited": "LiveAction"
             },
@@ -2611,7 +2069,7 @@
             "type Membership = NonNullable<OperationPayload<\"communication.members\">[\"result\"]>[\"items\"][number]"
           ],
           "docs": "",
-          "origin": "@convohop/core"
+          "origin": "@instantrelay/core"
         },
         {
           "name": "OperationInput",
@@ -2620,14 +2078,14 @@
             "type OperationInput<K extends OperationKey> = OperationTypes[K][\"variables\"] extends {\n    input?: infer I;\n} ? NonNullable<I> : Record<string, never>"
           ],
           "docs": "",
-          "origin": "@convohop/core"
+          "origin": "@instantrelay/core"
         },
         {
           "name": "OperationKey",
           "kind": "type",
           "signatures": ["type OperationKey = keyof OperationTypes"],
           "docs": "",
-          "origin": "@convohop/core"
+          "origin": "@instantrelay/core"
         },
         {
           "name": "OperationPayload",
@@ -2636,14 +2094,14 @@
             "type OperationPayload<K extends OperationKey> = OperationTypes[K][\"result\"][FieldName<K> & keyof OperationTypes[K][\"result\"]]"
           ],
           "docs": "",
-          "origin": "@convohop/core"
+          "origin": "@instantrelay/core"
         },
         {
           "name": "OperationTypes",
           "kind": "interface",
           "signatures": ["interface OperationTypes"],
           "docs": "",
-          "origin": "@convohop/core"
+          "origin": "@instantrelay/core"
         },
         {
           "name": "Outbox",
@@ -2654,13 +2112,13 @@
             {
               "name": "client",
               "kind": "property",
-              "signatures": ["readonly client: ConvoHopClient"],
+              "signatures": ["readonly client: RelayClient"],
               "docs": ""
             },
             {
               "name": "constructor",
               "kind": "constructor",
-              "signatures": ["constructor(client: ConvoHopClient, options?: OutboxOptions)"],
+              "signatures": ["constructor(client: RelayClient, options?: OutboxOptions)"],
               "docs": ""
             },
             {
@@ -2822,7 +2280,7 @@
           "kind": "interface",
           "signatures": ["interface PageOptions"],
           "docs": "",
-          "origin": "@convohop/core",
+          "origin": "@instantrelay/core",
           "members": [
             {"name": "cursor", "kind": "property", "signatures": ["cursor?: string"], "docs": ""},
             {"name": "limit", "kind": "property", "signatures": ["limit?: number"], "docs": ""}
@@ -2833,7 +2291,7 @@
           "kind": "interface",
           "signatures": ["interface PlatformURL"],
           "docs": "The parts of a WHATWG `URL` the SDKs read.",
-          "origin": "@convohop/core",
+          "origin": "@instantrelay/core",
           "members": [
             {
               "name": "href",
@@ -2910,14 +2368,14 @@
             "type PlatformURLConstructor = new (url: string, base?: string) => PlatformURL"
           ],
           "docs": "A WHATWG URL constructor, such as the global `URL` or a polyfill's.",
-          "origin": "@convohop/core"
+          "origin": "@instantrelay/core"
         },
         {
           "name": "PlatformWebSocket",
           "kind": "interface",
           "signatures": ["interface PlatformWebSocket"],
           "docs": "The parts of a `WebSocket` the client uses.",
-          "origin": "@convohop/core",
+          "origin": "@instantrelay/core",
           "members": [
             {
               "name": "onopen",
@@ -2966,7 +2424,7 @@
             "type PlatformWebSocketConstructor = new (url: string, protocols?: string | string[]) => PlatformWebSocket"
           ],
           "docs": "",
-          "origin": "@convohop/core"
+          "origin": "@instantrelay/core"
         },
         {
           "name": "ProjectCapabilities",
@@ -2981,7 +2439,7 @@
           "kind": "interface",
           "signatures": ["interface ProjectRoute"],
           "docs": "",
-          "origin": "@convohop/core",
+          "origin": "@instantrelay/core",
           "members": [
             {
               "name": "projectId",
@@ -3027,7 +2485,7 @@
           "kind": "type",
           "signatures": ["type ProtocolObject = Record<string, unknown>"],
           "docs": "",
-          "origin": "@convohop/core"
+          "origin": "@instantrelay/core"
         },
         {
           "name": "PushRegistration",
@@ -3035,7 +2493,7 @@
           "signatures": [
             "type PushRegistration = {\n    readonly kind: \"webPush\";\n    readonly subscription: WebPushSubscription;\n} | {\n    readonly kind: \"apns\" | \"apnsVoip\";\n    readonly token: string;\n    readonly environment?: \"development\" | \"production\";\n} | {\n    readonly kind: \"fcm\";\n    readonly token: string;\n    readonly fid?: never;\n} | {\n    readonly kind: \"fcm\";\n    readonly fid: string;\n    readonly token?: never;\n}"
           ],
-          "docs": "Where your backend sends one device's pushes. Every ConvoHop client hands your app this shape, so one backend\nendpoint can store registrations from browsers and native apps. ConvoHop never sees them.\n\n- `webPush`: a browser subscription; your backend signs pushes with its VAPID private key.\n- `apns`: an iOS device token for alerts. `environment` says which APNs host accepts it, when the app knows.\n- `apnsVoip`: an iOS PushKit token for incoming calls.\n- `fcm`: an Android app's Firebase Cloud Messaging target, with exactly one of `token` and `fid`. `token` is the\n  registration token, which apps get by default. `fid` is the Firebase Installation ID, which apps get instead when\n  their manifest sets `firebase_messaging_installation_id_enabled`. Send to it with the FCM HTTP v1 target of the\n  same name."
+          "docs": "Where your backend sends one device's pushes. Every Relay client hands your app this shape, so one backend\nendpoint can store registrations from browsers and native apps. Relay never sees them.\n\n- `webPush`: a browser subscription; your backend signs pushes with its VAPID private key.\n- `apns`: an iOS device token for alerts. `environment` says which APNs host accepts it, when the app knows.\n- `apnsVoip`: an iOS PushKit token for incoming calls.\n- `fcm`: an Android app's Firebase Cloud Messaging target, with exactly one of `token` and `fid`. `token` is the\n  registration token, which apps get by default. `fid` is the Firebase Installation ID, which apps get instead when\n  their manifest sets `firebase_messaging_installation_id_enabled`. Send to it with the FCM HTTP v1 target of the\n  same name."
         },
         {
           "name": "ReadReceipt",
@@ -3050,7 +2508,7 @@
           "kind": "interface",
           "signatures": ["interface RecoveryState"],
           "docs": "A mutation's recovery record. `resolutionState` is how far its request is known to have gone: `pending` before its\nfirst attempt, `unknown` while an attempt's outcome is unknown, `rejected` once the authority has rejected every\nattempt, and `committed` or `accepted` once the authority has the request.",
-          "origin": "@convohop/core",
+          "origin": "@instantrelay/core",
           "members": [
             {
               "name": "requestId",
@@ -3139,7 +2597,7 @@
           "kind": "interface",
           "signatures": ["interface RecoveryStorage"],
           "docs": "",
-          "origin": "@convohop/core",
+          "origin": "@instantrelay/core",
           "members": [
             {
               "name": "getItem",
@@ -3158,6 +2616,546 @@
               "kind": "method",
               "signatures": ["removeItem(key: string): void"],
               "docs": ""
+            }
+          ]
+        },
+        {
+          "name": "RelayClient",
+          "kind": "class",
+          "signatures": ["class RelayClient"],
+          "docs": "",
+          "members": [
+            {
+              "name": "projectId",
+              "kind": "property",
+              "signatures": ["readonly projectId: string"],
+              "docs": ""
+            },
+            {
+              "name": "principalId",
+              "kind": "property",
+              "signatures": ["readonly principalId: string"],
+              "docs": ""
+            },
+            {
+              "name": "http",
+              "kind": "property",
+              "signatures": ["readonly http: RelayTransport"],
+              "docs": ""
+            },
+            {
+              "name": "storage",
+              "kind": "property",
+              "signatures": ["readonly storage: RecoveryStorage | undefined"],
+              "docs": ""
+            },
+            {
+              "name": "asyncStorage",
+              "kind": "property",
+              "signatures": ["readonly asyncStorage: AsyncRecoveryStorage | undefined"],
+              "docs": "The configured `asyncRecoveryStorage`, if any."
+            },
+            {
+              "name": "platform",
+              "kind": "property",
+              "signatures": ["readonly platform: Readonly<RelayPlatform>"],
+              "docs": "The validated `platform` option, frozen. Empty when every service comes from globals."
+            },
+            {
+              "name": "constructor",
+              "kind": "constructor",
+              "signatures": ["constructor(options: RelayClientOptions)"],
+              "docs": ""
+            },
+            {
+              "name": "sessionBinding",
+              "kind": "property",
+              "signatures": ["get sessionBinding(): Readonly<SessionMetadata> | undefined"],
+              "docs": ""
+            },
+            {
+              "name": "sessionRefreshState",
+              "kind": "property",
+              "signatures": ["get sessionRefreshState(): SessionRefreshState"],
+              "docs": ""
+            },
+            {
+              "name": "initialize",
+              "kind": "method",
+              "signatures": ["initialize(): Promise<ProjectRoute>"],
+              "docs": ""
+            },
+            {
+              "name": "refreshSession",
+              "kind": "method",
+              "signatures": ["refreshSession(): Promise<SessionMetadata>"],
+              "docs": ""
+            },
+            {
+              "name": "scheduleSessionRefresh",
+              "kind": "method",
+              "signatures": ["scheduleSessionRefresh(options?: SessionRefreshSchedule): () => void"],
+              "docs": "Renews the session `leadMs` before it expires, and again after each renewal, until the returned function is\ncalled. A failed renewal that leaves the current session verified is retried with backoff before expiry, so the\n`sessionRefresh` hook can run again; any other failure stops the schedule. Every failure goes to `onError`.\nReturning to the foreground (`platform.lifecycle`) re-checks a waiting renewal at once, since suspended apps'\ntimers can fire late."
+            },
+            {
+              "name": "conversation",
+              "kind": "method",
+              "signatures": ["conversation(id: string): ConversationHandle"],
+              "docs": ""
+            },
+            {
+              "name": "getConversation",
+              "kind": "method",
+              "signatures": ["getConversation(id: string): Promise<Conversation>"],
+              "docs": ""
+            },
+            {
+              "name": "requests",
+              "kind": "property",
+              "signatures": ["readonly requests: { … }"],
+              "docs": "",
+              "members": [
+                {
+                  "name": "resolve",
+                  "kind": "property",
+                  "signatures": [
+                    "resolve: (requestId: string) => Promise<NonNullable<OperationPayload<\"communication.resolveRequest\">[\"result\"]>>"
+                  ],
+                  "docs": ""
+                },
+                {
+                  "name": "retry",
+                  "kind": "property",
+                  "signatures": [
+                    "retry: (requestId: string) => Promise<NonNullable<OperationPayload<\"communication.resolveRequest\">[\"result\"]>>"
+                  ],
+                  "docs": ""
+                }
+              ]
+            },
+            {
+              "name": "liveSession",
+              "kind": "method",
+              "signatures": ["liveSession(id: string): Promise<LiveSessionHandle>"],
+              "docs": ""
+            },
+            {
+              "name": "liveAlerts",
+              "kind": "property",
+              "signatures": ["readonly liveAlerts: { … }"],
+              "docs": "",
+              "members": [
+                {
+                  "name": "list",
+                  "kind": "property",
+                  "signatures": [
+                    "list: (options?: PageOptions) => Promise<OperationPayload<\"communication.liveSessionAlerts\">[\"result\"]>"
+                  ],
+                  "docs": ""
+                }
+              ]
+            },
+            {
+              "name": "messages",
+              "kind": "method",
+              "signatures": [
+                "messages(id: string, beforeSequence?: string, limit?: number): Promise<ItemPage<ConversationMessage>>"
+              ],
+              "docs": "Up to `limit` (1..100, default 100) messages before `beforeSequence` or the newest, newest first. Pages can hold fewer."
+            },
+            {
+              "name": "send",
+              "kind": "method",
+              "signatures": [
+                "send(id: string, text: string, requestId?: string, props?: ProtocolObject): Promise<SendReceipt>"
+              ],
+              "docs": ""
+            },
+            {
+              "name": "edit",
+              "kind": "method",
+              "signatures": [
+                "edit(message: ConversationMessage, text: string, requestId?: string): Promise<ConversationMessage>"
+              ],
+              "docs": ""
+            },
+            {
+              "name": "delete",
+              "kind": "method",
+              "signatures": [
+                "delete(message: ConversationMessage, requestId?: string): Promise<ConversationMessage>"
+              ],
+              "docs": ""
+            },
+            {
+              "name": "events",
+              "kind": "method",
+              "signatures": [
+                "events(id: string, after?: ConversationCursor): Promise<ItemPage<ProtocolObject> & {\n    nextCursor: ConversationCursor;\n}>"
+              ],
+              "docs": ""
+            },
+            {
+              "name": "reportRead",
+              "kind": "method",
+              "signatures": [
+                "reportRead(id: string, membership: Membership, throughSequence: string): Promise<ReadReceipt>"
+              ],
+              "docs": "Reports reading through a message's sequence, which also covers its delivery. Returns the user's current receipt."
+            },
+            {
+              "name": "reportDelivered",
+              "kind": "method",
+              "signatures": [
+                "reportDelivered(id: string, membership: Membership, throughSequence: string): Promise<ReadReceipt>"
+              ],
+              "docs": "Reports delivery through a message's sequence. Returns the user's current receipt."
+            },
+            {
+              "name": "receipts",
+              "kind": "method",
+              "signatures": [
+                "receipts(id: string, cursor?: string): Promise<ItemPage<ReadReceipt>>"
+              ],
+              "docs": ""
+            },
+            {
+              "name": "getMessage",
+              "kind": "method",
+              "signatures": [
+                "getMessage(id: string, messageId: string): Promise<ConversationMessage>"
+              ],
+              "docs": ""
+            },
+            {
+              "name": "members",
+              "kind": "method",
+              "signatures": [
+                "members(id: string, options?: PageOptions): Promise<ItemPage<Membership>>"
+              ],
+              "docs": ""
+            },
+            {
+              "name": "inbox",
+              "kind": "method",
+              "signatures": ["inbox(options?: PageOptions): Promise<InboxPage>"],
+              "docs": ""
+            },
+            {
+              "name": "capabilities",
+              "kind": "method",
+              "signatures": ["capabilities(): Promise<ProjectCapabilities>"],
+              "docs": ""
+            },
+            {
+              "name": "typing",
+              "kind": "method",
+              "signatures": ["typing(id: string, isTyping: boolean): Promise<boolean>"],
+              "docs": "Sends one ephemeral typing signal and returns whether the authority accepted it. Signals are never recorded,\nretried or resolved. Check `features?.typing` in `capabilities` first."
+            },
+            {
+              "name": "search",
+              "kind": "method",
+              "signatures": [
+                "search(query: string, conversationIds?: string[]): Promise<ItemPage<SearchHit>>"
+              ],
+              "docs": ""
+            },
+            {
+              "name": "recoverPending",
+              "kind": "method",
+              "signatures": ["recoverPending(onError: (error: Error) => void): Promise<void>"],
+              "docs": ""
+            },
+            {
+              "name": "watch",
+              "kind": "method",
+              "signatures": [
+                "watch(conversationId: string, apply: (events: ProtocolObject[]) => Promise<void>, onError: (error: Error) => void): Promise<ConversationStream>"
+              ],
+              "docs": ""
+            },
+            {
+              "name": "resyncAuthorizedHistory",
+              "kind": "method",
+              "signatures": [
+                "resyncAuthorizedHistory(conversationId: string, apply: (events: ProtocolObject[]) => Promise<void>, onError: (error: Error) => void): Promise<ConversationStream>"
+              ],
+              "docs": ""
+            }
+          ]
+        },
+        {
+          "name": "RelayClientOptions",
+          "kind": "interface",
+          "signatures": ["interface RelayClientOptions"],
+          "docs": "",
+          "members": [
+            {"name": "baseUrl", "kind": "property", "signatures": ["baseUrl: string"], "docs": ""},
+            {
+              "name": "projectId",
+              "kind": "property",
+              "signatures": ["projectId: string"],
+              "docs": ""
+            },
+            {
+              "name": "sessionToken",
+              "kind": "property",
+              "signatures": ["sessionToken: string"],
+              "docs": ""
+            },
+            {
+              "name": "incarnation",
+              "kind": "property",
+              "signatures": ["incarnation: string"],
+              "docs": ""
+            },
+            {
+              "name": "principalId",
+              "kind": "property",
+              "signatures": ["principalId: string"],
+              "docs": ""
+            },
+            {
+              "name": "recoveryStorage",
+              "kind": "property",
+              "signatures": ["recoveryStorage?: RecoveryStorage"],
+              "docs": "Synchronous storage, such as `localStorage`, for mutation recovery records and replay cursors. Never tokens."
+            },
+            {
+              "name": "asyncRecoveryStorage",
+              "kind": "property",
+              "signatures": ["asyncRecoveryStorage?: AsyncRecoveryStorage"],
+              "docs": "Asynchronous storage, such as React Native's AsyncStorage, used instead of `recoveryStorage`. Recovery records load\nbefore the first command; replay cursors load when a replay starts."
+            },
+            {
+              "name": "fetch",
+              "kind": "property",
+              "signatures": ["fetch?: typeof fetch"],
+              "docs": ""
+            },
+            {
+              "name": "sessionRefresh",
+              "kind": "property",
+              "signatures": ["sessionRefresh?: SessionRefresh"],
+              "docs": ""
+            },
+            {
+              "name": "platform",
+              "kind": "property",
+              "signatures": ["platform?: RelayPlatform"],
+              "docs": "Runtime services that replace missing browser globals, such as in React Native. See `RelayPlatform`."
+            }
+          ]
+        },
+        {
+          "name": "RelayPlatform",
+          "kind": "interface",
+          "signatures": ["interface RelayPlatform"],
+          "docs": "Runtime services for runtimes that lack a browser global, such as React Native. Every field is optional and\nfalls back to the global of the same name, looked up when it is used. The transport uses `randomUUID`, `sha256`\nand `URL`; `@instantrelay/client` also uses `WebSocket`, `connectivity` and `lifecycle`.",
+          "origin": "@instantrelay/core",
+          "members": [
+            {
+              "name": "randomUUID",
+              "kind": "property",
+              "signatures": ["randomUUID?: () => string"],
+              "docs": "A new random UUID in canonical lowercase form. Default: `crypto.randomUUID()`."
+            },
+            {
+              "name": "sha256",
+              "kind": "property",
+              "signatures": ["sha256?: (data: Uint8Array) => Promise<Uint8Array>"],
+              "docs": "The 32-byte SHA-256 digest of `data`. Default: `crypto.subtle.digest(\"SHA-256\", data)`."
+            },
+            {
+              "name": "URL",
+              "kind": "property",
+              "signatures": ["URL?: PlatformURLConstructor"],
+              "docs": "A WHATWG URL constructor. Default: the global `URL`. The SDK checks it before first use and refuses one that doesn't conform."
+            },
+            {
+              "name": "WebSocket",
+              "kind": "property",
+              "signatures": ["WebSocket?: PlatformWebSocketConstructor"],
+              "docs": "Opens the realtime connection. Default: the global `WebSocket`."
+            },
+            {
+              "name": "connectivity",
+              "kind": "property",
+              "signatures": ["connectivity?: Connectivity"],
+              "docs": "Network reachability. The outbox waits while offline. Coming online starts a waiting outbox entry and realtime\nreconnection at once. Default in browsers: `navigator.onLine` and `online`/`offline` events; elsewhere always online."
+            },
+            {
+              "name": "lifecycle",
+              "kind": "property",
+              "signatures": ["lifecycle?: Lifecycle"],
+              "docs": "Foreground state. Returning to `active` starts waiting realtime reconnection, due outbox entries and due session\nrenewal at once. It never changes retry budgets, request IDs or payloads. Default in browsers: page visibility."
+            }
+          ]
+        },
+        {
+          "name": "RelayProblem",
+          "kind": "class",
+          "signatures": ["class RelayProblem extends Error"],
+          "docs": "",
+          "origin": "@instantrelay/core",
+          "members": [
+            {
+              "name": "code",
+              "kind": "property",
+              "signatures": ["readonly code: string"],
+              "docs": ""
+            },
+            {
+              "name": "requestId",
+              "kind": "property",
+              "signatures": ["readonly requestId: string"],
+              "docs": ""
+            },
+            {
+              "name": "outcome",
+              "kind": "property",
+              "signatures": ["readonly outcome: string"],
+              "docs": ""
+            },
+            {
+              "name": "status",
+              "kind": "property",
+              "signatures": ["readonly status: number"],
+              "docs": ""
+            },
+            {
+              "name": "retryAfter",
+              "kind": "property",
+              "signatures": ["readonly retryAfter?: number"],
+              "docs": "Whole seconds to wait before resending the same request, when the authority sent a delay (for example with\n`RATE_LIMITED`). Read from the error's `extensions.retryAfter`, else from an HTTP `Retry-After` delay in seconds,\nor from a realtime close reason's `retryAfter=`. A request the caller sends is never resent on its own; when\n`@instantrelay/client` reconnects its stream or resends a queued message, it waits at least this long first."
+            },
+            {
+              "name": "constructor",
+              "kind": "constructor",
+              "signatures": [
+                "constructor(code: string, requestId: string, outcome: string, status: number, message: string, options?: ErrorOptions & {\n    retryAfter?: number;\n})"
+              ],
+              "docs": ""
+            }
+          ]
+        },
+        {
+          "name": "RelayTransport",
+          "kind": "class",
+          "signatures": ["class RelayTransport"],
+          "docs": "",
+          "origin": "@instantrelay/core",
+          "members": [
+            {
+              "name": "baseUrl",
+              "kind": "property",
+              "signatures": ["readonly baseUrl: string"],
+              "docs": ""
+            },
+            {
+              "name": "durableRecovery",
+              "kind": "property",
+              "signatures": ["readonly durableRecovery: boolean"],
+              "docs": ""
+            },
+            {
+              "name": "incarnation",
+              "kind": "property",
+              "signatures": ["incarnation: string"],
+              "docs": ""
+            },
+            {
+              "name": "servingEpoch",
+              "kind": "property",
+              "signatures": ["servingEpoch: string | undefined"],
+              "docs": ""
+            },
+            {
+              "name": "constructor",
+              "kind": "constructor",
+              "signatures": ["constructor(options: RelayTransportOptions)"],
+              "docs": ""
+            },
+            {
+              "name": "initializeRecovery",
+              "kind": "method",
+              "signatures": ["initializeRecovery(): Promise<void>"],
+              "docs": ""
+            },
+            {
+              "name": "recoveryStates",
+              "kind": "property",
+              "signatures": ["get recoveryStates(): readonly RecoveryState[]"],
+              "docs": ""
+            },
+            {
+              "name": "execute",
+              "kind": "method",
+              "signatures": [
+                "execute<K extends OperationKey>(key: K, projectId: string | undefined, input: OperationInput<K>, requestId?: string, credentialDeliveryPermit?: ProtocolObject): Promise<OperationPayload<K>>"
+              ],
+              "docs": ""
+            },
+            {
+              "name": "retry",
+              "kind": "method",
+              "signatures": [
+                "retry(requestId: string): Promise<NonNullable<OperationPayload<\"communication.resolveRequest\">[\"result\"]>>"
+              ],
+              "docs": ""
+            }
+          ]
+        },
+        {
+          "name": "RelayTransportOptions",
+          "kind": "interface",
+          "signatures": ["interface RelayTransportOptions"],
+          "docs": "",
+          "origin": "@instantrelay/core",
+          "members": [
+            {"name": "baseUrl", "kind": "property", "signatures": ["baseUrl: string"], "docs": ""},
+            {
+              "name": "credential",
+              "kind": "property",
+              "signatures": ["credential?: string"],
+              "docs": ""
+            },
+            {
+              "name": "namespace",
+              "kind": "property",
+              "signatures": ["namespace: string"],
+              "docs": ""
+            },
+            {
+              "name": "incarnation",
+              "kind": "property",
+              "signatures": ["incarnation?: string"],
+              "docs": ""
+            },
+            {
+              "name": "recoveryStorage",
+              "kind": "property",
+              "signatures": ["recoveryStorage?: RecoveryStorage"],
+              "docs": ""
+            },
+            {
+              "name": "asyncRecoveryStorage",
+              "kind": "property",
+              "signatures": ["asyncRecoveryStorage?: AsyncRecoveryStorage"],
+              "docs": ""
+            },
+            {
+              "name": "fetch",
+              "kind": "property",
+              "signatures": ["fetch?: typeof fetch"],
+              "docs": ""
+            },
+            {
+              "name": "platform",
+              "kind": "property",
+              "signatures": ["platform?: RelayPlatform"],
+              "docs": "Runtime services that replace missing globals, such as in React Native. See `RelayPlatform`."
             }
           ]
         },
@@ -3191,9 +3189,9 @@
         {
           "name": "ScopeRequiredProblem",
           "kind": "class",
-          "signatures": ["class ScopeRequiredProblem extends ConvoHopProblem"],
-          "docs": "`SCOPE_REQUIRED`: the backend key lacks a scope the operation requires (403, rejected, not retryable).\nClassify it by `instanceof ConvoHopProblem` and `code`; `scope` is a diagnostic detail.",
-          "origin": "@convohop/core",
+          "signatures": ["class ScopeRequiredProblem extends RelayProblem"],
+          "docs": "`SCOPE_REQUIRED`: the backend key lacks a scope the operation requires (403, rejected, not retryable).\nClassify it by `instanceof RelayProblem` and `code`; `scope` is a diagnostic detail.",
+          "origin": "@instantrelay/core",
           "members": [
             {
               "name": "code",
@@ -3220,28 +3218,28 @@
               "kind": "property",
               "signatures": ["readonly requestId: string"],
               "docs": "",
-              "inherited": "ConvoHopProblem"
+              "inherited": "RelayProblem"
             },
             {
               "name": "outcome",
               "kind": "property",
               "signatures": ["readonly outcome: string"],
               "docs": "",
-              "inherited": "ConvoHopProblem"
+              "inherited": "RelayProblem"
             },
             {
               "name": "status",
               "kind": "property",
               "signatures": ["readonly status: number"],
               "docs": "",
-              "inherited": "ConvoHopProblem"
+              "inherited": "RelayProblem"
             },
             {
               "name": "retryAfter",
               "kind": "property",
               "signatures": ["readonly retryAfter?: number"],
-              "docs": "Whole seconds to wait before resending the same request, when the authority sent a delay (for example with\n`RATE_LIMITED`). Read from the error's `extensions.retryAfter`, else from an HTTP `Retry-After` delay in seconds,\nor from a realtime close reason's `retryAfter=`. A request the caller sends is never resent on its own; when\n`@convohop/client` reconnects its stream or resends a queued message, it waits at least this long first.",
-              "inherited": "ConvoHopProblem"
+              "docs": "Whole seconds to wait before resending the same request, when the authority sent a delay (for example with\n`RATE_LIMITED`). Read from the error's `extensions.retryAfter`, else from an HTTP `Retry-After` delay in seconds,\nor from a realtime close reason's `retryAfter=`. A request the caller sends is never resent on its own; when\n`@instantrelay/client` reconnects its stream or resends a queued message, it waits at least this long first.",
+              "inherited": "RelayProblem"
             }
           ]
         },
@@ -3252,7 +3250,7 @@
             "type SearchHit = NonNullable<OperationPayload<\"communication.search\">[\"result\"]>[\"items\"][number] & {\n    message: ConversationMessage;\n}"
           ],
           "docs": "",
-          "origin": "@convohop/core"
+          "origin": "@instantrelay/core"
         },
         {
           "name": "SendReceipt",
@@ -3261,7 +3259,7 @@
             "type SendReceipt = NonNullable<OperationPayload<\"communication.sendMessage\">[\"result\"]> & {\n    cursor: ConversationCursor;\n}"
           ],
           "docs": "",
-          "origin": "@convohop/core"
+          "origin": "@instantrelay/core"
         },
         {
           "name": "SessionBootstrap",
@@ -3270,7 +3268,7 @@
             "type SessionBootstrap = SessionResult & {\n    session: NonNullable<SessionResult[\"session\"]>;\n}"
           ],
           "docs": "",
-          "origin": "@convohop/core"
+          "origin": "@instantrelay/core"
         },
         {
           "name": "SessionMetadata",
@@ -3279,7 +3277,7 @@
             "type SessionMetadata = OperationPayload<\"communication.currentSession\">[\"result\"]"
           ],
           "docs": "",
-          "origin": "@convohop/core"
+          "origin": "@instantrelay/core"
         },
         {
           "name": "SessionRefresh",
@@ -3288,7 +3286,7 @@
             "type SessionRefresh = (current: Readonly<SessionMetadata>) => Promise<SessionBootstrap>"
           ],
           "docs": "",
-          "origin": "@convohop/core"
+          "origin": "@instantrelay/core"
         },
         {
           "name": "SessionRefreshSchedule",
@@ -3323,7 +3321,7 @@
             "type SessionRefreshState = \"disabled\" | \"uninitialized\" | \"ready\" | \"refreshing\" | \"blocked\""
           ],
           "docs": "",
-          "origin": "@convohop/core"
+          "origin": "@instantrelay/core"
         },
         {
           "name": "TypingIndicator",
@@ -3334,7 +3332,7 @@
             {
               "name": "client",
               "kind": "property",
-              "signatures": ["readonly client: ConvoHopClient"],
+              "signatures": ["readonly client: RelayClient"],
               "docs": ""
             },
             {
@@ -3347,7 +3345,7 @@
               "name": "constructor",
               "kind": "constructor",
               "signatures": [
-                "constructor(client: ConvoHopClient, conversationId: string, options?: TypingIndicatorOptions)"
+                "constructor(client: RelayClient, conversationId: string, options?: TypingIndicatorOptions)"
               ],
               "docs": ""
             },
@@ -3441,56 +3439,56 @@
           "kind": "constant",
           "signatures": ["const operationCatalog: Record<OperationKey, OperationCatalogEntry>"],
           "docs": "",
-          "origin": "@convohop/core"
+          "origin": "@instantrelay/core"
         },
         {
           "name": "parseConversation",
           "kind": "function",
           "signatures": ["function parseConversation(value: unknown): Conversation"],
           "docs": "",
-          "origin": "@convohop/core"
+          "origin": "@instantrelay/core"
         },
         {
           "name": "parseCounter",
           "kind": "function",
           "signatures": ["function parseCounter(value: unknown): string"],
           "docs": "",
-          "origin": "@convohop/core"
+          "origin": "@instantrelay/core"
         },
         {
           "name": "parseCursor",
           "kind": "function",
           "signatures": ["function parseCursor(value: unknown): ConversationCursor"],
           "docs": "",
-          "origin": "@convohop/core"
+          "origin": "@instantrelay/core"
         },
         {
           "name": "parseId",
           "kind": "function",
           "signatures": ["function parseId(value: unknown): string"],
           "docs": "",
-          "origin": "@convohop/core"
+          "origin": "@instantrelay/core"
         },
         {
           "name": "parseMembership",
           "kind": "function",
           "signatures": ["function parseMembership(value: unknown): Membership"],
           "docs": "",
-          "origin": "@convohop/core"
+          "origin": "@instantrelay/core"
         },
         {
           "name": "parseMessage",
           "kind": "function",
           "signatures": ["function parseMessage(value: unknown): ConversationMessage"],
           "docs": "",
-          "origin": "@convohop/core"
+          "origin": "@instantrelay/core"
         },
         {
           "name": "parseObject",
           "kind": "function",
           "signatures": ["function parseObject(value: unknown): ProtocolObject"],
           "docs": "",
-          "origin": "@convohop/core"
+          "origin": "@instantrelay/core"
         },
         {
           "name": "parsePage",
@@ -3499,26 +3497,26 @@
             "function parsePage<T>(value: unknown, parse: (value: unknown) => T): ItemPage<T>"
           ],
           "docs": "",
-          "origin": "@convohop/core"
+          "origin": "@instantrelay/core"
         },
         {
           "name": "parseSearchHit",
           "kind": "function",
           "signatures": ["function parseSearchHit(value: unknown): SearchHit"],
           "docs": "",
-          "origin": "@convohop/core"
+          "origin": "@instantrelay/core"
         },
         {
           "name": "parseString",
           "kind": "function",
           "signatures": ["function parseString(value: unknown): string"],
           "docs": "",
-          "origin": "@convohop/core"
+          "origin": "@instantrelay/core"
         }
       ]
     },
     {
-      "name": "@convohop/react",
+      "name": "@instantrelay/react",
       "symbols": [
         {
           "name": "ConversationOptions",
@@ -3643,40 +3641,6 @@
               "signatures": ["readonly resyncRequired: boolean"],
               "docs": "The saved replay position is no longer valid. Only `ConversationStore.resync` recovers.",
               "inherited": "ConversationSnapshot"
-            }
-          ]
-        },
-        {
-          "name": "ConvoHopProvider",
-          "kind": "function",
-          "signatures": [
-            "function ConvoHopProvider({ client, outbox, children }: ConvoHopProviderProps): ReactElement"
-          ],
-          "docs": "Makes a client, and optionally a shared outbox, available to the hooks below it. It doesn't own or close either."
-        },
-        {
-          "name": "ConvoHopProviderProps",
-          "kind": "interface",
-          "signatures": ["interface ConvoHopProviderProps"],
-          "docs": "",
-          "members": [
-            {
-              "name": "client",
-              "kind": "property",
-              "signatures": ["readonly client: ConvoHopClient"],
-              "docs": "The signed-in user's client. Create it outside the provider, or above it, and close it when the user signs out."
-            },
-            {
-              "name": "outbox",
-              "kind": "property",
-              "signatures": ["readonly outbox?: Outbox | undefined"],
-              "docs": "The outbox every conversation below sends through. Without one, each conversation's store sends through an outbox\nof its own, which stops sending when the component unmounts."
-            },
-            {
-              "name": "children",
-              "kind": "property",
-              "signatures": ["readonly children?: ReactNode"],
-              "docs": ""
             }
           ]
         },
@@ -3863,6 +3827,40 @@
           ]
         },
         {
+          "name": "RelayProvider",
+          "kind": "function",
+          "signatures": [
+            "function RelayProvider({ client, outbox, children }: RelayProviderProps): ReactElement"
+          ],
+          "docs": "Makes a client, and optionally a shared outbox, available to the hooks below it. It doesn't own or close either."
+        },
+        {
+          "name": "RelayProviderProps",
+          "kind": "interface",
+          "signatures": ["interface RelayProviderProps"],
+          "docs": "",
+          "members": [
+            {
+              "name": "client",
+              "kind": "property",
+              "signatures": ["readonly client: RelayClient"],
+              "docs": "The signed-in user's client. Create it outside the provider, or above it, and close it when the user signs out."
+            },
+            {
+              "name": "outbox",
+              "kind": "property",
+              "signatures": ["readonly outbox?: Outbox | undefined"],
+              "docs": "The outbox every conversation below sends through. Without one, each conversation's store sends through an outbox\nof its own, which stops sending when the component unmounts."
+            },
+            {
+              "name": "children",
+              "kind": "property",
+              "signatures": ["readonly children?: ReactNode"],
+              "docs": ""
+            }
+          ]
+        },
+        {
           "name": "SessionRefreshOptions",
           "kind": "interface",
           "signatures": ["interface SessionRefreshOptions"],
@@ -3955,12 +3953,6 @@
           "docs": "Follows a conversation while the component is mounted: it loads the conversation, keeps it live through\nreconnects and session refreshes, and sends optimistically through the provider's outbox. A new `conversationId`,\nclient or outbox closes the old store and opens a new one; `null` closes it."
         },
         {
-          "name": "useConvoHopClient",
-          "kind": "function",
-          "signatures": ["function useConvoHopClient(): ConvoHopClient"],
-          "docs": "The provider's client."
-        },
-        {
           "name": "useLiveSession",
           "kind": "function",
           "signatures": [
@@ -3979,6 +3971,12 @@
           "kind": "function",
           "signatures": ["function useOutbox(outbox?: Outbox): readonly OutboxEntry[]"],
           "docs": "The entries of `outbox`, or of the provider's outbox, in send order."
+        },
+        {
+          "name": "useRelayClient",
+          "kind": "function",
+          "signatures": ["function useRelayClient(): RelayClient"],
+          "docs": "The provider's client."
         },
         {
           "name": "useSessionRefresh",

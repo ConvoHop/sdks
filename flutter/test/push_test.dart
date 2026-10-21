@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 
-import 'package:convohop/push.dart';
+import 'package:instantrelay/push.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -15,7 +15,7 @@ void main() {
     const events = EventChannel('convohop/test_push/events');
     late List<MethodCall> calls;
     late StreamController<Object?> controller;
-    late ConvoHopPush push;
+    late RelayPush push;
     late List<Object> errors;
     late Map<String, Object?>? registerResult;
 
@@ -66,8 +66,8 @@ void main() {
           onCancel: (arguments) {},
         ),
       );
-      push = ConvoHopPush(
-        notifications: ConvoHopNotifications(clock: fixedClock),
+      push = RelayPush(
+        notifications: RelayNotifications(clock: fixedClock),
         methods: methods,
         events: events,
         onError: errors.add,
@@ -82,7 +82,7 @@ void main() {
     });
 
     test('start subscribes before initial notification and drains call actions', () async {
-      final opened = <ConvoHopNotification>[];
+      final opened = <RelayNotification>[];
       final actions = <CallAction>[];
       push.opened.listen(opened.add);
       push.callActions.listen(actions.add);
@@ -96,7 +96,7 @@ void main() {
     test('delivers registration notification opened and call action events', () async {
       final registrations = <PushRegistration>[];
       final received = <HandledNotification>[];
-      final opened = <ConvoHopNotification>[];
+      final opened = <RelayNotification>[];
       final actions = <CallAction>[];
       push.registrations.listen(registrations.add);
       push.received.listen(received.add);
@@ -132,8 +132,8 @@ void main() {
 
     test("keeps handling native events after the app's error handler throws", () async {
       await push.close();
-      push = ConvoHopPush(
-        notifications: ConvoHopNotifications(clock: fixedClock),
+      push = RelayPush(
+        notifications: RelayNotifications(clock: fixedClock),
         methods: methods,
         events: events,
         onError: (error) {
@@ -143,7 +143,7 @@ void main() {
       );
       await push.start();
       await pumpEventQueue();
-      final opened = <ConvoHopNotification>[];
+      final opened = <RelayNotification>[];
       push.opened.listen(opened.add);
       controller.add(<String, Object?>{'type': 'opened', 'payload': 'not a map'});
       controller.add(<String, Object?>{

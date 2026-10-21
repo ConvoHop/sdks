@@ -1,8 +1,8 @@
 {
-  "name": "@convohop/core",
+  "name": "@instantrelay/core",
   "version": "0.1.0",
   "private": false,
-  "description": "Shared ConvoHop protocol types, generated GraphQL operations and isomorphic transport. Installed as a dependency of @convohop/client and @convohop/server; not a supported entry point.",
+  "description": "Shared Relay protocol types, generated GraphQL operations and isomorphic transport. Installed as a dependency of @instantrelay/client and @instantrelay/server; not a supported entry point.",
   "license": "Apache-2.0",
   "repository": {
     "type": "git",

@@ -91,11 +91,11 @@ mutation CommunicationEndLiveSession($context: RequestContextInput!, $input: End
 | Language | Members |
 | --- | --- |
 | [TypeScript](../../typescript/reference/operations.md) | [`ServerLiveSession.end`](../../typescript/reference/server.md#serverlivesessionend-method), [`LiveSessionHandle.end`](../../typescript/reference/client.md#livesessionhandleend-method) |
-| [Python](../../python/reference/operations.md) | [`ConvoHop.end_live_session`](../../python/reference/convohop.md#convohopend_live_session-method), [`AsyncConvoHop.end_live_session`](../../python/reference/convohop.md#asyncconvohopend_live_session-method) |
-| [.NET](../../dotnet/reference/operations.md) | [`ServerLiveSession.EndAsync`](../../dotnet/reference/convohop.md#serverlivesessionendasync-method), [`CommunicationApi.EndLiveSessionAsync`](../../dotnet/reference/api.md#communicationapiendlivesessionasync-method) |
+| [Python](../../python/reference/operations.md) | [`Relay.end_live_session`](../../python/reference/instantrelay.md#relayend_live_session-method), [`AsyncRelay.end_live_session`](../../python/reference/instantrelay.md#asyncrelayend_live_session-method) |
+| [.NET](../../dotnet/reference/operations.md) | [`ServerLiveSession.EndAsync`](../../dotnet/reference/relay.md#serverlivesessionendasync-method), [`CommunicationApi.EndLiveSessionAsync`](../../dotnet/reference/api.md#communicationapiendlivesessionasync-method) |
 | [Java and Kotlin](../../jvm/reference/operations.md) | [`CommunicationApi.endLiveSession`](../../jvm/reference/server.md#communicationapiendlivesession-method), [`CommunicationSuspendApi.endLiveSession`](../../jvm/reference/server-kotlin.md#communicationsuspendapiendlivesession-method) |
-| [Go](../../go/reference/operations.md) | [`ProjectClient.EndLiveSession`](../../go/reference/convohop.md#projectclientendlivesession-method) |
-| [Swift](../../swift/reference/operations.md) | [`LiveSessionHandle.end`](../../swift/reference/convohop.md#livesessionhandleend-method) |
+| [Go](../../go/reference/operations.md) | [`ProjectClient.EndLiveSession`](../../go/reference/relay.md#projectclientendlivesession-method) |
+| [Swift](../../swift/reference/operations.md) | [`LiveSessionHandle.end`](../../swift/reference/relay.md#livesessionhandleend-method) |
 | [Android](../../android/reference/operations.md) | [`LiveSessionHandle.end`](../../android/reference/android-core.md#livesessionhandleend-method) |
-| [Flutter](../../flutter/reference/operations.md) | [`LiveSessionHandle.end`](../../flutter/reference/convohop.md#livesessionhandleend-method), [`CommunicationOperations.endLiveSession`](../../flutter/reference/convohop.md#communicationoperationsendlivesession-method) |
+| [Flutter](../../flutter/reference/operations.md) | [`LiveSessionHandle.end`](../../flutter/reference/instantrelay.md#livesessionhandleend-method), [`CommunicationOperations.endLiveSession`](../../flutter/reference/instantrelay.md#communicationoperationsendlivesession-method) |
 | [React Native](../../react-native/reference/operations.md) | [`LiveSessionHandle.end`](../../react-native/reference/client.md#livesessionhandleend-method) |

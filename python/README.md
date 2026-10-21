@@ -1,6 +1,6 @@
-# ConvoHop Python server SDK
+# Relay Python server SDK
 
-`convohop` is the Python SDK for the current Conversation and Management APIs.
+`instantrelay` is the Python SDK for the current Conversation and Management APIs.
 It holds secret backend keys and operator credentials, so it runs only on
 trusted servers, never in a browser or a mobile app. It needs Python 3.11 or
 later and depends only on [`httpx`](https://www.python-httpx.org/).
@@ -16,13 +16,13 @@ or claim an existing PyPI release. Install it from a clone of this repository:
 pip install ./python
 ```
 
-- `ConvoHop` and `AsyncConvoHop` call one project with a backend key.
-- `ConvoHopManagement` and `AsyncConvoHopManagement` call the control plane
+- `Relay` and `AsyncRelay` call one project with a backend key.
+- `RelayManagement` and `AsyncRelayManagement` call the control plane
   with an operator access token.
-- `convohop.webhooks` verifies webhook deliveries.
-- `convohop.push` builds APNs, FCM and Web Push requests from notification
+- `instantrelay.webhooks` verifies webhook deliveries.
+- `instantrelay.push` builds APNs, FCM and Web Push requests from notification
   events.
-- `convohop.types` has the request inputs and response models.
+- `instantrelay.types` has the request inputs and response models.
 
 The operations, their inputs and models are generated from the schema in
 [`schema/`](../schema) by [`tools/sdkgen`](../tools/sdkgen), like the
@@ -35,10 +35,10 @@ Authenticate the application user before looking up its project-scoped
 principal. A caller-supplied principal ID isn't proof of login.
 
 ```python
-from convohop import ConvoHop
-from convohop.types import MemberInputInput
+from instantrelay import Relay
+from instantrelay.types import MemberInputInput
 
-with ConvoHop(
+with Relay(
     base_url=communication_base,
     backend_key=backend_key,  # Trusted secret storage only.
     project_id=project_id,
@@ -75,13 +75,13 @@ raise `TypeError` or `ValueError`.
 
 ## Async
 
-`AsyncConvoHop` and `AsyncConvoHopManagement` have the same methods as
+`AsyncRelay` and `AsyncRelayManagement` have the same methods as
 coroutines and run on asyncio. Use a client in one event loop.
 
 ```python
-from convohop import AsyncConvoHop
+from instantrelay import AsyncRelay
 
-async with AsyncConvoHop(
+async with AsyncRelay(
     base_url=communication_base,
     backend_key=backend_key,
     project_id=project_id,
@@ -101,7 +101,7 @@ Each schema operation is a keyword-only method named after it in snake_case,
 such as `create_conversation`, `members` and `end_live_session`. Its
 docstring names the authorization, the scope, the idempotency class and the
 pagination. Inputs that are `None` are omitted from the request. Responses
-are frozen dataclasses from `convohop.types`, checked against their request:
+are frozen dataclasses from `instantrelay.types`, checked against their request:
 a page from another conversation, for example, raises instead of being
 returned.
 
@@ -120,7 +120,7 @@ returned.
 
 ## Errors
 
-A failed request raises `ConvoHopProblem`. Its `code` is the authority's or
+A failed request raises `RelayProblem`. Its `code` is the authority's or
 the SDK's error code, `status` the HTTP status (0 when nothing was received),
 and `outcome` what is known about the request: `rejected` (no effect),
 `committed`, `accepted` or `unknown`. `retryable` says whether the error
@@ -151,11 +151,11 @@ operation, its exact input and a retry budget. When an outcome is `unknown`,
 for example after a timeout, don't send a new request with a new ID:
 
 ```python
-from convohop import ConvoHopProblem
+from instantrelay import RelayProblem
 
 try:
     server.send_message(conversation_id=conversation_id, text="Shipped", props={}, request_id=request_id)
-except ConvoHopProblem as problem:
+except RelayProblem as problem:
     if problem.outcome != "unknown":
         raise
     resolution = server.retry_request(problem.request_id)
@@ -181,7 +181,7 @@ three-attempt/60-second retry budget is spent, whatever its outcome (see the
 [recovery journal rules](../spec/recovery/README.md#recovery-journal)). A
 spent request raises `RESOLUTION_REQUIRED` instead of being sent, and
 `resolve_request()` still looks it up once its record is gone. With no final
-record to forget, the new request fails with `ConvoHopProblem` code
+record to forget, the new request fails with `RelayProblem` code
 `RECOVERY_LIMIT`, outcome `rejected` and status 409 before it is sent; resend
 or resolve the kept requests first. Records hold inputs, never credentials,
 and use the TypeScript SDK's keys and format, so both SDKs can share them.
@@ -195,7 +195,7 @@ symmetric `v1` scheme and returns its event.
 from starlette.requests import Request
 from starlette.responses import Response
 
-from convohop import WebhookVerificationError, webhooks
+from instantrelay import WebhookVerificationError, webhooks
 
 
 async def receive(request: Request) -> Response:
@@ -217,7 +217,7 @@ de-duplicate on `webhook_id`, which retries and replays keep.
 - `body` is the raw body as `bytes`, or a `str` that is its exact UTF-8
   decoding.
 - `secrets` is one `whsec_` secret or a list of them. Pass every secret you
-  hold: during a rotation ConvoHop also signs with the next secret, and with
+  hold: during a rotation Relay also signs with the next secret, and with
   the replaced one for 24 hours. Entries with other version prefixes are
   ignored.
 - `tolerance_seconds` defaults to 300 and `now` to the current time; `now`
@@ -256,9 +256,9 @@ signatures or the body.
 
 ## Push payloads
 
-ConvoHop doesn't send push notifications for you
+Relay doesn't send push notifications for you
 ([bring your own](../docs/sdk-strategy.md#push-notifications-bring-your-own)).
-`convohop.push` builds requests from a verified notification event. The
+`instantrelay.push` builds requests from a verified notification event. The
 builders are pure functions: your push library adds the device's token or
 FID and the APNs or FCM authorization, encrypts and signs Web Push messages,
 and sends them. They follow the [push payload contract](../spec/push-payload/README.md)
@@ -267,7 +267,7 @@ endpoint to `notification.message`, `notification.call` and
 `notification.callCancelled` to receive the events.
 
 ```python
-from convohop import push
+from instantrelay import push
 
 
 def notify(event):  # A notification event from webhooks.verify().
@@ -337,14 +337,14 @@ first. The message names the field but never contains its value.
 
 ## Management
 
-`ConvoHopManagement` calls the Management origin's `/graphql` with an
+`RelayManagement` calls the Management origin's `/graphql` with an
 operator access token. `actor_id` names the operator and scopes stored
 recovery records.
 
 ```python
-from convohop import ConvoHopManagement
+from instantrelay import RelayManagement
 
-with ConvoHopManagement(
+with RelayManagement(
     base_url=management_base,
     access_token=operator_token,
     actor_id=operator_id,
@@ -370,7 +370,7 @@ uv run pytest
 uv run python -m build && uv run twine check --strict dist/*
 ```
 
-`src/convohop/_generated/` is generated: change the schema or
+`src/instantrelay/_generated/` is generated: change the schema or
 `tools/sdkgen/emitters/python.mjs` and run `npm run generate:graphql` from the
 root, never edit it by hand. `npm run conformance -- --driver "python/.venv/bin/python conformance/drivers/python/driver.py"`
 runs the shared conformance scenarios against the mock authority.

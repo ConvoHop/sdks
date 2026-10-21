@@ -15,7 +15,7 @@ export function createGitHub({ env = process.env, fetch = globalThis.fetch } = {
     const headers = {
       Accept: 'application/vnd.github+json',
       Authorization: `Bearer ${token}`,
-      'User-Agent': 'convohop-sdks-release',
+      'User-Agent': 'relay-sdks-release',
       'X-GitHub-Api-Version': '2022-11-28',
     };
     if (json !== undefined) headers['Content-Type'] = 'application/json';

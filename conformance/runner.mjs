@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// ConvoHop conformance runner: executes the language-neutral scenarios in spec/conformance/scenarios
+// Relay conformance runner: executes the language-neutral scenarios in spec/conformance/scenarios
 // against a target through a driver and writes JUnit, JSON and Markdown reports.
 // Usage and exit codes: spec/conformance/README.md#running.
 import { existsSync } from "node:fs";

@@ -3,7 +3,7 @@ export type { OperationKey, OperationTypes } from "./generated/operations.js";
 export type * as GraphqlTypes from "./generated/graphql-types.js";
 export type { OperationInput, OperationPayload } from "./graphql.js";
 export {
-  ConvoHopProblem, ScopeRequiredProblem, parseObject, parseString, parseId, parseCounter, parseCursor, parsePage, parseMessage, parseSearchHit,
+  RelayProblem, ScopeRequiredProblem, parseObject, parseString, parseId, parseCounter, parseCursor, parsePage, parseMessage, parseSearchHit,
   parseMembership, parseConversation,
 } from "./protocol.js";
 export type {
@@ -12,9 +12,9 @@ export type {
   SessionBootstrap, SessionRefresh, SessionRefreshState, ProjectRoute, RecoveryState, RecoveryStorage,
   AsyncRecoveryStorage, CommandOptions, PageOptions,
 } from "./protocol.js";
-export { ConvoHopTransport } from "./transport.js";
-export type { ConvoHopTransportOptions } from "./transport.js";
+export { RelayTransport } from "./transport.js";
+export type { RelayTransportOptions } from "./transport.js";
 export type {
-  ConvoHopPlatform, Connectivity, Lifecycle, LifecycleState, PlatformURL, PlatformURLConstructor, PlatformWebSocket,
+  RelayPlatform, Connectivity, Lifecycle, LifecycleState, PlatformURL, PlatformURLConstructor, PlatformWebSocket,
   PlatformWebSocketConstructor,
 } from "./platform.js";

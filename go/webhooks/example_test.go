@@ -46,7 +46,7 @@ func ExampleVerify() {
 // deduplicate on the webhook ID.
 func Example_handler() {
 	// Every secret you hold, so that deliveries verify during a rotation.
-	secrets := strings.Fields(os.Getenv("CONVOHOP_WEBHOOK_SECRETS"))
+	secrets := strings.Fields(os.Getenv("RELAY_WEBHOOK_SECRETS"))
 	http.HandleFunc("POST /convohop/webhooks", func(w http.ResponseWriter, r *http.Request) {
 		// Verify rejects bodies over 4096 bytes, so read no more.
 		body, err := io.ReadAll(http.MaxBytesReader(w, r.Body, 4096))

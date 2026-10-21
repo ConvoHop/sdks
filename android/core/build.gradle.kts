@@ -6,9 +6,9 @@ plugins {
     `maven-publish`
 }
 
-group = "com.convohop"
-version = providers.gradleProperty("convohopVersion").get()
-description = "Platform-free runtime for the ConvoHop Android client SDK."
+group = "dev.instantrelay"
+version = providers.gradleProperty("relayVersion").get()
+description = "Platform-free runtime for the Relay Android client SDK."
 
 java {
     sourceCompatibility = JavaVersion.VERSION_17
@@ -45,7 +45,7 @@ publishing {
     publications {
         create<MavenPublication>("release") {
             // The pure-JVM runtime the Android library builds on; not a supported entry point.
-            artifactId = "convohop-android-core"
+            artifactId = "relay-android-core"
             from(components["java"])
         }
     }

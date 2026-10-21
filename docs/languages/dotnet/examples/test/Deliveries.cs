@@ -23,7 +23,7 @@ public sealed record Delivery(string WebhookId, IReadOnlyDictionary<string, stri
     }
 }
 
-// Signs deliveries the way ConvoHop does: Standard Webhooks, HMAC-SHA256 over "id.timestamp.body".
+// Signs deliveries the way Relay does: Standard Webhooks, HMAC-SHA256 over "id.timestamp.body".
 internal static class Deliveries
 {
     public static string NewSecret() => "whsec_" + Convert.ToBase64String(RandomNumberGenerator.GetBytes(32));
@@ -55,7 +55,7 @@ internal static class Deliveries
         ["subjectRef"] = new JsonObject { ["kind"] = kind, ["id"] = subjectId },
     };
 
-    // A body as ConvoHop sends it: compact JSON that escapes only quotes, backslashes and control characters, and
+    // A body as Relay sends it: compact JSON that escapes only quotes, backslashes and control characters, and
     // leaves other text as UTF-8. System.Text.Json's encoders escape more, which can push a large event past the limit.
     public static string WireJson(JsonNode? node)
     {

@@ -1,6 +1,6 @@
-# ConvoHop server SDK
+# Relay server SDK
 
-`@convohop/server` is the TypeScript/ESM SDK for the current Management and
+`@instantrelay/server` is the TypeScript/ESM SDK for the current Management and
 Conversation APIs. It runs only in trusted Node.js 22+ runtimes, because it
 holds secret backend keys and operator credentials. No hosted service, cloud
 provisioner or privileged browser client is included. It isn't on a package
@@ -10,15 +10,15 @@ License: [Apache-2.0](LICENSE).
 
 ## Runtime and entry point
 
-- `@convohop/server` has one ESM entry point with bundled TypeScript
+- `@instantrelay/server` has one ESM entry point with bundled TypeScript
   declarations, exported only under the `node` condition. Bundlers that
   target browsers can't resolve it, which keeps it out of client bundles.
   CommonJS code on Node.js 22.12 or later can `require()` it.
-- It depends only on `@convohop/core`. It never loads `@convohop/client`
+- It depends only on `@instantrelay/core`. It never loads `@instantrelay/client`
   or `livekit-client`.
-- It re-exports the public API of `@convohop/core`, such as `ConvoHopProblem`,
-  `ConvoHopTransport`, `operationCatalog` and the generated `GraphqlTypes` types. Import
-  them from `@convohop/server`, not from `@convohop/core`.
+- It re-exports the public API of `@instantrelay/core`, such as `RelayProblem`,
+  `RelayTransport`, `operationCatalog` and the generated `GraphqlTypes` types. Import
+  them from `@instantrelay/server`, not from `@instantrelay/core`.
 
 ## Application backend
 
@@ -26,7 +26,7 @@ Authenticate the application user before looking up its project-scoped
 principal. A caller-supplied principal ID is not proof of login.
 
 ```ts
-import { ProjectServerClient } from "@convohop/server";
+import { ProjectServerClient } from "@instantrelay/server";
 
 const server = new ProjectServerClient({
   baseUrl: communicationBase,
@@ -171,9 +171,9 @@ const inbox = await server.inbox({ actAs: principalId });
 
 ### Errors
 
-Failures are `ConvoHopProblem` errors, re-exported from `@convohop/core`.
+Failures are `RelayProblem` errors, re-exported from `@instantrelay/core`.
 
-- A key without a required scope gets `ScopeRequiredProblem`, a `ConvoHopProblem`
+- A key without a required scope gets `ScopeRequiredProblem`, a `RelayProblem`
   with `code: "SCOPE_REQUIRED"`, status 403 and outcome `rejected`. Grant
   the scope instead of retrying. `scope` names the missing scope, parsed from
   the authority's message, and is `undefined` if the wording differs. For
@@ -187,10 +187,10 @@ Failures are `ConvoHopProblem` errors, re-exported from `@convohop/core`.
 ## Webhooks
 
 `webhooks.verify()` checks a delivery with Web Crypto and returns its event.
-ConvoHop signs deliveries with the Standard Webhooks symmetric `v1` scheme.
+Relay signs deliveries with the Standard Webhooks symmetric `v1` scheme.
 
 ```ts
-import { webhooks, WebhookVerificationError } from "@convohop/server";
+import { webhooks, WebhookVerificationError } from "@instantrelay/server";
 
 export async function receive(request: Request): Promise<Response> {
   const body = new Uint8Array(await request.arrayBuffer()); // Raw bytes, never re-serialized JSON.
@@ -216,9 +216,9 @@ event delivered to two endpoints has the same `eventId` and different
 - `body` is the raw body as a `Uint8Array`, or a string that is its exact
   UTF-8 decoding. The SDK verifies those bytes as received and never
   re-serializes them.
-- `secrets` is one `whsec_` secret or an array of them. ConvoHop issues
+- `secrets` is one `whsec_` secret or an array of them. Relay issues
   32-byte secrets, and the SDK accepts the 24 to 64 bytes that Standard
-  Webhooks allows. Pass every secret you hold. ConvoHop signs with the
+  Webhooks allows. Pass every secret you hold. Relay signs with the
   current secret, with the next secret while a rotation is pending (at most
   5 minutes), and with the replaced secret for 24 hours after the rotation.
   A `v1` entry that matches any secret is accepted. Entries with other
@@ -255,7 +255,7 @@ secrets, signatures or the body.
 | `TIMESTAMP_EXPIRED` | The timestamp is more than the tolerance before `now`. |
 | `TIMESTAMP_FUTURE` | The timestamp is more than the tolerance after `now`. |
 | `BODY_TOO_LARGE` | The body is over 4096 bytes. |
-| `TOO_MANY_SIGNATURES` | `webhook-signature` has more than 8 entries. ConvoHop sends 1 to 3. |
+| `TOO_MANY_SIGNATURES` | `webhook-signature` has more than 8 entries. Relay sends 1 to 3. |
 | `NO_MATCHING_SIGNATURE` | No `v1` entry matches any secret. |
 | `INVALID_BODY` | `verify()` only: the signed body isn't a UTF-8 JSON event envelope. |
 
@@ -264,7 +264,7 @@ negative tolerance or a body that is neither a string nor a `Uint8Array`.
 
 ## Push payloads
 
-ConvoHop doesn't send push notifications for you
+Relay doesn't send push notifications for you
 ([bring your own](../../docs/sdk-strategy.md#push-notifications-bring-your-own)).
 `push` builds APNs, FCM and Web Push requests from a verified notification
 event. Its builders are pure functions: they hold no credentials and send
@@ -278,7 +278,7 @@ Deliveries are at least once and unordered, so deduplicate on `eventId`, as
 describes.
 
 ```ts
-import { push, type WebhookEvent, type WebhookNotificationEvent } from "@convohop/server";
+import { push, type WebhookEvent, type WebhookNotificationEvent } from "@instantrelay/server";
 
 // Your queue worker, for events that webhooks.verify() accepted.
 export async function handle(event: WebhookEvent): Promise<void> {
@@ -396,15 +396,15 @@ first, and the message names the field but never contains its value.
 
 ## Management and credential delivery
 
-`ConvoHopManagementClient` uses its separately configured Management origin's
+`RelayManagementClient` uses its separately configured Management origin's
 unversioned `/graphql`, with an authorized portal credential. The project
 client uses Communication `/graphql`. Both reject redirects and unsafe
 origins; only explicit loopback HTTP is permitted without TLS.
 
 ```ts
-import { ConvoHopManagementClient } from "@convohop/server";
+import { RelayManagementClient } from "@instantrelay/server";
 
-const management = new ConvoHopManagementClient({
+const management = new RelayManagementClient({
   baseUrl: managementBase,
   actorId: operatorId,
   accessToken: operatorToken,
@@ -424,7 +424,7 @@ Deployment/project readiness precedes dependent operations.
 `createProject`, `issueBackendKey` and `deliveryPermit` expose the remaining
 provisioning flow. Accepted management work has a durable operation ID, not
 a completion promise. Backend credentials use one-time delivery, never an
-ordinary retained result. Redeem using a bearer-less `ConvoHopTransport`:
+ordinary retained result. Redeem using a bearer-less `RelayTransport`:
 
 ```ts
 const result = await deliveryTransport.execute(
@@ -462,7 +462,7 @@ The optional backend-facing helper reads credential-free evidence for an
 **original** `issueSession` or `renewSession` mutation:
 
 ```ts
-import { type SessionRequestOutcome } from "@convohop/server";
+import { type SessionRequestOutcome } from "@instantrelay/server";
 
 await server.initialize(); // Establish the configured project route/epoch.
 const evidence: SessionRequestOutcome =
@@ -531,7 +531,7 @@ qualification and public deployment remain separate publication gates.
 
 ### Asynchronous database recovery storage
 
-`ProjectServerClient`, `ConvoHopManagementClient` and the low-level `ConvoHopTransport`
+`ProjectServerClient`, `RelayManagementClient` and the low-level `RelayTransport`
 accept optional `asyncRecoveryStorage`, mutually exclusive with the existing
 synchronous `recoveryStorage`. Both Server SDK storage types are exported:
 
@@ -547,7 +547,7 @@ Implement that interface using your application's database transactions;
 it is not a bundled SQL adapter or migration:
 
 ```ts
-import { ProjectServerClient, type AsyncRecoveryStorage } from "@convohop/server";
+import { ProjectServerClient, type AsyncRecoveryStorage } from "@instantrelay/server";
 
 const storage: AsyncRecoveryStorage = applicationSqlRecoveryStorage;
 const server = new ProjectServerClient({
@@ -580,7 +580,7 @@ again: the authority committed or accepted it, or rejected it with a problem
 that isn't retryable, or its three-attempt/60-second retry budget is spent,
 whatever its outcome (see the
 [recovery journal rules](../../spec/recovery/README.md#recovery-journal)).
-A write that creates a command fails with `ConvoHopProblem` code
+A write that creates a command fails with `RelayProblem` code
 `RECOVERY_LIMIT`, outcome `rejected` and status 409, before the command is
 sent, rather than prune one that isn't final; any other write prunes other
 clients' oldest commands that aren't final, so the client's own always fit.
@@ -592,7 +592,7 @@ these methods with fire-and-forget writes or success-shaped error handling.
 The SDK awaits pending-intent and submitted-attempt writes before sending a
 mutation, and awaits receipt/resolution writes before returning success.
 Native admission likewise awaits its saved use marker before opening.
-An async write failure raises local `ConvoHopProblem` code
+An async write failure raises local `RelayProblem` code
 `RECOVERY_STORAGE_FAILURE` with the original `requestId`, retained
 `outcome` (`unknown`, `committed` or `accepted`) and storage error `cause`.
 No mutation is sent when its pre-submit write fails. An attempted submission
@@ -632,7 +632,7 @@ alone, an unconditional transactional upsert, or a last-write-wins store can
 still lose another client's pending commands. One small app-service instance
 can have overlapping deployments/processes; it does not guarantee a single
 writer. The SDK supplies no distributed lock, SQL schema or migration.
-Browser `ConvoHopClient` recovery/cursor storage remains synchronous,
+Browser `RelayClient` recovery/cursor storage remains synchronous,
 including existing `sessionStorage` usage.
 
 Build/test from the root npm workspace:

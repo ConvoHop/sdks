@@ -1,4 +1,4 @@
-group = "com.convohop.flutter"
+group = "dev.instantrelay.flutter"
 
 buildscript {
     repositories {
@@ -21,7 +21,7 @@ allprojects {
 apply plugin: "com.android.library"
 
 android {
-    namespace = "com.convohop.flutter"
+    namespace = "dev.instantrelay.flutter"
 
     compileSdk = 36
 

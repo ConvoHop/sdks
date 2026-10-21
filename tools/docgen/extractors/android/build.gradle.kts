@@ -2,6 +2,8 @@
 // the extract task, which parses the SDK's Kotlin sources and writes their public API in the docs pipeline's
 // surface format.
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+import org.jetbrains.kotlin.gradle.tasks.KotlinCompilerExecutionStrategy
 
 plugins {
     alias(libs.plugins.kotlin.jvm)
@@ -21,6 +23,10 @@ kotlin {
     }
 }
 
+tasks.named<KotlinCompile>("compileKotlin") {
+    compilerExecutionStrategy.set(KotlinCompilerExecutionStrategy.IN_PROCESS)
+}
+
 dependencies {
     implementation(libs.kotlin.compiler.embeddable)
 
@@ -34,7 +40,7 @@ tasks.test {
 tasks.register<JavaExec>("extract") {
     description = "Writes the Android SDK's public API. Run it through tools/docgen/extractors/android.mjs."
     classpath = sourceSets.main.get().runtimeClasspath
-    mainClass.set("com.convohop.docs.android.MainKt")
+    mainClass.set("dev.instantrelay.docs.android.MainKt")
     // Arguments name repository-relative paths.
     workingDir = rootDir.parentFile
     maxHeapSize = "512m"

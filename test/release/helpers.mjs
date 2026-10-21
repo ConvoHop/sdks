@@ -5,7 +5,7 @@ import { dirname, join } from 'node:path';
 import { gzipSync } from 'node:zlib';
 
 export function tempDir(t) {
-  const dir = mkdtempSync(join(tmpdir(), 'convohop-release-'));
+  const dir = mkdtempSync(join(tmpdir(), 'relay-release-'));
   t.after(() => rmSync(dir, { recursive: true, force: true }));
   return dir;
 }
@@ -85,11 +85,11 @@ export function tarGz(entries) {
 }
 
 export const LICENSE_TEXT = 'Apache License\nVersion 2.0\n';
-export const NOTICE_TEXT = 'ConvoHop SDKs\n';
+export const NOTICE_TEXT = 'Relay SDKs\n';
 
 export function publishableManifest(overrides = {}) {
   return {
-    name: '@convohop/example',
+    name: '@instantrelay/example',
     version: '1.2.3',
     license: 'Apache-2.0',
     type: 'module',
@@ -115,10 +115,10 @@ export function packageTarball({ manifest = publishableManifest(), omit = [], ex
 }
 
 export const EXPECTED = {
-  name: '@convohop/example',
+  name: '@instantrelay/example',
   version: '1.2.3',
   directory: 'packages/example',
-  internalVersions: { '@convohop/core': '1.0.0' },
+  internalVersions: { '@instantrelay/core': '1.0.0' },
   license: Buffer.from(LICENSE_TEXT),
   notice: Buffer.from(NOTICE_TEXT),
 };

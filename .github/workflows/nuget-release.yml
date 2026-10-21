@@ -34,7 +34,7 @@ jobs:
       confirmation: ${{ inputs.confirmation }}
 
   publish:
-    name: Publish ConvoHop to NuGet
+    name: Publish Relay to NuGet
     needs: prepare
     if: needs.prepare.outputs.publish == 'true'
     runs-on: ubuntu-24.04
@@ -81,5 +81,5 @@ jobs:
           VERSION: ${{ needs.prepare.outputs.version }}
           NUGET_API_KEY: ${{ steps.login.outputs.NUGET_API_KEY }}
         run: >-
-          dotnet nuget push "$RUNNER_TEMP/registry-assets/ConvoHop.$VERSION.nupkg"
+          dotnet nuget push "$RUNNER_TEMP/registry-assets/InstantRelay.$VERSION.nupkg"
           --source https://api.nuget.org/v3/index.json --api-key "$NUGET_API_KEY"

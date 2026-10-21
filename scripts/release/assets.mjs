@@ -1,6 +1,6 @@
 // Build job (and PR CI): packs each npm package, inspects the tarball and
 // writes a CycloneDX SBOM and SHA256SUMS to <out>/<component>/.
-import { existsSync, mkdirSync, readdirSync, readFileSync, writeFileSync } from 'node:fs';
+import { existsSync, lstatSync, mkdirSync, readdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { join, resolve } from 'node:path';
 import { pathToFileURL } from 'node:url';
 
@@ -18,6 +18,35 @@ import {
 } from './lib.mjs';
 import { createSbom } from './sbom.mjs';
 import { inspectTarball } from './tarball.mjs';
+
+export function verifyNpmAssets({ root = REPO_ROOT, assets, packages }) {
+  const selected = new Set(packages.map((pkg) => pkg.name));
+  const all = npmReleasePackages(root);
+  const expected = all.filter((pkg) => selected.has(pkg.name));
+  if (packages.length === 0 || JSON.stringify(packages) !== JSON.stringify(expected)) {
+    throw new Error('npm artifacts must match the checked-out packages in dependency order');
+  }
+  const internalVersions = Object.fromEntries(all.map((pkg) => [pkg.name, pkg.version]));
+  for (const pkg of packages) {
+    const directory = join(assets, pkg.component);
+    const names = [pkg.tarball, pkg.sbom, 'SHA256SUMS'].sort();
+    if (!lstatSync(directory).isDirectory() || JSON.stringify(readdirSync(directory).sort()) !== JSON.stringify(names)) {
+      throw new Error(`Unexpected npm artifact file set for ${pkg.name}`);
+    }
+    if (names.some((name) => !lstatSync(join(directory, name)).isFile())) throw new Error('npm artifacts must be regular files');
+    const tarball = readFileSync(join(directory, pkg.tarball));
+    const sbom = readFileSync(join(directory, pkg.sbom));
+    if (readFileSync(join(directory, 'SHA256SUMS'), 'utf8') !== sha256Sums([
+      { name: pkg.tarball, data: tarball }, { name: pkg.sbom, data: sbom },
+    ])) throw new Error(`npm artifact checksum mismatch for ${pkg.name}`);
+    const { problems } = inspectTarball(tarball, {
+      name: pkg.name, version: pkg.version, directory: pkg.path, internalVersions,
+      requireChangelog: existsSync(join(root, pkg.path, 'CHANGELOG.md')),
+      license: readFileSync(join(root, 'LICENSE')), notice: readFileSync(join(root, 'NOTICE')),
+    });
+    if (problems.length) throw new Error(`${pkg.tarball} failed inspection:\n- ${problems.join('\n- ')}`);
+  }
+}
 
 // Without `releases`, builds every configured npm package at its package.json version.
 export async function buildAssets({ root = REPO_ROOT, out, releases, npm = 'npm' }) {

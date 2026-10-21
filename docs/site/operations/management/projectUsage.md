@@ -93,7 +93,7 @@ query ManagementProjectUsage($context: RequestContextInput!, $input: ProjectUsag
 | Language | Members |
 | --- | --- |
 | [TypeScript](../../typescript/reference/operations.md) | Not wrapped by a method |
-| [Python](../../python/reference/operations.md) | [`ConvoHopManagement.project_usage`](../../python/reference/convohop.md#convohopmanagementproject_usage-method), [`AsyncConvoHopManagement.project_usage`](../../python/reference/convohop.md#asyncconvohopmanagementproject_usage-method) |
+| [Python](../../python/reference/operations.md) | [`RelayManagement.project_usage`](../../python/reference/instantrelay.md#relaymanagementproject_usage-method), [`AsyncRelayManagement.project_usage`](../../python/reference/instantrelay.md#asyncrelaymanagementproject_usage-method) |
 | [.NET](../../dotnet/reference/operations.md) | [`ManagementApi.ProjectUsageAsync`](../../dotnet/reference/api.md#managementapiprojectusageasync-method) |
 | [Java and Kotlin](../../jvm/reference/operations.md) | [`ManagementApi.projectUsage`](../../jvm/reference/server.md#managementapiprojectusage-method), [`ManagementSuspendApi.projectUsage`](../../jvm/reference/server-kotlin.md#managementsuspendapiprojectusage-method) |
-| [Go](../../go/reference/operations.md) | [`ManagementClient.ProjectUsage`](../../go/reference/convohop.md#managementclientprojectusage-method) |
+| [Go](../../go/reference/operations.md) | [`ManagementClient.ProjectUsage`](../../go/reference/relay.md#managementclientprojectusage-method) |

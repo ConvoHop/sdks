@@ -36,7 +36,7 @@ type handled struct {
 
 type recordingHandlers struct{ calls []handled }
 
-func (h *recordingHandlers) ConversationChanged(_ context.Context, conversation *convohop.Conversation) error {
+func (h *recordingHandlers) ConversationChanged(_ context.Context, conversation *relay.Conversation) error {
 	h.calls = append(h.calls, handled{"ConversationChanged", [2]string{conversation.ConversationID, conversation.Title}})
 	return nil
 }
@@ -150,7 +150,7 @@ func TestHandleEventReadsChangedConversationsAndRoutesNotifications(t *testing.T
 		envelope(webhooks.EventMessageCreated, "message", newUUID(), config.ProjectID),
 		notification,
 		envelope(webhooks.EventWebhookEndpointDisabled, "webhookEndpoint", "endpoint-orders", config.ProjectID),
-		// A type from a newer ConvoHop.
+		// A type from a newer Relay.
 		envelope("thread.archived", "thread", newUUID(), config.ProjectID),
 		// Known types whose events don't match them: an endpoint-disabled
 		// event about a conversation, and a notification event outside the

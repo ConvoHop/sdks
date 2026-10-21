@@ -41,15 +41,13 @@ export interface CliOperation {
   /** The input type, a key of cliTypes; absent when the operation takes no input. */
   readonly input?: string;
 }
-/** Operations `convohop call` never runs, because their results are credentials or they record a person's consent. */
+/** Operations `relay call` never runs, because their results are credentials or they record a person's consent. */
 export const withheldOperations: Readonly<Record<string, string>> = {
   "communication.issueSession": "returns a user session token",
   "communication.renewSession": "returns a user session token",
   "management.credentialPermit": "returns a credential delivery permit",
   "management.createBillingCheckoutSession": "returns a hosted billing link that grants access to whoever holds it",
-  "management.createBillingPortalSession": "returns a hosted billing link that grants access to whoever holds it",
-  "management.agentCredentialPermit": "returns a credential delivery permit",
-  "management.approveAgentSignup": "records an owner's consent to an agent signup; the owner gives it from the emailed approval link"
+  "management.createBillingPortalSession": "returns a hosted billing link that grants access to whoever holds it"
 };
 /** The scopes a backend key can grant, by wire name, with what each allows. */
 export const cliScopes: Readonly<Record<string, string>> = {
@@ -80,22 +78,6 @@ export const cliTypes: Readonly<Record<string, CliType>> = {
     "fields": [
       {"name": "conversationId", "type": "UUID!", "required": true},
       {"name": "members", "type": "[MemberBatchEntryInput!]!", "required": true}
-    ]
-  },
-  "AgentAuditEventsRequestInput": {
-    "kind": "input",
-    "fields": [
-      {"name": "orgId", "type": "UUID!", "required": true},
-      {"name": "limit", "type": "PageSize!", "required": false, "default": 50},
-      {"name": "cursor", "type": "String", "required": false}
-    ]
-  },
-  "AgentGrantsRequestInput": {
-    "kind": "input",
-    "fields": [
-      {"name": "orgId", "type": "UUID!", "required": true},
-      {"name": "limit", "type": "PageSize!", "required": false, "default": 50},
-      {"name": "cursor", "type": "String", "required": false}
     ]
   },
   "AlertLiveSessionInput": {
@@ -340,10 +322,6 @@ export const cliTypes: Readonly<Record<string, CliType>> = {
     "kind": "input",
     "fields": [{"name": "orgId", "type": "UUID!", "required": true}]
   },
-  "OrganizationSpendRequestInput": {
-    "kind": "input",
-    "fields": [{"name": "orgId", "type": "UUID!", "required": true}]
-  },
   "OrganizationUsageRequestInput": {
     "kind": "input",
     "fields": [
@@ -417,13 +395,6 @@ export const cliTypes: Readonly<Record<string, CliType>> = {
       {"name": "expectedRevision", "type": "Decimal!", "required": true}
     ]
   },
-  "RevokeAgentGrantRequestInput": {
-    "kind": "input",
-    "fields": [
-      {"name": "grantId", "type": "UUID!", "required": true},
-      {"name": "revokeIssuedSessions", "type": "Boolean!", "required": true}
-    ]
-  },
   "RevokeBackendKeyRequestInput": {
     "kind": "input",
     "fields": [
@@ -491,14 +462,6 @@ export const cliTypes: Readonly<Record<string, CliType>> = {
       {"name": "muted", "type": "Boolean!", "required": true},
       {"name": "until", "type": "String", "required": false},
       {"name": "actAsPrincipalId", "type": "UUID", "required": false}
-    ]
-  },
-  "SetSpendControlsRequestInput": {
-    "kind": "input",
-    "fields": [
-      {"name": "orgId", "type": "UUID!", "required": true},
-      {"name": "monthlySpendCap", "type": "String!", "required": true},
-      {"name": "agentPurchaseLimit", "type": "String", "required": false}
     ]
   },
   "UUID": {"kind": "scalar", "description": "Canonical lowercase UUID. The nil UUID is rejected."},
@@ -1101,7 +1064,7 @@ export const cliOperations: Readonly<Record<string, CliOperation>> = {
     "id": "management.organizationBilling",
     "plane": "management",
     "kind": "query",
-    "summary": "Read the billing state of an organization in any status: the plan whose limits apply, whether ConvoHop bills the organization and, when it does, its standing and subscription.",
+    "summary": "Read the billing state of an organization in any status: the plan whose limits apply, whether Relay bills the organization and, when it does, its standing and subscription.",
     "credential": "portalCredential",
     "requires": "portalCredential (condition owner: The caller owns the organization, deployment or project)",
     "idempotency": "safe",
@@ -1163,47 +1126,6 @@ export const cliOperations: Readonly<Record<string, CliOperation>> = {
     "resolvable": false,
     "destructive": false,
     "input": "GetOperationRequestInput"
-  },
-  "management.agentGrants": {
-    "id": "management.agentGrants",
-    "plane": "management",
-    "kind": "query",
-    "summary": "List an organization's agent grants with their keys, newest first.",
-    "credential": "portalCredential",
-    "requires": "portalCredential (condition owner: The caller owns the organization, deployment or project)",
-    "idempotency": "safe",
-    "retry": "repeat",
-    "resolvable": false,
-    "destructive": false,
-    "paged": "Paged (cursor): Server-ordered pages. Pass nextCursor back as the cursor input until complete is true. Uses cursor input cursor and page size input limit.",
-    "input": "AgentGrantsRequestInput"
-  },
-  "management.agentAuditEvents": {
-    "id": "management.agentAuditEvents",
-    "plane": "management",
-    "kind": "query",
-    "summary": "List an organization's agent audit trail, newest first: the approval, provisioning, keys, revocations, spend-control changes and purchases.",
-    "credential": "portalCredential",
-    "requires": "portalCredential (condition owner: The caller owns the organization, deployment or project)",
-    "idempotency": "safe",
-    "retry": "repeat",
-    "resolvable": false,
-    "destructive": false,
-    "paged": "Paged (cursor): Server-ordered pages. Pass nextCursor back as the cursor input until complete is true. Uses cursor input cursor and page size input limit.",
-    "input": "AgentAuditEventsRequestInput"
-  },
-  "management.organizationSpend": {
-    "id": "management.organizationSpend",
-    "plane": "management",
-    "kind": "query",
-    "summary": "Read the organization's spend this month: its cap, credits, minimum credit, charge limit, charges, margin, spend stop and the freshness of its usage.",
-    "credential": "portalCredential",
-    "requires": "portalCredential (condition owner: The caller owns the organization, deployment or project)",
-    "idempotency": "safe",
-    "retry": "repeat",
-    "resolvable": false,
-    "destructive": false,
-    "input": "OrganizationSpendRequestInput"
   },
   "management.createOrganization": {
     "id": "management.createOrganization",
@@ -1383,31 +1305,5 @@ export const cliOperations: Readonly<Record<string, CliOperation>> = {
     "destructive": false,
     "longRunning": {"poll": "management.getOperation", "refField": "operation"},
     "input": "ReplayWebhookDeliveriesRequestInput"
-  },
-  "management.revokeAgentGrant": {
-    "id": "management.revokeAgentGrant",
-    "plane": "management",
-    "kind": "mutation",
-    "summary": "Revoke an agent grant and every key issued under it.",
-    "credential": "portalCredential",
-    "requires": "portalCredential (condition owner: The caller owns the organization, deployment or project)",
-    "idempotency": "idempotent",
-    "retry": "sameRequest",
-    "resolvable": true,
-    "destructive": true,
-    "input": "RevokeAgentGrantRequestInput"
-  },
-  "management.setSpendControls": {
-    "id": "management.setSpendControls",
-    "plane": "management",
-    "kind": "mutation",
-    "summary": "Set the organization's monthly spend cap and agent purchase limit.",
-    "credential": "portalCredential",
-    "requires": "portalCredential (condition owner: The caller owns the organization, deployment or project)",
-    "idempotency": "idempotent",
-    "retry": "sameRequest",
-    "resolvable": true,
-    "destructive": false,
-    "input": "SetSpendControlsRequestInput"
   }
 };

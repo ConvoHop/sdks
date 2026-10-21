@@ -1,7 +1,7 @@
 // Server quickstart snippets. test/server.test.ts runs them against the conformance mock.
 
 // #region connect
-import { ProjectServerClient } from "@convohop/server";
+import { ProjectServerClient } from "@instantrelay/server";
 
 export interface ServerConfig {
   baseUrl: string;
@@ -18,7 +18,7 @@ export async function connect(config: ServerConfig): Promise<ProjectServerClient
 // #endregion connect
 
 // #region bootstrap
-import type { SessionBootstrap } from "@convohop/server";
+import type { SessionBootstrap } from "@instantrelay/server";
 
 // What your login endpoint returns to the signed-in user's app.
 export type UserBootstrap = SessionBootstrap & { baseUrl: string; projectId: string };
@@ -67,7 +67,7 @@ export async function sendAs(
 // #endregion send-message
 
 // #region list-messages
-import type { MessagePage } from "@convohop/server";
+import type { MessagePage } from "@instantrelay/server";
 
 // Reads what one member can see, newest first.
 export async function latestMessages(
@@ -81,7 +81,7 @@ export async function latestMessages(
 // #endregion list-messages
 
 // #region recover
-import { ConvoHopProblem } from "@convohop/server";
+import { RelayProblem } from "@instantrelay/server";
 
 // A lost response leaves the outcome unknown: the message may or may not exist. Ask about the
 // same request ID instead of sending with a new one, which could post the message twice.
@@ -95,7 +95,7 @@ export async function sendOnce(
   try {
     return await sendAs(server, conversationId, authorId, text, requestId);
   } catch (error) {
-    if (!(error instanceof ConvoHopProblem) || error.outcome !== "unknown") throw error;
+    if (!(error instanceof RelayProblem) || error.outcome !== "unknown") throw error;
     // Resolves the request first, and resends the original only if the authority never saw it.
     const resolution = await server.requests.retry(requestId);
     if (resolution.state !== "committed") throw error;

@@ -5,8 +5,8 @@
 import assert from "node:assert/strict";
 import { randomUUID } from "node:crypto";
 import { after, afterEach, before, beforeEach, describe, test } from "node:test";
-import { ConversationStore, ConvoHopClient, Outbox } from "@convohop/client";
-import { ProjectServerClient } from "@convohop/server";
+import { ConversationStore, RelayClient, Outbox } from "@instantrelay/client";
+import { ProjectServerClient } from "@instantrelay/server";
 import { ControlClient } from "../lib/control.mjs";
 import { startMockTarget } from "../mock/server.mjs";
 
@@ -38,7 +38,7 @@ async function conversation(names = ["alice", "bob"]) {
   for (const name of names) {
     const principalId = await backend.createPrincipal(`${name}-${randomUUID()}`);
     const { sessionToken } = await backend.issueSession(principalId, randomUUID());
-    const connect = (options = {}) => new ConvoHopClient({ baseUrl, projectId, incarnation, principalId, sessionToken, ...options });
+    const connect = (options = {}) => new RelayClient({ baseUrl, projectId, incarnation, principalId, sessionToken, ...options });
     users.push({ principalId, connect, client: connect() });
   }
   const { conversationId } = await backend.createConversation("Client store",

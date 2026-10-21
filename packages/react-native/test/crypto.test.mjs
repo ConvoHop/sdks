@@ -56,7 +56,7 @@ test("random bytes come from the native generator, which must return exactly wha
   for (const output of [undefined, null, 42, "", "not base64", "QR==", Buffer.alloc(15).toString("base64"),
     Buffer.alloc(17).toString("base64"), Promise.resolve(Buffer.alloc(16).toString("base64"))]) {
     linkPlatform({ getRandomBytes: () => output });
-    assert.throws(() => randomBytes(16), { name: "TypeError", message: "ConvoHopPlatform.getRandomBytes returned malformed bytes" });
+    assert.throws(() => randomBytes(16), { name: "TypeError", message: "RelayPlatform.getRandomBytes returned malformed bytes" });
   }
 });
 

@@ -9,7 +9,7 @@ export function randomBytes(length: number): Uint8Array {
   const encoded: unknown = platformModule().getRandomBytes(length);
   let bytes: Uint8Array | undefined;
   try { if (typeof encoded === "string") bytes = decodeBase64(encoded); } catch { bytes = undefined; }
-  if (bytes?.length !== length) throw new TypeError("ConvoHopPlatform.getRandomBytes returned malformed bytes");
+  if (bytes?.length !== length) throw new TypeError("RelayPlatform.getRandomBytes returned malformed bytes");
   return bytes;
 }
 

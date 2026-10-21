@@ -1,5 +1,5 @@
-import { ConvoHopProblem, parseId } from "@convohop/core";
-import type { ConvoHopClient } from "./client.js";
+import { RelayProblem, parseId } from "@instantrelay/core";
+import type { RelayClient } from "./client.js";
 import { asError } from "./util.js";
 
 export interface TypingIndicatorOptions {
@@ -26,7 +26,7 @@ function duration(value: number | undefined, fallback: number, name: string): nu
  * project doesn't support typing.
  */
 export class TypingIndicator {
-  readonly client: ConvoHopClient;
+  readonly client: RelayClient;
   readonly conversationId: string;
   readonly #interval: number;
   readonly #idle: number;
@@ -36,7 +36,7 @@ export class TypingIndicator {
   #active = false;
   #lastSignal = 0;
   #idleTimer: ReturnType<typeof setTimeout> | undefined;
-  constructor(client: ConvoHopClient, conversationId: string, options: TypingIndicatorOptions = {}) {
+  constructor(client: RelayClient, conversationId: string, options: TypingIndicatorOptions = {}) {
     this.client = client; this.conversationId = parseId(conversationId);
     this.#interval = duration(options.intervalMs, 3000, "intervalMs");
     this.#idle = duration(options.idleMs, 5000, "idleMs");
@@ -74,7 +74,7 @@ export class TypingIndicator {
   }
   #signal(isTyping: boolean): void {
     this.client.typing(this.conversationId, isTyping).catch((error: unknown) => {
-      if (error instanceof ConvoHopProblem && error.code === "FEATURE_UNSUPPORTED") {
+      if (error instanceof RelayProblem && error.code === "FEATURE_UNSUPPORTED") {
         this.#enabled = false; this.#active = false;
         if (this.#idleTimer !== undefined) { clearTimeout(this.#idleTimer); this.#idleTimer = undefined; }
       }

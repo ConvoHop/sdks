@@ -1,8 +1,8 @@
-# `com.convohop:convohop-server-kotlin`
+# `dev.instantrelay:relay-server-kotlin`
 
 Kotlin coroutine extensions for the Java server SDK: suspending APIs, page flows and interruptible blocking calls.
 
-**Layer:** Server. **Runtime:** Kotlin 2.2 or later, on Java 11 or later. **Source:** `jvm/convohop-server-kotlin`.
+**Layer:** Server. **Runtime:** Kotlin 2.2 or later, on Java 11 or later. **Source:** `jvm/relay-server-kotlin`.
 
 ## Classes
 
@@ -16,7 +16,7 @@ Suspending view of `CommunicationApi`. Each call runs on `dispatcher`. Cancellin
 coroutine interrupts the blocking request and the call fails with a CancellationException
 whose cause is the lost-request problem; a mutation stays in the client's recovery journal.
 
-Package: `com.convohop.server.kotlin`.
+Package: `dev.instantrelay.server.kotlin`.
 
 #### `CommunicationSuspendApi` constructor
 
@@ -480,7 +480,7 @@ Suspending view of `ManagementApi`. Each call runs on `dispatcher`. Cancelling t
 coroutine interrupts the blocking request and the call fails with a CancellationException
 whose cause is the lost-request problem; a mutation stays in the client's recovery journal.
 
-Package: `com.convohop.server.kotlin`.
+Package: `dev.instantrelay.server.kotlin`.
 
 #### `ManagementSuspendApi` constructor
 
@@ -625,64 +625,6 @@ public suspend fun getOperation(input: GetOperationRequestInput): GetOperationRe
 Suspending `ManagementApi.getOperation`.
 
 Sends [`management.getOperation`](../../operations/management/getOperation.md).
-
-#### `ManagementSuspendApi.agentSignupForApproval` method
-
-```java
-public suspend fun agentSignupForApproval(input: AgentSignupForApprovalRequestInput): AgentSignupForApprovalReply
-```
-
-Suspending `ManagementApi.agentSignupForApproval`.
-
-#### `ManagementSuspendApi.agentSignup` method
-
-```java
-public suspend fun agentSignup(): AgentSignupReply
-```
-
-Suspending `ManagementApi.agentSignup`.
-
-#### `ManagementSuspendApi.agentGrants` method
-
-```java
-public suspend fun agentGrants(input: AgentGrantsRequestInput): AgentGrantsReply
-```
-
-Suspending `ManagementApi.agentGrants`.
-
-#### `ManagementSuspendApi.agentGrantsPages` method
-
-```java
-public fun agentGrantsPages(input: AgentGrantsRequestInput): Flow<AgentGrantPage>
-```
-
-`ManagementApi.agentGrantsPages` as a cold flow. Each collection starts again from `input`, and each page is requested
-on `dispatcher` when the collector is ready for it.
-
-#### `ManagementSuspendApi.agentAuditEvents` method
-
-```java
-public suspend fun agentAuditEvents(input: AgentAuditEventsRequestInput): AgentAuditEventsReply
-```
-
-Suspending `ManagementApi.agentAuditEvents`.
-
-#### `ManagementSuspendApi.agentAuditEventsPages` method
-
-```java
-public fun agentAuditEventsPages(input: AgentAuditEventsRequestInput): Flow<AgentAuditEventPage>
-```
-
-`ManagementApi.agentAuditEventsPages` as a cold flow. Each collection starts again from `input`, and each page is requested
-on `dispatcher` when the collector is ready for it.
-
-#### `ManagementSuspendApi.organizationSpend` method
-
-```java
-public suspend fun organizationSpend(input: OrganizationSpendRequestInput): OrganizationSpendReply
-```
-
-Suspending `ManagementApi.organizationSpend`.
 
 #### `ManagementSuspendApi.createOrganization` method
 
@@ -840,70 +782,6 @@ Suspending `ManagementApi.replayWebhookDeliveries`.
 
 Sends [`management.replayWebhookDeliveries`](../../operations/management/replayWebhookDeliveries.md).
 
-#### `ManagementSuspendApi.requestAgentSignup` method
-
-```java
-public suspend fun requestAgentSignup(input: RequestAgentSignupRequestInput, requestId: String? = null): RequestAgentSignupReply
-```
-
-Suspending `ManagementApi.requestAgentSignup`.
-
-#### `ManagementSuspendApi.rejectAgentSignup` method
-
-```java
-public suspend fun rejectAgentSignup(input: RejectAgentSignupRequestInput, requestId: String? = null): RejectAgentSignupReply
-```
-
-Suspending `ManagementApi.rejectAgentSignup`.
-
-#### `ManagementSuspendApi.approveAgentSignup` method
-
-```java
-public suspend fun approveAgentSignup(input: ApproveAgentSignupRequestInput, requestId: String? = null): ApproveAgentSignupReply
-```
-
-Suspending `ManagementApi.approveAgentSignup`.
-
-#### `ManagementSuspendApi.issueAgentKey` method
-
-```java
-public suspend fun issueAgentKey(input: IssueAgentKeyRequestInput, requestId: String? = null): IssueAgentKeyReply
-```
-
-Suspending `ManagementApi.issueAgentKey`.
-
-#### `ManagementSuspendApi.agentCredentialPermit` method
-
-```java
-public suspend fun agentCredentialPermit(input: AgentCredentialPermitRequestInput, requestId: String? = null): AgentCredentialPermitReply
-```
-
-Suspending `ManagementApi.agentCredentialPermit`.
-
-#### `ManagementSuspendApi.revokeAgentGrant` method
-
-```java
-public suspend fun revokeAgentGrant(input: RevokeAgentGrantRequestInput, requestId: String? = null): RevokeAgentGrantReply
-```
-
-Suspending `ManagementApi.revokeAgentGrant`.
-
-#### `ManagementSuspendApi.setSpendControls` method
-
-```java
-public suspend fun setSpendControls(input: SetSpendControlsRequestInput, requestId: String? = null): SetSpendControlsReply
-```
-
-Suspending `ManagementApi.setSpendControls`.
-
-#### `ManagementSuspendApi.purchaseAgentCredits` method
-
-```java
-public suspend fun purchaseAgentCredits(input: PurchaseAgentCreditsRequestInput, requestId: String? = null): PurchaseAgentCreditsReply
-```
-
-Suspending `ManagementApi.purchaseAgentCredits`.
-
 ## Functions
 
 ### `interruptible` function
@@ -921,7 +799,7 @@ The transport reports an interrupted request as a lost request whose outcome is 
 and cancel its parent, so a failure that races cancellation becomes a `CancellationException` whose
 cause is the original problem. A mutation stays in the client's recovery journal either way.
 
-Package: `com.convohop.server.kotlin`.
+Package: `dev.instantrelay.server.kotlin`.
 
 ### `suspending` function
 
@@ -932,4 +810,4 @@ public fun ManagementApi.suspending(dispatcher: CoroutineDispatcher = Dispatcher
 
 A suspending view of this plane API whose calls run on `dispatcher`.
 
-Package: `com.convohop.server.kotlin`.
+Package: `dev.instantrelay.server.kotlin`.

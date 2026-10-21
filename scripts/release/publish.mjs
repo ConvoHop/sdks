@@ -1,5 +1,4 @@
-// npm job (and PR CI): dry-run publishes the packed tarballs in dependency order.
-// Real publishing stays disabled until REL-PUB; see RELEASING.md.
+// PR CI rehearses publishing; only a confirmed, enabled tag dispatch can publish.
 import { readFileSync } from 'node:fs';
 import { join, resolve } from 'node:path';
 import { pathToFileURL } from 'node:url';
@@ -16,20 +15,24 @@ import {
   run,
   sri,
 } from './lib.mjs';
+import { verifyNpmAssets } from './assets.mjs';
+import { npmPublicationFromGit } from './plan.mjs';
 
 // npm refuses to tag a prerelease as `latest` implicitly.
 export function distTag(version) {
   return isPrerelease(version) ? 'next' : undefined;
 }
 
-export function publishArgs(file, version) {
+export function publishArgs(file, version, { dryRun = true } = {}) {
   const tag = distTag(version);
-  return ['publish', file, '--dry-run', '--provenance', '--access', 'public', ...(tag ? ['--tag', tag] : [])];
+  return ['publish', file, ...(dryRun ? ['--dry-run'] : []), '--provenance', '--access', 'public',
+    '--ignore-scripts', '--registry', 'https://registry.npmjs.org', ...(tag ? ['--tag', tag] : [])];
 }
 
 // Resolves to the published dist.integrity, or undefined when npm has no such version.
 async function publishedIntegrity(npm, pkg, options) {
-  const result = await run(npm, ['view', `${pkg.name}@${pkg.version}`, 'dist.integrity', '--json'], options);
+  const result = await run(npm, ['view', `${pkg.name}@${pkg.version}`, 'dist.integrity', '--json',
+    '--registry', 'https://registry.npmjs.org'], options);
   let parsed;
   try {
     parsed = result.stdout.trim() ? JSON.parse(result.stdout) : undefined;
@@ -46,13 +49,18 @@ export async function publishPackages({
   assets,
   packages,
   dryRun,
+  publish = false,
   requireOidc = false,
   skipPublished = false,
   env = process.env,
   npm = 'npm',
 }) {
-  if (dryRun !== true) throw new Error('Real npm publishing is disabled until REL-PUB; pass --dry-run');
-  if (requireOidc && !(env.ACTIONS_ID_TOKEN_REQUEST_URL && env.ACTIONS_ID_TOKEN_REQUEST_TOKEN)) {
+  if ((dryRun === true) === (publish === true)) throw new Error('Choose exactly one of --dry-run or --publish');
+  if (publish && skipPublished) throw new Error('--skip-published is only for a dry run; real publication must compare integrity');
+  await npmPublicationFromGit({ root, env, releases: packages, publish });
+  verifyNpmAssets({ root, assets, packages });
+  if (publish && (env.NODE_AUTH_TOKEN || env.NPM_TOKEN)) throw new Error('npm publication must use OIDC, not a stored token');
+  if ((requireOidc || publish) && !(env.ACTIONS_ID_TOKEN_REQUEST_URL && env.ACTIONS_ID_TOKEN_REQUEST_TOKEN)) {
     throw new Error('No GitHub OIDC token is available; the npm job needs `id-token: write`');
   }
   const options = { cwd: root, env };
@@ -76,24 +84,25 @@ export async function publishPackages({
       notice(`${pkg.name}@${pkg.version} is already on npm with this tarball; skipping`, env);
       continue;
     }
-    const result = await run(npm, publishArgs(file, pkg.version), options);
+    const result = await run(npm, publishArgs(file, pkg.version, { dryRun: !publish }), options);
     process.stdout.write(result.stdout);
     process.stderr.write(result.stderr);
-    if (result.code !== 0) throw new Error(`npm publish --dry-run failed for ${pkg.name}@${pkg.version}`);
+    if (result.code !== 0) throw new Error(`npm publish${publish ? '' : ' --dry-run'} failed for ${pkg.name}@${pkg.version}`);
   }
 }
 
 if (import.meta.url === pathToFileURL(process.argv[1] ?? '').href) {
   await main(async () => {
     const args = parseArgs(process.argv.slice(2), {
-      flags: ['dry-run', 'require-oidc', 'skip-published'],
+      flags: ['dry-run', 'publish', 'require-oidc', 'skip-published'],
       options: ['assets'],
     });
-    if (!args.assets) throw new Error('Usage: publish.mjs --dry-run --assets <dir> [--require-oidc] [--skip-published]');
+    if (!args.assets) throw new Error('Usage: publish.mjs (--dry-run | --publish) --assets <dir> [--require-oidc] [--skip-published]');
     await publishPackages({
       assets: resolve(args.assets),
       packages: packagesFromEnv(),
       dryRun: args['dry-run'] === true,
+      publish: args.publish === true,
       requireOidc: args['require-oidc'] === true,
       skipPublished: args['skip-published'] === true,
     });

@@ -82,7 +82,7 @@ mutation CommunicationDisablePrincipal($context: RequestContextInput!, $input: D
 | Language | Members |
 | --- | --- |
 | [TypeScript](../../typescript/reference/operations.md) | [`ProjectServerClient.principals.disable`](../../typescript/reference/server.md#projectserverclientprincipalsdisable-property) |
-| [Python](../../python/reference/operations.md) | [`ConvoHop.disable_principal`](../../python/reference/convohop.md#convohopdisable_principal-method), [`AsyncConvoHop.disable_principal`](../../python/reference/convohop.md#asyncconvohopdisable_principal-method) |
-| [.NET](../../dotnet/reference/operations.md) | [`ServerPrincipals.DisableAsync`](../../dotnet/reference/convohop.md#serverprincipalsdisableasync-method), [`CommunicationApi.DisablePrincipalAsync`](../../dotnet/reference/api.md#communicationapidisableprincipalasync-method) |
+| [Python](../../python/reference/operations.md) | [`Relay.disable_principal`](../../python/reference/instantrelay.md#relaydisable_principal-method), [`AsyncRelay.disable_principal`](../../python/reference/instantrelay.md#asyncrelaydisable_principal-method) |
+| [.NET](../../dotnet/reference/operations.md) | [`ServerPrincipals.DisableAsync`](../../dotnet/reference/relay.md#serverprincipalsdisableasync-method), [`CommunicationApi.DisablePrincipalAsync`](../../dotnet/reference/api.md#communicationapidisableprincipalasync-method) |
 | [Java and Kotlin](../../jvm/reference/operations.md) | [`ProjectServerClient.principals.disable`](../../jvm/reference/server.md#projectserverclientprincipalsdisable-method), [`CommunicationApi.disablePrincipal`](../../jvm/reference/server.md#communicationapidisableprincipal-method), [`CommunicationSuspendApi.disablePrincipal`](../../jvm/reference/server-kotlin.md#communicationsuspendapidisableprincipal-method) |
-| [Go](../../go/reference/operations.md) | [`ProjectClient.DisablePrincipal`](../../go/reference/convohop.md#projectclientdisableprincipal-method) |
+| [Go](../../go/reference/operations.md) | [`ProjectClient.DisablePrincipal`](../../go/reference/relay.md#projectclientdisableprincipal-method) |

@@ -31,12 +31,12 @@ test('SBOMs cover each package runtime closure and nothing else', () => {
   const core = createSbom({ lock, path: 'packages/core' });
   assert.deepEqual(core.components, []);
   const server = createSbom({ lock, path: 'packages/server' });
-  assert.deepEqual(names(server), ['@convohop/core']);
+  assert.deepEqual(names(server), ['@instantrelay/core']);
   const client = createSbom({ lock, path: 'packages/client' });
-  for (const name of ['@convohop/core', 'livekit-client', 'tslib']) assert.ok(names(client).includes(name), name);
+  for (const name of ['@instantrelay/core', 'livekit-client', 'tslib']) assert.ok(names(client).includes(name), name);
   for (const sbom of [core, server, client]) {
     checkGraph(sbom);
-    for (const name of [...DEV_ONLY, '@convohop/server', '@convohop/client']) {
+    for (const name of [...DEV_ONLY, '@instantrelay/server', '@instantrelay/client']) {
       assert.ok(!names(sbom).includes(name), `${sbom.metadata.component.name} must not list ${name}`);
     }
   }
@@ -61,7 +61,7 @@ test('SBOMs are deterministic and identify the tarball', () => {
     { alg: 'SHA-256', content: createHash('sha256').update(tarball).digest('hex') },
     { alg: 'SHA-512', content: createHash('sha512').update(tarball).digest('hex') },
   ]);
-  assert.equal(first.metadata.component.purl, 'pkg:npm/%40convohop/client@0.1.0');
+  assert.equal(first.metadata.component.purl, 'pkg:npm/%40instantrelay/client@0.1.0');
 });
 
 const integrity = `sha512-${createHash('sha512').update('a').digest('base64')}`;
@@ -69,7 +69,7 @@ const integrity = `sha512-${createHash('sha512').update('a').digest('base64')}`;
 function syntheticLock(rootDependencies, packages) {
   return {
     packages: {
-      'packages/app': { name: '@convohop/app', version: '1.0.0', license: 'Apache-2.0', ...rootDependencies },
+      'packages/app': { name: '@instantrelay/app', version: '1.0.0', license: 'Apache-2.0', ...rootDependencies },
       ...packages,
     },
   };
@@ -78,7 +78,7 @@ function syntheticLock(rootDependencies, packages) {
 test('SBOMs follow Node.js resolution through the lockfile', () => {
   const sbom = createSbom({
     lock: syntheticLock(
-      { dependencies: { a: '^1.0.0', '@convohop/lib': '1.0.0' }, optionalDependencies: { gone: '*' }, peerDependencies: { peer: '*' } },
+      { dependencies: { a: '^1.0.0', '@instantrelay/lib': '1.0.0' }, optionalDependencies: { gone: '*' }, peerDependencies: { peer: '*' } },
       {
         'node_modules/a': {
           version: '1.0.0',
@@ -89,18 +89,18 @@ test('SBOMs follow Node.js resolution through the lockfile', () => {
         },
         'node_modules/a/node_modules/b': { version: '2.0.0', license: 'SEE LICENSE IN LICENSE.txt' },
         'node_modules/b': { version: '1.0.0', license: 'MIT' },
-        'node_modules/@convohop/lib': { resolved: 'packages/lib', link: true },
-        'packages/lib': { name: '@convohop/lib', version: '1.0.0', license: 'Apache-2.0', devDependencies: { b: '*' } },
+        'node_modules/@instantrelay/lib': { resolved: 'packages/lib', link: true },
+        'packages/lib': { name: '@instantrelay/lib', version: '1.0.0', license: 'Apache-2.0', devDependencies: { b: '*' } },
       },
     ),
     path: 'packages/app',
   });
   assert.deepEqual(
     sbom.components.map((component) => component.purl),
-    ['pkg:npm/%40convohop/lib@1.0.0', 'pkg:npm/a@1.0.0', 'pkg:npm/b@2.0.0'],
+    ['pkg:npm/%40instantrelay/lib@1.0.0', 'pkg:npm/a@1.0.0', 'pkg:npm/b@2.0.0'],
   );
   const [lib, a, b] = sbom.components;
-  assert.equal(lib.group, '@convohop');
+  assert.equal(lib.group, '@instantrelay');
   assert.deepEqual(lib.licenses, [{ license: { id: 'Apache-2.0' } }]);
   assert.deepEqual(a.licenses, [{ expression: '(MIT OR Apache-2.0)' }]);
   assert.deepEqual(a.hashes, [{ alg: 'SHA-512', content: createHash('sha512').update('a').digest('hex') }]);
@@ -129,6 +129,6 @@ test('SBOMs fail on unresolvable runtime dependencies', () => {
 });
 
 test('purl encodes scoped names and versions', () => {
-  assert.equal(purl('@convohop/core', '0.1.0'), 'pkg:npm/%40convohop/core@0.1.0');
+  assert.equal(purl('@instantrelay/core', '0.1.0'), 'pkg:npm/%40instantrelay/core@0.1.0');
   assert.equal(purl('livekit-client', '2.0.0-rc.1+build'), 'pkg:npm/livekit-client@2.0.0-rc.1%2Bbuild');
 });

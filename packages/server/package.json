@@ -1,8 +1,8 @@
 {
-  "name": "@convohop/server",
+  "name": "@instantrelay/server",
   "version": "0.1.0",
   "private": false,
-  "description": "ConvoHop server SDK for trusted Node.js runtimes. Uses secret backend keys for management and data-plane access.",
+  "description": "Relay server SDK for trusted Node.js runtimes. Uses secret backend keys for management and data-plane access.",
   "license": "Apache-2.0",
   "repository": {
     "type": "git",
@@ -38,7 +38,7 @@
     "check:package": "publint --strict && attw --pack . --profile esm-only"
   },
   "dependencies": {
-    "@convohop/core": "0.1.0"
+    "@instantrelay/core": "0.1.0"
   },
   "devDependencies": {
     "@types/node": "^22.0.0",

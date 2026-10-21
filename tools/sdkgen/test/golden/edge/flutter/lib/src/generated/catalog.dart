@@ -430,7 +430,7 @@ final class ErrorCodeSpec {
   final bool retryable;
 }
 
-/// Error codes, for comparing with `ConvoHopProblem.code`.
+/// Error codes, for comparing with `RelayProblem.code`.
 abstract final class ErrorCodes {
   /// The cursor is too old.
   static const String cursorExpired = 'CURSOR_EXPIRED';

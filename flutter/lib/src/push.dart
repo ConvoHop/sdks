@@ -8,8 +8,8 @@ import 'client.dart';
 import 'notifications.dart';
 
 /// Where your backend sends this device's pushes. Send each one to your
-/// backend, which delivers ConvoHop's notification events to it; ConvoHop
-/// never sees them. Every ConvoHop client hands its app the same JSON shape,
+/// backend, which delivers Relay's notification events to it; Relay
+/// never sees them. Every Relay client hands its app the same JSON shape,
 /// from [toJson], so one backend endpoint can store registrations from
 /// browsers and native apps.
 sealed class PushRegistration {
@@ -121,7 +121,7 @@ final class CallAction {
 
 /// Push notifications and the system incoming-call UI on Android and iOS.
 ///
-/// The plugin's native code shows ConvoHop pushes even while Dart isn't
+/// The plugin's native code shows Relay pushes even while Dart isn't
 /// running. On Android, its Firebase messaging service builds a notification
 /// for each FCM data message and rings with a full-screen call-style
 /// notification. On iOS, the system shows APNs alerts, and VoIP pushes ring
@@ -131,26 +131,26 @@ final class CallAction {
 ///
 /// Listen to the streams, then call [start]. Send each registration from
 /// [registrations] to your backend.
-final class ConvoHopPush {
-  ConvoHopPush({
-    ConvoHopNotifications? notifications,
+final class RelayPush {
+  RelayPush({
+    RelayNotifications? notifications,
     ErrorListener? onError,
     @visibleForTesting MethodChannel methods = const MethodChannel('convohop/push'),
     @visibleForTesting EventChannel events = const EventChannel('convohop/push/events'),
-  }) : notifications = notifications ?? ConvoHopNotifications(),
+  }) : notifications = notifications ?? RelayNotifications(),
        _onError = onError,
        _methods = methods,
        _eventChannel = events;
 
   /// Deduplicates notifications and tracks rings.
-  final ConvoHopNotifications notifications;
+  final RelayNotifications notifications;
   final ErrorListener? _onError;
   final MethodChannel _methods;
   final EventChannel _eventChannel;
   final StreamController<PushRegistration> _registrations = StreamController<PushRegistration>.broadcast();
   final StreamController<HandledNotification> _received = StreamController<HandledNotification>.broadcast();
-  final StreamController<ConvoHopNotification> _openedNotifications =
-      StreamController<ConvoHopNotification>.broadcast();
+  final StreamController<RelayNotification> _openedNotifications =
+      StreamController<RelayNotification>.broadcast();
   final StreamController<CallAction> _callActions = StreamController<CallAction>.broadcast();
   final Set<String> _answered = <String>{};
   final Set<String> _endedByNative = <String>{};
@@ -164,13 +164,13 @@ final class ConvoHopPush {
   /// arrive more than once: store them idempotently.
   Stream<PushRegistration> get registrations => _registrations.stream;
 
-  /// ConvoHop pushes that reached the device while Dart was running, after
+  /// Relay pushes that reached the device while Dart was running, after
   /// native code showed them. Check [HandledNotification.duplicate]. On iOS,
   /// alert pushes reach the app only while it's in the foreground.
   Stream<HandledNotification> get received => _received.stream;
 
   /// Notifications the user opened: open the conversation or the call.
-  Stream<ConvoHopNotification> get opened => _openedNotifications.stream;
+  Stream<RelayNotification> get opened => _openedNotifications.stream;
 
   /// What the user did in the system call UI, including actions taken
   /// shortly before Dart started.
@@ -222,7 +222,7 @@ final class ConvoHopPush {
 
   /// Records a push payload that reached Dart another way, for example
   /// through another push plugin, and reports it on [received]. Returns
-  /// null when the payload isn't ConvoHop's; throws a [FormatException]
+  /// null when the payload isn't Relay's; throws a [FormatException]
   /// when it breaks the push payload contract.
   HandledNotification? handleNotification(Map<Object?, Object?> payload) {
     final handled = notifications.handleNotification(payload);
@@ -230,12 +230,12 @@ final class ConvoHopPush {
     return handled;
   }
 
-  /// Shows a ConvoHop FCM data message with the plugin's notifications, on
+  /// Shows a Relay FCM data message with the plugin's notifications, on
   /// Android, when another plugin's messaging service received it: call it
   /// with the message's data from that plugin's foreground and background
   /// handlers, instead of [handleNotification]. While a started
-  /// [ConvoHopPush] runs, [received] reports it. Resolves false when
-  /// [payload] isn't ConvoHop's, and on iOS, where the system shows APNs
+  /// [RelayPush] runs, [received] reports it. Resolves false when
+  /// [payload] isn't Relay's, and on iOS, where the system shows APNs
   /// alerts.
   Future<bool> showNotification(Map<Object?, Object?> payload) async {
     if (!payload.containsKey('convohop')) return false;
@@ -281,7 +281,7 @@ final class ConvoHopPush {
     return _methods.invokeMethod<void>('endCall', {'alertId': alertId, 'reason': reason});
   }
 
-  /// Removes ConvoHop's delivered message notifications, only
+  /// Removes Relay's delivered message notifications, only
   /// [conversationId]'s when given, for example when the user opens the
   /// conversation. The app's own notifications stay.
   Future<void> removeDeliveredNotifications({String? conversationId}) =>
@@ -308,7 +308,7 @@ final class ConvoHopPush {
   }
 
   void _checkOpen() {
-    if (_closed) throw StateError('ConvoHopPush is closed');
+    if (_closed) throw StateError('RelayPush is closed');
   }
 
   void _ringChanged(RingUpdate update) {

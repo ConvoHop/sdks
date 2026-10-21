@@ -1,6 +1,6 @@
-# Contributing to the ConvoHop SDKs
+# Contributing to the Relay SDKs
 
-Thanks for helping to improve the ConvoHop SDKs. This guide covers how to
+Thanks for helping to improve the Relay SDKs. This guide covers how to
 report problems, propose changes and get a pull request merged.
 
 Everyone who takes part follows our [Code of Conduct](CODE_OF_CONDUCT.md).
@@ -60,8 +60,8 @@ The [.NET server SDK](dotnet/README.md) has its own build in `dotnet/`. Build
 it with the .NET 10 SDK that [`global.json`](global.json) selects:
 
 ```sh
-dotnet build dotnet/ConvoHop.slnx                   # the library, its tests and the generator goldens
-dotnet test dotnet/test/ConvoHop.Tests -f net10.0   # the tests on .NET 10
+dotnet build dotnet/Relay.slnx                   # the library, its tests and the generator goldens
+dotnet test dotnet/test/Relay.Tests -f net10.0   # the tests on .NET 10
 ```
 
 [Build and test](dotnet/README.md#build-and-test) explains how to run the
@@ -74,7 +74,7 @@ dependencies. Build and test it with Go 1.26 or later:
 ```sh
 cd go
 go vet ./...
-CONVOHOP_REQUIRE_SPEC=1 go test -race ./...
+RELAY_REQUIRE_SPEC=1 go test -race ./...
 ```
 
 [Build and test](go/README.md#build-and-test) explains how to run the
@@ -125,20 +125,20 @@ of the docs projects.
 
 | Path | Contents |
 | --- | --- |
-| `packages/core` | Shared core (`@convohop/core`): generated GraphQL types and operations, protocol validation and the isomorphic transport |
-| `packages/client` | Client SDK (`@convohop/client`) for browsers and React Native, with realtime and media |
-| `packages/react` | React hooks (`@convohop/react`) over the client SDK. A private workspace, not in a release yet |
-| `packages/server` | Node.js server SDK (`@convohop/server`) for backend keys and management credentials |
-| `jvm/` | Java and Kotlin server SDK (`com.convohop:convohop-server` and `com.convohop:convohop-server-kotlin`), a separate Gradle build that also builds its conformance driver in `conformance/drivers/jvm/` |
-| `dotnet/` | .NET server SDK (`ConvoHop`), its xUnit tests and the projects that compile the C# generator goldens. Its conformance driver is in `conformance/drivers/dotnet/` |
+| `packages/core` | Shared core (`@instantrelay/core`): generated GraphQL types and operations, protocol validation and the isomorphic transport |
+| `packages/client` | Client SDK (`@instantrelay/client`) for browsers and React Native, with realtime and media |
+| `packages/react` | React hooks (`@instantrelay/react`) over the client SDK. A private workspace, not in a release yet |
+| `packages/server` | Node.js server SDK (`@instantrelay/server`) for backend keys and management credentials |
+| `jvm/` | Java and Kotlin server SDK (`dev.instantrelay:relay-server` and `dev.instantrelay:relay-server-kotlin`), a separate Gradle build that also builds its conformance driver in `conformance/drivers/jvm/` |
+| `dotnet/` | .NET server SDK (`Relay`), its xUnit tests and the projects that compile the C# generator goldens. Its conformance driver is in `conformance/drivers/dotnet/` |
 | `go/` | Go server SDK (`github.com/ConvoHop/sdks/go`), a Go module with no dependencies. Its conformance driver is a separate module in `conformance/drivers/go/` |
-| `android/` | Android client SDK (`com.convohop:convohop-android`, with `convohop-android-core` and `convohop-android-push`), a separate Gradle build that also builds its conformance driver in `conformance/drivers/android/` and compiles the Kotlin generator's edge goldens |
-| `flutter/` | Flutter SDK (`convohop`, Dart): the package, its Android and iOS plugin code, tests and an example app. It isn't an npm workspace |
-| `packages/react-native` | React Native SDK (`@convohop/react-native`), in development: the client SDK's platform on Hermes, push, calls and media, with native modules for iOS and Android and their Codegen specs, and an example app. A private workspace, not in a release yet. Its conformance driver is in `conformance/drivers/react-native/` |
-| `swift/` | Swift client SDK for iOS and macOS (the `ConvoHop` Swift package and its products), a self-contained Swift package. Its conformance driver is a separate package in `conformance/drivers/swift/Driver/` |
-| `packages/cli` | The `convohop` command-line tool (`@convohop/cli`), built on `@convohop/server`, with a generated operation catalog. A private npm workspace that isn't released yet |
-| `packages/mcp` | An MCP server (`@convohop/mcp`) whose generated tools run server operations for AI agents. A private npm workspace that isn't released yet |
-| `schema/` | GraphQL schemas exported by the ConvoHop API, operation annotations, and the generated IR and operation documents |
+| `android/` | Android client SDK (`dev.instantrelay:relay-android`, with `relay-android-core` and `relay-android-push`), a separate Gradle build that also builds its conformance driver in `conformance/drivers/android/` and compiles the Kotlin generator's edge goldens |
+| `flutter/` | Flutter SDK (`instantrelay`, Dart): the package, its Android and iOS plugin code, tests and an example app. It isn't an npm workspace |
+| `packages/react-native` | React Native SDK (`@instantrelay/react-native`), in development: the client SDK's platform on Hermes, push, calls and media, with native modules for iOS and Android and their Codegen specs, and an example app. A private workspace, not in a release yet. Its conformance driver is in `conformance/drivers/react-native/` |
+| `swift/` | Swift client SDK for iOS and macOS (the `Relay` Swift package and its products), a self-contained Swift package. Its conformance driver is a separate package in `conformance/drivers/swift/Driver/` |
+| `packages/cli` | The `relay` command-line tool (`@instantrelay/cli`), built on `@instantrelay/server`, with a generated operation catalog. A private npm workspace that isn't released yet |
+| `packages/mcp` | An MCP server (`@instantrelay/mcp`) whose generated tools run server operations for AI agents. A private npm workspace that isn't released yet |
+| `schema/` | GraphQL schemas exported by the Relay API, operation annotations, and the generated IR and operation documents |
 | `tools/sdkgen/` | The SDK generator: annotation check, IR builder, emitters and their tests. See [SDK generation](docs/sdk-generation.md) |
 | `tools/docgen/` | The docs pipeline: public API extractors, the docs generator, the example code runner and their tests. See [Docs pipeline](docs/docs-pipeline.md) |
 | `scripts/release/`, `test/release/` | Release scripts and their tests |
@@ -157,7 +157,7 @@ of the docs projects.
 
 Each package has its own tests in `packages/<name>/test/`.
 
-- `@convohop/client` and `@convohop/server` depend on `@convohop/core` with
+- `@instantrelay/client` and `@instantrelay/server` depend on `@instantrelay/core` with
   an exact version in `dependencies`. They never depend on each other, not
   even as a development dependency.
 - A workspace or tool that isn't released, such as a test harness or a tool
@@ -168,13 +168,13 @@ Each package has its own tests in `packages/<name>/test/`.
   backend key or a management credential belongs in `server`. Code that both
   need, and that runs in browsers, React Native and Node.js alike, belongs in
   `core`.
-- `@convohop/core` isn't a supported entry point. Re-export its public API
+- `@instantrelay/core` isn't a supported entry point. Re-export its public API
   from `client` and `server` instead of asking users to import it.
 
 ## Generated code
 
 `schema/communication.graphql` and `schema/management.graphql` are
-exported by the ConvoHop API and are the source of truth.
+exported by the Relay API and are the source of truth.
 `schema/annotations.json` adds the facts that GraphQL can't express. See
 [Annotating operations](#annotating-operations). The generator in
 `tools/sdkgen` builds a language-neutral IR from them and generates these
@@ -187,13 +187,13 @@ files from the IR:
 - `packages/core/src/generated/graphql-types.ts`
 - `packages/core/src/generated/errors.ts`
 - `docs/snippets/`
-- `jvm/convohop-server/src/generated/java/` and
-  `jvm/convohop-server-kotlin/src/generated/kotlin/`
-- `dotnet/src/ConvoHop/Generated/`
+- `jvm/relay-server/src/generated/java/` and
+  `jvm/relay-server-kotlin/src/generated/kotlin/`
+- `dotnet/src/Relay/Generated/`
 - `go/*_gen.go`
-- `android/core/src/main/kotlin/com/convohop/android/generated/`
+- `android/core/src/main/kotlin/dev/instantrelay/android/generated/`
 - `flutter/lib/src/generated/`
-- `swift/Sources/ConvoHop/Generated/`
+- `swift/Sources/Relay/Generated/`
 
 ```sh
 npm run generate:graphql   # regenerate after a schema or annotation change
@@ -216,8 +216,8 @@ IR, the operation snippets and each language's inputs in `docs/languages/`.
 Those inputs include the language's public API, which an extractor reads
 from the built packages into `surface.json`. After you change the schemas,
 the annotations, a package's public API or a docs input, regenerate both.
-The React Native docs document `@convohop/client` and `@convohop/react` as
-well as `@convohop/react-native`, so refresh them with the TypeScript docs:
+The React Native docs document `@instantrelay/client` and `@instantrelay/react` as
+well as `@instantrelay/react-native`, so refresh them with the TypeScript docs:
 
 ```sh
 npm run build                                          # the TypeScript extractor reads the built declarations
@@ -319,13 +319,13 @@ interfaces, `@oneOf` inputs and custom directives are rejected. See
   while offline, keeping unsent messages across a reload and, in Chromium,
   showing push notifications. Run them with
   `npm run test:browser -w conformance` when you change browser behavior.
-- `@convohop/react`'s tests render the hooks with `react-test-renderer`. CI
+- `@instantrelay/react`'s tests render the hooks with `react-test-renderer`. CI
   also runs them, with the hooks' conformance test, on React 18 from the
   lockfile in `packages/react/test/oldest-react/`.
-- `@convohop/react-native`'s tests run on Node.js with stand-ins for React
+- `@instantrelay/react-native`'s tests run on Node.js with stand-ins for React
   Native, LiveKit's React Native SDK and the native modules, and run React
   Native's Codegen on the native module specs. They don't build or run
-  native code. `npm run typecheck:example -w @convohop/react-native`
+  native code. `npm run typecheck:example -w @instantrelay/react-native`
   type-checks the example app. The
   [React Native workflow](.github/workflows/react-native.yml) also runs the
   Android modules' JVM tests and builds the example app for Android and the
@@ -339,13 +339,13 @@ interfaces, `@oneOf` inputs and custom directives are rejected. See
   [Tested code](docs/docs-pipeline.md#tested-code) describes.
 - The Java and Kotlin SDK's tests use JUnit 5. They live in
   `jvm/*/src/test/` and run with `./gradlew test` in `jvm/`.
-- The .NET SDK's tests use xUnit. They live in `dotnet/test/ConvoHop.Tests/`
+- The .NET SDK's tests use xUnit. They live in `dotnet/test/Relay.Tests/`
   and run with `dotnet test`. So do the tests of the .NET docs extractor, in
   `tools/docgen/extractors/dotnet/test/`.
 - The Go SDK's tests use the standard `testing` package. They live next to
   the code in `go/` and run with `go test ./...` in `go/`.
 - The Android SDK's tests use JUnit 4, with Robolectric in the `push` and
-  `convohop` modules. They live in `android/*/src/test/` and run with
+  `relay` modules. They live in `android/*/src/test/` and run with
   `./gradlew test` in `android/`. So do the tests of the Android docs
   extractor, in `tools/docgen/extractors/android/src/test/`, and of the docs
   examples, in `docs/languages/android/examples/src/test/`, which use
@@ -451,8 +451,8 @@ write changelogs, as described in [RELEASING.md](RELEASING.md).
   [commit override](RELEASING.md#commit-overrides) in the pull request
   description.
 - The scope is only for readers. A change is released in the packages whose
-  files it changes. When `@convohop/core` is released, `@convohop/client`
-  and `@convohop/server` get at least a patch release. If a core change adds
+  files it changes. When `@instantrelay/core` is released, `@instantrelay/client`
+  and `@instantrelay/server` get at least a patch release. If a core change adds
   to or breaks the API that client or server re-exports, change those
   packages in the same pull request too, for example their README or tests.
 - Don't edit `CHANGELOG.md` files, package versions or

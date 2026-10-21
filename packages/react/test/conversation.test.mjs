@@ -1,30 +1,30 @@
 import assert from "node:assert/strict";
 import { describe, test } from "node:test";
 import { act } from "react-test-renderer";
-import { ConvoHopProvider, useConversation, useConvoHopClient, useOutbox } from "../dist/index.js";
+import { RelayProvider, useConversation, useRelayClient, useOutbox } from "../dist/index.js";
 import { alice, conversationA, conversationB, fakeOutbox, liveEvent, renderHook, stubClient, waitFor } from "./support.mjs";
 
 const open = client => client.streams.filter(stream => !stream.closed);
 
-describe("ConvoHopProvider", () => {
+describe("RelayProvider", () => {
   test("provides its client to the hooks below it", async () => {
     const client = stubClient();
-    const { result, unmount } = await renderHook(() => useConvoHopClient(), { client });
+    const { result, unmount } = await renderHook(() => useRelayClient(), { client });
     assert.equal(result.current, client);
     await unmount();
   });
 
   test("hooks outside a provider throw", async () => {
     const { result, unmount } = await renderHook(() => {
-      try { return useConvoHopClient(); } catch (error) { return error; }
+      try { return useRelayClient(); } catch (error) { return error; }
     });
-    assert.match(result.current.message, /inside a ConvoHopProvider/);
+    assert.match(result.current.message, /inside a RelayProvider/);
     await unmount();
   });
 
   test("rejects an outbox of another client", () => {
     // The check runs before the provider's first hook, so calling the component shows it without an error boundary.
-    assert.throws(() => ConvoHopProvider({ client: stubClient(), outbox: fakeOutbox(stubClient()) }),
+    assert.throws(() => RelayProvider({ client: stubClient(), outbox: fakeOutbox(stubClient()) }),
       { name: "TypeError", message: /belongs to another client/ });
   });
 });
@@ -175,7 +175,7 @@ describe("useOutbox", () => {
     const { result, unmount } = await renderHook(() => {
       try { return useOutbox(); } catch (error) { return error; }
     }, { client: stubClient() });
-    assert.match(result.current.message, /Pass an outbox, or give the ConvoHopProvider one/);
+    assert.match(result.current.message, /Pass an outbox, or give the RelayProvider one/);
     await unmount();
   });
 });

@@ -7,7 +7,7 @@
  * Reads the built declaration files (`exports["."].types`) of each package
  * listed in the language file and prints surface JSON
  * (spec/docs/surface.schema.json) on stdout. A listed name can also be a
- * package's subpath export, such as `@convohop/client/push`, which reads
+ * package's subpath export, such as `@instantrelay/client/push`, which reads
  * `exports["./push"].types`. Run `npm ci && npm run build`
  * first. Re-exports are followed into other workspace packages; third-party
  * packages are not documented. Declarations from `generated/` modules are

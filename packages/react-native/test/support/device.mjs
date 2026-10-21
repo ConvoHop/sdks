@@ -1,5 +1,5 @@
 // A phone for launching an app again and again. AsyncStorage's native storage and the network outlive each launch, as
-// does the ConvoHop authority the app talks to. app.mjs is one launch.
+// does the Relay authority the app talks to. app.mjs is one launch.
 import { randomUUID } from "node:crypto";
 import { full } from "../../../../test/graphql-fixtures.mjs";
 import { operationCatalog } from "../../../core/dist/generated/operations.js";
@@ -102,7 +102,7 @@ class Network {
 }
 
 /**
- * A ConvoHop authority that commits each request ID at most once. `onSend(request)` runs as a send arrives, before the
+ * A Relay authority that commits each request ID at most once. `onSend(request)` runs as a send arrives, before the
  * authority commits it; a promise it returns holds the reply back.
  */
 class Authority {

@@ -1,10 +1,10 @@
 import {
-  ConvoHopProblem, parseId, parseString, type CommandOptions, type ConversationMute, type ConvoHopTransport, type OperationPayload,
+  RelayProblem, parseId, parseString, type CommandOptions, type ConversationMute, type RelayTransport, type OperationPayload,
   type PageOptions, type GraphqlTypes, type ConversationMessage, type ProtocolObject,
-} from "@convohop/core";
-import { randomUUID, retainRecovery } from "@convohop/core/internal";
+} from "@instantrelay/core";
+import { randomUUID, retainRecovery } from "@instantrelay/core/internal";
 import { admitConnection } from "./admission.js";
-import type { ConvoHopClient } from "./client.js";
+import type { RelayClient } from "./client.js";
 import { MediaConnection, type MediaOptions } from "./media.js";
 import { abortReason, throwIfAborted } from "./platform.js";
 
@@ -61,7 +61,7 @@ async function pause(signal?: AbortSignal): Promise<void> {
 /** Reads the request IDs a live handle holds, or `undefined` once the app has dropped the handle. */
 type HeldRequests = () => readonly (string | undefined)[] | undefined;
 /** Each transport's readers of the request IDs that live handles hold. */
-const heldRequests = new WeakMap<ConvoHopTransport, Set<HeldRequests>>();
+const heldRequests = new WeakMap<RelayTransport, Set<HeldRequests>>();
 
 /** The request IDs that `readers` report, forgetting the readers of dropped handles. */
 function readHeld(readers: Set<HeldRequests>): string[] {
@@ -86,7 +86,7 @@ function reader<T extends object>(handle: WeakRef<T>, held: (handle: T) => reado
  * admission, so a full journal must not forget them. Ends when the handle lets go of a request ID, or the app drops
  * the handle. `held` must not capture the handle.
  */
-function retainHeld<T extends object>(transport: ConvoHopTransport, handle: WeakRef<T>,
+function retainHeld<T extends object>(transport: RelayTransport, handle: WeakRef<T>,
   held: (handle: T) => readonly (string | undefined)[]): void {
   let readers = heldRequests.get(transport);
   if (readers === undefined) {
@@ -101,7 +101,7 @@ function retainHeld<T extends object>(transport: ConvoHopTransport, handle: Weak
 
 export class ConversationHandle {
   readonly live: ConversationLive;
-  constructor(readonly client: ConvoHopClient, readonly conversationId: string) {
+  constructor(readonly client: RelayClient, readonly conversationId: string) {
     parseId(conversationId);
     this.live = new ConversationLive(this);
   }
@@ -167,7 +167,7 @@ export class ConversationLive {
 }
 
 class LiveAction {
-  constructor(readonly client: ConvoHopClient, readonly operationId: string, readonly liveSessionId: string,
+  constructor(readonly client: RelayClient, readonly operationId: string, readonly liveSessionId: string,
     readonly kind: "START" | "END", readonly requestId: string) {
     parseId(operationId); parseId(liveSessionId); parseId(requestId);
   }
@@ -190,18 +190,18 @@ class LiveAction {
       }
       if (action.state === "FAILED") {
         if (!action.failure) throw new TypeError("Failed live action is missing its reason");
-        throw new ConvoHopProblem(action.failure.code, this.requestId, "accepted", 409, action.failure.message);
+        throw new RelayProblem(action.failure.code, this.requestId, "accepted", 409, action.failure.message);
       }
       if (action.state !== "RUNNING") throw new TypeError("Unknown live action state");
       await pause(signal);
     } while (Date.now() < deadline);
-    throw new ConvoHopProblem("RESOLUTION_REQUIRED", this.requestId, "accepted", 409,
+    throw new RelayProblem("RESOLUTION_REQUIRED", this.requestId, "accepted", 409,
       "Action remains unresolved; retain this operation ID and query it again. Elapsed time is not cutoff.");
   }
 }
 
 export class LiveStartOperation extends LiveAction {
-  constructor(client: ConvoHopClient, readonly receipt: OperationPayload<"communication.startLiveSession">) {
+  constructor(client: RelayClient, readonly receipt: OperationPayload<"communication.startLiveSession">) {
     super(client, receipt.result.operationId, receipt.result.liveSessionId, "START", receipt.requestId);
   }
   async ready(options: LiveWaitOptions = {}): Promise<LiveSessionHandle> {
@@ -211,7 +211,7 @@ export class LiveStartOperation extends LiveAction {
 }
 
 export class LiveEndOperation extends LiveAction {
-  constructor(client: ConvoHopClient, readonly receipt: OperationPayload<"communication.endLiveSession">) {
+  constructor(client: RelayClient, readonly receipt: OperationPayload<"communication.endLiveSession">) {
     super(client, receipt.result.operationId, receipt.result.liveSessionId, "END", receipt.requestId);
   }
 }
@@ -222,12 +222,12 @@ export class LiveSessionHandle {
   readonly conversationId: string;
   #endRequest: string | undefined;
   #retaining = false;
-  constructor(readonly client: ConvoHopClient, readonly snapshot: LiveSession) {
+  constructor(readonly client: RelayClient, readonly snapshot: LiveSession) {
     this.liveSessionId = parseId(snapshot.liveSessionId);
     this.generation = snapshot.generation;
     this.conversationId = parseId(snapshot.conversationId);
   }
-  static async get(client: ConvoHopClient, liveSessionId: string) {
+  static async get(client: RelayClient, liveSessionId: string) {
     return new LiveSessionHandle(client, (await client.http.execute("communication.liveSession",
       client.projectId, { liveSessionId: parseId(liveSessionId) })).result);
   }
@@ -295,7 +295,7 @@ export class LiveParticipationHandle {
   async get(): Promise<LiveParticipation> {
     const current = (await this.live.get()).myParticipation;
     if (!current || current.participationId !== this.participationId)
-      throw new ConvoHopProblem("PARTICIPATION_MISMATCH", randomUUID(this.live.client.platform), "rejected", 409, "This participation is no longer current");
+      throw new RelayProblem("PARTICIPATION_MISMATCH", randomUUID(this.live.client.platform), "rejected", 409, "This participation is no longer current");
     return current;
   }
   /** Connects this participation's media in the browser with `livekit-client`, which is loaded on first use. */
@@ -360,13 +360,13 @@ export class LiveParticipationHandle {
       const resolution = await client.requests.resolve(old.requestId);
       const issuance = resolution?.receipt?.result?.liveCredentialIssuance;
       if (!resolution || !issuance || issuance.participationId !== this.participationId || issuance.liveSessionId !== liveSessionId)
-        throw new ConvoHopProblem("RESOLUTION_REQUIRED", old.requestId, "unknown", 409, "Resolve the original credential attempt before obtaining another grant");
+        throw new RelayProblem("RESOLUTION_REQUIRED", old.requestId, "unknown", 409, "Resolve the original credential attempt before obtaining another grant");
       const unobserved = !current.nativeConnectionId ||
         (old.mode === "RECONNECT" && current.nativeConnectionId === old.replacementOfConnectionId);
       if (unobserved && Date.parse(issuance.admissionExpiresAt) > Date.parse(resolution.checkedAt))
-        throw new ConvoHopProblem("RESOLUTION_REQUIRED", old.requestId, "committed", 409, "Native admission remains unresolved; keep this reservation and retry or explicitly leave");
+        throw new RelayProblem("RESOLUTION_REQUIRED", old.requestId, "committed", 409, "Native admission remains unresolved; keep this reservation and retry or explicitly leave");
       if (options.requestId === old.requestId)
-        throw new ConvoHopProblem("CREDENTIAL_REFRESH_REQUIRED", old.requestId, "committed", 409, "The resolved old credential requires a separately identified fresh attempt");
+        throw new RelayProblem("CREDENTIAL_REFRESH_REQUIRED", old.requestId, "committed", 409, "The resolved old credential requires a separately identified fresh attempt");
       this.#attempt = undefined;
     }
     this.#attempt ??= { requestId: options.requestId ?? randomUUID(client.platform),

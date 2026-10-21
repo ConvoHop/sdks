@@ -45,7 +45,7 @@ export function sha256Digest(data: Uint8Array): Uint8Array {
   return digest;
 }
 
-/** {@link sha256Digest} as the asynchronous `ConvoHopPlatform.sha256` seam. */
+/** {@link sha256Digest} as the asynchronous `RelayPlatform.sha256` seam. */
 export async function sha256(data: Uint8Array): Promise<Uint8Array> {
   if (!(data instanceof Uint8Array)) throw new TypeError("sha256 needs a Uint8Array");
   return sha256Digest(data);

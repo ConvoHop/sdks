@@ -1,4 +1,4 @@
-package convohop_test
+package relay_test
 
 import (
 	"context"
@@ -19,17 +19,17 @@ var (
 	deviceID               = "6b1d2c3e-4f5a-4b6c-8d7e-9f0a1b2c3d4e"
 	teammatePrincipalID    = "0b3c5d7e-9f1a-4b2c-8d3e-4f5a6b7c8d9e"
 	conversationID         = "d9b3f7e5-2c8a-4d1f-8e6b-3a2c1b0f9e8d"
-	client                 *convohop.ProjectClient
+	client                 *relay.ProjectClient
 )
 
 // An application backend creates a principal for a signed-in user, issues
 // the user a session and creates a conversation.
 func Example() {
-	client, err := convohop.NewProjectClient(convohop.ProjectConfig{
+	client, err := relay.NewProjectClient(relay.ProjectConfig{
 		BaseURL:     communicationBase,
 		ProjectID:   projectID,
 		Incarnation: incarnation,
-		BackendKey:  os.Getenv("CONVOHOP_BACKEND_KEY"), // Trusted secret storage only.
+		BackendKey:  os.Getenv("RELAY_BACKEND_KEY"), // Trusted secret storage only.
 	})
 	if err != nil {
 		log.Fatal(err)
@@ -37,29 +37,29 @@ func Example() {
 	if err := client.Initialize(ctx); err != nil {
 		log.Fatal(err)
 	}
-	principal, err := client.CreatePrincipal(ctx, convohop.CreatePrincipalRequestInput{ExternalUserID: authenticatedAccountID})
+	principal, err := client.CreatePrincipal(ctx, relay.CreatePrincipalRequestInput{ExternalUserID: authenticatedAccountID})
 	if err != nil {
 		log.Fatal(err)
 	}
 	principalID := principal.Result.PrincipalID
-	bootstrap, err := client.IssueSession(ctx, convohop.IssueSessionRequestInput{
+	bootstrap, err := client.IssueSession(ctx, relay.IssueSessionRequestInput{
 		PrincipalID: principalID, DeviceID: deviceID, RequestedTTLMs: "900000",
 	})
 	if err != nil {
 		log.Fatal(err)
 	}
 	_ = bootstrap.Result // Return only this user's bootstrap and public project metadata.
-	conversation, err := client.CreateConversation(ctx, convohop.CreateConversationRequestInput{
+	conversation, err := client.CreateConversation(ctx, relay.CreateConversationRequestInput{
 		Title: "Support",
-		Members: []convohop.MemberInputInput{
+		Members: []relay.MemberInputInput{
 			{PrincipalID: principalID, Role: "member"},
 			{PrincipalID: teammatePrincipalID, Role: "member"},
 		},
-	}, convohop.WithRequestID(convohop.NewRequestID()))
+	}, relay.WithRequestID(relay.NewRequestID()))
 	if err != nil {
 		log.Fatal(err)
 	}
-	_, err = client.SendMessage(ctx, convohop.SendMessageRequestInput{
+	_, err = client.SendMessage(ctx, relay.SendMessageRequestInput{
 		ConversationID: conversation.Result.ConversationID,
 		Text:           "Welcome",
 	})
@@ -72,11 +72,11 @@ func Example() {
 // its original request ID with Retry, never by sending it again under a new
 // one.
 func ExampleProjectClient_Retry() {
-	requestID := convohop.NewRequestID() // Keep it with the work it identifies.
-	input := convohop.SendMessageRequestInput{ConversationID: conversationID, Text: "Your order shipped"}
-	_, err := client.SendMessage(ctx, input, convohop.WithRequestID(requestID))
-	var problem *convohop.Problem
-	if errors.As(err, &problem) && problem.Outcome == convohop.OutcomeUnknown {
+	requestID := relay.NewRequestID() // Keep it with the work it identifies.
+	input := relay.SendMessageRequestInput{ConversationID: conversationID, Text: "Your order shipped"}
+	_, err := client.SendMessage(ctx, input, relay.WithRequestID(requestID))
+	var problem *relay.Problem
+	if errors.As(err, &problem) && problem.Outcome == relay.OutcomeUnknown {
 		resolution, err := client.Retry(ctx, problem.RequestID)
 		if err != nil {
 			log.Fatal(err)
@@ -89,11 +89,11 @@ func ExampleProjectClient_Retry() {
 // what that member can see.
 func ExampleProjectClient_MessagesPages() {
 	member := teammatePrincipalID
-	pages := client.MessagesPages(ctx, convohop.MessagesRequestInput{
+	pages := client.MessagesPages(ctx, relay.MessagesRequestInput{
 		ConversationID: conversationID, Limit: 50, ActAsPrincipalID: &member,
 	})
 	for page, err := range pages {
-		if errors.Is(err, convohop.ErrRefreshRequired) {
+		if errors.Is(err, relay.ErrRefreshRequired) {
 			break // Start again from the latest message.
 		}
 		if err != nil {
@@ -109,19 +109,19 @@ func ExampleProjectClient_MessagesPages() {
 
 // Classify a failure by its code and outcome, never by its message.
 func ExampleProblem() {
-	_, err := client.CreatePrincipal(ctx, convohop.CreatePrincipalRequestInput{ExternalUserID: authenticatedAccountID})
-	var problem *convohop.Problem
+	_, err := client.CreatePrincipal(ctx, relay.CreatePrincipalRequestInput{ExternalUserID: authenticatedAccountID})
+	var problem *relay.Problem
 	if !errors.As(err, &problem) {
 		return
 	}
 	switch {
-	case errors.Is(err, convohop.ErrorCodeScopeRequired):
+	case errors.Is(err, relay.ErrorCodeScopeRequired):
 		scope, _ := problem.Scope()
 		log.Printf("grant the backend key the %s scope", scope)
-	case errors.Is(err, convohop.ErrorCodeRateLimited):
+	case errors.Is(err, relay.ErrorCodeRateLimited):
 		wait, _ := problem.RetryAfter()
 		log.Printf("wait %s, then send again with request ID %s", wait, problem.RequestID)
-	case problem.Outcome == convohop.OutcomeUnknown:
+	case problem.Outcome == relay.OutcomeUnknown:
 		log.Printf("settle request %s with Retry", problem.RequestID)
 	}
 }
@@ -129,15 +129,15 @@ func ExampleProblem() {
 // An operator issues a backend key. The key is never an ordinary result: the
 // completed operation names a credential delivery, which hands it over once.
 func ExampleManagementClient_IssueBackendKey() {
-	management, err := convohop.NewManagementClient(convohop.ManagementConfig{
+	management, err := relay.NewManagementClient(relay.ManagementConfig{
 		BaseURL:     "https://management.example.com",
-		AccessToken: os.Getenv("CONVOHOP_OPERATOR_TOKEN"), // Trusted secret storage only.
+		AccessToken: os.Getenv("RELAY_OPERATOR_TOKEN"), // Trusted secret storage only.
 		ActorID:     "5a4b3c2d-1e0f-4a9b-8c7d-6e5f4a3b2c1d",
-	}, convohop.WithRecoveryStore(convohop.NewMemoryRecoveryStore()))
+	}, relay.WithRecoveryStore(relay.NewMemoryRecoveryStore()))
 	if err != nil {
 		log.Fatal(err)
 	}
-	issued, err := management.IssueBackendKey(ctx, convohop.IssueBackendKeyRequestInput{
+	issued, err := management.IssueBackendKey(ctx, relay.IssueBackendKeyRequestInput{
 		ProjectID: projectID, Name: "orders-service",
 		Scopes: []string{"principalManage", "sessionIssue"}, ExpiresAt: "2027-10-01T00:00:00Z",
 	})
@@ -148,7 +148,7 @@ func ExampleManagementClient_IssueBackendKey() {
 		return
 	}
 	// Keep the operation ID, and poll until the work completes.
-	operation, err := management.GetOperation(ctx, convohop.GetOperationRequestInput{OperationID: issued.Operation.OperationID})
+	operation, err := management.GetOperation(ctx, relay.GetOperationRequestInput{OperationID: issued.Operation.OperationID})
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -160,21 +160,21 @@ func ExampleManagementClient_IssueBackendKey() {
 // A client without a backend key redeems a credential delivery with the
 // permit that the management plane issued for it.
 func ExampleProjectClient_RedeemCredential() {
-	delivery, err := convohop.NewProjectClient(convohop.ProjectConfig{
+	delivery, err := relay.NewProjectClient(relay.ProjectConfig{
 		BaseURL: communicationBase, ProjectID: projectID, Incarnation: incarnation,
 	})
 	if err != nil {
 		log.Fatal(err)
 	}
-	var permit convohop.SignedProof                 // From ManagementClient.CredentialPermit, never stored.
+	var permit relay.SignedProof                 // From ManagementClient.CredentialPermit, never stored.
 	deliveryID, redemptionRequestID := "...", "..." // The IDs the permit names.
-	redeemed, err := delivery.RedeemCredential(ctx, permit, convohop.RedeemCredentialRequestInput{DeliveryID: deliveryID},
-		convohop.WithRequestID(redemptionRequestID))
+	redeemed, err := delivery.RedeemCredential(ctx, permit, relay.RedeemCredentialRequestInput{DeliveryID: deliveryID},
+		relay.WithRequestID(redemptionRequestID))
 	if err != nil {
 		log.Fatal(err)
 	}
 	_ = redeemed.Result // Store the capsule in trusted secret storage, then acknowledge the delivery.
-	_, err = delivery.AcknowledgeCredential(ctx, permit, convohop.AcknowledgeCredentialRequestInput{DeliveryID: deliveryID})
+	_, err = delivery.AcknowledgeCredential(ctx, permit, relay.AcknowledgeCredentialRequestInput{DeliveryID: deliveryID})
 	if err != nil {
 		log.Fatal(err)
 	}

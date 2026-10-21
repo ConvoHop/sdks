@@ -1,6 +1,6 @@
 # TypeScript webhooks quickstart
 
-Receive ConvoHop events in your backend with `@convohop/server`: verify each signed delivery, acknowledge it quickly, and handle its event in a queue worker.
+Receive Relay events in your backend with `@instantrelay/server`: verify each signed delivery, acknowledge it quickly, and handle its event in a queue worker.
 
 ## Before you start
 
@@ -8,10 +8,10 @@ Create a webhook endpoint for your project with the [`management.configureWebhoo
 
 ## Verify deliveries
 
-ConvoHop signs each delivery with the [Standard Webhooks](https://www.standardwebhooks.com) scheme. `webhooks.verify` checks the signature and timestamp against the raw body, and returns the event.
+Relay signs each delivery with the [Standard Webhooks](https://www.standardwebhooks.com) scheme. `webhooks.verify` checks the signature and timestamp against the raw body, and returns the event.
 
 ```ts snippet=docs/languages/typescript/examples/src/webhooks.ts#receive
-import { webhooks, WebhookVerificationError, type WebhookEvent } from "@convohop/server";
+import { webhooks, WebhookVerificationError, type WebhookEvent } from "@instantrelay/server";
 
 // A fetch-style handler: Request in, Response out. secrets are the endpoint's whsec_ secrets from your
 // secret store. Pass every one you hold, so deliveries keep verifying during a secret rotation.
@@ -38,7 +38,7 @@ export function webhookHandler(
 }
 ```
 
-- Pass every secret you hold. While a rotation is pending, ConvoHop signs with both the current and the next secret, and it signs with the replaced secret for 24 hours after the rotation.
+- Pass every secret you hold. While a rotation is pending, Relay signs with both the current and the next secret, and it signs with the replaced secret for 24 hours after the rotation.
 - Answer within 5 seconds, and process the event afterwards.
 - Delivery is at least once, and retries keep the webhook ID, so deduplicate on it.
 - A failed check throws `WebhookVerificationError`, whose `code` names the check. Only `INVALID_SECRET` means your configuration is wrong. The [`webhooks` reference](../reference/server.md#webhooks-constant) lists the others.
@@ -48,7 +48,7 @@ export function webhookHandler(
 Events carry IDs and metadata, not content, so read the current state through the API. Events arrive in any order.
 
 ```ts snippet=docs/languages/typescript/examples/src/webhooks.ts#handle
-import type { Conversation, ProjectServerClient, WebhookNotificationEvent } from "@convohop/server";
+import type { Conversation, ProjectServerClient, WebhookNotificationEvent } from "@instantrelay/server";
 
 // What your app does with the events it subscribes to.
 export interface EventHandlers {

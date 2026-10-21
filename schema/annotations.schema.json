@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "title": "ConvoHop SDK operation annotations",
+  "title": "Relay SDK operation annotations",
   "description": "Hand-maintained, language-neutral facts that the GraphQL schema cannot express: SDK layer, authorization, idempotency, pagination, realtime behaviour and documented error codes for every operation. Validated by `npm run check:annotations`.",
   "type": "object",
   "additionalProperties": false,

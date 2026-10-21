@@ -63,7 +63,7 @@ jobs:
         run: npm run check:graphql
       - name: Test the generators against their golden files, compiling the Go goldens
         env:
-          CONVOHOP_REQUIRE_GO: "1"
+          RELAY_REQUIRE_GO: "1"
         run: npm run test:sdkgen
       - name: Fetch, build and test the module from a release tag (dry run)
         # Pushing a go/vX.Y.Z tag to this repository publishes the module (see
@@ -133,7 +133,7 @@ jobs:
         # The SDK tests read the shared vectors in spec/; fail rather than skip
         # when they are missing. The docs job runs the docs modules' tests.
         env:
-          CONVOHOP_REQUIRE_SPEC: "1"
+          RELAY_REQUIRE_SPEC: "1"
         run: |
           for module in go conformance/drivers/go; do
             (cd "$module" && go test -race ./...)
@@ -225,7 +225,7 @@ jobs:
             console.log(`::error::${scenario.id} ${scenario.status}: ${scenario.reason ?? "no reason"}`);
           }
           console.log(`${summary.driver.name}: ${passed.length} of ${scenarios.length} passed`);
-          if (summary.driver.name !== "convohop-go" || passed.length === 0 || other.length > 0) process.exit(1);
+          if (summary.driver.name !== "relay-go" || passed.length === 0 || other.length > 0) process.exit(1);
           EOF
       - name: Upload JUnit and summary reports
         if: always()
@@ -237,7 +237,7 @@ jobs:
           retention-days: 14
 
   # Like the dev-stack job in conformance.yml, runs the scenarios against the
-  # ConvoHop dev stack: the private, development-only linux/arm64 image that
+  # Relay dev stack: the private, development-only linux/arm64 image that
   # runs the whole platform in one container (see spec/conformance/targets.md),
   # which conformance/dev-stack.mjs starts. The job runs only when the
   # CONVOHOP_DEV_STACK_IMAGE repository variable names the image, and never for

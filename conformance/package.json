@@ -1,5 +1,5 @@
 {
-  "name": "@convohop/conformance",
+  "name": "@instantrelay/conformance",
   "version": "0.0.0",
   "private": true,
   "description": "Cross-language conformance runner, deterministic mock target and TypeScript reference driver. Never published.",
@@ -14,10 +14,10 @@
     "test:browser": "node --test --test-concurrency=1 \"browser/*.test.mjs\""
   },
   "devDependencies": {
-    "@convohop/client": "*",
-    "@convohop/react": "*",
-    "@convohop/react-native": "*",
-    "@convohop/server": "*",
+    "@instantrelay/client": "*",
+    "@instantrelay/react": "*",
+    "@instantrelay/react-native": "*",
+    "@instantrelay/server": "*",
     "@types/node": "^22.20.5",
     "graphql": "17.0.2",
     "playwright": "1.64.0",

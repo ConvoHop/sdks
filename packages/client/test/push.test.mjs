@@ -4,7 +4,7 @@ import { readFileSync } from "node:fs";
 import {
   NotificationHandler, defaultWebNotification, handleNotification, handleNotificationClick, handlePushEvent, parsePushNotification,
   parsePushPayload, showPushNotification, subscribePush, unsubscribePush,
-} from "@convohop/client/push";
+} from "@instantrelay/client/push";
 
 const { vectors, invalidEvents } = JSON.parse(readFileSync(new URL("../../../spec/push-payload/vectors.json", import.meta.url), "utf8"));
 const turn = () => new Promise(resolve => setImmediate(resolve));

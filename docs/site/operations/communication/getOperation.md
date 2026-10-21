@@ -149,11 +149,11 @@ query CommunicationGetOperation($context: RequestContextInput!, $input: GetOpera
 | Language | Members |
 | --- | --- |
 | [TypeScript](../../typescript/reference/operations.md) | [`ProjectServerClient.operation`](../../typescript/reference/server.md#projectserverclientoperation-method) |
-| [Python](../../python/reference/operations.md) | [`ConvoHop.get_operation`](../../python/reference/convohop.md#convohopget_operation-method), [`AsyncConvoHop.get_operation`](../../python/reference/convohop.md#asyncconvohopget_operation-method) |
-| [.NET](../../dotnet/reference/operations.md) | [`ProjectServerClient.GetOperationAsync`](../../dotnet/reference/convohop.md#projectserverclientgetoperationasync-method), [`CommunicationApi.GetOperationAsync`](../../dotnet/reference/api.md#communicationapigetoperationasync-method) |
+| [Python](../../python/reference/operations.md) | [`Relay.get_operation`](../../python/reference/instantrelay.md#relayget_operation-method), [`AsyncRelay.get_operation`](../../python/reference/instantrelay.md#asyncrelayget_operation-method) |
+| [.NET](../../dotnet/reference/operations.md) | [`ProjectServerClient.GetOperationAsync`](../../dotnet/reference/relay.md#projectserverclientgetoperationasync-method), [`CommunicationApi.GetOperationAsync`](../../dotnet/reference/api.md#communicationapigetoperationasync-method) |
 | [Java and Kotlin](../../jvm/reference/operations.md) | [`ProjectServerClient.operation`](../../jvm/reference/server.md#projectserverclientoperation-method), [`CommunicationApi.getOperation`](../../jvm/reference/server.md#communicationapigetoperation-method), [`CommunicationSuspendApi.getOperation`](../../jvm/reference/server-kotlin.md#communicationsuspendapigetoperation-method) |
-| [Go](../../go/reference/operations.md) | [`ProjectClient.GetOperation`](../../go/reference/convohop.md#projectclientgetoperation-method) |
+| [Go](../../go/reference/operations.md) | [`ProjectClient.GetOperation`](../../go/reference/relay.md#projectclientgetoperation-method) |
 | [Swift](../../swift/reference/operations.md) | Not wrapped by a method |
 | [Android](../../android/reference/operations.md) | Not wrapped by a method |
-| [Flutter](../../flutter/reference/operations.md) | [`CommunicationOperations.getOperation`](../../flutter/reference/convohop.md#communicationoperationsgetoperation-method) |
+| [Flutter](../../flutter/reference/operations.md) | [`CommunicationOperations.getOperation`](../../flutter/reference/instantrelay.md#communicationoperationsgetoperation-method) |
 | [React Native](../../react-native/reference/operations.md) | Not wrapped by a method |

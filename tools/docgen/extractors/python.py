@@ -1130,7 +1130,7 @@ class Program:
         return result
 
     def namespace(self, name: str, module: Module) -> dict[str, Any]:
-        """An exported module, such as `webhooks` in `convohop`, documented by its module docstring."""
+        """An exported module, such as `webhooks` in `instantrelay`, documented by its module docstring."""
         parent, _, last = module.name.rpartition(".")
         signature = f"from {parent} import {last}" if parent else f"import {last}"
         if name != last:

@@ -1,9 +1,9 @@
 import 'dart:async';
 import 'dart:convert';
 
-import 'package:convohop/convohop.dart';
-import 'package:convohop/src/failures.dart' show maxTimerDelayMs;
-import 'package:convohop/src/protocol.dart' show fingerprint;
+import 'package:instantrelay/instantrelay.dart';
+import 'package:instantrelay/src/failures.dart' show maxTimerDelayMs;
+import 'package:instantrelay/src/protocol.dart' show fingerprint;
 import 'package:fake_async/fake_async.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:http/http.dart' as http;
@@ -44,7 +44,7 @@ final class _Authority {
     return jsonResponse(okFor(operation, id, input));
   });
 
-  ConvoHopClient client(Clock clock, {RecoveryStorage? storage}) => ConvoHopClient(
+  RelayClient client(Clock clock, {RecoveryStorage? storage}) => RelayClient(
     baseUrl: 'https://authority.example',
     projectId: projectId,
     principalId: principalId,
@@ -166,12 +166,12 @@ Map<String, Object?> _journalRecord(
 }
 
 /// The request IDs [client]'s recovery journal holds, in order.
-List<String> _journal(ConvoHopClient client) => <String>[
+List<String> _journal(RelayClient client) => <String>[
   for (final state in client.transport.recoveryStates) state.requestId,
 ];
 
 /// The refusal of request [id] while no recovery record can make room.
-Matcher _recoveryLimit(String id) => isA<ConvoHopProblem>()
+Matcher _recoveryLimit(String id) => isA<RelayProblem>()
     .having((problem) => problem.code, 'code', 'RECOVERY_LIMIT')
     .having((problem) => problem.requestId, 'requestId', id)
     .having((problem) => problem.outcome, 'outcome', 'rejected')
@@ -194,7 +194,7 @@ void main() {
       }),
       storage: storage,
     );
-    final outbox = ConvoHopOutbox(client, clock: fixedClock);
+    final outbox = RelayOutbox(client, clock: fixedClock);
     final first = await outbox.send(conversationId, 'one');
     final second = await outbox.send(conversationId, 'two');
     expect(<OutboxState>[OutboxState.queued, OutboxState.sending], contains(first.state));
@@ -216,7 +216,7 @@ void main() {
       final authority = _Authority()..online = false;
       final storage = MemoryRecoveryStorage();
       final client = authority.client(now, storage: storage);
-      final outbox = ConvoHopOutbox(client, clock: now, random: NoJitter());
+      final outbox = RelayOutbox(client, clock: now, random: NoJitter());
       final changes = <OutboxItem>[];
       outbox.changes.listen(changes.add);
 
@@ -272,7 +272,7 @@ void main() {
       final storage = MemoryRecoveryStorage();
       final errors = <Object>[];
       final client = authority.client(now, storage: storage);
-      final outbox = ConvoHopOutbox(client, clock: now, random: NoJitter(), onError: errors.add);
+      final outbox = RelayOutbox(client, clock: now, random: NoJitter(), onError: errors.add);
 
       final first = settled(async, outbox.send(conversationId, 'first'));
       final second = settled(async, outbox.send(conversationId, 'second'));
@@ -283,7 +283,7 @@ void main() {
           ('second', OutboxState.failed, 'FORBIDDEN', 1, false),
         ],
       );
-      expect(outbox.items.first.error, isA<ConvoHopProblem>().having((problem) => problem.status, 'status', 403));
+      expect(outbox.items.first.error, isA<RelayProblem>().having((problem) => problem.status, 'status', 403));
       expect(authority.sends, <String>[first.requestId, second.requestId]);
       async.elapse(const Duration(minutes: 1));
       expect(authority.sends, hasLength(2));
@@ -334,7 +334,7 @@ void main() {
         );
       final errors = <Object>[];
       final client = authority.client(now);
-      final outbox = ConvoHopOutbox(client, clock: now, random: NoJitter(), onError: errors.add);
+      final outbox = RelayOutbox(client, clock: now, random: NoJitter(), onError: errors.add);
 
       final x1 = settled(async, outbox.send(conversationId, 'x1'));
       final x2 = settled(async, outbox.send(conversationId, 'x2'));
@@ -370,7 +370,7 @@ void main() {
       final storage = MemoryRecoveryStorage();
       final offline = _Authority()..online = false;
       final firstClient = offline.client(now, storage: storage);
-      final firstOutbox = ConvoHopOutbox(firstClient, clock: now, random: NoJitter());
+      final firstOutbox = RelayOutbox(firstClient, clock: now, random: NoJitter());
       final queued = settled(
         async,
         firstOutbox.send(conversationId, 'survives a restart', props: <String, Object?>{'kind': 'note'}),
@@ -398,7 +398,7 @@ void main() {
 
       final online = _Authority();
       final client = online.client(now, storage: storage);
-      final outbox = ConvoHopOutbox(client, clock: now, random: NoJitter());
+      final outbox = RelayOutbox(client, clock: now, random: NoJitter());
       settled(async, outbox.initialize());
       expect(online.checks, <String>[queued.requestId]);
       expect(online.sends, <String>[queued.requestId]);
@@ -422,7 +422,7 @@ void main() {
       final storage = MemoryRecoveryStorage();
       final stalled = _Authority()
         ..answer('CommunicationSendMessage', (id, input) => Completer<http.Response>().future);
-      final stopped = ConvoHopOutbox(
+      final stopped = RelayOutbox(
         stalled.client(now, storage: storage),
         clock: now,
         random: NoJitter(),
@@ -436,7 +436,7 @@ void main() {
 
       final authority = _Authority()..answer('CommunicationResolveRequest', _committed(sending.requestId, '7'));
       final client = authority.client(now, storage: storage);
-      final outbox = ConvoHopOutbox(client, clock: now, random: NoJitter());
+      final outbox = RelayOutbox(client, clock: now, random: NoJitter());
       final changes = <OutboxItem>[];
       outbox.changes.listen(changes.add);
       settled(async, outbox.initialize());
@@ -487,7 +487,7 @@ void main() {
         );
       final authority = _Authority();
       final client = authority.client(now, storage: storage);
-      final outbox = ConvoHopOutbox(client, clock: now, random: NoJitter());
+      final outbox = RelayOutbox(client, clock: now, random: NoJitter());
       final changes = <OutboxItem>[];
       outbox.changes.listen(changes.add);
       settled(async, outbox.initialize());
@@ -532,7 +532,7 @@ void main() {
         );
       final authority = _Authority();
       final client = authority.client(now, storage: storage);
-      final outbox = ConvoHopOutbox(client, clock: now, random: NoJitter());
+      final outbox = RelayOutbox(client, clock: now, random: NoJitter());
       settled(async, outbox.initialize());
       // Neither was observed, and neither can be resent under its ID.
       expect(authority.checks, <String>[inDoubt, refused]);
@@ -546,7 +546,7 @@ void main() {
       );
       expect(
         outbox.items.first.error,
-        isA<ConvoHopProblem>()
+        isA<RelayProblem>()
             .having((problem) => problem.requestId, 'requestId', inDoubt)
             .having((problem) => problem.outcome, 'outcome', 'unknown'),
       );
@@ -573,7 +573,7 @@ void main() {
         authority.answer('CommunicationSendMessage', (id, input) => throw http.ClientException('connection reset'));
       }
       final client = authority.client(now);
-      final outbox = ConvoHopOutbox(client, clock: now, random: NoJitter());
+      final outbox = RelayOutbox(client, clock: now, random: NoJitter());
       final changes = <OutboxItem>[];
       outbox.changes.listen(changes.add);
 
@@ -625,7 +625,7 @@ void main() {
       final authority = _Authority()
         ..answer('CommunicationSendMessage', (id, input) => throw http.ClientException('connection reset'));
       final client = authority.client(now);
-      final outbox = ConvoHopOutbox(client, clock: now, random: NoJitter());
+      final outbox = RelayOutbox(client, clock: now, random: NoJitter());
       final changes = <OutboxItem>[];
       outbox.changes.listen(changes.add);
 
@@ -650,17 +650,17 @@ void main() {
     fakeAsync((async) {
       final authority = _Authority()..online = false;
       final client = authority.client(fixedClock);
-      final outbox = ConvoHopOutbox(client, clock: fixedClock, random: NoJitter());
+      final outbox = RelayOutbox(client, clock: fixedClock, random: NoJitter());
       expect(failureOf(async, outbox.send('not-a-uuid', 'text')), isArgumentError);
       expect(
         failureOf(async, outbox.send(conversationId, 'text', props: <String, Object?>{'at': DateTime(2026)})),
         isArgumentError,
       );
-      for (var i = 0; i < ConvoHopOutbox.maxItems; i++) {
+      for (var i = 0; i < RelayOutbox.maxItems; i++) {
         settled(async, outbox.send(conversationId, 'message $i'));
       }
       expect(failureOf(async, outbox.send(conversationId, 'one too many')), isStateError);
-      expect(outbox.items, hasLength(ConvoHopOutbox.maxItems));
+      expect(outbox.items, hasLength(RelayOutbox.maxItems));
       expect(authority.sends, isEmpty);
       settled(async, outbox.close());
       expect(failureOf(async, outbox.send(conversationId, 'closed')), isStateError);
@@ -679,7 +679,7 @@ void main() {
       ]) {
         final storage = MemoryRecoveryStorage()..setItem(_outboxKey, stored);
         final restoring = authority.client(fixedClock, storage: storage);
-        final restored = ConvoHopOutbox(restoring, clock: fixedClock);
+        final restored = RelayOutbox(restoring, clock: fixedClock);
         expect(
           failureOf(async, restored.initialize()),
           isA<FormatException>().having((error) => error.message, 'message', message),
@@ -697,7 +697,7 @@ void main() {
       final loading = _OutboxStorage()..held = Completer<void>();
       loading.memory.setItem(_outboxKey, jsonEncode(<Object?>[_stored(requestId)]));
       final client = authority.client(fixedClock, storage: loading);
-      final outbox = ConvoHopOutbox(client, clock: fixedClock, random: NoJitter());
+      final outbox = RelayOutbox(client, clock: fixedClock, random: NoJitter());
       var ended = false;
       final paused = outbox.changes.listen(null, onDone: () => ended = true)..pause();
       final initialized = outbox.initialize();
@@ -720,7 +720,7 @@ void main() {
       final saving = _OutboxStorage();
       final errors = <Object>[];
       final next = authority.client(fixedClock, storage: saving);
-      final unsaved = ConvoHopOutbox(next, clock: fixedClock, random: NoJitter(), onError: errors.add);
+      final unsaved = RelayOutbox(next, clock: fixedClock, random: NoJitter(), onError: errors.add);
       settled(async, unsaved.initialize());
       saving
         ..held = Completer<void>()
@@ -741,7 +741,7 @@ void main() {
       final unreadable = _OutboxStorage();
       unreadable.memory.setItem(_outboxKey, 'not JSON');
       final last = authority.client(fixedClock, storage: unreadable);
-      final broken = ConvoHopOutbox(last, clock: fixedClock, random: NoJitter());
+      final broken = RelayOutbox(last, clock: fixedClock, random: NoJitter());
       final loaded = broken.initialize();
       final stopped = broken.close();
       expect(failureOf(async, loaded), isFormatException);
@@ -758,7 +758,7 @@ void main() {
       final authority = _Authority()..answer('CommunicationSendMessage', (id, input) => response.future);
       final storage = _OutboxStorage();
       final client = authority.client(fixedClock, storage: storage);
-      final outbox = ConvoHopOutbox(client, clock: fixedClock, random: NoJitter());
+      final outbox = RelayOutbox(client, clock: fixedClock, random: NoJitter());
       final changes = <OutboxState>[];
       outbox.changes.listen((item) => changes.add(item.state));
 
@@ -790,7 +790,7 @@ void main() {
       final storage = _OutboxStorage()..failing.add(2);
       final client = authority.client(now, storage: storage);
       final errors = <Object>[];
-      final outbox = ConvoHopOutbox(
+      final outbox = RelayOutbox(
         client,
         clock: now,
         random: NoJitter(),
@@ -846,7 +846,7 @@ void main() {
           );
           final errors = <Object>[];
           final client = authority.client(now, storage: storage);
-          final outbox = ConvoHopOutbox(client, clock: now, random: NoJitter(), onError: errors.add);
+          final outbox = RelayOutbox(client, clock: now, random: NoJitter(), onError: errors.add);
           final changes = <OutboxItem>[];
           outbox.changes.listen(changes.add);
 
@@ -906,7 +906,7 @@ void main() {
           ..answer('CommunicationSendMessage', (id, input) => jsonResponse(gqlError('NEWLY_INVENTED', status: 400)));
         final errors = <Object>[];
         final client = authority.client(now);
-        final outbox = ConvoHopOutbox(client, clock: now, random: NoJitter(), onError: errors.add);
+        final outbox = RelayOutbox(client, clock: now, random: NoJitter(), onError: errors.add);
 
         final sent = <String>[
           for (final text in <String>['over quota', 'over plan', 'not understood'])
@@ -942,7 +942,7 @@ void main() {
           );
         final errors = <Object>[];
         final client = authority.client(now);
-        final outbox = ConvoHopOutbox(client, clock: now, random: NoJitter(), onError: errors.add);
+        final outbox = RelayOutbox(client, clock: now, random: NoJitter(), onError: errors.add);
 
         final item = settled(async, outbox.send(conversationId, 'eventually'));
         var current = outbox.items.single;
@@ -977,7 +977,7 @@ void main() {
           ..answer('CommunicationSendMessage', (id, input) => jsonResponse(gqlError('WRONG_REGION', status: 409)));
         final errors = <Object>[];
         final client = authority.client(now);
-        final outbox = ConvoHopOutbox(client, clock: now, random: NoJitter(), onError: errors.add);
+        final outbox = RelayOutbox(client, clock: now, random: NoJitter(), onError: errors.add);
 
         final item = settled(async, outbox.send(conversationId, 'moved'));
         expect(authority.operations, <String>[
@@ -1021,7 +1021,7 @@ void main() {
           jsonEncode(<Object?>[for (final id in unknown) _journalRecord(id, fixedClock() - 1000, 'unknown')]),
         );
         final client = authority.client(now, storage: storage);
-        final outbox = ConvoHopOutbox(client, clock: now, random: NoJitter());
+        final outbox = RelayOutbox(client, clock: now, random: NoJitter());
 
         // Rate limited three times, the message has spent its budget, so its
         // record is final; the outbox keeps it queued until it checks it again.
@@ -1079,7 +1079,7 @@ void main() {
             (id, input) => jsonResponse(gqlError('RATE_LIMITED', status: 429, retryAfter: '3000000')),
           );
         final client = authority.client(now);
-        final outbox = ConvoHopOutbox(client, clock: now, random: NoJitter());
+        final outbox = RelayOutbox(client, clock: now, random: NoJitter());
 
         final item = settled(async, outbox.send(conversationId, 'much later'));
         expect(outbox.items.single.nextAttemptAt, fixedClock() + retryAfterMs);

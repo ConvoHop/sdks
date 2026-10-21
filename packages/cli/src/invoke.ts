@@ -1,4 +1,4 @@
-import type { OperationInput, OperationKey } from "@convohop/server";
+import type { OperationInput, OperationKey } from "@instantrelay/server";
 import type { Args } from "./args.js";
 import { isOperationKey, mutate, query, type MutationResult } from "./call.js";
 import { flag, printMutation, text, type Command } from "./command.js";
@@ -21,12 +21,12 @@ function operation(id: string | undefined, command: string): CliOperation {
   const found = Object.hasOwn(cliOperations, id) ? cliOperations[id] : undefined;
   if (found !== undefined) return found;
   const withheld = Object.hasOwn(withheldOperations, id) ? withheldOperations[id] : undefined;
-  if (withheld !== undefined) throw new UsageError(`convohop call doesn't run ${id}, which ${withheld}`, command);
+  if (withheld !== undefined) throw new UsageError(`relay call doesn't run ${id}, which ${withheld}`, command);
   if (deliveryOperations.has(id))
-    throw new UsageError(`convohop redeem runs ${id}, and keeps the credential out of its output`, command);
-  if (isOperationKey(id)) throw new UsageError(`convohop call doesn't run ${id}`, command);
+    throw new UsageError(`relay redeem runs ${id}, and keeps the credential out of its output`, command);
+  if (isOperationKey(id)) throw new UsageError(`relay call doesn't run ${id}`, command);
   throw new UsageError(`${operationName.test(id) ? `Unknown operation ${id}` : "Unknown operation"}. ` +
-    "convohop call --list lists them", command);
+    "relay call --list lists them", command);
 }
 
 async function inputObject(context: Context, args: Args): Promise<Record<string, unknown>> {
@@ -58,10 +58,10 @@ function checkInput(op: CliOperation, input: Record<string, unknown>, command: s
   for (const name of Object.keys(input))
     if (!fields.some(field => field.name === name))
       throw new UsageError(`${op.id} has no input field${fieldName.test(name) ? ` ${name}` : " with that name"}. ` +
-        `convohop call ${op.id} --help lists them`, command);
+        `relay call ${op.id} --help lists them`, command);
   for (const field of fields)
     if (field.required && (input[field.name] === undefined || input[field.name] === null))
-      throw new UsageError(`The input needs ${field.name}. convohop call ${op.id} --help lists the fields`, command);
+      throw new UsageError(`The input needs ${field.name}. relay call ${op.id} --help lists the fields`, command);
 }
 
 /** The credential delivery a reply names, such as a new webhook signing secret's. */
@@ -70,7 +70,7 @@ function deliveryHint<K extends OperationKey>(result: MutationResult<K>): string
   const delivery = result.payload.result.delivery;
   if (!isRecord(delivery) || typeof delivery.deliveryId !== "string" || typeof delivery.projectId !== "string")
     return undefined;
-  return `Redeem the credential with convohop redeem --delivery ${delivery.deliveryId} --project ${delivery.projectId} --out FILE`;
+  return `Redeem the credential with relay redeem --delivery ${delivery.deliveryId} --project ${delivery.projectId} --out FILE`;
 }
 
 const baseType = (type: string): string => type.replace(/[[\]!]/g, "");
@@ -79,14 +79,14 @@ const baseType = (type: string): string => type.replace(/[[\]!]/g, "");
 export function operationHelp(op: CliOperation): string {
   const communication = op.plane === "communication";
   const lines = [
-    `Usage: convohop call ${op.id} [--input JSON | --input-file FILE]${communication ? " [--project ID] [--incarnation ID]" : ""}` +
+    `Usage: relay call ${op.id} [--input JSON | --input-file FILE]${communication ? " [--project ID] [--incarnation ID]" : ""}` +
       `${op.destructive ? " [--yes]" : ""}`,
     "", op.summary,
   ];
   if (op.description) lines.push("", op.description);
   lines.push("", `Kind: ${op.plane} ${op.kind}`, `Credential: ${op.credential}`, `Requires: ${op.requires}`,
     `Idempotency: ${op.idempotency}`);
-  if (op.destructive) lines.push("Destructive: yes. convohop asks first, unless --yes is given");
+  if (op.destructive) lines.push("Destructive: yes. relay asks first, unless --yes is given");
   if (op.paged) lines.push(`Paging: ${op.paged}`);
   if (op.longRunning) lines.push(`Long-running: follow it with ${op.longRunning.poll}, using the reply's ${op.longRunning.refField}`);
   if (op.input === undefined) lines.push("", "Input: none");
@@ -113,7 +113,7 @@ export function operationHelp(op: CliOperation): string {
     }
   }
   if (communication)
-    lines.push("", "Communication operations use a backend key from CONVOHOP_BACKEND_KEY or CONVOHOP_BACKEND_KEY_FILE.");
+    lines.push("", "Communication operations use a backend key from RELAY_BACKEND_KEY or RELAY_BACKEND_KEY_FILE.");
   return `${lines.join("\n")}\n`;
 }
 
@@ -122,16 +122,16 @@ export const callCommand: Command = {
   summary: "Run any operation in the schema by its ID, such as management.getProject.",
   usage: "OPERATION [--input JSON | --input-file FILE] [--project ID] [--incarnation ID] [--yes] | --list",
   positionals: 1,
-  details: "convohop call OPERATION --help shows an operation's input and annotations. Mutations get a new request ID; " +
-    "when their outcome is unknown, convohop resolves the request and resends it only while the authority hasn't seen " +
+  details: "relay call OPERATION --help shows an operation's input and annotations. Mutations get a new request ID; " +
+    "when their outcome is unknown, relay resolves the request and resends it only while the authority hasn't seen " +
     "it. Destructive operations ask first. Operations whose results are credentials, and the owner's approval of an " +
     "agent signup, aren't available.",
   options: {
     input: text("JSON", "The operation's input, as a JSON object."),
     "input-file": text("FILE", "Read the input from FILE; - reads standard input."),
     list: flag("List the operations."),
-    project: text("ID", "Communication operations: the project. Default: CONVOHOP_PROJECT_ID."),
-    incarnation: text("ID", "Communication operations: the project's incarnation. Default: CONVOHOP_INCARNATION."),
+    project: text("ID", "Communication operations: the project. Default: RELAY_PROJECT_ID."),
+    incarnation: text("ID", "Communication operations: the project's incarnation. Default: RELAY_INCARNATION."),
     yes: flag("Run a destructive operation without asking."),
   },
   help(args) {

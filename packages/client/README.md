@@ -1,6 +1,6 @@
-# ConvoHop client SDK
+# Relay client SDK
 
-`@convohop/client` is the TypeScript/ESM SDK for the current Conversation,
+`@instantrelay/client` is the TypeScript/ESM SDK for the current Conversation,
 LiveSession and Participation API. It runs on end-user devices with a
 short-lived session for one signed-in user, which your backend issues. It
 never holds a backend key. No hosted service is included. It isn't on a
@@ -13,18 +13,18 @@ Build and test from the repository's root npm workspace with Node.js 22+:
 ```sh
 npm ci
 npm run build
-npm test --workspace @convohop/client
+npm test --workspace @instantrelay/client
 ```
 
 ## Runtimes and entry point
 
-- `@convohop/client` is ESM with bundled TypeScript declarations and two
-  entry points: `@convohop/client` and `@convohop/client/push`, a
+- `@instantrelay/client` is ESM with bundled TypeScript declarations and two
+  entry points: `@instantrelay/client` and `@instantrelay/client/push`, a
   dependency-free module for service workers. Neither has import side
   effects, so bundlers can tree-shake unused exports.
-- It re-exports the public API of `@convohop/core`, such as `ConvoHopProblem`,
-  `ConvoHopTransport`, `operationCatalog` and the generated `GraphqlTypes` types. Import
-  them from `@convohop/client`, not from `@convohop/core`.
+- It re-exports the public API of `@instantrelay/core`, such as `RelayProblem`,
+  `RelayTransport`, `operationCatalog` and the generated `GraphqlTypes` types. Import
+  them from `@instantrelay/client`, not from `@instantrelay/core`.
 - **Browsers:** targets the current and previous major versions of Chrome,
   Edge, Firefox and Safari. Calls need WebRTC and use `livekit-client`. CI
   runs the unit tests on Node.js with fake network and media APIs. It runs
@@ -36,14 +36,14 @@ npm test --workspace @convohop/client
   an iOS simulator. Pass a `platform` option with what the JavaScript
   engine lacks, such as `randomUUID`, `sha256`, a WHATWG-conforming `URL`,
   `connectivity` and `lifecycle`.
-  [`@convohop/react-native`](../react-native/README.md) provides one with
+  [`@instantrelay/react-native`](../react-native/README.md) provides one with
   `createPlatform()`, and adds push and calls in the system call UI; its
   README says what has been verified. Metro resolves package `exports` by
   default from React Native 0.79; on earlier versions, set
   `resolver.unstable_enablePackageExports = true`. Calls connect through
   `participation.connectWith` and LiveKit's React Native SDK.
 - **Node.js 22+:** builds and unit tests. Use
-  [`@convohop/server`](../server/README.md) for backend code.
+  [`@instantrelay/server`](../server/README.md) for backend code.
 
 ## Chat and replay
 
@@ -53,9 +53,9 @@ decimal strings. Configure an HTTPS origin, or explicit loopback HTTP for
 local development. HTTP and `graphql-transport-ws` use unversioned `/graphql`.
 
 ```ts
-import { ConvoHopClient } from "@convohop/client";
+import { RelayClient } from "@instantrelay/client";
 
-const client = new ConvoHopClient({
+const client = new RelayClient({
   baseUrl: bootstrap.baseUrl,
   projectId: bootstrap.projectId,
   incarnation: bootstrap.session.incarnation,
@@ -124,7 +124,7 @@ grants are not stored there.
 ## Conversation store, offline sends and typing
 
 ```ts
-import { ConversationStore, Outbox, TypingIndicator } from "@convohop/client";
+import { ConversationStore, Outbox, TypingIndicator } from "@instantrelay/client";
 
 const outbox = new Outbox(client, { persist: true }); // One per client.
 const store = new ConversationStore(client, conversationId, { outbox, onError: report });
@@ -203,18 +203,18 @@ to clients yet.
 The authority never sends pushes. Your backend builds them from its
 notification webhooks, with the payload in
 [`spec/push-payload/`](../../spec/push-payload/), and sends them to the
-subscriptions your app registers with it. `@convohop/client/push` has no
+subscriptions your app registers with it. `@instantrelay/client/push` has no
 dependencies, so service workers can import it.
 
 ```ts
 // App, from a user gesture:
-import { subscribePush } from "@convohop/client/push";
+import { subscribePush } from "@instantrelay/client/push";
 const registration = await navigator.serviceWorker.register("/sw.js", { type: "module" });
 await subscribePush(registration, { applicationServerKey: vapidPublicKey,
   register: subscription => saveWithYourBackend(subscription) });
 
 // sw.js:
-import { handleNotificationClick, handlePushEvent } from "@convohop/client/push";
+import { handleNotificationClick, handlePushEvent } from "@instantrelay/client/push";
 self.addEventListener("push", event => handlePushEvent(self.registration, event));
 self.addEventListener("notificationclick", event => handleNotificationClick(self.clients, event,
   notification => `/conversations/${notification.conversationId}`));
@@ -294,7 +294,7 @@ budget. `recoverPending(showError)` runs that bounded recovery on startup or
 foreground. Never replace an uncertain command with a new UUID. Native-use
 markers survive reconstruction without persisting the grant.
 
-Failures are `ConvoHopProblem` errors. `retryAfter` is the number of whole seconds
+Failures are `RelayProblem` errors. `retryAfter` is the number of whole seconds
 the authority asks you to wait before resending, for example with
 `RATE_LIMITED`. It comes from the error's `retryAfter` extension, or else
 from an HTTP `Retry-After` header given in seconds. It is `undefined` when
@@ -302,9 +302,9 @@ the authority gives no delay, and the SDK never waits or resends because of
 it. `ScopeRequiredProblem` is re-exported for completeness, but user
 sessions never get it: only backend keys have scopes.
 
-Browser `ConvoHopClient` keeps its existing synchronous `recoveryStorage`
+Browser `RelayClient` keeps its existing synchronous `recoveryStorage`
 (`sessionStorage` or `localStorage`) for request recovery and replay cursors.
-For trusted database-backed use, `ConvoHopTransport` separately exports
+For trusted database-backed use, `RelayTransport` separately exports
 `AsyncRecoveryStorage` and accepts optional `asyncRecoveryStorage`.
 Do not pass a Promise-returning adapter as synchronous storage. Explicit
 `await transport.initializeRecovery()` loads its journal once; `execute` and
@@ -329,7 +329,7 @@ with a retryable problem such as `RATE_LIMITED` stay while their budget
 lasts, since the request can still be resent with its ID. So do records an
 `Outbox` may still resend or resolve, and those a live session or
 participation handle holds, whatever their state. When no record is final,
-creating a request fails without sending it, with `ConvoHopProblem` code
+creating a request fails without sending it, with `RelayProblem` code
 `RECOVERY_LIMIT`, outcome `rejected` and status 409: retry or resolve the
 outstanding requests first. Any other save drops another tab's oldest
 records that aren't final, so a tab's own records always fit. Records this SDK can't
@@ -365,10 +365,10 @@ separate backend-only session-outcome read without changing that capability.
 
 ```ts
 import {
-  ConvoHopClient, type SessionMetadata, type SessionBootstrap,
-} from "@convohop/client";
+  RelayClient, type SessionMetadata, type SessionBootstrap,
+} from "@instantrelay/client";
 
-const client = new ConvoHopClient({
+const client = new RelayClient({
   baseUrl: bootstrap.baseUrl,
   projectId: bootstrap.projectId,
   incarnation: bootstrap.session.incarnation,
@@ -480,7 +480,7 @@ candidate types, protocol and optional relayProtocol, without credentials,
 addresses or URLs. TURN/TLS evidence requires a relay candidate and
 `relayProtocol === "tls"`; direct ICE TCP reports `protocol === "tcp"`.
 
-The service requires the participation-aware ConvoHop media server (SFU),
+The service requires the participation-aware Relay media server (SFU),
 not a stock LiveKit server. This package connects through the official
 `livekit-client`, as in
 [Calls with the official LiveKit SDKs](../../docs/sdk-strategy.md#calls-with-the-official-livekit-sdks):

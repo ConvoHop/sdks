@@ -2,8 +2,8 @@ import assert from "node:assert/strict";
 import { randomUUID } from "node:crypto";
 import { after, before, test, type TestContext } from "node:test";
 import { createAsyncStorage } from "@react-native-async-storage/async-storage";
-import type { ConvoHopClient } from "@convohop/client";
-import { parsePushPayload, type MessagePushNotification } from "@convohop/client/push";
+import type { RelayClient } from "@instantrelay/client";
+import { parsePushPayload, type MessagePushNotification } from "@instantrelay/client/push";
 import { connectUser } from "../src/client.ts";
 import { allowNotifications, messageText, openNotifications, startPush, stopPush } from "../src/push.ts";
 import { bootstrapUser, connect, createConversation, startAppBackend, type ServerConfig } from "./backend.ts";
@@ -29,7 +29,7 @@ before(async () => {
 after(() => target.close());
 
 // A signed-in user's client on a new install.
-async function signIn(): Promise<ConvoHopClient> {
+async function signIn(): Promise<RelayClient> {
   const login = await bootstrapUser(await connect(config), config, `user-${randomUUID()}`, randomUUID());
   return connectUser(login, createAsyncStorage(randomUUID()));
 }
@@ -53,7 +53,7 @@ async function appBackend(t: TestContext, reject: (method: string) => boolean = 
   return { backend, sent };
 }
 
-const recipient = (client: ConvoHopClient) => ({ projectId: client.projectId, recipientId: client.principalId });
+const recipient = (client: RelayClient) => ({ projectId: client.projectId, recipientId: client.principalId });
 const methods = (module: FakeModule) => module.log.map(([method]) => method);
 
 type Ids = Partial<Record<"projectId" | "recipientId" | "conversationId" | "senderId" | "messageId", string>>;

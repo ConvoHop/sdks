@@ -1,6 +1,6 @@
 // The test service worker, written as an app's would be, except that it tells the test page when it has finished
 // with a push. Workers don't use the page's import map, so it imports the built module by URL;
-// @convohop/client/push imports nothing else.
+// @instantrelay/client/push imports nothing else.
 import { handlePushEvent } from "/packages/client/dist/push.js";
 
 /**

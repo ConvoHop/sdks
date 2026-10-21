@@ -1,9 +1,9 @@
 import assert from "node:assert/strict";
 import { describe, test } from "node:test";
-import { ConvoHopClient } from "@convohop/client";
+import { RelayClient } from "@instantrelay/client";
 import { Component, StrictMode, createElement } from "react";
 import { act, create } from "react-test-renderer";
-import { ConvoHopProvider, useSessionRefresh, useTyping } from "../dist/index.js";
+import { RelayProvider, useSessionRefresh, useTyping } from "../dist/index.js";
 import { alice, conversationA, conversationB, flush, loggedErrors, projectId, renderHook, stubClient } from "./support.mjs";
 
 function typingClient(fail) {
@@ -126,7 +126,7 @@ describe("useSessionRefresh", () => {
   });
 
   test("throws to the nearest error boundary when the client has no sessionRefresh", async () => {
-    const client = new ConvoHopClient({ projectId, principalId: alice, incarnation: crypto.randomUUID(),
+    const client = new RelayClient({ projectId, principalId: alice, incarnation: crypto.randomUUID(),
       sessionToken: "fixture-session", baseUrl: "http://localhost:18080" });
     const caught = [];
     class Boundary extends Component {
@@ -137,7 +137,7 @@ describe("useSessionRefresh", () => {
     }
     function Renewing() { useSessionRefresh(); return null; }
     const tree = createElement(StrictMode, null,
-      createElement(ConvoHopProvider, { client }, createElement(Boundary, null, createElement(Renewing))));
+      createElement(RelayProvider, { client }, createElement(Boundary, null, createElement(Renewing))));
     let renderer;
     const logged = await loggedErrors(() => act(async () => { renderer = create(tree, { unstable_isConcurrent: true }); }));
     assert.notEqual(caught.length, 0);

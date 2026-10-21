@@ -1,6 +1,6 @@
-# ConvoHop React Native SDK
+# Relay React Native SDK
 
-`@convohop/react-native` runs [`@convohop/client`](../client/README.md) in
+`@instantrelay/react-native` runs [`@instantrelay/client`](../client/README.md) in
 React Native apps. It adds:
 
 - the platform the client needs on Hermes: secure random UUIDs, SHA-256, a
@@ -14,7 +14,7 @@ React Native apps. It adds:
 
 It reuses the client for everything else: conversations, the outbox,
 replay, receipts, live sessions and push payload parsing. For hooks, use
-[`@convohop/react`](../react/README.md). It isn't published to a package
+[`@instantrelay/react`](../react/README.md). It isn't published to a package
 registry yet. The [React Native docs](../../docs/site/react-native/index.md)
 have quickstarts with tested code and the API reference. License:
 [Apache-2.0](LICENSE).
@@ -30,13 +30,13 @@ Build and test from the repository's root npm workspace with Node.js 22+:
 ```sh
 npm ci
 npm run build
-npm test --workspace @convohop/react-native
-npm run typecheck:example --workspace @convohop/react-native
+npm test --workspace @instantrelay/react-native
+npm run typecheck:example --workspace @instantrelay/react-native
 ```
 
 The docs include code from `docs/languages/react-native/examples`, whose
 tests run it on Node.js with this package's stand-ins. The docs also cover
-`@convohop/client` and `@convohop/react`. After you change the public API of
+`@instantrelay/client` and `@instantrelay/react`. After you change the public API of
 any of the three, from the repository's root:
 
 ```sh
@@ -62,8 +62,8 @@ npm run test:docs -- --install react-native     # type-check and run the docs ex
   the example on an Android emulator and on an iOS simulator; the
   [design](../../docs/react-native.md#testing) lists what those runs
   verified.
-- `react-native` and `@convohop/client` are peer dependencies.
-  `@convohop/react-native/media` also needs `@livekit/react-native`
+- `react-native` and `@instantrelay/client` are peer dependencies.
+  `@instantrelay/react-native/media` also needs `@livekit/react-native`
   `^3.0.0`, `@livekit/react-native-webrtc` `^144.2.0` and `livekit-client`
   `^2.22.3`. Apps without calls don't install them.
 - Metro resolves package `exports` by default from React Native 0.79. On
@@ -74,7 +74,7 @@ npm run test:docs -- --install react-native     # type-check and run the docs ex
 Apps with calls set up media first, at the top of `index.js`:
 
 ```js
-import { setupMedia } from "@convohop/react-native/media";
+import { setupMedia } from "@instantrelay/react-native/media";
 
 setupMedia({ callKit: true }); // Before anything imports livekit-client.
 ```
@@ -89,12 +89,12 @@ Create one platform for the app and pass it to each client:
 ```ts
 import { createAsyncStorage } from "@react-native-async-storage/async-storage";
 import NetInfo from "@react-native-community/netinfo";
-import { ConvoHopClient, Outbox } from "@convohop/client";
-import { createPlatform } from "@convohop/react-native";
+import { RelayClient, Outbox } from "@instantrelay/client";
+import { createPlatform } from "@instantrelay/react-native";
 
 const platform = createPlatform({ netInfo: NetInfo });
 
-const client = new ConvoHopClient({
+const client = new RelayClient({
   // The user bootstrap from your backend: baseUrl, projectId, sessionToken, incarnation and principalId.
   ...bootstrap,
   platform,
@@ -109,7 +109,7 @@ const outbox = new Outbox(client, { persist: true }); // One per client.
 
 | Member | Source |
 | --- | --- |
-| `randomUUID` | Version 4 UUIDs from the platform's secure generator, through `ConvoHopPlatform`. Request IDs come from it. |
+| `randomUUID` | Version 4 UUIDs from the platform's secure generator, through `RelayPlatform`. Request IDs come from it. |
 | `sha256` | SHA-256 in JavaScript, for request fingerprints. Its digests match Web Crypto's. |
 | `URL` | A WHATWG `URL`. Hosts must be ASCII: write internationalized domain names in Punycode. |
 | `connectivity` | NetInfo's `isConnected`, when you pass `netInfo`. Unknown counts as online, and without NetInfo the platform is always online. |
@@ -132,7 +132,7 @@ Ask for permission when it suits your app. After sign-in on every launch,
 tell the device whose pushes to accept, then register:
 
 ```ts
-import { registerForPush, requestPushPermission, setPushRecipient } from "@convohop/react-native";
+import { registerForPush, requestPushPermission, setPushRecipient } from "@instantrelay/react-native";
 
 await requestPushPermission(); // iOS alerts, badges and sounds; Android 13+ POST_NOTIFICATIONS.
 await setPushRecipient({ projectId: client.projectId, recipientId: client.principalId });
@@ -145,10 +145,10 @@ await registerForPush({
 ```
 
 `setPushRecipient` tells the native modules whose pushes to show and ring.
-They drop ConvoHop pushes for anyone else, including a push that starts the
+They drop Relay pushes for anyone else, including a push that starts the
 app before JavaScript runs. The device keeps the two IDs, never a
 credential. Until you first set a recipient, and after you set `null` at
-sign-out, they drop every ConvoHop push, so a registration your backend
+sign-out, they drop every Relay push, so a registration your backend
 failed to delete reaches nobody.
 
 `registerForPush` passes each registration to `register`, which stores it
@@ -169,7 +169,7 @@ the app. Each gives the parsed
 [push payload](../client/README.md#push-notifications):
 
 ```ts
-import { onNotification, takeInitialNotification } from "@convohop/react-native";
+import { onNotification, takeInitialNotification } from "@instantrelay/react-native";
 
 const opened = await takeInitialNotification();
 const stopListening = onNotification(({ action, notification }) => {
@@ -191,10 +191,10 @@ it.
 ### iOS
 
 - **Pods.** Run `bundle exec pod install` in `ios/`. The podspec adds the
-  [Swift SDK's](../../swift/README.md) `ConvoHopPush` and `ConvoHopCalls`
+  [Swift SDK's](../../swift/README.md) `RelayPush` and `RelayCalls`
   products as a local Swift package, because the Swift SDK can't be added
   by URL yet: the `swift/` directory of the repository this package comes
-  from, or the checkout that `CONVOHOP_SWIFT_PACKAGE` names. Without
+  from, or the checkout that `RELAY_SWIFT_PACKAGE` names. Without
   either, `pod install` fails and says so.
 - **Capabilities.** Add Push Notifications, and the Voice over IP and Audio
   background modes. Add `NSMicrophoneUsageDescription` to `Info.plist`,
@@ -205,33 +205,33 @@ it.
   token:
 
   ```swift
-  import ConvoHopReactNative
+  import RelayReactNative
 
   func application(
     _ application: UIApplication,
     didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]? = nil
   ) -> Bool {
-    ConvoHopReactNative.configure(.init(appGroup: "group.com.example.chat", apnsEnvironment: .production))
+    RelayReactNative.configure(.init(appGroup: "group.com.example.chat", apnsEnvironment: .production))
     // Then start React Native.
     return true
   }
 
   func application(_ application: UIApplication, didRegisterForRemoteNotificationsWithDeviceToken deviceToken: Data) {
-    ConvoHopReactNative.didRegisterForRemoteNotifications(deviceToken: deviceToken)
+    RelayReactNative.didRegisterForRemoteNotifications(deviceToken: deviceToken)
   }
 
   func application(_ application: UIApplication, didFailToRegisterForRemoteNotificationsWithError error: Error) {
-    ConvoHopReactNative.didFailToRegisterForRemoteNotifications(error: error)
+    RelayReactNative.didFailToRegisterForRemoteNotifications(error: error)
   }
   ```
 
   `configure` starts CallKit and PushKit, and makes the package the
   notification center's delegate. It passes other pushes to the delegate it
   replaced. If your app sets its own delegate later, call
-  `ConvoHopReactNative.userNotificationCenter(_:willPresent:withCompletionHandler:)`
+  `RelayReactNative.userNotificationCenter(_:willPresent:withCompletionHandler:)`
   and `userNotificationCenter(_:didReceive:withCompletionHandler:)` first
   from it. Each returns `false`, without calling the completion handler,
-  for a push that isn't ConvoHop's. Until `configure` runs,
+  for a push that isn't Relay's. Until `configure` runs,
   `registerForPush`, `startOutgoingCall` and `setPushRecipient` with a
   recipient reject with `E_NOT_CONFIGURED`. The package doesn't swizzle
   your app delegate.
@@ -270,37 +270,37 @@ it.
 **Message text.** Message pushes carry no text unless the project opts in to
 previews. A Notification Service Extension can fetch the message and show
 its text. React Native doesn't run in an extension, so the extension is
-native code that uses the ConvoHop Swift SDK's
-`ConvoHopNotificationService`. Give it its own short-lived session for the
+native code that uses the Relay Swift SDK's
+`RelayNotificationService`. Give it its own short-lived session for the
 push's recipient, in memory. Never write a session token to disk or to the
 App Group. Without an extension, iOS shows `CONVOHOP_MESSAGE`.
 
-Give the extension a `ConvoHopNotificationLedger` on your App Group, the
+Give the extension a `RelayNotificationLedger` on your App Group, the
 one you pass to `configure` as `appGroup`. The extension then hides the
 text of a push for anyone but the recipient `setPushRecipient` set: no
-title, and a `CONVOHOP_*` string as the body.
+title, and a `RELAY_*` string as the body.
 
 ### Android
 
 - The package's Gradle module depends on the
   [Android SDK](../../android/README.md),
-  `com.convohop:convohop-android-push`, which isn't on Maven Central yet.
+  `dev.instantrelay:relay-android-push`, which isn't on Maven Central yet.
   The [example](example/README.md#android) builds it from this repository.
   Set up Firebase as for any Firebase app, with your `google-services.json`.
 - Your app's manifest declares the Android SDK's
-  `ConvoHopMessagingService`, as in the
+  `RelayMessagingService`, as in the
   [Android SDK](../../android/README.md#push-notifications). It receives
   data messages, shows message notifications and rings calls.
 - A push can start the process before JavaScript runs, so configure
   notifications in `MainApplication.onCreate`, before React Native loads:
 
   ```kotlin
-  ConvoHopReactNative.configure(this, ConvoHopNotificationOptions().apply {
+  RelayReactNative.configure(this, RelayNotificationOptions().apply {
       smallIcon = R.drawable.ic_notification
   })
   ```
 
-  Use it instead of setting `ConvoHopNotifications.options`: it adds the
+  Use it instead of setting `RelayNotifications.options`: it adds the
   recipient filter `setPushRecipient` sets, and signs the push it adds to
   each notification's intent, so a notification reported as `opened` is
   one your app posted. Until it runs, `registerForPush`,
@@ -309,8 +309,8 @@ title, and a `CONVOHOP_*` string as the body.
   set the options' intents.
 - If another library, such as React Native Firebase, owns your app's
   messaging service, pass its data messages to `handleRemoteMessage(data)`.
-  It resolves what the native handler did, such as `notConvoHop` for a
-  message that isn't a ConvoHop push.
+  It resolves what the native handler did, such as `notRelay` for a
+  message that isn't a Relay push.
 - `registerForPush` follows your app's FCM mode. By default it passes the
   registration token, `{ kind: "fcm", token }`. When the app manifest sets
   `firebase_messaging_installation_id_enabled`, Firebase registers by
@@ -333,8 +333,8 @@ calls that are still current, so a call answered before JavaScript started
 isn't lost:
 
 ```ts
-import { reportConnected, reportConnecting, subscribeAnsweredCalls, type Call } from "@convohop/react-native";
-import { createRoom, createRoomConnector } from "@convohop/react-native/media";
+import { reportConnected, reportConnecting, subscribeAnsweredCalls, type Call } from "@instantrelay/react-native";
+import { createRoom, createRoomConnector } from "@instantrelay/react-native/media";
 
 async function join(call: Call): Promise<void> {
   const live = await client.liveSession(call.liveSessionId);
@@ -392,7 +392,7 @@ participation that already exists, retries, hang-up and media that drops.
 
 ## Media
 
-`@convohop/react-native/media` connects calls with LiveKit's
+`@instantrelay/react-native/media` connects calls with LiveKit's
 [React Native SDK](../../docs/sdk-strategy.md#calls-with-the-official-livekit-sdks):
 
 - `createRoom()` creates a LiveKit room with the Web SDK's media policy: one
@@ -414,9 +414,9 @@ participation that already exists, retries, hang-up and media that drops.
 
 ## Hooks
 
-[`@convohop/react`](../react/README.md) imports only `react` and
-`@convohop/client`, so its hooks work in React Native. Wrap the signed-in
-screens in its `ConvoHopProvider` with the client and outbox, and use
+[`@instantrelay/react`](../react/README.md) imports only `react` and
+`@instantrelay/client`, so its hooks work in React Native. Wrap the signed-in
+screens in its `RelayProvider` with the client and outbox, and use
 `useConversation`, `useTyping` and `useSessionRefresh`.
 `useMediaConnection` is for browsers; connect calls as shown above.
 
@@ -458,4 +458,4 @@ write restores it, with the text of unsent messages:
 ## Example
 
 [`example/`](example/README.md) is a chat app with push notifications and
-calls, built on this package, `@convohop/react` and a backend of your own.
+calls, built on this package, `@instantrelay/react` and a backend of your own.

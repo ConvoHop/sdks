@@ -7,19 +7,19 @@ from dataclasses import dataclass
 from datetime import UTC, datetime
 from typing import Any, Final, Literal, TypeAlias, TypeGuard, TypeVar, assert_never
 
-import convohop
-from convohop import (
-    AsyncConvoHop,
-    AsyncConvoHopManagement,
-    ConvoHop,
-    ConvoHopManagement,
-    ConvoHopProblem,
+import instantrelay
+from instantrelay import (
+    AsyncRelay,
+    AsyncRelayManagement,
+    Relay,
+    RelayManagement,
+    RelayProblem,
     MemoryStorage,
     WebhookVerificationError,
     webhooks,
 )
-from convohop.types import MemberBatchEntryInput, MemberInputInput
-from convohop.webhooks import WebhookVerificationCode
+from instantrelay.types import MemberBatchEntryInput, MemberInputInput
+from instantrelay.webhooks import WebhookVerificationCode
 
 from params import Args, ParamsError, entries, integer, optional_text, record, strings, text
 
@@ -45,7 +45,7 @@ Api: TypeAlias = Literal["sync", "async"]
 Role: TypeAlias = Literal["backend", "management"]
 ROLES: Final[tuple[Role, ...]] = ("backend", "management")
 FEATURES: Final = ("recovery.eviction", "recovery.spentBudget", "recovery.storage", "retryAfter", "webhooks.verify")
-PACKAGES: Final = {"convohop": convohop.__version__}
+PACKAGES: Final = {"instantrelay": instantrelay.__version__}
 
 # The SDK requires requestedTtlMs; the catalog makes it optional, so use the TypeScript server SDK's default.
 _DEFAULT_SESSION_TTL_MS: Final = "900000"
@@ -54,8 +54,8 @@ _MAX_SAFE_INTEGER: Final = 2**53 - 1
 
 _T = TypeVar("_T")
 
-Backend: TypeAlias = ConvoHop | AsyncConvoHop
-Management: TypeAlias = ConvoHopManagement | AsyncConvoHopManagement
+Backend: TypeAlias = Relay | AsyncRelay
+Management: TypeAlias = RelayManagement | AsyncRelayManagement
 
 
 def is_role(value: str) -> TypeGuard[Role]:
@@ -64,7 +64,7 @@ def is_role(value: str) -> TypeGuard[Role]:
 
 def driver_error(error: Exception) -> dict[str, Any]:
     """The language-neutral projection of an SDK failure (spec/conformance/driver-protocol.md)."""
-    if isinstance(error, ConvoHopProblem):
+    if isinstance(error, RelayProblem):
         # The SDK reports a missing authority response as status 0; the protocol uses null.
         return {
             "code": error.code,
@@ -140,7 +140,7 @@ def create_client(spec: ClientSpec, api: Api) -> SdkClient:
             incarnation = _required(spec.incarnation, "incarnation")
             if api == "async":
                 return BackendClient(
-                    AsyncConvoHop(
+                    AsyncRelay(
                         base_url=spec.base_url,
                         backend_key=spec.credential,
                         project_id=project_id,
@@ -149,7 +149,7 @@ def create_client(spec: ClientSpec, api: Api) -> SdkClient:
                     )
                 )
             return BackendClient(
-                ConvoHop(
+                Relay(
                     base_url=spec.base_url,
                     backend_key=spec.credential,
                     project_id=project_id,
@@ -160,7 +160,7 @@ def create_client(spec: ClientSpec, api: Api) -> SdkClient:
         actor_id = _required(spec.actor_id, "actorId")
         if api == "async":
             return ManagementClient(
-                AsyncConvoHopManagement(
+                AsyncRelayManagement(
                     base_url=spec.base_url,
                     access_token=spec.credential,
                     actor_id=actor_id,
@@ -168,20 +168,20 @@ def create_client(spec: ClientSpec, api: Api) -> SdkClient:
                 )
             )
         return ManagementClient(
-            ConvoHopManagement(
+            RelayManagement(
                 base_url=spec.base_url,
                 access_token=spec.credential,
                 actor_id=actor_id,
                 recovery_storage=spec.storage,
             )
         )
-    except (TypeError, ValueError, ConvoHopProblem) as error:
+    except (TypeError, ValueError, RelayProblem) as error:
         raise ParamsError(str(error)) from None
 
 
 async def close(client: SdkClient) -> None:
     sdk = client.sdk
-    if isinstance(sdk, AsyncConvoHop | AsyncConvoHopManagement):
+    if isinstance(sdk, AsyncRelay | AsyncRelayManagement):
         await sdk.aclose()
     else:
         sdk.close()

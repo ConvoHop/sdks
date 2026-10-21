@@ -59,15 +59,15 @@ func packages() map[string]string {
 
 // recoveryStore is a named in-memory recovery store; every client created
 // with that name shares it.
-type recoveryStore = convohop.MemoryRecoveryStore
+type recoveryStore = relay.MemoryRecoveryStore
 
-func newRecoveryStore() *recoveryStore { return convohop.NewMemoryRecoveryStore() }
+func newRecoveryStore() *recoveryStore { return relay.NewMemoryRecoveryStore() }
 
 // client is one SDK client: a backend client or a management client.
 type client struct {
 	role       string
-	project    *convohop.ProjectClient
-	management *convohop.ManagementClient
+	project    *relay.ProjectClient
+	management *relay.ManagementClient
 }
 
 // clientSpec is a decoded client.create request. The optional fields are nil
@@ -93,9 +93,9 @@ func required(value *string, name string) (string, error) {
 // newClient constructs an SDK client without network I/O. Constructor
 // failures are INVALID_PARAMS.
 func newClient(spec clientSpec) (*client, error) {
-	var options []convohop.Option
+	var options []relay.Option
 	if spec.store != nil {
-		options = append(options, convohop.WithRecoveryStore(spec.store))
+		options = append(options, relay.WithRecoveryStore(spec.store))
 	}
 	switch spec.role {
 	case "backend":
@@ -107,7 +107,7 @@ func newClient(spec clientSpec) (*client, error) {
 		if err != nil {
 			return nil, err
 		}
-		project, err := convohop.NewProjectClient(convohop.ProjectConfig{
+		project, err := relay.NewProjectClient(relay.ProjectConfig{
 			BaseURL: spec.baseURL, ProjectID: projectID, Incarnation: incarnation, BackendKey: spec.credential,
 		}, options...)
 		if err != nil {
@@ -119,7 +119,7 @@ func newClient(spec clientSpec) (*client, error) {
 		if err != nil {
 			return nil, err
 		}
-		management, err := convohop.NewManagementClient(convohop.ManagementConfig{
+		management, err := relay.NewManagementClient(relay.ManagementConfig{
 			BaseURL: spec.baseURL, AccessToken: spec.credential, ActorID: actorID,
 		}, options...)
 		if err != nil {
@@ -174,12 +174,12 @@ func prepare(target *client, name string, p params) (call, error) {
 	found := false
 	switch target.role {
 	case "backend":
-		var op operation[*convohop.ProjectClient]
+		var op operation[*relay.ProjectClient]
 		if op, found = find(backendOperations, name); found {
 			run = op.prepare(target.project, p)
 		}
 	case "management":
-		var op operation[*convohop.ManagementClient]
+		var op operation[*relay.ManagementClient]
 		if op, found = find(managementOperations, name); found {
 			run = op.prepare(target.management, p)
 		}
@@ -195,17 +195,17 @@ func prepare(target *client, name string, p params) (call, error) {
 
 // requestOptions carries an optional requestId, which a retry of the same
 // logical request reuses.
-func requestOptions(p params) []convohop.CallOption {
+func requestOptions(p params) []relay.CallOption {
 	if requestID := p.optionalText("requestId"); requestID != nil {
-		return []convohop.CallOption{convohop.WithRequestID(*requestID)}
+		return []relay.CallOption{relay.WithRequestID(*requestID)}
 	}
 	return nil
 }
 
 // message decodes a message that an earlier step returned, as edit and
 // delete need its identity and revision.
-func message(p params) convohop.Message {
-	var current convohop.Message
+func message(p params) relay.Message {
+	var current relay.Message
 	if p.Err() != nil {
 		return current
 	}
@@ -229,12 +229,12 @@ const (
 // returns.
 var errNoResult = errors.New("the reply has no result")
 
-var backendOperations = []operation[*convohop.ProjectClient]{
-	{"route.initialize", func(c *convohop.ProjectClient, _ params) call {
+var backendOperations = []operation[*relay.ProjectClient]{
+	{"route.initialize", func(c *relay.ProjectClient, _ params) call {
 		return func(ctx context.Context) (any, error) { return nil, c.Initialize(ctx) }
 	}},
-	{"principals.create", func(c *convohop.ProjectClient, p params) call {
-		input := convohop.CreatePrincipalRequestInput{ExternalUserID: p.text("externalUserId")}
+	{"principals.create", func(c *relay.ProjectClient, p params) call {
+		input := relay.CreatePrincipalRequestInput{ExternalUserID: p.text("externalUserId")}
 		return func(ctx context.Context) (any, error) {
 			reply, err := c.CreatePrincipal(ctx, input)
 			if err != nil {
@@ -246,8 +246,8 @@ var backendOperations = []operation[*convohop.ProjectClient]{
 			return map[string]any{"principalId": reply.Result.PrincipalID}, nil
 		}
 	}},
-	{"sessions.issue", func(c *convohop.ProjectClient, p params) call {
-		input := convohop.IssueSessionRequestInput{
+	{"sessions.issue", func(c *relay.ProjectClient, p params) call {
+		input := relay.IssueSessionRequestInput{
 			PrincipalID: p.text("principalId"), DeviceID: p.text("deviceId"), RequestedTTLMs: defaultSessionTTLMs,
 		}
 		if ttl := p.optionalText("requestedTtlMs"); ttl != nil {
@@ -261,13 +261,13 @@ var backendOperations = []operation[*convohop.ProjectClient]{
 			return reply.Result, nil
 		}
 	}},
-	{"conversations.create", func(c *convohop.ProjectClient, p params) call {
+	{"conversations.create", func(c *relay.ProjectClient, p params) call {
 		fields := p.nested("input", "input")
-		input := convohop.CreateConversationRequestInput{
-			Title: fields.text("title"), Props: convohop.Properties(fields.record("props", "input.props")),
+		input := relay.CreateConversationRequestInput{
+			Title: fields.text("title"), Props: relay.Properties(fields.record("props", "input.props")),
 		}
 		for _, member := range fields.entries("members") {
-			input.Members = append(input.Members, convohop.MemberInputInput{
+			input.Members = append(input.Members, relay.MemberInputInput{
 				PrincipalID: member.text("principalId"), Role: member.text("role"),
 			})
 		}
@@ -280,8 +280,8 @@ var backendOperations = []operation[*convohop.ProjectClient]{
 			return reply.Result, nil
 		}
 	}},
-	{"conversations.get", func(c *convohop.ProjectClient, p params) call {
-		input := convohop.GetConversationRequestInput{ConversationID: p.text("conversationId")}
+	{"conversations.get", func(c *relay.ProjectClient, p params) call {
+		input := relay.GetConversationRequestInput{ConversationID: p.text("conversationId")}
 		return func(ctx context.Context) (any, error) {
 			reply, err := c.GetConversation(ctx, input)
 			if err != nil {
@@ -290,8 +290,8 @@ var backendOperations = []operation[*convohop.ProjectClient]{
 			return reply.Result, nil
 		}
 	}},
-	{"members.list", func(c *convohop.ProjectClient, p params) call {
-		input := convohop.MembersRequestInput{ConversationID: p.text("conversationId"), Limit: defaultPageLimit}
+	{"members.list", func(c *relay.ProjectClient, p params) call {
+		input := relay.MembersRequestInput{ConversationID: p.text("conversationId"), Limit: defaultPageLimit}
 		if limit, ok := p.integer("limit", 1, 100); ok {
 			input.Limit = limit
 		}
@@ -304,10 +304,10 @@ var backendOperations = []operation[*convohop.ProjectClient]{
 			return reply.Result, nil
 		}
 	}},
-	{"members.add", func(c *convohop.ProjectClient, p params) call {
-		input := convohop.AddMembersInput{ConversationID: p.text("conversationId")}
+	{"members.add", func(c *relay.ProjectClient, p params) call {
+		input := relay.AddMembersInput{ConversationID: p.text("conversationId")}
 		for _, member := range p.entries("members") {
-			input.Members = append(input.Members, convohop.MemberBatchEntryInput{
+			input.Members = append(input.Members, relay.MemberBatchEntryInput{
 				PrincipalID: member.text("principalId"), Role: member.text("role"),
 				ExpectedRevision: member.text("expectedRevision"),
 			})
@@ -321,8 +321,8 @@ var backendOperations = []operation[*convohop.ProjectClient]{
 			return reply.Result.Items, nil
 		}
 	}},
-	{"messages.list", func(c *convohop.ProjectClient, p params) call {
-		input := convohop.MessagesRequestInput{
+	{"messages.list", func(c *relay.ProjectClient, p params) call {
+		input := relay.MessagesRequestInput{
 			BeforeSequence: p.optionalText("beforeSequence"), ConversationID: p.text("conversationId"),
 			Limit: defaultPageLimit, ActAsPrincipalID: p.optionalText("actAs"),
 		}
@@ -334,9 +334,9 @@ var backendOperations = []operation[*convohop.ProjectClient]{
 			return reply.Result, nil
 		}
 	}},
-	{"messages.send", func(c *convohop.ProjectClient, p params) call {
-		input := convohop.SendMessageRequestInput{
-			ConversationID: p.text("conversationId"), Text: p.text("text"), Props: convohop.Properties{},
+	{"messages.send", func(c *relay.ProjectClient, p params) call {
+		input := relay.SendMessageRequestInput{
+			ConversationID: p.text("conversationId"), Text: p.text("text"), Props: relay.Properties{},
 			ActAsPrincipalID: p.optionalText("actAs"),
 		}
 		options := requestOptions(p)
@@ -348,10 +348,10 @@ var backendOperations = []operation[*convohop.ProjectClient]{
 			return reply.Result, nil
 		}
 	}},
-	{"messages.edit", func(c *convohop.ProjectClient, p params) call {
+	{"messages.edit", func(c *relay.ProjectClient, p params) call {
 		current := message(p)
 		text := p.text("text")
-		input := convohop.EditMessageRequestInput{
+		input := relay.EditMessageRequestInput{
 			ConversationID: current.ConversationID, MessageID: current.MessageID,
 			ExpectedRevision: current.Revision, Text: &text,
 		}
@@ -364,9 +364,9 @@ var backendOperations = []operation[*convohop.ProjectClient]{
 			return reply.Result, nil
 		}
 	}},
-	{"messages.delete", func(c *convohop.ProjectClient, p params) call {
+	{"messages.delete", func(c *relay.ProjectClient, p params) call {
 		current := message(p)
-		input := convohop.DeleteMessageRequestInput{
+		input := relay.DeleteMessageRequestInput{
 			ConversationID: current.ConversationID, MessageID: current.MessageID, ExpectedRevision: current.Revision,
 		}
 		options := requestOptions(p)
@@ -380,9 +380,9 @@ var backendOperations = []operation[*convohop.ProjectClient]{
 	}},
 }
 
-var managementOperations = []operation[*convohop.ManagementClient]{
-	{"backendKeys.issue", func(c *convohop.ManagementClient, p params) call {
-		input := convohop.IssueBackendKeyRequestInput{
+var managementOperations = []operation[*relay.ManagementClient]{
+	{"backendKeys.issue", func(c *relay.ManagementClient, p params) call {
+		input := relay.IssueBackendKeyRequestInput{
 			ProjectID: p.text("projectId"), Name: p.text("name"), Scopes: p.strings("scopes"),
 			ExpiresAt: p.text("expiresAt"),
 		}
@@ -402,7 +402,7 @@ type sdkFailure struct {
 }
 
 func sdkError(err error) sdkFailure {
-	var problem *convohop.Problem
+	var problem *relay.Problem
 	if !errors.As(err, &problem) {
 		return sdkFailure{Code: "SDK_ERROR", Message: err.Error()}
 	}

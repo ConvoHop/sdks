@@ -1,8 +1,8 @@
 // The backends the samples talk to. connect, bootstrapUser and createConversation do what your backend does with
-// @convohop/server: see the TypeScript server quickstart. startAppBackend stands in for your backend's own endpoints,
+// @instantrelay/server: see the TypeScript server quickstart. startAppBackend stands in for your backend's own endpoints,
 // which the samples call with fetch. It records each request and answers it with respond's status and JSON body.
 import { createServer } from "node:http";
-import { ProjectServerClient } from "@convohop/server";
+import { ProjectServerClient } from "@instantrelay/server";
 import type { Backend, UserBootstrap } from "../src/client.ts";
 
 export interface ServerConfig {

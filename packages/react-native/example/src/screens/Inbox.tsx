@@ -1,9 +1,9 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Alert, FlatList, Linking, Platform, Pressable, RefreshControl, StyleSheet, Text, View } from "react-native";
-import type { InboxItem, InboxPage } from "@convohop/client";
+import type { InboxItem, InboxPage } from "@instantrelay/client";
 import {
   canUseFullScreenIntent, getPushPermission, openFullScreenIntentSettings, requestPushPermission, type PushPermission,
-} from "@convohop/react-native";
+} from "@instantrelay/react-native";
 import type { Session } from "../session";
 import { Banner, Button, colors, MessageText, useForeground } from "../ui";
 

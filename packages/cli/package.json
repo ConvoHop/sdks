@@ -1,8 +1,8 @@
 {
-  "name": "@convohop/cli",
+  "name": "@instantrelay/cli",
   "version": "0.0.0",
   "private": true,
-  "description": "ConvoHop command-line interface for project operators: login, projects, backend keys, webhooks and push payload tests. Built on @convohop/server; runs only in trusted Node.js runtimes.",
+  "description": "Relay command-line interface for project operators: login, projects, backend keys, webhooks and push payload tests. Built on @instantrelay/server; runs only in trusted Node.js runtimes.",
   "license": "Apache-2.0",
   "repository": {
     "type": "git",
@@ -25,7 +25,7 @@
     "./package.json": "./package.json"
   },
   "bin": {
-    "convohop": "dist/bin.js"
+    "relay": "dist/bin.js"
   },
   "files": [
     "dist",
@@ -38,7 +38,7 @@
     "check:package": "publint --strict && attw --pack . --profile esm-only"
   },
   "dependencies": {
-    "@convohop/server": "*"
+    "@instantrelay/server": "*"
   },
   "devDependencies": {
     "@types/node": "^22.20.5",

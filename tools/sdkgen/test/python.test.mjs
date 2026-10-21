@@ -10,7 +10,7 @@ import { codeUnitCompare } from "../lib/naming.mjs";
 import python, { docstring, includedOperations, pythonName, renderPythonPlane, renderPythonTypes } from "../emitters/python.mjs";
 import { REPO_ROOT, assertGoldenTree, fixtureSources, repoSources } from "./helpers.mjs";
 
-const DIRECTORY = "src/convohop/_generated";
+const DIRECTORY = "src/instantrelay/_generated";
 const edgeIr = () => buildIr(fixtureSources());
 
 // The edge fixture with its client queries and mutations opened to the server key, so the Python emitter renders

@@ -1,8 +1,8 @@
-# `convohop.webhooks`
+# `instantrelay.webhooks`
 
-Verifies Standard Webhooks signatures and parses ConvoHop webhook deliveries into typed events.
+Verifies Standard Webhooks signatures and parses Relay webhook deliveries into typed events.
 
-**Layer:** Server. **Runtime:** Python 3.11 or later. **Source:** `python/src/convohop`.
+**Layer:** Server. **Runtime:** Python 3.11 or later. **Source:** `python/src/instantrelay`.
 
 ## Classes
 

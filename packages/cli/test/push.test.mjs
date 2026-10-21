@@ -4,7 +4,7 @@ import { readFile, writeFile } from "node:fs/promises";
 import { createServer } from "node:http";
 import { join } from "node:path";
 import { test } from "node:test";
-import { push, webhooks } from "@convohop/server";
+import { push, webhooks } from "@instantrelay/server";
 import { PUSH_VECTOR_FILE, canonicalBytes, measuredPart } from "../../../conformance/lib/push-vectors.mjs";
 import { UUID, assertNoSecrets, assertUsage, sandbox, stdinOf } from "./helpers.mjs";
 
@@ -21,7 +21,7 @@ async function withSecret(t) {
   return { ...box, secret, secretFile };
 }
 
-/** Checks that each payload is what the @convohop/server builder makes of the printed event, with its measured size. */
+/** Checks that each payload is what the @instantrelay/server builder makes of the printed event, with its measured size. */
 function assertBuilt(output, options) {
   for (const [builder, built] of Object.entries(output.payloads)) {
     const request = push[builder](output.event, { now: NOW, bundleId: BUNDLE_ID, ...options });
@@ -66,7 +66,7 @@ test("push test reports each invalid event with the builders' error, and a body 
     const result = await signed(invalid.event, ["--bundle-id", BUNDLE_ID]);
     assert.equal(result.code, 1, invalid.id);
     assert.equal(result.stdout, "", invalid.id);
-    assert.equal(result.stderr, `convohop: INVALID_EVENT: ${message}\n`, invalid.id);
+    assert.equal(result.stderr, `relay: INVALID_EVENT: ${message}\n`, invalid.id);
   }
 
   const conversationId = randomUUID();
@@ -75,12 +75,12 @@ test("push test reports each invalid event with the builders' error, and a body 
   for (const [body, stderr] of [
     [created, "INVALID_EVENT: Invalid notification event: eventType must be a notification event type"],
     ["not json", "INVALID_BODY: Webhook body is not UTF-8 JSON"],
-    ["[1,2]", "INVALID_BODY: Webhook body is not a ConvoHop event envelope"],
+    ["[1,2]", "INVALID_BODY: Webhook body is not a Relay event envelope"],
   ]) {
     const result = await signed(body);
     assert.equal(result.code, 1);
     assert.equal(result.stdout, "");
-    assert.equal(result.stderr, `convohop: ${stderr}\n`);
+    assert.equal(result.stderr, `relay: ${stderr}\n`);
   }
   assertUsage(await signed(" ".repeat(4097)), "--event must be at most 4096 bytes", "push test");
 
@@ -92,7 +92,7 @@ test("push test reports each invalid event with the builders' error, and a body 
   assert.deepEqual(JSON.parse(fromFile.stdout).event, vector.event);
   const missing = join(directory, "missing.json"), unread = await cli(["push", "test", "--event", missing]);
   assert.equal(unread.code, 1);
-  assert.equal(unread.stderr, `convohop: Can't read ${missing}\n`);
+  assert.equal(unread.stderr, `relay: Can't read ${missing}\n`);
 });
 
 test("push test signs a sample message, call or cancellation for the given recipient and platforms", async t => {
@@ -159,8 +159,8 @@ test("push test signs with the endpoint's secret from a file, standard input or 
     for (const { argv = [], stdin, env, source } of [
       { argv: ["--secret-file", secretFile], source: "file" },
       { argv: ["--secret-file", "-"], stdin: `${secret}\n`, source: "file" },
-      { env: { CONVOHOP_WEBHOOK_SECRET: secret }, source: "environment" },
-      { env: { CONVOHOP_WEBHOOK_SECRET_FILE: secretFile }, source: "environment" },
+      { env: { RELAY_WEBHOOK_SECRET: secret }, source: "environment" },
+      { env: { RELAY_WEBHOOK_SECRET_FILE: secretFile }, source: "environment" },
     ]) {
       const result = await cli(["push", "test", ...argv], { stdin: stdinOf(stdin), env, now: () => NOW });
       assert.equal(result.code, 0, result.stderr);
@@ -178,22 +178,22 @@ test("push test signs with the endpoint's secret from a file, standard input or 
         "INVALID_SECRET: A webhook secret must be whsec_ followed by padded standard Base64 of 24 to 64 bytes"],
       [["--secret-file", empty], {}, "--secret-file names an empty file"],
       [["--secret-file", join(directory, "missing")], {}, `Can't read ${join(directory, "missing")}`],
-      [[], { CONVOHOP_WEBHOOK_SECRET_FILE: empty }, "CONVOHOP_WEBHOOK_SECRET_FILE names an empty file"],
-      [[], { CONVOHOP_WEBHOOK_SECRET_FILE: join(directory, "missing") },
-        "Can't read the file that CONVOHOP_WEBHOOK_SECRET_FILE names"],
+      [[], { RELAY_WEBHOOK_SECRET_FILE: empty }, "RELAY_WEBHOOK_SECRET_FILE names an empty file"],
+      [[], { RELAY_WEBHOOK_SECRET_FILE: join(directory, "missing") },
+        "Can't read the file that RELAY_WEBHOOK_SECRET_FILE names"],
     ];
     for (const [argv, env, message] of failures) {
       const result = await cli(["push", "test", ...argv], { env });
       assert.equal(result.code, 1, message);
       assert.equal(result.stdout, "");
-      assert.equal(result.stderr, `convohop: ${message}\n`);
+      assert.equal(result.stderr, `relay: ${message}\n`);
       assertNoSecrets(result, "not-a-webhook-secret");
     }
     assertUsage(await cli(["push", "test", "--secret-file", large]), "--secret-file must be at most 1024 bytes", "push test");
     assertUsage(await cli(["push", "test", "--event", "-", "--secret-file", "-"]),
       "--event and --secret-file can't both read standard input", "push test");
-    assertUsage(await cli(["push", "test"], { env: { CONVOHOP_WEBHOOK_SECRET: secret, CONVOHOP_WEBHOOK_SECRET_FILE: secretFile } }),
-      "Set CONVOHOP_WEBHOOK_SECRET or CONVOHOP_WEBHOOK_SECRET_FILE, not both");
+    assertUsage(await cli(["push", "test"], { env: { RELAY_WEBHOOK_SECRET: secret, RELAY_WEBHOOK_SECRET_FILE: secretFile } }),
+      "Set RELAY_WEBHOOK_SECRET or RELAY_WEBHOOK_SECRET_FILE, not both");
   });
 
 test("push test checks its options before it signs or sends anything", async t => {
@@ -214,12 +214,12 @@ test("push test checks its options before it signs or sends anything", async t =
     ...[["type", "call"], ["project", randomUUID()], ["recipient", randomUUID()], ["preview-text", "Hi"], ["reason", "ended"]]
       .map(([name, value]) => [["--event", "-", `--${name}`, value], `--${name} sets up a sample; don't combine it with --event`]),
     [["--deliver", "hooks.example.com"], "--deliver is not a URL"],
-    [["--deliver", "http://hooks.example.com/convohop"], "--deliver must be an https URL, or http on localhost"],
-    [["--deliver", "ftp://localhost/convohop"], "--deliver must be an https URL, or http on localhost"],
-    [["--deliver", "https://hook-user:hook-password@hooks.example.com/convohop"],
+    [["--deliver", "http://hooks.example.dev/instantrelay"], "--deliver must be an https URL, or http on localhost"],
+    [["--deliver", "ftp://localhost/relay"], "--deliver must be an https URL, or http on localhost"],
+    [["--deliver", "https://hook-user:hook-password@hooks.example.dev/instantrelay"],
       "--deliver must not contain a user name or password"],
-    [["--deliver", "https://hooks.example.com/convohop"], "--deliver needs the endpoint's secret: set --secret-file, " +
-      "CONVOHOP_WEBHOOK_SECRET or CONVOHOP_WEBHOOK_SECRET_FILE"],
+    [["--deliver", "https://hooks.example.dev/instantrelay"], "--deliver needs the endpoint's secret: set --secret-file, " +
+      "RELAY_WEBHOOK_SECRET or RELAY_WEBHOOK_SECRET_FILE"],
   ];
   for (const [argv, message] of cases) {
     const result = await cli(["push", "test", ...argv], { stdin: stdinOf("{}") });
@@ -253,11 +253,11 @@ test("push test --deliver posts the signed delivery, which webhooks.verify accep
   const { cli, secret, secretFile } = await withSecret(t);
   const endpoint = await endpointServer(t, [204, 500, 302]);
   const vector = document.vectors[0], now = new Date(vector.nowSeconds * 1000), body = JSON.stringify(vector.event);
-  const target = `${endpoint.origin}/convohop/hooks?token=hook-query-token#fragment`;
+  const target = `${endpoint.origin}/relay/hooks?token=hook-query-token#fragment`;
   const deliver = () => cli(["push", "test", "--event", "-", "--secret-file", secretFile, "--deliver", target],
     { stdin: stdinOf(body), now: () => now, fetch: globalThis.fetch });
   const assertQuiet = result => {
-    for (const text of ["hook-query-token", "127.0.0.1", "/convohop/hooks"])
+    for (const text of ["hook-query-token", "127.0.0.1", "/relay/hooks"])
       assert.ok(!result.stdout.includes(text) && !result.stderr.includes(text), `output contains ${text}`);
     assertNoSecrets(result, secret);
   };
@@ -272,7 +272,7 @@ test("push test --deliver posts the signed delivery, which webhooks.verify accep
   assertQuiet(result);
   const [delivery] = endpoint.received;
   assert.equal(delivery.method, "POST");
-  assert.equal(delivery.url, "/convohop/hooks?token=hook-query-token");
+  assert.equal(delivery.url, "/relay/hooks?token=hook-query-token");
   assert.equal(delivery.headers["content-type"], "application/json");
   assert.equal(delivery.headers["webhook-id"], output.webhook.id);
   assert.equal(delivery.headers["webhook-timestamp"], String(output.webhook.timestamp));
@@ -284,7 +284,7 @@ test("push test --deliver posts the signed delivery, which webhooks.verify accep
     const failed = await deliver();
     assert.equal(failed.code, 1);
     assert.deepEqual(JSON.parse(failed.stdout).delivery, { status, ok: false });
-    assert.equal(failed.stderr, `convohop: The endpoint answered HTTP ${status}\n`);
+    assert.equal(failed.stderr, `relay: The endpoint answered HTTP ${status}\n`);
     assertQuiet(failed);
   }
   assert.equal(endpoint.received.length, 3, "a redirect isn't followed");
@@ -303,10 +303,10 @@ test("push test --deliver reports an endpoint it can't reach or that doesn't ans
     const unreachable = await run(`http://127.0.0.1:${closed}/hooks?token=hook-query-token`, { fetch: globalThis.fetch });
     assert.equal(unreachable.code, 1);
     assert.equal(unreachable.stdout, "");
-    assert.equal(unreachable.stderr, "convohop: Can't reach the endpoint\n");
+    assert.equal(unreachable.stderr, "relay: Can't reach the endpoint\n");
 
     const calls = [];
-    const slow = await run("https://hooks.example.com/convohop?token=hook-query-token", {
+    const slow = await run("https://hooks.example.dev/instantrelay?token=hook-query-token", {
       fetch: async (url, init) => {
         calls.push({ url: String(url), init });
         throw new DOMException("The operation was aborted due to timeout", "TimeoutError");
@@ -314,15 +314,15 @@ test("push test --deliver reports an endpoint it can't reach or that doesn't ans
     });
     assert.equal(slow.code, 1);
     assert.equal(slow.stdout, "");
-    assert.equal(slow.stderr, "convohop: The endpoint didn't answer within 12 seconds\n");
+    assert.equal(slow.stderr, "relay: The endpoint didn't answer within 12 seconds\n");
     assert.equal(calls.length, 1);
-    assert.equal(calls[0].url, "https://hooks.example.com/convohop?token=hook-query-token");
+    assert.equal(calls[0].url, "https://hooks.example.dev/instantrelay?token=hook-query-token");
     assert.equal(calls[0].init.method, "POST");
     assert.equal(calls[0].init.redirect, "manual");
     assert.ok(calls[0].init.signal instanceof AbortSignal);
 
     const controller = new AbortController();
-    const interrupted = await run("https://hooks.example.com/convohop", {
+    const interrupted = await run("https://hooks.example.dev/instantrelay", {
       signal: controller.signal,
       fetch: async () => {
         controller.abort();
@@ -331,7 +331,7 @@ test("push test --deliver reports an endpoint it can't reach or that doesn't ans
     });
     assert.equal(interrupted.code, 130);
     assert.equal(interrupted.stdout, "");
-    assert.equal(interrupted.stderr, "convohop: Interrupted\n");
+    assert.equal(interrupted.stderr, "relay: Interrupted\n");
     for (const result of [unreachable, slow, interrupted]) {
       assert.ok(!result.stderr.includes("hook-query-token"));
       assertNoSecrets(result, secret);

@@ -2,13 +2,13 @@
 // spec/push-payload. tsconfig.worker.json compiles it with the WebWorker library instead of the DOM.
 
 // #region service-worker
-import { handleNotificationClick, handlePushEvent } from "@convohop/client/push";
+import { handleNotificationClick, handlePushEvent } from "@instantrelay/client/push";
 
 declare const self: ServiceWorkerGlobalScope;
 
 self.addEventListener("push", event =>
   handlePushEvent(self.registration, event, {
-    // Pushes that aren't ConvoHop notifications end here, including your app's own. Browsers expect every push to
+    // Pushes that aren't Relay notifications end here, including your app's own. Browsers expect every push to
     // show a notification, so show one.
     onError: () => self.registration.showNotification("New activity", { tag: "app-activity" }),
   }),

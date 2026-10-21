@@ -133,8 +133,8 @@ mutation ManagementIssueBackendKey($context: RequestContextInput!, $input: Issue
 
 | Language | Members |
 | --- | --- |
-| [TypeScript](../../typescript/reference/operations.md) | [`ConvoHopManagementClient.issueBackendKey`](../../typescript/reference/server.md#convohopmanagementclientissuebackendkey-method) |
-| [Python](../../python/reference/operations.md) | [`ConvoHopManagement.issue_backend_key`](../../python/reference/convohop.md#convohopmanagementissue_backend_key-method), [`AsyncConvoHopManagement.issue_backend_key`](../../python/reference/convohop.md#asyncconvohopmanagementissue_backend_key-method) |
-| [.NET](../../dotnet/reference/operations.md) | [`ConvoHopManagementClient.IssueBackendKeyAsync`](../../dotnet/reference/convohop.md#convohopmanagementclientissuebackendkeyasync-method), [`ManagementApi.IssueBackendKeyAsync`](../../dotnet/reference/api.md#managementapiissuebackendkeyasync-method) |
+| [TypeScript](../../typescript/reference/operations.md) | [`RelayManagementClient.issueBackendKey`](../../typescript/reference/server.md#relaymanagementclientissuebackendkey-method) |
+| [Python](../../python/reference/operations.md) | [`RelayManagement.issue_backend_key`](../../python/reference/instantrelay.md#relaymanagementissue_backend_key-method), [`AsyncRelayManagement.issue_backend_key`](../../python/reference/instantrelay.md#asyncrelaymanagementissue_backend_key-method) |
+| [.NET](../../dotnet/reference/operations.md) | [`RelayManagementClient.IssueBackendKeyAsync`](../../dotnet/reference/relay.md#relaymanagementclientissuebackendkeyasync-method), [`ManagementApi.IssueBackendKeyAsync`](../../dotnet/reference/api.md#managementapiissuebackendkeyasync-method) |
 | [Java and Kotlin](../../jvm/reference/operations.md) | [`ManagementClient.issueBackendKey`](../../jvm/reference/server.md#managementclientissuebackendkey-method), [`ManagementApi.issueBackendKey`](../../jvm/reference/server.md#managementapiissuebackendkey-method), [`ManagementSuspendApi.issueBackendKey`](../../jvm/reference/server-kotlin.md#managementsuspendapiissuebackendkey-method) |
-| [Go](../../go/reference/operations.md) | [`ManagementClient.IssueBackendKey`](../../go/reference/convohop.md#managementclientissuebackendkey-method) |
+| [Go](../../go/reference/operations.md) | [`ManagementClient.IssueBackendKey`](../../go/reference/relay.md#managementclientissuebackendkey-method) |

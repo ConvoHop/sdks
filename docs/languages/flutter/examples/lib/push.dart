@@ -1,12 +1,12 @@
 // Push quickstart snippets. test/push_test.dart runs them against mocked platform channels, and test/client_test.dart
-// runs pushText against the conformance mock. Joining an answered call needs a ConvoHop project with calls and a
+// runs pushText against the conformance mock. Joining an answered call needs a Relay project with calls and a
 // LiveKit media server, so the analyzer only checks that path.
 
 // #region imports
 import 'dart:async';
 
-import 'package:convohop/convohop.dart';
-import 'package:convohop/push.dart';
+import 'package:instantrelay/instantrelay.dart';
+import 'package:instantrelay/push.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 
@@ -31,12 +31,12 @@ abstract interface class AppScreens {
 
 // Starts push for a signed-in client. saveRegistration sends a registration to your backend, which stores it as one
 // of the user's devices.
-Future<ConvoHopPush> startPush(
-  ConvoHopClient client,
+Future<RelayPush> startPush(
+  RelayClient client,
   AppScreens screens, {
   required Future<void> Function(Map<String, String> registration) saveRegistration,
 }) async {
-  final push = ConvoHopPush(onError: (error) => debugPrint('Push failed: $error'));
+  final push = RelayPush(onError: (error) => debugPrint('Push failed: $error'));
   final calls = IncomingCalls(client, push, screens);
   // Listen before start(): it delivers the notification that launched the app, and earlier call actions.
   push.registrations.listen((registration) async {
@@ -71,7 +71,7 @@ Future<ConvoHopPush> startPush(
 
 // #region open
 // The user tapped a notification.
-void openNotification(ConvoHopClient client, ConvoHopPush push, AppScreens screens, ConvoHopNotification notification) {
+void openNotification(RelayClient client, RelayPush push, AppScreens screens, RelayNotification notification) {
   // A device keeps its registration across sign-ins, so a push can be for another user.
   if (!notification.isFor(client)) return;
   switch (notification) {
@@ -93,7 +93,7 @@ void openNotification(ConvoHopClient client, ConvoHopPush push, AppScreens scree
 // #region previews
 // A message push's text. Message previews are off by default, so the push carries no text unless the project turned
 // previews on or your backend set a body. Then fetch the message with the user's session.
-Future<String?> pushText(ConvoHopClient client, MessageNotification notification) async =>
+Future<String?> pushText(RelayClient client, MessageNotification notification) async =>
     notification.body ?? (await notification.fetchMessage(client)).text;
 // #endregion previews
 
@@ -102,8 +102,8 @@ Future<String?> pushText(ConvoHopClient client, MessageNotification notification
 final class IncomingCalls {
   IncomingCalls(this.client, this.push, this.screens);
 
-  final ConvoHopClient client;
-  final ConvoHopPush push;
+  final RelayClient client;
+  final RelayPush push;
   final AppScreens screens;
   final Map<String, Future<JoinedCall?>> _calls = {};
 
@@ -170,7 +170,7 @@ final class IncomingCalls {
 // #region sign-out
 // At sign-out, before you close the client. The plugin's native code keeps showing the pushes that reach the device,
 // so also have your backend delete the registrations that it stored for this sign-in.
-Future<void> stopPush(ConvoHopPush push) async {
+Future<void> stopPush(RelayPush push) async {
   await push.removeDeliveredNotifications(); // The next user shouldn't see them.
   await push.close();
   push.notifications.close(); // Cancels ring timers.

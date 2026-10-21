@@ -1,4 +1,4 @@
-// ConvoHop conformance reference driver: NDJSON over stdio (spec/conformance/driver-protocol.md).
+// Relay conformance reference driver: NDJSON over stdio (spec/conformance/driver-protocol.md).
 import { createInterface } from "node:readline";
 import { setTimeout as delay } from "node:timers/promises";
 import { parseArgs } from "node:util";

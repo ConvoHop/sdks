@@ -3,11 +3,11 @@ import { byName, requireType } from "../lib/ir-model.mjs";
 import { formatJson } from "../lib/json.mjs";
 import { capitalize, snakeCase, words } from "../lib/naming.mjs";
 import {
-  WITHHELD_OPERATIONS, authText, oneLine, paginationText, serverCredential, serverOperations,
+  WITHHELD_OPERATIONS, authText, oneLine, paginationText, serverCredential, serverOperations, withheldOperations,
 } from "../lib/server-operations.mjs";
 
 /**
- * MCP tool catalog for @convohop/mcp.
+ * MCP tool catalog for @instantrelay/mcp.
  *
  * Each query and mutation that a server bearer credential can call becomes
  * one tool. Its entry carries the operation's annotations (credential,
@@ -17,10 +17,10 @@ import {
  * and the operations in WITHHELD get no tool.
  */
 export const DIRECTORY = "packages/mcp/src/generated";
-/** The hand-written @convohop/mcp tool that resolves a mutation with an unknown outcome and resends it only when the authority never saw it. */
+/** The hand-written @instantrelay/mcp tool that resolves a mutation with an unknown outcome and resends it only when the authority never saw it. */
 export const RETRY_TOOL = "retry_request";
 /** The tool `_meta` key that carries the operation annotations. */
-export const META_KEY = "com.convohop/operation";
+export const META_KEY = "dev.instantrelay/operation";
 
 /**
  * Operations whose results are credentials, which an agent must never receive, and operations that record a person's
@@ -250,13 +250,13 @@ export function renderTools(ir) {
   return NOTICE + DECLARATIONS +
     `export const retryToolName = ${JSON.stringify(RETRY_TOOL)};\n` +
     `export const operationMetaKey = ${JSON.stringify(META_KEY)};\n` +
-    `export const withheldOperations: Readonly<Record<string, string>> = ${formatJson(WITHHELD).trimEnd()};\n` +
+    `export const withheldOperations: Readonly<Record<string, string>> = ${formatJson(withheldOperations(ir)).trimEnd()};\n` +
     `export const mcpTools: readonly McpToolDefinition[] = ${tools};\n`;
 }
 
 export default defineEmitter({
   name: "mcp-tools",
-  description: "MCP tool catalog for @convohop/mcp",
+  description: "MCP tool catalog for @instantrelay/mcp",
   owns: [DIRECTORY],
   emit(ir) {
     return [{ path: `${DIRECTORY}/tools.ts`, contents: renderTools(ir) }];

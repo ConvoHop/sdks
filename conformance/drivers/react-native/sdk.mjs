@@ -1,13 +1,13 @@
 // The React Native driver's SDK module: the reference protocol loop, ../ts/dist/driver.mjs, loads it in place of the
-// reference's sdk.mjs (see driver.mjs). It maps catalog operations to the @convohop/client calls an app makes on the
+// reference's sdk.mjs (see driver.mjs). It maps catalog operations to the @instantrelay/client calls an app makes on the
 // React Native platform. Apps hold user sessions, never backend keys, so it declares only the user role, and the
 // runner's fixture driver serves the backend and management clients that set scenarios up.
 import { createRequire } from "node:module";
-import { ConvoHopClient, ConvoHopProblem, parseCursor, parseMessage } from "@convohop/client";
-import { createPlatform } from "@convohop/react-native";
+import { RelayClient, RelayProblem, parseCursor, parseMessage } from "@instantrelay/client";
+import { createPlatform } from "@instantrelay/react-native";
 import { ParamsError, optionalText, text } from "../ts/dist/params.mjs";
 
-export const DRIVER = Object.freeze({ name: "convohop-react-native", version: "0.1.0", language: "typescript" });
+export const DRIVER = Object.freeze({ name: "relay-react-native", version: "0.1.0", language: "typescript" });
 export const ROLES = Object.freeze(["user"]);
 // A client SDK doesn't verify webhooks: that is the backend's job.
 export const FEATURES = Object.freeze(["realtime", "realtime.reconnectPolicy", "recovery.eviction", "recovery.spentBudget",
@@ -18,7 +18,7 @@ const platform = createPlatform();
 
 /** The same projection of SDK failures as the reference driver's (spec/conformance/driver-protocol.md). */
 export function driverError(error) {
-  if (error instanceof ConvoHopProblem) return { code: error.code, status: error.status === 0 ? null : error.status,
+  if (error instanceof RelayProblem) return { code: error.code, status: error.status === 0 ? null : error.status,
     outcome: error.outcome, requestId: error.requestId,
     retryAfterMs: error.retryAfter === undefined ? null : error.retryAfter * 1000, message: error.message };
   return { code: "SDK_ERROR", status: null, outcome: null, requestId: null, retryAfterMs: null,
@@ -49,7 +49,7 @@ function required(value, name) {
 export function createClient(spec) {
   if (spec.role !== "user") throw new ParamsError(`The React Native SDK has no ${spec.role} clients`);
   try {
-    return { role: "user", sdk: new ConvoHopClient({ baseUrl: spec.baseUrl, projectId: required(spec.projectId, "projectId"),
+    return { role: "user", sdk: new RelayClient({ baseUrl: spec.baseUrl, projectId: required(spec.projectId, "projectId"),
       incarnation: required(spec.incarnation, "incarnation"), principalId: required(spec.principalId, "principalId"),
       sessionToken: spec.credential, platform, ...(spec.storage === undefined ? {} : { asyncRecoveryStorage: spec.storage }) }) };
   } catch (error) {
@@ -105,5 +105,5 @@ export function verifyWebhook() {
 }
 
 const require = createRequire(import.meta.url);
-export const PACKAGES = Object.freeze(Object.fromEntries(["@convohop/core", "@convohop/client", "@convohop/react-native"]
+export const PACKAGES = Object.freeze(Object.fromEntries(["@instantrelay/core", "@instantrelay/client", "@instantrelay/react-native"]
   .map(name => [name, require(`${name}/package.json`).version ?? "unknown"])));

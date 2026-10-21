@@ -1,4 +1,4 @@
-// Package convohop is the ConvoHop server SDK for Go.
+// Package convohop is the Relay server SDK for Go.
 //
 // [ProjectClient] calls the communication plane of one project with a backend
 // key, and [ManagementClient] calls the management plane with an operator
@@ -10,11 +10,11 @@
 // authority's /graphql endpoint. It returns the reply, or an error that is a
 // [*Problem] for every failure the authority or the transport reports:
 //
-//	client, err := convohop.NewProjectClient(convohop.ProjectConfig{
+//	client, err := relay.NewProjectClient(relay.ProjectConfig{
 //		BaseURL:     "https://api.example.com",
 //		ProjectID:   projectID,
 //		Incarnation: incarnation,
-//		BackendKey:  os.Getenv("CONVOHOP_BACKEND_KEY"),
+//		BackendKey:  os.Getenv("RELAY_BACKEND_KEY"),
 //	})
 //	if err != nil {
 //		return err
@@ -22,7 +22,7 @@
 //	if err := client.Initialize(ctx); err != nil {
 //		return err
 //	}
-//	reply, err := client.SendMessage(ctx, convohop.SendMessageRequestInput{
+//	reply, err := client.SendMessage(ctx, relay.SendMessageRequestInput{
 //		ConversationID: conversationID,
 //		Text:           "Hello",
 //	})
@@ -64,4 +64,4 @@
 //
 // The webhooks package verifies webhook deliveries, and the push package
 // builds push notification payloads.
-package convohop
+package relay

@@ -2,182 +2,182 @@
   "$schema": "../../../spec/docs/operation-map.schema.json",
   "operations": {
     "communication.capabilities": [
-      "ConvoHop#ConvoHopClient.capabilities",
-      "ConvoHop#ConvoHopTypingIndicator.textChanged",
-      "ConvoHop#ConvoHopConversationModel.textChanged"
+      "Relay#RelayClient.capabilities",
+      "Relay#RelayTypingIndicator.textChanged",
+      "Relay#RelayConversationModel.textChanged"
     ],
     "communication.route": [
-      "ConvoHop#ConvoHopClient.initialize",
-      "ConvoHop#ConvoHopClient.refreshSession",
-      "ConvoHop#ConvoHopClient.scheduleSessionRefresh",
-      "ConvoHop#ConvoHopClient.watch",
-      "ConvoHop#ConvoHopClient.resyncAuthorizedHistory",
-      "ConvoHop#ConvoHopConversationModel.start",
-      "ConvoHop#ConvoHopConversationModel.resync"
+      "Relay#RelayClient.initialize",
+      "Relay#RelayClient.refreshSession",
+      "Relay#RelayClient.scheduleSessionRefresh",
+      "Relay#RelayClient.watch",
+      "Relay#RelayClient.resyncAuthorizedHistory",
+      "Relay#RelayConversationModel.start",
+      "Relay#RelayConversationModel.resync"
     ],
     "communication.currentSession": [
-      "ConvoHop#ConvoHopClient.initialize",
-      "ConvoHop#ConvoHopClient.refreshSession",
-      "ConvoHop#ConvoHopClient.scheduleSessionRefresh",
-      "ConvoHop#ConvoHopClient.watch",
-      "ConvoHop#ConvoHopClient.resyncAuthorizedHistory",
-      "ConvoHop#ConvoHopConversationModel.start",
-      "ConvoHop#ConvoHopConversationModel.resync"
+      "Relay#RelayClient.initialize",
+      "Relay#RelayClient.refreshSession",
+      "Relay#RelayClient.scheduleSessionRefresh",
+      "Relay#RelayClient.watch",
+      "Relay#RelayClient.resyncAuthorizedHistory",
+      "Relay#RelayConversationModel.start",
+      "Relay#RelayConversationModel.resync"
     ],
     "communication.getConversation": [
-      "ConvoHop#ConvoHopClient.getConversation",
-      "ConvoHop#ConvoHopClient.resyncAuthorizedHistory",
-      "ConvoHop#ConversationHandle.get",
-      "ConvoHop#ConvoHopReadReceiptReporter.markRead",
-      "ConvoHop#ConvoHopConversationModel.start",
-      "ConvoHop#ConvoHopConversationModel.resync",
-      "ConvoHop#ConvoHopConversationModel.markRead"
+      "Relay#RelayClient.getConversation",
+      "Relay#RelayClient.resyncAuthorizedHistory",
+      "Relay#ConversationHandle.get",
+      "Relay#RelayReadReceiptReporter.markRead",
+      "Relay#RelayConversationModel.start",
+      "Relay#RelayConversationModel.resync",
+      "Relay#RelayConversationModel.markRead"
     ],
     "communication.members": [
-      "ConvoHop#ConvoHopClient.members"
+      "Relay#RelayClient.members"
     ],
     "communication.messages": [
-      "ConvoHop#ConvoHopClient.messages",
-      "ConvoHop#ConversationMessages.list",
-      "ConvoHop#ConvoHopConversationModel.start",
-      "ConvoHop#ConvoHopConversationModel.resync",
-      "ConvoHop#ConvoHopConversationModel.loadOlder"
+      "Relay#RelayClient.messages",
+      "Relay#ConversationMessages.list",
+      "Relay#RelayConversationModel.start",
+      "Relay#RelayConversationModel.resync",
+      "Relay#RelayConversationModel.loadOlder"
     ],
     "communication.getMessage": [
-      "ConvoHop#ConvoHopClient.getMessage",
-      "ConvoHop#ConversationMessages.get",
-      "ConvoHop#ConvoHopConversationModel.start",
-      "ConvoHop#ConvoHopConversationModel.resync",
-      "ConvoHop#ConvoHopConversationModel.send",
-      "ConvoHopNotificationService#ConvoHopNotificationService.didReceive"
+      "Relay#RelayClient.getMessage",
+      "Relay#ConversationMessages.get",
+      "Relay#RelayConversationModel.start",
+      "Relay#RelayConversationModel.resync",
+      "Relay#RelayConversationModel.send",
+      "RelayNotificationService#RelayNotificationService.didReceive"
     ],
     "communication.events": [
-      "ConvoHop#ConvoHopClient.events",
-      "ConvoHop#ConvoHopClient.watch",
-      "ConvoHop#ConvoHopClient.resyncAuthorizedHistory",
-      "ConvoHop#ConversationStream.reconcile",
-      "ConvoHop#ConvoHopConversationModel.start",
-      "ConvoHop#ConvoHopConversationModel.resync"
+      "Relay#RelayClient.events",
+      "Relay#RelayClient.watch",
+      "Relay#RelayClient.resyncAuthorizedHistory",
+      "Relay#ConversationStream.reconcile",
+      "Relay#RelayConversationModel.start",
+      "Relay#RelayConversationModel.resync"
     ],
     "communication.receipts": [
-      "ConvoHop#ConvoHopClient.receipts",
-      "ConvoHop#ConvoHopConversationModel.start",
-      "ConvoHop#ConvoHopConversationModel.resync"
+      "Relay#RelayClient.receipts",
+      "Relay#RelayConversationModel.start",
+      "Relay#RelayConversationModel.resync"
     ],
     "communication.inbox": [
-      "ConvoHop#ConvoHopClient.inbox"
+      "Relay#RelayClient.inbox"
     ],
     "communication.search": [
-      "ConvoHop#ConvoHopClient.search"
+      "Relay#RelayClient.search"
     ],
     "communication.resolveRequest": [
-      "ConvoHop#ConvoHopClient.resolveRequest",
-      "ConvoHop#ConvoHopClient.retryRequest",
-      "ConvoHop#ConvoHopClient.recoverPending",
-      "ConvoHop#ConvoHopClient.watch",
-      "ConvoHop#ConvoHopClient.resyncAuthorizedHistory",
-      "ConvoHop#ConvoHopOutbox.start",
-      "ConvoHop#ConvoHopOutbox.enqueue",
-      "ConvoHop#ConvoHopOutbox.resume",
-      "ConvoHop#ConvoHopOutbox.flush",
-      "ConvoHop#ConvoHopOutbox.resend",
-      "ConvoHop#ConvoHopConversationModel.start",
-      "ConvoHop#ConvoHopConversationModel.resync",
-      "ConvoHop#ConvoHopConversationModel.send",
-      "ConvoHop#LiveParticipationHandle.connect",
-      "ConvoHop#MediaConnection.reconnect"
+      "Relay#RelayClient.resolveRequest",
+      "Relay#RelayClient.retryRequest",
+      "Relay#RelayClient.recoverPending",
+      "Relay#RelayClient.watch",
+      "Relay#RelayClient.resyncAuthorizedHistory",
+      "Relay#RelayOutbox.start",
+      "Relay#RelayOutbox.enqueue",
+      "Relay#RelayOutbox.resume",
+      "Relay#RelayOutbox.flush",
+      "Relay#RelayOutbox.resend",
+      "Relay#RelayConversationModel.start",
+      "Relay#RelayConversationModel.resync",
+      "Relay#RelayConversationModel.send",
+      "Relay#LiveParticipationHandle.connect",
+      "Relay#MediaConnection.reconnect"
     ],
     "communication.conversationMute": [
-      "ConvoHop#ConversationMuteSetting.get"
+      "Relay#ConversationMuteSetting.get"
     ],
     "communication.currentLiveSession": [
-      "ConvoHop#ConversationLive.current"
+      "Relay#ConversationLive.current"
     ],
     "communication.liveSession": [
-      "ConvoHop#ConvoHopClient.liveSession",
-      "ConvoHop#ConvoHopClient.ringStopReason",
-      "ConvoHop#LiveSessionHandle.get",
-      "ConvoHop#LiveSessionHandle.participation",
-      "ConvoHop#LiveSessionHandle.end",
-      "ConvoHop#LiveStartOperation.ready",
-      "ConvoHop#LiveParticipationHandle.get",
-      "ConvoHop#LiveParticipationHandle.connect",
-      "ConvoHop#MediaConnection.reconnect"
+      "Relay#RelayClient.liveSession",
+      "Relay#RelayClient.ringStopReason",
+      "Relay#LiveSessionHandle.get",
+      "Relay#LiveSessionHandle.participation",
+      "Relay#LiveSessionHandle.end",
+      "Relay#LiveStartOperation.ready",
+      "Relay#LiveParticipationHandle.get",
+      "Relay#LiveParticipationHandle.connect",
+      "Relay#MediaConnection.reconnect"
     ],
     "communication.liveSessions": [
-      "ConvoHop#ConversationLive.history"
+      "Relay#ConversationLive.history"
     ],
     "communication.liveSessionParticipants": [
-      "ConvoHop#LiveSessionHandle.participants"
+      "Relay#LiveSessionHandle.participants"
     ],
     "communication.liveSessionAlerts": [
-      "ConvoHop#ConvoHopClient.liveAlerts"
+      "Relay#RelayClient.liveAlerts"
     ],
     "communication.liveSessionOperation": [
-      "ConvoHop#LiveAction.get",
-      "ConvoHop#LiveAction.completed",
-      "ConvoHop#LiveStartOperation.ready"
+      "Relay#LiveAction.get",
+      "Relay#LiveAction.completed",
+      "Relay#LiveStartOperation.ready"
     ],
     "communication.sendMessage": [
-      "ConvoHop#ConvoHopClient.send",
-      "ConvoHop#ConversationMessages.send",
-      "ConvoHop#ConvoHopOutbox.start",
-      "ConvoHop#ConvoHopOutbox.enqueue",
-      "ConvoHop#ConvoHopOutbox.resume",
-      "ConvoHop#ConvoHopOutbox.flush",
-      "ConvoHop#ConvoHopOutbox.resend",
-      "ConvoHop#ConvoHopConversationModel.send"
+      "Relay#RelayClient.send",
+      "Relay#ConversationMessages.send",
+      "Relay#RelayOutbox.start",
+      "Relay#RelayOutbox.enqueue",
+      "Relay#RelayOutbox.resume",
+      "Relay#RelayOutbox.flush",
+      "Relay#RelayOutbox.resend",
+      "Relay#RelayConversationModel.send"
     ],
     "communication.editMessage": [
-      "ConvoHop#ConvoHopClient.edit",
-      "ConvoHop#ConversationMessages.edit"
+      "Relay#RelayClient.edit",
+      "Relay#ConversationMessages.edit"
     ],
     "communication.deleteMessage": [
-      "ConvoHop#ConvoHopClient.delete",
-      "ConvoHop#ConversationMessages.delete"
+      "Relay#RelayClient.delete",
+      "Relay#ConversationMessages.delete"
     ],
     "communication.reportReceipt": [
-      "ConvoHop#ConvoHopClient.reportRead",
-      "ConvoHop#ConvoHopReadReceiptReporter.markRead",
-      "ConvoHop#ConvoHopConversationModel.markRead"
+      "Relay#RelayClient.reportRead",
+      "Relay#RelayReadReceiptReporter.markRead",
+      "Relay#RelayConversationModel.markRead"
     ],
     "communication.typing": [
-      "ConvoHop#ConvoHopClient.setTyping",
-      "ConvoHop#ConvoHopTypingIndicator.textChanged",
-      "ConvoHop#ConvoHopTypingIndicator.stop",
-      "ConvoHop#ConvoHopConversationModel.send",
-      "ConvoHop#ConvoHopConversationModel.textChanged",
-      "ConvoHop#ConvoHopConversationModel.stop"
+      "Relay#RelayClient.setTyping",
+      "Relay#RelayTypingIndicator.textChanged",
+      "Relay#RelayTypingIndicator.stop",
+      "Relay#RelayConversationModel.send",
+      "Relay#RelayConversationModel.textChanged",
+      "Relay#RelayConversationModel.stop"
     ],
     "communication.setConversationMute": [
-      "ConvoHop#ConversationMuteSetting.set"
+      "Relay#ConversationMuteSetting.set"
     ],
     "communication.startLiveSession": [
-      "ConvoHop#ConversationLive.startVoice",
-      "ConvoHop#ConversationLive.startVideo",
-      "ConvoHop#ConversationLive.startBroadcast"
+      "Relay#ConversationLive.startVoice",
+      "Relay#ConversationLive.startVideo",
+      "Relay#ConversationLive.startBroadcast"
     ],
     "communication.joinLiveSession": [
-      "ConvoHop#LiveSessionHandle.join"
+      "Relay#LiveSessionHandle.join"
     ],
     "communication.alertLiveSession": [
-      "ConvoHop#LiveSessionAlerts.send"
+      "Relay#LiveSessionAlerts.send"
     ],
     "communication.leaveLiveSession": [
-      "ConvoHop#LiveParticipationHandle.leave"
+      "Relay#LiveParticipationHandle.leave"
     ],
     "communication.endLiveSession": [
-      "ConvoHop#LiveSessionHandle.end"
+      "Relay#LiveSessionHandle.end"
     ],
     "communication.liveSessionCredentials": [
-      "ConvoHop#LiveParticipationHandle.connect",
-      "ConvoHop#MediaConnection.reconnect"
+      "Relay#LiveParticipationHandle.connect",
+      "Relay#MediaConnection.reconnect"
     ],
     "communication.conversationEvents": [
-      "ConvoHop#ConvoHopClient.watch",
-      "ConvoHop#ConvoHopClient.resyncAuthorizedHistory",
-      "ConvoHop#ConvoHopConversationModel.start",
-      "ConvoHop#ConvoHopConversationModel.resync"
+      "Relay#RelayClient.watch",
+      "Relay#RelayClient.resyncAuthorizedHistory",
+      "Relay#RelayConversationModel.start",
+      "Relay#RelayConversationModel.resync"
     ]
   }
 }

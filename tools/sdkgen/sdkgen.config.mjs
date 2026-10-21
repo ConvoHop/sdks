@@ -20,11 +20,11 @@ export default {
   emitters: [ir, graphqlOperations, typescript, docSnippets, java, mcpTools, cliOperations, python, csharp, go, android, dart, swift],
   options: {
     typescript: { directory: "packages/core/src/generated" },
-    java: { directory: "jvm/convohop-server/src/generated/java", kotlinDirectory: "jvm/convohop-server-kotlin/src/generated/kotlin" },
-    python: { directory: "python/src/convohop/_generated" },
-    csharp: { directory: "dotnet/src/ConvoHop/Generated", layers: ["server", "both"] },
+    java: { directory: "jvm/relay-server/src/generated/java", kotlinDirectory: "jvm/relay-server-kotlin/src/generated/kotlin" },
+    python: { directory: "python/src/instantrelay/_generated" },
+    csharp: { directory: "dotnet/src/Relay/Generated", layers: ["server", "both"] },
     go: { directory: "go", clients: { communication: "ProjectClient", management: "ManagementClient" } },
     dart: { directory: "flutter/lib/src/generated" },
-    swift: { directory: "swift/Sources/ConvoHop/Generated" },
+    swift: { directory: "swift/Sources/Relay/Generated" },
   },
 };

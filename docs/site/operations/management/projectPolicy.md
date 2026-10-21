@@ -133,7 +133,7 @@ mutation ManagementProjectPolicy($context: RequestContextInput!, $input: Project
 | Language | Members |
 | --- | --- |
 | [TypeScript](../../typescript/reference/operations.md) | Not wrapped by a method |
-| [Python](../../python/reference/operations.md) | [`ConvoHopManagement.project_policy`](../../python/reference/convohop.md#convohopmanagementproject_policy-method), [`AsyncConvoHopManagement.project_policy`](../../python/reference/convohop.md#asyncconvohopmanagementproject_policy-method) |
+| [Python](../../python/reference/operations.md) | [`RelayManagement.project_policy`](../../python/reference/instantrelay.md#relaymanagementproject_policy-method), [`AsyncRelayManagement.project_policy`](../../python/reference/instantrelay.md#asyncrelaymanagementproject_policy-method) |
 | [.NET](../../dotnet/reference/operations.md) | [`ManagementApi.ProjectPolicyAsync`](../../dotnet/reference/api.md#managementapiprojectpolicyasync-method) |
 | [Java and Kotlin](../../jvm/reference/operations.md) | [`ManagementApi.projectPolicy`](../../jvm/reference/server.md#managementapiprojectpolicy-method), [`ManagementSuspendApi.projectPolicy`](../../jvm/reference/server-kotlin.md#managementsuspendapiprojectpolicy-method) |
-| [Go](../../go/reference/operations.md) | [`ManagementClient.ProjectPolicy`](../../go/reference/convohop.md#managementclientprojectpolicy-method) |
+| [Go](../../go/reference/operations.md) | [`ManagementClient.ProjectPolicy`](../../go/reference/relay.md#managementclientprojectpolicy-method) |

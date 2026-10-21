@@ -4,8 +4,8 @@ using System.Linq;
 using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
-using ConvoHop;
-using ConvoHop.Models;
+using Relay;
+using Relay.Models;
 using Xunit;
 
 namespace Examples.Tests;

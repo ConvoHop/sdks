@@ -3,7 +3,7 @@ import { randomUUID } from "node:crypto";
 import { readFile, stat, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 import test from "node:test";
-import { cliOperations, cliScopes } from "@convohop/cli";
+import { cliOperations, cliScopes } from "@instantrelay/cli";
 import { full, reply } from "../../../test/graphql-fixtures.mjs";
 import {
   COMMUNICATION_URL, MANAGEMENT_URL, PORTAL_TOKEN, UUID, accepted, assertNoSecrets, assertUsage, fakeAuthority, problem,
@@ -97,7 +97,7 @@ test("keys issue without --out prints the request and how to redeem the key", as
     "--expires-at", "2027-01-31T02:00:00+02:00"], authority);
   assert.equal(result.code, 0, result.stderr);
   assert.equal(result.stderr,
-    `Redeem the key with convohop redeem --delivery ${authority.deliveryId} --project ${authority.projectId} --out FILE\n`);
+    `Redeem the key with relay redeem --delivery ${authority.deliveryId} --project ${authority.projectId} --out FILE\n`);
   assert.equal(JSON.parse(result.stdout).kind, "reply");
   assert.deepEqual(authority.names(), ["ManagementIssueBackendKey"]);
   assert.equal(authority.requests[0].variables.input.expiresAt, "2027-01-31T00:00:00.000Z");
@@ -111,15 +111,15 @@ test("keys issue checks its options, its file and the communication URL before i
   const existing = join(directory, "existing"), out = join(directory, "key");
   await writeFile(existing, "keep\n");
   const withoutCommunication = { ...authority.env };
-  delete withoutCommunication.CONVOHOP_COMMUNICATION_URL;
+  delete withoutCommunication.RELAY_COMMUNICATION_URL;
   const time = "--expires-at must be an ISO 8601 time with a zone, such as 2027-01-31T00:00:00Z";
   const duration = "--expires-in must be a number and a unit (s, m, h or d), such as 90d";
   for (const [argv, message, env = authority.env] of [
     [[], "--project is required"],
     [projectOption, "--name is required"],
-    [named, "Set at least one --scope. convohop keys scopes lists them"],
-    [[...named, "--scope", "nope"], "Unknown scope nope. convohop keys scopes lists them"],
-    [[...named, "--scope", "sk_live/0123456789"], "Unknown scope. convohop keys scopes lists them"],
+    [named, "Set at least one --scope. relay keys scopes lists them"],
+    [[...named, "--scope", "nope"], "Unknown scope nope. relay keys scopes lists them"],
+    [[...named, "--scope", "sk_live/0123456789"], "Unknown scope. relay keys scopes lists them"],
     [[...scoped, "--scope", "messageRead"], "--scope messageRead is given more than once"],
     [scoped, "Set --expires-at or --expires-in"],
     [[...scoped, "--expires-at", "2027-01-31T00:00:00Z", "--expires-in", "1d"], "Set --expires-at or --expires-in"],
@@ -131,8 +131,8 @@ test("keys issue checks its options, its file and the communication URL before i
     [[...scoped, "--expires-at", "2026-10-08T11:59:59Z"], "The key must expire in the future"],
     [[...expiring, "--timeout", "3601"], "--timeout must be a whole number from 0 to 3600"],
     [[...expiring, "--out", out], "--out redeems the key from the communication authority: set --communication-url or " +
-      "CONVOHOP_COMMUNICATION_URL, or log in with --communication-url", withoutCommunication],
-    [[...expiring, "--out", "-"], "--out must name a file: convohop never prints credentials"],
+      "RELAY_COMMUNICATION_URL, or log in with --communication-url", withoutCommunication],
+    [[...expiring, "--out", "-"], "--out must name a file: relay never prints credentials"],
     [[...expiring, "--out", existing], `${existing} already exists. Name a new file for the credential`],
   ]) {
     const result = await cli(["keys", "issue", ...argv], { env, now });
@@ -142,7 +142,7 @@ test("keys issue checks its options, its file and the communication URL before i
   const unwritable = join(directory, "absent", "key");
   const failed = await cli(["keys", "issue", ...expiring, "--out", unwritable], { env: authority.env, now });
   assert.equal(failed.code, 1);
-  assert.equal(failed.stderr, `convohop: Can't create ${unwritable}\n`);
+  assert.equal(failed.stderr, `relay: Can't create ${unwritable}\n`);
   assert.deepEqual(failed.sent, []);
   assert.equal(await readFile(existing, "utf8"), "keep\n");
   await missing(out);
@@ -159,7 +159,7 @@ test("a rejected key issue leaves no file and says nothing about redeeming", asy
   assert.equal(result.code, 1);
   assert.equal(result.stdout, "");
   const [issue] = authority.requests;
-  assert.equal(result.stderr, "convohop: FORBIDDEN: The portal user can't issue keys\n  outcome: rejected\n" +
+  assert.equal(result.stderr, "relay: FORBIDDEN: The portal user can't issue keys\n  outcome: rejected\n" +
     `  requestId: ${issue.variables.context.requestId}\n`);
   assert.deepEqual(authority.names(), ["ManagementIssueBackendKey"]);
   await missing(out);
@@ -187,7 +187,7 @@ test("redeem --operation waits for the operation's credential delivery, then red
   const mismatch = await run(cli, ["redeem", "--operation", authority.operationId, "--project", randomUUID(),
     "--out", elsewhere], authority);
   assert.equal(mismatch.code, 1);
-  assert.equal(mismatch.stderr, "convohop: The credential delivery is for another project\n");
+  assert.equal(mismatch.stderr, "relay: The credential delivery is for another project\n");
   assert.equal(sent(authority, "ManagementCredentialPermit").length, 1);
   await missing(elsewhere);
 });
@@ -196,10 +196,10 @@ test("keys issue --out says the key is issued when its delivery doesn't come, an
   const { cli, directory } = await sandbox(t);
   const cases = [
     { fields: { blockedReason: "The project is suspended" }, timeout: "120", waits: [],
-      message: id => `Operation ${id} is blocked: The project is suspended`, next: id => `convohop operation get --operation ${id}` },
+      message: id => `Operation ${id} is blocked: The project is suspended`, next: id => `relay operation get --operation ${id}` },
     { fields: {}, timeout: "4", waits: [2000, 2000],
       message: id => `Operation ${id} has no credential delivery after 4 seconds (state running)`,
-      next: id => `Wait, then run convohop redeem --operation ${id} --out FILE` },
+      next: id => `Wait, then run relay redeem --operation ${id} --out FILE` },
   ];
   for (const { fields, timeout, waits, message, next } of cases) {
     const authority = keyAuthority(({ operationId }) => ({
@@ -211,7 +211,7 @@ test("keys issue --out says the key is issued when its delivery doesn't come, an
       "messageRead", "--expires-in", "1d", "--out", out, "--timeout", timeout], authority);
     assert.equal(result.code, 1);
     assert.equal(result.stdout, "");
-    assert.equal(result.stderr, `The key is issued (operation ${id}).\nconvohop: ${message(id)}\n  next: ${next(id)}\n`);
+    assert.equal(result.stderr, `The key is issued (operation ${id}).\nrelay: ${message(id)}\n  next: ${next(id)}\n`);
     assert.deepEqual(result.waits, waits);
     assert.equal(sent(authority, "ManagementGetOperation").length, waits.length + 1);
     assert.ok(!authority.names().includes("ManagementCredentialPermit"));
@@ -221,7 +221,7 @@ test("keys issue --out says the key is issued when its delivery doesn't come, an
   const gone = keyAuthority(() => ({ ManagementGetOperation: request => reply(request, {}) }));
   const result = await run(cli, ["redeem", "--operation", gone.operationId, "--out", join(directory, "gone")], gone);
   assert.equal(result.code, 1);
-  assert.equal(result.stderr, `convohop: Operation ${gone.operationId} doesn't exist\n`);
+  assert.equal(result.stderr, `relay: Operation ${gone.operationId} doesn't exist\n`);
 });
 
 test("redeem writes a webhook secret to its file and prints only its metadata", async t => {
@@ -251,7 +251,7 @@ test("redeem refuses a delivery without exactly one credential, and leaves no fi
     const result = await run(cli, redeemArgs(authority, out), authority);
     assert.equal(result.code, 1);
     assert.equal(result.stdout, "");
-    assert.equal(result.stderr, `convohop: The credential delivery returned no usable credential\n  next: ${reissue}\n`);
+    assert.equal(result.stderr, `relay: The credential delivery returned no usable credential\n  next: ${reissue}\n`);
     assert.ok(!authority.names().includes("CommunicationAcknowledgeCredential"));
     await missing(out);
   }
@@ -267,7 +267,7 @@ test("a delivery that was already redeemed or has expired is reported with what 
   assert.equal(result.code, 1);
   assert.equal(result.stdout, "");
   const [redemption] = sent(authority, "CommunicationRedeemCredential");
-  assert.equal(result.stderr, "convohop: DELIVERY_CONSUMED: The delivery was redeemed\n  outcome: rejected\n" +
+  assert.equal(result.stderr, "relay: DELIVERY_CONSUMED: The delivery was redeemed\n  outcome: rejected\n" +
     `  requestId: ${redemption.variables.context.requestId}\n  next: ${reissue}\n`);
   assert.deepEqual(result.waits, []);
   await missing(out);
@@ -279,7 +279,7 @@ test("a delivery that was already redeemed or has expired is reported with what 
   assert.equal(late.code, 1);
   assert.equal(late.stdout, "");
   const [permit] = sent(expired, "ManagementCredentialPermit");
-  assert.equal(late.stderr, "convohop: CREDENTIAL_DELIVERY_EXPIRED: The delivery expired\n  outcome: rejected\n" +
+  assert.equal(late.stderr, "relay: CREDENTIAL_DELIVERY_EXPIRED: The delivery expired\n  outcome: rejected\n" +
     `  requestId: ${permit.variables.context.requestId}\n  next: ${reissue}\n`);
   assert.deepEqual(late.waits, []);
   assert.ok(!expired.names().includes("CommunicationRedeemCredential"));
@@ -305,8 +305,8 @@ test("a redemption whose outcome stays unknown is resent with its request ID and
   assert.ok(redemptions.every(request => request.variables.context.requestId === requestId));
   assert.deepEqual(redemptions.map(request => request.variables.context.credentialDeliveryPermit), permits.map(permitOf));
   assert.equal(new Set(permits.map(request => request.variables.input.redemptionRequestId)).size, 1);
-  assert.equal(result.stderr, "convohop: TRANSPORT_UNKNOWN: The redemption's outcome is unknown\n  outcome: unknown\n" +
-    `  requestId: ${requestId}\n  next: The credential may be redeemed but not received. Run convohop redeem --delivery ` +
+  assert.equal(result.stderr, "relay: TRANSPORT_UNKNOWN: The redemption's outcome is unknown\n  outcome: unknown\n" +
+    `  requestId: ${requestId}\n  next: The credential may be redeemed but not received. Run relay redeem --delivery ` +
     `${deliveryId} --project ${projectId} --out FILE; if it reports DELIVERY_CONSUMED: ${reissue}\n`);
   await missing(out);
 });
@@ -355,7 +355,7 @@ test("a permit request whose outcome is unknown is sent again with its request I
 
 test("without a first permit nothing is redeemed, and the error says how to redeem the credential", async t => {
   const { cli, directory } = await sandbox(t);
-  const again = authority => "No redemption was sent. Redeem the credential with convohop redeem --delivery " +
+  const again = authority => "No redemption was sent. Redeem the credential with relay redeem --delivery " +
     `${authority.deliveryId} --project ${authority.projectId} --out FILE, which requests a new permit`;
   const unknown = keyAuthority(() => ({ ManagementCredentialPermit: permitFailingOn(1, 2, 3) }));
   const out = join(directory, "unknown");
@@ -367,7 +367,7 @@ test("without a first permit nothing is redeemed, and the error says how to rede
   assert.equal(permits.length, 3);
   for (const request of permits) assert.deepEqual(request.variables, permits[0].variables);
   assert.ok(!unknown.names().includes("CommunicationRedeemCredential"));
-  assert.equal(result.stderr, "convohop: TRANSPORT_UNKNOWN: The delivery permit request's outcome is unknown\n" +
+  assert.equal(result.stderr, "relay: TRANSPORT_UNKNOWN: The delivery permit request's outcome is unknown\n" +
     `  outcome: unknown\n  requestId: ${permits[0].variables.context.requestId}\n  next: ${again(unknown)}\n`);
   await missing(out);
 
@@ -378,7 +378,7 @@ test("without a first permit nothing is redeemed, and the error says how to rede
   assert.equal(issue.code, 1);
   assert.equal(issue.stdout, "");
   assert.match(issue.stderr, new RegExp(`^The key is issued \\(operation ${issued.operationId}\\)\\.\\n` +
-    "convohop: TRANSPORT_UNKNOWN: The delivery permit request's outcome is unknown\\n"));
+    "relay: TRANSPORT_UNKNOWN: The delivery permit request's outcome is unknown\\n"));
   assert.ok(issue.stderr.endsWith(`  next: ${again(issued)}\n`));
   assert.ok(!issued.names().includes("CommunicationRedeemCredential"));
   await missing(key);
@@ -387,7 +387,7 @@ test("without a first permit nothing is redeemed, and the error says how to rede
   const none = await run(cli, redeemArgs(empty, join(directory, "empty")), empty);
   assert.equal(none.code, 1);
   const [permit] = sent(empty, "ManagementCredentialPermit");
-  assert.equal(none.stderr, "convohop: The management authority returned no delivery permit\n" +
+  assert.equal(none.stderr, "relay: The management authority returned no delivery permit\n" +
     `  requestId: ${permit.variables.context.requestId}\n  next: ${again(empty)}\n`);
   assert.ok(!empty.names().includes("CommunicationRedeemCredential"));
   await missing(join(directory, "empty"));
@@ -431,7 +431,7 @@ test("redeem renews an expired permit and follows a moved project, but not a new
   const out = join(directory, "replaced");
   const third = await run(cli, redeemArgs(replaced, out), replaced);
   assert.equal(third.code, 1);
-  assert.equal(third.stderr, `convohop: The project's incarnation changed, so the delivery can't be redeemed\n  next: ${reissue}\n`);
+  assert.equal(third.stderr, `relay: The project's incarnation changed, so the delivery can't be redeemed\n  next: ${reissue}\n`);
   assert.equal(sent(replaced, "CommunicationRedeemCredential").length, 1);
   await missing(out);
 });
@@ -460,7 +460,7 @@ test("redeem checks its options before it sends anything", async t => {
   const { cli, directory } = await sandbox(t);
   const authority = fakeAuthority(), id = randomUUID(), out = join(directory, "key");
   const withoutCommunication = { ...authority.env };
-  delete withoutCommunication.CONVOHOP_COMMUNICATION_URL;
+  delete withoutCommunication.RELAY_COMMUNICATION_URL;
   for (const [argv, message, env = authority.env] of [
     [["--out", out], "Set --operation, or --delivery and --project"],
     [["--operation", id, "--delivery", id, "--project", id, "--out", out], "Set --operation, or --delivery and --project"],
@@ -468,9 +468,9 @@ test("redeem checks its options before it sends anything", async t => {
     [["--operation", id], "--out is required"],
     [["--operation", "operation-1", "--out", out], "--operation must be a UUID"],
     [["--operation", id, "--out", out, "--timeout", "-1"], "--timeout must be a whole number from 0 to 3600"],
-    [["--operation", id, "--out", out], "Set --communication-url or CONVOHOP_COMMUNICATION_URL, or log in with " +
+    [["--operation", id, "--out", out], "Set --communication-url or RELAY_COMMUNICATION_URL, or log in with " +
       "--communication-url", withoutCommunication],
-    [["--operation", id, "--out", "-"], "--out must name a file: convohop never prints credentials"],
+    [["--operation", id, "--out", "-"], "--out must name a file: relay never prints credentials"],
   ]) {
     const result = await cli(["redeem", ...argv], { env });
     assertUsage(result, message, "redeem");
@@ -492,7 +492,7 @@ test("keys revoke asks first, checks the revision and revokes the key", async t 
     "Type yes to run it: ";
   const declined = await cli([...revoke, "7"], { ...options, stdin: stdinOf("no\n", { tty: true }) });
   assert.equal(declined.code, 1);
-  assert.equal(declined.stderr, `${prompt}convohop: Cancelled; nothing was sent\n`);
+  assert.equal(declined.stderr, `${prompt}relay: Cancelled; nothing was sent\n`);
   assert.deepEqual(authority.requests, []);
 
   const confirmed = await cli([...revoke, "7"], { ...options, stdin: stdinOf("yes\n", { tty: true }) });

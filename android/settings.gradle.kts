@@ -25,15 +25,15 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "convohop-android"
+rootProject.name = "relay-android"
 
 // The runtime shared by the SDK and the conformance driver; not a supported entry point.
 include(":core")
-// Push notifications and incoming calls, com.convohop:convohop-android-push. It stands alone so other
+// Push notifications and incoming calls, dev.instantrelay:relay-android-push. It stands alone so other
 // Android SDKs, such as React Native's, can reuse it.
 include(":push")
-// The published Android library, com.convohop:convohop-android.
-include(":convohop")
+// The published Android library, dev.instantrelay:relay-android.
+include(":relay")
 // Compiles the generator's edge goldens so emitter changes stay valid Kotlin.
 include(":edge-fixture")
 // The conformance driver lives beside the other drivers.

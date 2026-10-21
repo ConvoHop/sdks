@@ -25,7 +25,7 @@ export function junit(summary) {
     ["driver.features", summary.driver.features.join(",")], ["target", `${summary.target.kind}:${summary.target.name}`],
     ["target.capabilities", summary.target.capabilities.join(",")]];
   const lines = ["<?xml version=\"1.0\" encoding=\"UTF-8\"?>",
-    `<testsuites name="ConvoHop conformance" tests="${sum.scenarios}" failures="${sum.failed}" errors="0" skipped="${sum.skipped}" time="${seconds(summary.durationMs)}">`];
+    `<testsuites name="Relay conformance" tests="${sum.scenarios}" failures="${sum.failed}" errors="0" skipped="${sum.skipped}" time="${seconds(summary.durationMs)}">`];
   for (const suite of summary.suites) {
     const counts = totals(suite.scenarios);
     lines.push(`  <testsuite name="${attribute(suite.suite)}" tests="${counts.scenarios}" failures="${counts.failed}" errors="0" ` +
@@ -55,7 +55,7 @@ const cell = text => String(text).replaceAll("|", "\\|").replaceAll("\n", " ").s
 
 export function markdown(summary) {
   const all = summary.suites.flatMap(suite => suite.scenarios), sum = totals(all);
-  const lines = ["## ConvoHop conformance", "",
+  const lines = ["## Relay conformance", "",
     `Driver **${summary.driver.name} ${summary.driver.version}** (${summary.driver.language}) against target ` +
     `**${summary.target.kind}:${summary.target.name}**.`, "",
     `**${sum.passed} passed, ${sum.failed} failed, ${sum.skipped} skipped** of ${sum.scenarios} scenarios in ${seconds(summary.durationMs)} s.`, "",

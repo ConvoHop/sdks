@@ -1,10 +1,10 @@
 # Java and Kotlin push notifications quickstart
 
-Send push notifications for ConvoHop messages and calls: `convohop-server` turns notification events into APNs, FCM and Web Push requests, and you send them with your own push credentials and libraries.
+Send push notifications for Relay messages and calls: `relay-server` turns notification events into APNs, FCM and Web Push requests, and you send them with your own push credentials and libraries.
 
 ## Before you start
 
-ConvoHop doesn't send push notifications itself. You need:
+Relay doesn't send push notifications itself. You need:
 
 - A webhook endpoint that receives `notification.message`, `notification.call` and `notification.callCancelled` events, as the [webhooks quickstart](webhooks.md) shows. Each of these events is addressed to one recipient. Events arrive at least once and in any order, so deduplicate on `getEventId()` before you send.
 - The devices that your app registered for each user, in your own database.
@@ -12,12 +12,12 @@ ConvoHop doesn't send push notifications itself. You need:
 
 The sample uses these imports:
 
-```java include=examples/src/main/java/com/convohop/examples/Push.java#imports
+```java include=examples/src/main/java/dev/instantrelay/examples/Push.java#imports
 ```
 
 ## Build and send the requests
 
-```java include=examples/src/main/java/com/convohop/examples/Push.java#notify
+```java include=examples/src/main/java/dev/instantrelay/examples/Push.java#notify
 ```
 
 Each `PushPayloads` builder returns null when the event doesn't apply to the platform or has expired, and then you send nothing. The APNs builders take your iOS app's bundle ID for the `apns-topic` header, and throw `IllegalArgumentException` if it isn't valid. `PushOptions` applies to every builder:
@@ -41,10 +41,10 @@ A Web Push library encrypts the payload, signs the request with your VAPID keys 
 
 The Firebase Admin SDK for Java takes the Android options in its own form, with the TTL in milliseconds. Convert them:
 
-```java include=examples/src/main/java/com/convohop/examples/Push.java#fcm-imports
+```java include=examples/src/main/java/dev/instantrelay/examples/Push.java#fcm-imports
 ```
 
-```java include=examples/src/main/java/com/convohop/examples/Push.java#fcm
+```java include=examples/src/main/java/dev/instantrelay/examples/Push.java#fcm
 ```
 
 Each Android device has the target that its app registered: a registration token by default, or a Firebase Installation ID (FID) when the app's manifest sets `firebase_messaging_installation_id_enabled`. The app gets the token in `FirebaseMessagingService.onNewToken()`, or the FID in `onRegistered()`. firebase-messaging 25.1.0 deprecates `getToken()`, `deleteToken()` and `onNewToken()` in favor of `register()`, `unregister()` and `onRegistered()`. Both sets work: the deprecated methods without the flag, and the new ones with it. The token stays the default because the flag applies to the whole app: with it, `FirebaseMessaging.getToken()` fails for every library in the app. For FID mode, use firebase-messaging 25.1.2 or later (Firebase Android BoM 34.18.0 or later): 25.1.1 fixed re-registration when the FID changes, and 25.1.2 fixed a `FID_ALREADY_USED` registration error.

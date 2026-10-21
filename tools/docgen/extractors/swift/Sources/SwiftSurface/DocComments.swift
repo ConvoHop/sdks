@@ -329,7 +329,7 @@ struct DocReader {
         return out + rest
     }
 
-    /// The code that a DocC symbol link such as ``ConvoHopOutbox/resend(_:)`` names: `ConvoHopOutbox.resend(_:)`.
+    /// The code that a DocC symbol link such as ``RelayOutbox/resend(_:)`` names: `RelayOutbox.resend(_:)`.
     /// Nil when the span isn't a symbol path, so it stays a code span.
     private func symbolLink(_ content: Substring, problems: inout [String]) -> String? {
         var components: [String] = []

@@ -20,8 +20,8 @@ import { resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
 export const ROOT = fileURLToPath(new URL("../../../", import.meta.url));
-export const PROJECT = "tools/docgen/extractors/dotnet/src/ConvoHop.Docgen.csproj";
-export const ASSEMBLY = "tools/docgen/extractors/dotnet/src/bin/Release/net10.0/ConvoHop.Docgen.dll";
+export const PROJECT = "tools/docgen/extractors/dotnet/src/Relay.Docgen.csproj";
+export const ASSEMBLY = "tools/docgen/extractors/dotnet/src/bin/Release/net10.0/Relay.Docgen.dll";
 const ENV = { ...process.env, DOTNET_NOLOGO: "1", DOTNET_CLI_TELEMETRY_OPTOUT: "1" };
 
 export class ExtractError extends Error {}

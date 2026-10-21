@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { ConvoHopClient, LiveSessionHandle, LiveParticipationHandle, operationCatalog } from "@convohop/client";
+import { RelayClient, LiveSessionHandle, LiveParticipationHandle, operationCatalog } from "@instantrelay/client";
 import { event, reply, resolution } from "../../../test/graphql-fixtures.mjs";
 
 const id = () => crypto.randomUUID();
@@ -80,7 +80,7 @@ function fixture({ enabled = true, revision = "1", platform } = {}) {
     } });
     throw new Error(`Unexpected fixture operation ${operation}`);
   };
-  setup.client = new ConvoHopClient({ baseUrl: "http://localhost:18080", projectId, incarnation, principalId,
+  setup.client = new RelayClient({ baseUrl: "http://localhost:18080", projectId, incarnation, principalId,
     sessionToken: originalToken, recoveryStorage: saved, fetch: setup.fetch, ...(platform ? { platform } : {}),
     ...(enabled ? { sessionRefresh: async current => {
       setup.hookCalls.push(current);

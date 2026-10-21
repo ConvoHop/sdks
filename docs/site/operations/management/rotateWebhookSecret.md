@@ -133,7 +133,7 @@ mutation ManagementRotateWebhookSecret($context: RequestContextInput!, $input: R
 | Language | Members |
 | --- | --- |
 | [TypeScript](../../typescript/reference/operations.md) | Not wrapped by a method |
-| [Python](../../python/reference/operations.md) | [`ConvoHopManagement.rotate_webhook_secret`](../../python/reference/convohop.md#convohopmanagementrotate_webhook_secret-method), [`AsyncConvoHopManagement.rotate_webhook_secret`](../../python/reference/convohop.md#asyncconvohopmanagementrotate_webhook_secret-method) |
+| [Python](../../python/reference/operations.md) | [`RelayManagement.rotate_webhook_secret`](../../python/reference/instantrelay.md#relaymanagementrotate_webhook_secret-method), [`AsyncRelayManagement.rotate_webhook_secret`](../../python/reference/instantrelay.md#asyncrelaymanagementrotate_webhook_secret-method) |
 | [.NET](../../dotnet/reference/operations.md) | [`ManagementApi.RotateWebhookSecretAsync`](../../dotnet/reference/api.md#managementapirotatewebhooksecretasync-method) |
 | [Java and Kotlin](../../jvm/reference/operations.md) | [`ManagementApi.rotateWebhookSecret`](../../jvm/reference/server.md#managementapirotatewebhooksecret-method), [`ManagementSuspendApi.rotateWebhookSecret`](../../jvm/reference/server-kotlin.md#managementsuspendapirotatewebhooksecret-method) |
-| [Go](../../go/reference/operations.md) | [`ManagementClient.RotateWebhookSecret`](../../go/reference/convohop.md#managementclientrotatewebhooksecret-method) |
+| [Go](../../go/reference/operations.md) | [`ManagementClient.RotateWebhookSecret`](../../go/reference/relay.md#managementclientrotatewebhooksecret-method) |

@@ -10,36 +10,36 @@
   "snippetRoots": ["examples/src"],
   "packages": [
     {
-      "name": "convohop",
-      "slug": "convohop",
+      "name": "instantrelay",
+      "slug": "instantrelay",
       "layer": "server",
       "summary": "Server SDK for trusted Python backends: sync and async clients for backend-key data-plane calls and management, with typed problems and recovery storage.",
       "runtime": "Python 3.11 or later",
-      "source": "python/src/convohop"
+      "source": "python/src/instantrelay"
     },
     {
-      "name": "convohop.webhooks",
+      "name": "instantrelay.webhooks",
       "slug": "webhooks",
       "layer": "server",
-      "summary": "Verifies Standard Webhooks signatures and parses ConvoHop webhook deliveries into typed events.",
+      "summary": "Verifies Standard Webhooks signatures and parses Relay webhook deliveries into typed events.",
       "runtime": "Python 3.11 or later",
-      "source": "python/src/convohop"
+      "source": "python/src/instantrelay"
     },
     {
-      "name": "convohop.push",
+      "name": "instantrelay.push",
       "slug": "push",
       "layer": "server",
-      "summary": "Builds APNs, FCM and Web Push requests from ConvoHop push notification events.",
+      "summary": "Builds APNs, FCM and Web Push requests from Relay push notification events.",
       "runtime": "Python 3.11 or later",
-      "source": "python/src/convohop"
+      "source": "python/src/instantrelay"
     },
     {
-      "name": "convohop.types",
+      "name": "instantrelay.types",
       "slug": "types",
       "layer": "server",
-      "summary": "Generated request and response models of the ConvoHop GraphQL API, as frozen dataclasses.",
+      "summary": "Generated request and response models of the Relay GraphQL API, as frozen dataclasses.",
       "runtime": "Python 3.11 or later",
-      "source": "python/src/convohop"
+      "source": "python/src/instantrelay"
     }
   ],
   "quickstarts": ["server", "webhooks", "push"],

@@ -1,10 +1,10 @@
 # Python push notifications quickstart
 
-Send push notifications for ConvoHop messages and calls: `convohop.push` turns notification events into APNs, FCM and Web Push requests, and you send them with your own push credentials and libraries.
+Send push notifications for Relay messages and calls: `instantrelay.push` turns notification events into APNs, FCM and Web Push requests, and you send them with your own push credentials and libraries.
 
 ## Before you start
 
-ConvoHop doesn't send push notifications itself. You need:
+Relay doesn't send push notifications itself. You need:
 
 - A webhook endpoint that receives `notification.message`, `notification.call` and `notification.callCancelled` events, as the [webhooks quickstart](webhooks.md) shows. Each of these events is addressed to one recipient. Events arrive at least once and in any order, so deduplicate on `event_id` before you send.
 - The devices that your app registered for each user, in your own database.
@@ -18,8 +18,8 @@ from dataclasses import dataclass
 from datetime import datetime
 from typing import Protocol, TypedDict, Unpack
 
-from convohop import push
-from convohop.webhooks import WebhookNotificationEvent
+from instantrelay import push
+from instantrelay.webhooks import WebhookNotificationEvent
 
 
 class WebSubscriptionKeys(TypedDict):
@@ -190,5 +190,5 @@ The test runs `notify` on every vector of the [push payload contract](https://gi
 
 ## Next steps
 
-- [`convohop.push` reference](../reference/push.md): every builder and its options.
+- [`instantrelay.push` reference](../reference/push.md): every builder and its options.
 - [Webhooks quickstart](webhooks.md): verify the deliveries that carry these events.

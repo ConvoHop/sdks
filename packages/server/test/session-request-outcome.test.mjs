@@ -1,7 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { ProjectServerClient } from "@convohop/server";
-import { ConvoHopClient, operationCatalog } from "@convohop/client";
+import { ProjectServerClient } from "@instantrelay/server";
+import { RelayClient, operationCatalog } from "@instantrelay/client";
 import { full, reply, resolution } from "../../../test/graphql-fixtures.mjs";
 import { asyncStorage } from "../../../test/recovery-fixtures.mjs";
 
@@ -383,7 +383,7 @@ test("legacy Browser and Server initialization and withheld ResolveRequest seman
   const values = new Map(), recoveryStorage = {
     getItem: key => values.get(key) ?? null, setItem: (key, value) => values.set(key, value), removeItem: key => values.delete(key),
   };
-  const browser = new ConvoHopClient({ baseUrl: "http://localhost:18080", projectId, incarnation,
+  const browser = new RelayClient({ baseUrl: "http://localhost:18080", projectId, incarnation,
     principalId: id(), sessionToken: "fixture-browser", recoveryStorage, fetch });
   await server.initialize();
   await browser.initialize();

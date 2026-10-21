@@ -7,8 +7,8 @@
     <Deterministic>true</Deterministic>
     <ContinuousIntegrationBuild Condition="'$(GITHUB_ACTIONS)' == 'true'">true</ContinuousIntegrationBuild>
     <Authors>The ConvoHop Authors</Authors>
-    <Company>ConvoHop</Company>
-    <Product>ConvoHop</Product>
+    <Company>Relay</Company>
+    <Product>Relay</Product>
     <Copyright>Copyright 2026 The ConvoHop Authors</Copyright>
     <NeutralLanguage>en</NeutralLanguage>
     <RepositoryUrl>https://github.com/ConvoHop/sdks</RepositoryUrl>

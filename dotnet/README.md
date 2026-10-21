@@ -1,6 +1,6 @@
-# ConvoHop .NET server SDK
+# Relay .NET server SDK
 
-`ConvoHop` is the .NET SDK for the current Conversation and Management APIs.
+`Relay` is the .NET SDK for the current Conversation and Management APIs.
 Use it only in trusted .NET backends, because it holds secret backend keys
 and operator credentials. Never put it, or a backend key, in a MAUI, Blazor
 WebAssembly, Unity or other client app. It isn't on NuGet yet:
@@ -32,22 +32,22 @@ Building needs the .NET 10 SDK that [`global.json`](../global.json) selects.
 From the repository root, pack the library into a folder:
 
 ```sh
-dotnet pack dotnet/src/ConvoHop -c Release -o "$PWD/dotnet/artifacts"
+dotnet pack dotnet/src/Relay -c Release -o "$PWD/dotnet/artifacts"
 ```
 
 Then, from your own project's directory, add that folder as a package source
 and add the package. `dotnet nuget add source` writes to the closest
 `NuGet.config` above the current directory, or to your user-wide one. If
-your configuration uses package source mapping, also map `ConvoHop` to the
+your configuration uses package source mapping, also map `Relay` to the
 new source.
 
 ```sh
-dotnet nuget add source /path/to/sdks/dotnet/artifacts --name convohop-local
-dotnet add package ConvoHop --version 0.1.0
+dotnet nuget add source /path/to/sdks/dotnet/artifacts --name relay-local
+dotnet add package InstantRelay --version 0.1.0
 ```
 
 The build is deterministic and has Source Link, so debuggers can step into
-the matching source. Its symbols are in `ConvoHop.0.1.0.snupkg`.
+the matching source. Its symbols are in `Relay.0.1.0.snupkg`.
 
 ## Application backend
 
@@ -55,8 +55,8 @@ Authenticate the application user before looking up its project-scoped
 principal. A caller-supplied principal ID is not proof of login.
 
 ```csharp
-using ConvoHop;
-using ConvoHop.Models;
+using Relay;
+using Relay.Models;
 
 var server = new ProjectServerClient(new ProjectServerClientOptions
 {
@@ -145,7 +145,7 @@ Each helper needs the backend-key scope listed:
 
 ### Errors
 
-Failures are `ConvoHopException`.
+Failures are `RelayException`.
 
 - `Code` is the stable error code, such as `RATE_LIMITED`. Always handle
   codes you don't know.
@@ -180,7 +180,7 @@ Invalid arguments throw `ArgumentException`, `ArgumentNullException` or
 
 `server.Communication` and `managementClient.Management` reach every
 operation of their plane, with generated input and reply classes in
-`ConvoHop.Models`. They're generated from the [schemas](../schema) with the
+`Relay.Models`. They're generated from the [schemas](../schema) with the
 other SDKs, so they always cover operations that have no helper. Unlike the
 helpers, they don't check that a result names the resource you asked for.
 
@@ -250,16 +250,16 @@ RequestResolution resolution = await server.Requests.RetryAsync(exception.Reques
   spent request throws `RESOLUTION_REQUIRED` instead of being sent, and
   `Requests.ResolveAsync(id)` still looks it up once its record is gone.
   With no final record to forget, the new request fails with
-  `ConvoHopException` code `RECOVERY_LIMIT`, outcome `rejected` and status
+  `RelayException` code `RECOVERY_LIMIT`, outcome `rejected` and status
   409 before it is sent; resend or resolve the kept requests first.
 
 ## Webhooks
 
-`Webhooks.Verify` checks a delivery and returns its event. ConvoHop signs
+`Webhooks.Verify` checks a delivery and returns its event. Relay signs
 deliveries with the Standard Webhooks symmetric `v1` scheme.
 
 ```csharp
-using ConvoHop;
+using Relay;
 
 // In an ASP.NET Core minimal API.
 app.MapPost("/webhooks/convohop", async (HttpRequest request, CancellationToken cancellationToken) =>
@@ -293,7 +293,7 @@ event delivered to two endpoints has the same event ID and different
   case-insensitively.
 - The body is the exact bytes received, or a string that is their exact
   UTF-8 decoding. Never re-serialize it.
-- Pass every `whsec_` secret you hold. ConvoHop signs with the current
+- Pass every `whsec_` secret you hold. Relay signs with the current
   secret, with the next secret while a rotation is pending (at most 5
   minutes), and with the replaced secret for 24 hours after the rotation. A
   `v1` entry that matches any secret is accepted. Entries with other version
@@ -331,13 +331,13 @@ or the body.
 | `TimestampExpired` | The timestamp is more than the tolerance before now. |
 | `TimestampFuture` | The timestamp is more than the tolerance after now. |
 | `BodyTooLarge` | The body is over 4096 bytes. |
-| `TooManySignatures` | `webhook-signature` has more than 8 entries. ConvoHop sends 1 to 3. |
+| `TooManySignatures` | `webhook-signature` has more than 8 entries. Relay sends 1 to 3. |
 | `NoMatchingSignature` | No `v1` entry matches any secret. |
 | `InvalidBody` | `Verify` only: the signed body isn't a UTF-8 JSON event envelope. |
 
 ## Push payloads
 
-ConvoHop doesn't send push notifications for you
+Relay doesn't send push notifications for you
 ([bring your own](../docs/sdk-strategy.md#push-notifications-bring-your-own)).
 `PushPayloads` builds APNs, FCM and Web Push requests from a notification
 event, following the [push payload contract](../spec/push-payload/README.md).
@@ -348,7 +348,7 @@ to `notification.message`, `notification.call` and
 `notification.callCancelled`, and de-duplicate on the event ID.
 
 ```csharp
-using ConvoHop;
+using Relay;
 
 var options = new ApnsPushOptions(bundleId) { Title = DisplayName(notification.SenderId) };
 // A CallKit app gets incoming calls as VoIP pushes. ApnsVoip returns null for other events.
@@ -391,13 +391,13 @@ stored or received another way; one that doesn't match the contract throws
 
 ## Management and credential delivery
 
-`ConvoHopManagementClient` uses the Management origin's unversioned
+`RelayManagementClient` uses the Management origin's unversioned
 `/graphql` with an authorized operator access token.
 
 ```csharp
-using ConvoHop;
+using Relay;
 
-var management = new ConvoHopManagementClient(new ConvoHopManagementClientOptions
+var management = new RelayManagementClient(new RelayManagementClientOptions
 {
     BaseUrl = managementBase,
     ActorId = operatorId,
@@ -422,14 +422,14 @@ CreateDeploymentReply accepted = await management.CreateDeploymentAsync(organiza
   other management operation.
 
 A backend key is handed over once, through credential delivery, never as an
-ordinary result. Redeem the delivery with a `ConvoHopTransport` that has no
+ordinary result. Redeem the delivery with a `RelayTransport` that has no
 `Credential`, passing the permit from `GetDeliveryPermitAsync`:
 
 ```csharp
-using ConvoHop;
-using ConvoHop.Models;
+using Relay;
+using Relay.Models;
 
-var delivery = new ConvoHopTransport(new ConvoHopTransportOptions
+var delivery = new RelayTransport(new RelayTransportOptions
 {
     BaseUrl = communicationBase,
     Namespace = "credential-delivery:" + projectId,
@@ -452,9 +452,9 @@ From the repository root, with the .NET 10 SDK that
 [`global.json`](../global.json) selects:
 
 ```sh
-dotnet build dotnet/ConvoHop.slnx -c Release -maxcpucount:2
-dotnet test dotnet/test/ConvoHop.Tests -c Release --no-build -f net10.0
-dotnet pack dotnet/src/ConvoHop -c Release -o dotnet/artifacts
+dotnet build dotnet/Relay.slnx -c Release -maxcpucount:2
+dotnet test dotnet/test/Relay.Tests -c Release --no-build -f net10.0
+dotnet pack dotnet/src/Relay -c Release -o dotnet/artifacts
 ```
 
 The tests target .NET 8, 9 and 10. `net8.0` and `net9.0` test the library's
@@ -471,7 +471,7 @@ driver:
 ```sh
 npm ci
 dotnet build conformance/drivers/dotnet -c Release
-npm run conformance -- --driver "dotnet conformance/drivers/dotnet/bin/Release/net10.0/ConvoHop.Conformance.dll"
+npm run conformance -- --driver "dotnet conformance/drivers/dotnet/bin/Release/net10.0/Relay.Conformance.dll"
 ```
 
 The driver in `bin/Release/net8.0/` runs the `netstandard2.0` build on the
@@ -492,16 +492,16 @@ npm run generate:docs                   # regenerate docs/site
 npm run test:docs -- --install dotnet   # restore, build and run the docs examples
 ```
 
-`src/ConvoHop/Generated` holds code generated from the schemas: never edit
+`src/Relay/Generated` holds code generated from the schemas: never edit
 it. `npm run generate:graphql` regenerates it and `npm run check:graphql`
 checks it. See [SDK generation](../docs/sdk-generation.md).
 
 | Path | Contents |
 | --- | --- |
-| `src/ConvoHop` | The hand-written runtime: clients, transport, recovery, errors, webhooks and push |
-| `src/ConvoHop/Generated` | Generated models, the operation catalog and one API class per plane |
-| `test/ConvoHop.Tests` | xUnit tests, with the fake authority and fixtures in `TestSupport` |
-| `test/ConvoHop.SdkgenEdge`, `test/ConvoHop.SdkgenEdge.AllLayers` | Compile the generator's edge-case golden output against the runtime |
+| `src/Relay` | The hand-written runtime: clients, transport, recovery, errors, webhooks and push |
+| `src/Relay/Generated` | Generated models, the operation catalog and one API class per plane |
+| `test/Relay.Tests` | xUnit tests, with the fake authority and fixtures in `TestSupport` |
+| `test/Relay.SdkgenEdge`, `test/Relay.SdkgenEdge.AllLayers` | Compile the generator's edge-case golden output against the runtime |
 | [`../conformance/drivers/dotnet`](../conformance/drivers/dotnet) | The conformance driver |
 | [`../tools/docgen/extractors/dotnet`](../tools/docgen/extractors/dotnet) | The docs pipeline's surface extractor, built on Roslyn, and its xUnit tests |
 | [`../docs/languages/dotnet`](../docs/languages/dotnet) | The .NET docs' pages, their tested examples and the extracted surface |

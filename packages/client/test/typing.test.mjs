@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { ConvoHopProblem, TypingIndicator } from "@convohop/client";
+import { RelayProblem, TypingIndicator } from "@instantrelay/client";
 
 const conversationId = crypto.randomUUID();
 const turn = () => new Promise(resolve => setImmediate(resolve));
@@ -77,7 +77,7 @@ test("a project without typing turns the indicator off and reports the problem o
   clock(t);
   const errors = [];
   const client = fakeClient(() => {
-    throw new ConvoHopProblem("FEATURE_UNSUPPORTED", crypto.randomUUID(), "rejected", 400, "Typing is not enabled");
+    throw new RelayProblem("FEATURE_UNSUPPORTED", crypto.randomUUID(), "rejected", 400, "Typing is not enabled");
   });
   const typing = new TypingIndicator(client, conversationId, { onError: error => errors.push(error) });
   typing.input();

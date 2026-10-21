@@ -90,7 +90,7 @@ mutation CommunicationRemoveMember($context: RequestContextInput!, $input: Remov
 | Language | Members |
 | --- | --- |
 | [TypeScript](../../typescript/reference/operations.md) | [`ServerConversation.members.remove`](../../typescript/reference/server.md#serverconversationmembersremove-method) |
-| [Python](../../python/reference/operations.md) | [`ConvoHop.remove_member`](../../python/reference/convohop.md#convohopremove_member-method), [`AsyncConvoHop.remove_member`](../../python/reference/convohop.md#asyncconvohopremove_member-method) |
-| [.NET](../../dotnet/reference/operations.md) | [`ServerMembers.RemoveAsync`](../../dotnet/reference/convohop.md#servermembersremoveasync-method), [`CommunicationApi.RemoveMemberAsync`](../../dotnet/reference/api.md#communicationapiremovememberasync-method) |
+| [Python](../../python/reference/operations.md) | [`Relay.remove_member`](../../python/reference/instantrelay.md#relayremove_member-method), [`AsyncRelay.remove_member`](../../python/reference/instantrelay.md#asyncrelayremove_member-method) |
+| [.NET](../../dotnet/reference/operations.md) | [`ServerMembers.RemoveAsync`](../../dotnet/reference/relay.md#servermembersremoveasync-method), [`CommunicationApi.RemoveMemberAsync`](../../dotnet/reference/api.md#communicationapiremovememberasync-method) |
 | [Java and Kotlin](../../jvm/reference/operations.md) | [`ServerConversation.members.remove`](../../jvm/reference/server.md#serverconversationmembersremove-method), [`CommunicationApi.removeMember`](../../jvm/reference/server.md#communicationapiremovemember-method), [`CommunicationSuspendApi.removeMember`](../../jvm/reference/server-kotlin.md#communicationsuspendapiremovemember-method) |
-| [Go](../../go/reference/operations.md) | [`ProjectClient.RemoveMember`](../../go/reference/convohop.md#projectclientremovemember-method) |
+| [Go](../../go/reference/operations.md) | [`ProjectClient.RemoveMember`](../../go/reference/relay.md#projectclientremovemember-method) |

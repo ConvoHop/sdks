@@ -1,4 +1,4 @@
-# ConvoHop SDK instructions
+# Relay SDK instructions
 
 This is the canonical public `ConvoHop/sdks` repository. The TypeScript
 packages live under `packages/`: `core` (generated types/operations and the
@@ -19,8 +19,9 @@ generated operations/types in `packages/core/src/generated/`.
 and workflow policy. Releases follow `RELEASING.md`: never hand-edit package
 versions, `CHANGELOG.md` files or `.release-please-manifest.json`; keep
 unreleased workspaces `private`; pin every action to a full commit SHA and
-grant each job least-privilege `permissions`. npm publishing stays a dry run
-until registry publishing (REL-PUB) is approved.
+grant each job least-privilege `permissions`. Automatic releases only dry-run
+npm; real registry publication requires confirmed ownership/trust, its
+default-off readiness switch and protected registry approval.
 
 `tools/sdkgen` generates from the schemas plus `schema/annotations.json`
 through a language-neutral IR (`schema/ir.json`); see

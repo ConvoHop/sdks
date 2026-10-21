@@ -1,8 +1,8 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "urn:convohop:conformance:target",
-  "title": "ConvoHop conformance target descriptor",
-  "description": "Where and how the runner reaches a ConvoHop authority. String values may use ${env:NAME}; see spec/conformance/targets.md.",
+  "title": "Relay conformance target descriptor",
+  "description": "Where and how the runner reaches a Relay authority. String values may use ${env:NAME}; see spec/conformance/targets.md.",
   "type": "object",
   "additionalProperties": false,
   "required": ["name", "communicationUrl", "projectId", "incarnation"],

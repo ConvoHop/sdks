@@ -552,7 +552,7 @@ wheels = [
 ]
 
 [[package]]
-name = "convohop"
+name = "instantrelay"
 source = { editable = "../../../../python" }
 dependencies = [
     { name = "httpx" },
@@ -572,11 +572,11 @@ dev = [
 ]
 
 [[package]]
-name = "convohop-docs-python-examples"
+name = "relay-docs-python-examples"
 version = "0"
 source = { virtual = "." }
 dependencies = [
-    { name = "convohop" },
+    { name = "instantrelay" },
     { name = "firebase-admin" },
     { name = "pywebpush" },
 ]
@@ -589,7 +589,7 @@ dev = [
 
 [package.metadata]
 requires-dist = [
-    { name = "convohop", editable = "../../../../python" },
+    { name = "instantrelay", editable = "../../../../python" },
     { name = "firebase-admin", specifier = "==7.7.0" },
     { name = "pywebpush", specifier = "==2.5.0" },
 ]

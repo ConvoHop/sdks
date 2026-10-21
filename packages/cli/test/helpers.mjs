@@ -4,15 +4,15 @@ import { mkdtemp, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { Readable } from "node:stream";
-import { run } from "@convohop/cli";
+import { run } from "@instantrelay/cli";
 import { ControlClient } from "../../../conformance/lib/control.mjs";
 import { startMockTarget } from "../../../conformance/mock/server.mjs";
 import { full, reply } from "../../../test/graphql-fixtures.mjs";
 
 export const PORTAL_TOKEN = "fixture-portal-token-never-in-output";
 export const BACKEND_KEY = "fixture-backend-key-never-in-output";
-export const MANAGEMENT_URL = "https://management.convohop.test";
-export const COMMUNICATION_URL = "https://communication.convohop.test";
+export const MANAGEMENT_URL = "https://management.relay.test";
+export const COMMUNICATION_URL = "https://communication.relay.test";
 export const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/;
 
 /** A text output that keeps what is written to it. */
@@ -35,12 +35,12 @@ export function stdinOf(text, { tty = false } = {}) {
 }
 
 /**
- * Runs convohop in this process. It never reaches the network, an OS credential store or the user's configuration:
+ * Runs relay in this process. It never reaches the network, an OS credential store or the user's configuration:
  * fetch and runCommand fail unless the test passes its own, env replaces the process environment and must name a
  * configuration directory, and sleep returns at once, recording each wait in waits.
  */
 export async function cli(argv, { env = {}, stdin = stdinOf(), fetch, runCommand, platform = "linux", now, signal, sleep } = {}) {
-  assert.ok(env.CONVOHOP_CONFIG_DIR || env.XDG_CONFIG_HOME, "a test must not use the real configuration directory");
+  assert.ok(env.RELAY_CONFIG_DIR || env.XDG_CONFIG_HOME, "a test must not use the real configuration directory");
   const stdout = new Capture(), stderr = new Capture(), waits = [], sent = [];
   const code = await run({
     argv, env, stdin, stdout, stderr, platform, now, signal,
@@ -60,12 +60,12 @@ export async function cli(argv, { env = {}, stdin = stdinOf(), fetch, runCommand
 
 /** A temporary directory, removed after the test, and a cli whose configuration directory is config inside it. */
 export async function sandbox(t) {
-  const directory = await mkdtemp(join(tmpdir(), "convohop-cli-"));
+  const directory = await mkdtemp(join(tmpdir(), "relay-cli-"));
   t.after(() => rm(directory, { recursive: true, force: true }));
   const config = join(directory, "config");
   return {
     directory, config,
-    cli: (argv, options = {}) => cli(argv, { ...options, env: { CONVOHOP_CONFIG_DIR: config, ...options.env } }),
+    cli: (argv, options = {}) => cli(argv, { ...options, env: { RELAY_CONFIG_DIR: config, ...options.env } }),
   };
 }
 
@@ -82,7 +82,7 @@ export function assertNoSecrets(result, ...secrets) {
 export function assertUsage(result, message, command) {
   assert.equal(result.code, 2, result.stderr);
   assert.equal(result.stdout, "");
-  assert.equal(result.stderr, `convohop: ${message}\nRun convohop ${command ? `${command} ` : ""}--help for usage.\n`);
+  assert.equal(result.stderr, `relay: ${message}\nRun relay ${command ? `${command} ` : ""}--help for usage.\n`);
 }
 
 /** An authority that answers operations by name and routes every project to itself. */
@@ -100,9 +100,9 @@ export function fakeAuthority(answers = {}) {
     projectId, incarnation, requests, fetch,
     names: () => requests.map(request => request.operationName),
     env: {
-      CONVOHOP_MANAGEMENT_URL: MANAGEMENT_URL, CONVOHOP_PORTAL_TOKEN: PORTAL_TOKEN,
-      CONVOHOP_COMMUNICATION_URL: COMMUNICATION_URL, CONVOHOP_BACKEND_KEY: BACKEND_KEY,
-      CONVOHOP_PROJECT_ID: projectId, CONVOHOP_INCARNATION: incarnation,
+      RELAY_MANAGEMENT_URL: MANAGEMENT_URL, RELAY_PORTAL_TOKEN: PORTAL_TOKEN,
+      RELAY_COMMUNICATION_URL: COMMUNICATION_URL, RELAY_BACKEND_KEY: BACKEND_KEY,
+      RELAY_PROJECT_ID: projectId, RELAY_INCARNATION: incarnation,
     },
   };
 }
@@ -123,7 +123,7 @@ export const project = (projectId, incarnation, fields = {}) => full("Project", 
 export const accepted = (request, operationId, fields = {}) => reply(request, { status: "accepted",
   operation: full("OperationRef", { operationId, owner: "management", href: "/graphql", state: "requested" }), ...fields });
 
-/** The conformance mock target, closed after the test, with an environment that points convohop at it. */
+/** The conformance mock target, closed after the test, with an environment that points relay at it. */
 export async function mockTarget(t) {
   const target = await startMockTarget();
   t.after(() => target.close());
@@ -131,9 +131,9 @@ export async function mockTarget(t) {
   return {
     descriptor, control: new ControlClient(descriptor.control),
     env: {
-      CONVOHOP_MANAGEMENT_URL: descriptor.managementUrl, CONVOHOP_PORTAL_TOKEN: descriptor.credentials.management,
-      CONVOHOP_COMMUNICATION_URL: descriptor.communicationUrl, CONVOHOP_BACKEND_KEY: descriptor.credentials.backend,
-      CONVOHOP_PROJECT_ID: descriptor.projectId, CONVOHOP_INCARNATION: descriptor.incarnation,
+      RELAY_MANAGEMENT_URL: descriptor.managementUrl, RELAY_PORTAL_TOKEN: descriptor.credentials.management,
+      RELAY_COMMUNICATION_URL: descriptor.communicationUrl, RELAY_BACKEND_KEY: descriptor.credentials.backend,
+      RELAY_PROJECT_ID: descriptor.projectId, RELAY_INCARNATION: descriptor.incarnation,
     },
   };
 }

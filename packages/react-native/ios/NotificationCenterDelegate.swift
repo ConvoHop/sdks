@@ -1,19 +1,19 @@
-internal import ConvoHopPush
+internal import RelayPush
 import Foundation
 import UserNotifications
 
-/// The notification center's delegate once ``ConvoHopReactNative/configure(_:)`` runs. It handles ConvoHop pushes and
+/// The notification center's delegate once ``RelayReactNative/configure(_:)`` runs. It handles Relay pushes and
 /// forwards everything else to the delegate it replaced.
 final class NotificationCenterDelegate: NSObject, UNUserNotificationCenterDelegate, @unchecked Sendable {
     static let shared = NotificationCenterDelegate()
 
     /// A push, read on the thread that delivered it.
     enum Push: Sendable {
-        case notConvoHop
+        case notRelay
         /// A `convohop` object this SDK can't read, or an event type it doesn't support.
         case invalid
         /// `payload` is the JSON text JavaScript parses: `{"convohop": {...}}`.
-        case notification(ConvoHopNotification, payload: String)
+        case notification(RelayNotification, payload: String)
     }
 
     /// The fields of the push payload contract that JavaScript reads.
@@ -42,15 +42,15 @@ final class NotificationCenterDelegate: NSObject, UNUserNotificationCenterDelega
     }
 
     static func read(_ userInfo: [AnyHashable: Any]) -> Push {
-        guard let object = userInfo["convohop"] else { return .notConvoHop }
-        guard let notification = try? ConvoHopNotification.parse(userInfo: userInfo),
+        guard let object = userInfo["convohop"] else { return .notRelay }
+        guard let notification = try? RelayNotification.parse(userInfo: userInfo),
             let payload = payload(object, notification)
         else { return .invalid }
         return .notification(notification, payload: payload)
     }
 
     /// The contract's fields of the `convohop` object, or of its JSON text, with the visible text the push shows.
-    private static func payload(_ object: Any, _ notification: ConvoHopNotification) -> String? {
+    private static func payload(_ object: Any, _ notification: RelayNotification) -> String? {
         var object = object
         if let text = object as? String {
             guard let data = text.data(using: .utf8), let parsed = try? JSONSerialization.jsonObject(with: data) else {
@@ -69,23 +69,23 @@ final class NotificationCenterDelegate: NSObject, UNUserNotificationCenterDelega
         return String(data: data, encoding: .utf8)
     }
 
-    /// Handles a ConvoHop push that arrives in the foreground. Returns `false` for any other push.
+    /// Handles a Relay push that arrives in the foreground. Returns `false` for any other push.
     func handle(
         willPresent notification: UNNotification,
         completionHandler: @escaping (UNNotificationPresentationOptions) -> Void
     ) -> Bool {
         let push = Self.read(notification.request.content.userInfo)
-        if case .notConvoHop = push { return false }
+        if case .notRelay = push { return false }
         let completion = UncheckedBox(completionHandler)
         onMain { completion.value(Hub.shared.willPresent(push)) }
         return true
     }
 
-    /// Handles the default action on a ConvoHop push. Returns `false` for any other response.
+    /// Handles the default action on a Relay push. Returns `false` for any other response.
     func handle(didReceive response: UNNotificationResponse, completionHandler: @escaping () -> Void) -> Bool {
         guard response.actionIdentifier == UNNotificationDefaultActionIdentifier else { return false }
         let push = Self.read(response.notification.request.content.userInfo)
-        if case .notConvoHop = push { return false }
+        if case .notRelay = push { return false }
         let completion = UncheckedBox(completionHandler)
         onMain {
             Hub.shared.opened(push)

@@ -1,6 +1,6 @@
 // Starts the conformance mock in a Node.js process: the same HTTP and WebSocket server that the SDK's conformance
 // tests run against, with a backend key and controls for injecting faults.
-import ConvoHop
+import Relay
 import Foundation
 import XCTest
 
@@ -58,10 +58,10 @@ final class MockTarget: @unchecked Sendable {
         control = descriptor.control
     }
 
-    // Runs node from PATH, or CONVOHOP_NODE.
+    // Runs node from PATH, or RELAY_NODE.
     static func start() async throws -> MockTarget {
         let process = Process()
-        let node = ProcessInfo.processInfo.environment["CONVOHOP_NODE"]
+        let node = ProcessInfo.processInfo.environment["RELAY_NODE"]
         process.executableURL = URL(fileURLWithPath: node ?? "/usr/bin/env")
         process.arguments =
             (node == nil ? ["node"] : []) + [repositoryRoot.appendingPathComponent("conformance/mock/cli.mjs").path]
@@ -141,14 +141,14 @@ extension XCTestCase {
     // outlives a run of the app.
     func temporaryDirectory() -> URL {
         let directory = FileManager.default.temporaryDirectory.appendingPathComponent(
-            "convohop-docs-\(newRequestId())", isDirectory: true)
+            "relay-docs-\(newRequestId())", isDirectory: true)
         addTeardownBlock { try? FileManager.default.removeItem(at: directory) }
         return directory
     }
 
     // The app's client for a user, with storage in directory.
     @MainActor
-    func connect(_ signIn: SignIn, in directory: URL? = nil) async throws -> ConvoHopClient {
+    func connect(_ signIn: SignIn, in directory: URL? = nil) async throws -> RelayClient {
         try await connectUser(signIn, storage: FileRecoveryStorage(directory: directory ?? temporaryDirectory()))
     }
 
@@ -163,7 +163,7 @@ extension XCTestCase {
 
     // A started model of a conversation. The test stops it when it ends.
     @MainActor
-    func startModel(of conversationId: String, in chat: Chat) async throws -> ConvoHopConversationModel {
+    func startModel(of conversationId: String, in chat: Chat) async throws -> RelayConversationModel {
         let conversation = try model(of: conversationId, in: chat)
         await conversation.start()
         addTeardownBlock { await conversation.stop() }

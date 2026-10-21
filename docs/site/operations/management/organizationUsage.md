@@ -93,7 +93,7 @@ query ManagementOrganizationUsage($context: RequestContextInput!, $input: Organi
 | Language | Members |
 | --- | --- |
 | [TypeScript](../../typescript/reference/operations.md) | Not wrapped by a method |
-| [Python](../../python/reference/operations.md) | [`ConvoHopManagement.organization_usage`](../../python/reference/convohop.md#convohopmanagementorganization_usage-method), [`AsyncConvoHopManagement.organization_usage`](../../python/reference/convohop.md#asyncconvohopmanagementorganization_usage-method) |
+| [Python](../../python/reference/operations.md) | [`RelayManagement.organization_usage`](../../python/reference/instantrelay.md#relaymanagementorganization_usage-method), [`AsyncRelayManagement.organization_usage`](../../python/reference/instantrelay.md#asyncrelaymanagementorganization_usage-method) |
 | [.NET](../../dotnet/reference/operations.md) | [`ManagementApi.OrganizationUsageAsync`](../../dotnet/reference/api.md#managementapiorganizationusageasync-method) |
 | [Java and Kotlin](../../jvm/reference/operations.md) | [`ManagementApi.organizationUsage`](../../jvm/reference/server.md#managementapiorganizationusage-method), [`ManagementSuspendApi.organizationUsage`](../../jvm/reference/server-kotlin.md#managementsuspendapiorganizationusage-method) |
-| [Go](../../go/reference/operations.md) | [`ManagementClient.OrganizationUsage`](../../go/reference/convohop.md#managementclientorganizationusage-method) |
+| [Go](../../go/reference/operations.md) | [`ManagementClient.OrganizationUsage`](../../go/reference/relay.md#managementclientorganizationusage-method) |

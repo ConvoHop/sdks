@@ -1,4 +1,4 @@
-import { parseId, parseString, type PageOptions } from "@convohop/core";
+import { parseId, parseString, type PageOptions } from "@instantrelay/core";
 
 export function required<T>(value: T | null | undefined): T {
   if (value == null) throw new TypeError("Missing current authority result");

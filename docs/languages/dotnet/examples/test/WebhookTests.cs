@@ -5,8 +5,8 @@ using System.Text;
 using System.Text.Json.Nodes;
 using System.Threading;
 using System.Threading.Tasks;
-using ConvoHop;
-using ConvoHop.Models;
+using Relay;
+using Relay.Models;
 using Microsoft.AspNetCore.Http;
 using Xunit;
 
@@ -124,7 +124,7 @@ public sealed class WebhookTests(MockTarget mock)
             Deliveries.Envelope("message.created", "message", Guid.NewGuid().ToString(), mock.ProjectId),
             notification,
             Deliveries.Envelope("webhook.endpointDisabled", "webhookEndpoint", "endpoint-orders", mock.ProjectId),
-            Deliveries.Envelope("thread.archived", "thread", Guid.NewGuid().ToString(), mock.ProjectId), // A type from a newer ConvoHop.
+            Deliveries.Envelope("thread.archived", "thread", Guid.NewGuid().ToString(), mock.ProjectId), // A type from a newer Relay.
         })
         {
             Assert.Equal(204, await ReceiveAsync(Deliveries.Sign(@event, secret), [secret], queue));

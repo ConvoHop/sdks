@@ -11,7 +11,7 @@ const stop = (): void => {
 };
 process.on("SIGINT", stop);
 process.on("SIGTERM", stop);
-// A closed pipe, as in convohop webhooks tail | head, stops the command instead of crashing it.
+// A closed pipe, as in relay webhooks tail | head, stops the command instead of crashing it.
 process.stdout.on("error", error => {
   if ("code" in error && error.code === "EPIPE") controller.abort();
   else throw error;

@@ -2,7 +2,7 @@ import 'store.dart';
 
 /// Members' recent activity in a conversation, from what its store holds.
 ///
-/// ConvoHop doesn't publish online status to clients. This reflects what
+/// Relay doesn't publish online status to clients. This reflects what
 /// members visibly did in this conversation, the messages they wrote or
 /// edited and the receipts they reported, so treat it as "recently active",
 /// not "online". It only covers what the store has loaded.

@@ -92,7 +92,7 @@ mutation CommunicationHistoryGrant($context: RequestContextInput!, $input: Histo
 | Language | Members |
 | --- | --- |
 | [TypeScript](../../typescript/reference/operations.md) | [`ServerConversation.members.grantHistory`](../../typescript/reference/server.md#serverconversationmembersgranthistory-method) |
-| [Python](../../python/reference/operations.md) | [`ConvoHop.history_grant`](../../python/reference/convohop.md#convohophistory_grant-method), [`AsyncConvoHop.history_grant`](../../python/reference/convohop.md#asyncconvohophistory_grant-method) |
-| [.NET](../../dotnet/reference/operations.md) | [`ServerMembers.GrantHistoryAsync`](../../dotnet/reference/convohop.md#servermembersgranthistoryasync-method), [`CommunicationApi.HistoryGrantAsync`](../../dotnet/reference/api.md#communicationapihistorygrantasync-method) |
+| [Python](../../python/reference/operations.md) | [`Relay.history_grant`](../../python/reference/instantrelay.md#relayhistory_grant-method), [`AsyncRelay.history_grant`](../../python/reference/instantrelay.md#asyncrelayhistory_grant-method) |
+| [.NET](../../dotnet/reference/operations.md) | [`ServerMembers.GrantHistoryAsync`](../../dotnet/reference/relay.md#servermembersgranthistoryasync-method), [`CommunicationApi.HistoryGrantAsync`](../../dotnet/reference/api.md#communicationapihistorygrantasync-method) |
 | [Java and Kotlin](../../jvm/reference/operations.md) | [`CommunicationApi.historyGrant`](../../jvm/reference/server.md#communicationapihistorygrant-method), [`CommunicationSuspendApi.historyGrant`](../../jvm/reference/server-kotlin.md#communicationsuspendapihistorygrant-method) |
-| [Go](../../go/reference/operations.md) | [`ProjectClient.HistoryGrant`](../../go/reference/convohop.md#projectclienthistorygrant-method) |
+| [Go](../../go/reference/operations.md) | [`ProjectClient.HistoryGrant`](../../go/reference/relay.md#projectclienthistorygrant-method) |

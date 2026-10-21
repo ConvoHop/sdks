@@ -2,18 +2,18 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { getEventListeners } from "node:events";
 import { readFileSync } from "node:fs";
-import { parsePushPayload } from "@convohop/client/push";
+import { parsePushPayload } from "@instantrelay/client/push";
 import {
   getPushPermission, getPushRegistrations, handleRemoteMessage, onNotification, registerForPush, requestPushPermission,
   setPushRecipient, takeInitialNotification, unregisterFromPush,
-} from "@convohop/react-native";
+} from "@instantrelay/react-native";
 import { Platform, reported } from "react-native";
 import { linkCalls, linkPush, turn } from "./support/native.mjs";
 
 const { vectors } = JSON.parse(readFileSync(new URL("../../../spec/push-payload/vectors.json", import.meta.url), "utf8"));
 const vector = id => vectors.find(entry => entry.id === id).expected;
 const APNS = "a1".repeat(32), VOIP = "b2".repeat(32), FID = "dBq3s1Fa-7xN_mk2Lp0QzW", FCM_TOKEN = "dGVzdA:APA91bH-token_value";
-const INVALID = "ConvoHopPush sent a notification that isn't a valid ConvoHop push";
+const INVALID = "RelayPush sent a notification that isn't a valid Relay push";
 
 test.beforeEach(() => {
   Platform.OS = "ios";
@@ -51,7 +51,7 @@ test("permission requests ask for alerts, badges and sounds by default and valid
     assert.equal(await getPushPermission(), status);
   }
   linkPush({ getPermissionStatus: async () => "authorized", requestPermission: async () => 2 });
-  const unknown = { name: "TypeError", message: "ConvoHopPush returned an unknown permission status" };
+  const unknown = { name: "TypeError", message: "RelayPush returned an unknown permission status" };
   await assert.rejects(getPushPermission(), unknown);
   await assert.rejects(requestPushPermission(), unknown);
 });
@@ -76,11 +76,11 @@ test("getPushRegistrations returns the platform's registrations, frozen and vali
   assert.deepEqual(await getPushRegistrations(), [{ kind: "fcm", fid: FID }], "an app that registers by FID");
   assert.deepEqual(calls.log, [], "Android has no PushKit token");
   Platform.OS = "web";
-  await assert.rejects(getPushRegistrations(), { name: "Error", message: "ConvoHop pushes need iOS or Android" });
+  await assert.rejects(getPushRegistrations(), { name: "Error", message: "Relay pushes need iOS or Android" });
 });
 
 test("push registrations must match their provider's format", async () => {
-  const malformed = { name: "TypeError", message: "ConvoHopPush returned malformed registrations" };
+  const malformed = { name: "TypeError", message: "RelayPush returned malformed registrations" };
   const cases = {
     ios: [
       [{ kind: "apns", token: "0f".repeat(8) }, true],
@@ -170,7 +170,7 @@ test("registerForPush rejects invalid options before using the native modules", 
     await assert.rejects(registration, error => error instanceof type && error.message === message, message);
   }
   Platform.OS = "web";
-  await assert.rejects(registerForPush({ register }), { name: "Error", message: "ConvoHop pushes need iOS or Android" });
+  await assert.rejects(registerForPush({ register }), { name: "Error", message: "Relay pushes need iOS or Android" });
   assert.deepEqual([push.log, calls.log], [[], []]);
   assertUnsubscribed(push, calls);
 });
@@ -305,7 +305,7 @@ test("registerForPush sends errors it doesn't reject with to onError or React Na
   push.emit("onPushRegistration", { kind: "apns", token: APNS });
   (await registration)();
   assert.deepEqual(reported.map(error => error.message).sort(),
-    ["ConvoHop sent a malformed push registration", "getRegistrations failed", "getVoipToken failed"]);
+    ["Relay sent a malformed push registration", "getRegistrations failed", "getVoipToken failed"]);
 
   reported.length = 0;
   push = linkPush({ getRegistrations: async () => "registrations" });
@@ -316,7 +316,7 @@ test("registerForPush sends errors it doesn't reject with to onError or React Na
   push.emit("onPushRegistration", { kind: "fcm", fid: FID });
   push.emit("onPushRegistration", { kind: "apns", token: APNS });
   (await second)();
-  assert.deepEqual(errors, ["ConvoHopPush returned malformed registrations", "ConvoHop sent a malformed push registration"]);
+  assert.deepEqual(errors, ["RelayPush returned malformed registrations", "Relay sent a malformed push registration"]);
   assert.deepEqual(reported, [thrown, thrown]);
 });
 
@@ -445,7 +445,7 @@ test("registerForPush on Android passes each FCM unregistration to unregister, a
   for (const event of [{ kind: "apns", token: APNS }, { kind: "fcm", token: FCM_TOKEN, fid: FID }, { kind: "fcm" }, null])
     push.emit("onPushUnregistration", event);
   assert.equal(seen.length, 5, "malformed reports don't reach the backend");
-  assert.deepEqual(reported.map(error => error.message), Array(4).fill("ConvoHop sent a malformed push registration"));
+  assert.deepEqual(reported.map(error => error.message), Array(4).fill("Relay sent a malformed push registration"));
   stop();
   push.emit("onPushUnregistration", fid);
   await turn();
@@ -483,7 +483,7 @@ test("registerForPush rejects and unsubscribes when a native event can't be subs
   assert.deepEqual([push.log, calls.log], [[], []]);
 });
 
-test("onNotification passes each ConvoHop push the app receives or opens to the listener", () => {
+test("onNotification passes each Relay push the app receives or opens to the listener", () => {
   const push = linkPush(), seen = [], payloads = [];
   for (const { expected } of vectors)
     for (const payload of [expected.apnsAlert?.request.payload, expected.apnsVoip?.request.payload, expected.fcm?.request.message.data])
@@ -523,7 +523,7 @@ test("onNotification passes each ConvoHop push the app receives or opens to the 
   assert.throws(() => onNotification("listener"), { name: "TypeError", message: "listener must be a function" });
 });
 
-test("takeInitialNotification resolves the ConvoHop push the user opened to launch the app", async () => {
+test("takeInitialNotification resolves the Relay push the user opened to launch the app", async () => {
   const payload = JSON.stringify(vector("call-incoming").apnsVoip.request.payload);
   linkPush({ takeInitialNotification: async () => ({ action: "opened", payload }) });
   const opened = await takeInitialNotification();
@@ -561,9 +561,9 @@ test("unregisterFromPush unregisters an Android device from FCM and resolves the
   }
   for (const malformed of [{ kind: "apns", token: APNS }, { kind: "fcm", token: FCM_TOKEN, fid: FID }, { kind: "fcm" }, "fcm"]) {
     linkPush({ unregister: async () => malformed });
-    await assert.rejects(unregisterFromPush(), { name: "TypeError", message: "ConvoHopPush returned a malformed registration" });
+    await assert.rejects(unregisterFromPush(), { name: "TypeError", message: "RelayPush returned a malformed registration" });
   }
-  const failure = new Error("ConvoHop needs com.google.firebase:firebase-messaging 25.1.2 or later");
+  const failure = new Error("Relay needs com.google.firebase:firebase-messaging 25.1.2 or later");
   linkPush({ unregister: async () => { throw failure; } });
   await assert.rejects(unregisterFromPush(), error => error === failure, "the platform's error passes through");
 });
@@ -578,12 +578,12 @@ test("handleRemoteMessage hands an Android data message to the native handler", 
   const push = linkPush({ handleRemoteMessage: async () => "ringing" });
   assert.equal(await handleRemoteMessage(data), "ringing");
   assert.deepEqual(push.log, [["handleRemoteMessage", JSON.stringify(data)]]);
-  for (const result of ["notConvoHop", "invalid", "ignored", "message", "ringing", "stopped", "missed"]) {
+  for (const result of ["notRelay", "invalid", "ignored", "message", "ringing", "stopped", "missed"]) {
     linkPush({ handleRemoteMessage: async () => result });
     assert.equal(await handleRemoteMessage({ other: "value" }), result);
   }
   linkPush({ handleRemoteMessage: async () => "shown" });
-  await assert.rejects(handleRemoteMessage(data), { name: "TypeError", message: "ConvoHopPush returned an unknown result" });
+  await assert.rejects(handleRemoteMessage(data), { name: "TypeError", message: "RelayPush returned an unknown result" });
   const checked = linkPush();
   for (const value of [null, [], "data", { convohop: JSON.parse(data.convohop) }, { count: 1 }])
     await assert.rejects(handleRemoteMessage(value), { name: "TypeError", message: "data must be an object of strings" });

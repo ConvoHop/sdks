@@ -1,4 +1,4 @@
-# `@convohop/react`
+# `@instantrelay/react`
 
 React hooks over the client SDK: conversations with offline-safe sends, typing, session renewal, calls and browser media.
 
@@ -179,35 +179,6 @@ readonly resyncRequired: boolean
 The saved replay position is no longer valid. Only `ConversationStore.resync` recovers.
 
 Inherited from `ConversationSnapshot`.
-
-### `ConvoHopProviderProps` interface
-
-```ts
-interface ConvoHopProviderProps
-```
-
-#### `ConvoHopProviderProps.client` property
-
-```ts
-readonly client: ConvoHopClient
-```
-
-The signed-in user's client. Create it outside the provider, or above it, and close it when the user signs out.
-
-#### `ConvoHopProviderProps.outbox` property
-
-```ts
-readonly outbox?: Outbox | undefined
-```
-
-The outbox every conversation below sends through. Without one, each conversation's store sends through an outbox
-of its own, which stops sending when the component unmounts.
-
-#### `ConvoHopProviderProps.children` property
-
-```ts
-readonly children?: ReactNode
-```
 
 ### `LiveSessionState` interface
 
@@ -417,6 +388,35 @@ Why the last connect or reconnect failed.
 
 Inherited from `MediaConnectionState`.
 
+### `RelayProviderProps` interface
+
+```ts
+interface RelayProviderProps
+```
+
+#### `RelayProviderProps.client` property
+
+```ts
+readonly client: RelayClient
+```
+
+The signed-in user's client. Create it outside the provider, or above it, and close it when the user signs out.
+
+#### `RelayProviderProps.outbox` property
+
+```ts
+readonly outbox?: Outbox | undefined
+```
+
+The outbox every conversation below sends through. Without one, each conversation's store sends through an outbox
+of its own, which stops sending when the component unmounts.
+
+#### `RelayProviderProps.children` property
+
+```ts
+readonly children?: ReactNode
+```
+
 ### `SessionRefreshOptions` interface
 
 ```ts
@@ -529,10 +529,10 @@ type MediaConnectionStatus = "idle" | "connecting" | "connected" | "resuming" | 
 
 ## Functions
 
-### `ConvoHopProvider` function
+### `RelayProvider` function
 
 ```ts
-function ConvoHopProvider({ client, outbox, children }: ConvoHopProviderProps): ReactElement
+function RelayProvider({ client, outbox, children }: RelayProviderProps): ReactElement
 ```
 
 Makes a client, and optionally a shared outbox, available to the hooks below it. It doesn't own or close either.
@@ -548,14 +548,6 @@ reconnects and session refreshes, and sends optimistically through the provider'
 client or outbox closes the old store and opens a new one; `null` closes it.
 
 Sends [`communication.getConversation`](../../operations/communication/getConversation.md), [`communication.messages`](../../operations/communication/messages.md), [`communication.getMessage`](../../operations/communication/getMessage.md), [`communication.events`](../../operations/communication/events.md), [`communication.receipts`](../../operations/communication/receipts.md) and [`communication.conversationEvents`](../../operations/communication/conversationEvents.md).
-
-### `useConvoHopClient` function
-
-```ts
-function useConvoHopClient(): ConvoHopClient
-```
-
-The provider's client.
 
 ### `useLiveSession` function
 
@@ -585,6 +577,14 @@ function useOutbox(outbox?: Outbox): readonly OutboxEntry[]
 ```
 
 The entries of `outbox`, or of the provider's outbox, in send order.
+
+### `useRelayClient` function
+
+```ts
+function useRelayClient(): RelayClient
+```
+
+The provider's client.
 
 ### `useSessionRefresh` function
 

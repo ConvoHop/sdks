@@ -1,7 +1,7 @@
 // Webhooks quickstart snippets. test/webhooks.test.ts signs deliveries and runs them.
 
 // #region receive
-import { webhooks, WebhookVerificationError, type WebhookEvent } from "@convohop/server";
+import { webhooks, WebhookVerificationError, type WebhookEvent } from "@instantrelay/server";
 
 // A fetch-style handler: Request in, Response out. secrets are the endpoint's whsec_ secrets from your
 // secret store. Pass every one you hold, so deliveries keep verifying during a secret rotation.
@@ -29,7 +29,7 @@ export function webhookHandler(
 // #endregion receive
 
 // #region handle
-import type { Conversation, ProjectServerClient, WebhookNotificationEvent } from "@convohop/server";
+import type { Conversation, ProjectServerClient, WebhookNotificationEvent } from "@instantrelay/server";
 
 // What your app does with the events it subscribes to.
 export interface EventHandlers {

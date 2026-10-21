@@ -1,4 +1,4 @@
-// Package push builds APNs, FCM and Web Push requests from ConvoHop
+// Package push builds APNs, FCM and Web Push requests from Relay
 // notification events, following the push payload contract (spec/push-payload
 // in the SDK repository).
 //

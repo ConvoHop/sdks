@@ -10,20 +10,20 @@
   "snippetRoots": ["examples/src/main"],
   "packages": [
     {
-      "name": "com.convohop:convohop-server",
+      "name": "dev.instantrelay:relay-server",
       "slug": "server",
       "layer": "server",
       "summary": "Java server SDK for trusted JVM backends: backend-key data-plane calls, management, webhook verification and push requests.",
       "runtime": "Java 11 or later",
-      "source": "jvm/convohop-server"
+      "source": "jvm/relay-server"
     },
     {
-      "name": "com.convohop:convohop-server-kotlin",
+      "name": "dev.instantrelay:relay-server-kotlin",
       "slug": "server-kotlin",
       "layer": "server",
       "summary": "Kotlin coroutine extensions for the Java server SDK: suspending APIs, page flows and interruptible blocking calls.",
       "runtime": "Kotlin 2.2 or later, on Java 11 or later",
-      "source": "jvm/convohop-server-kotlin"
+      "source": "jvm/relay-server-kotlin"
     }
   ],
   "quickstarts": ["server", "webhooks", "push"],

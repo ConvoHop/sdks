@@ -2,301 +2,301 @@
   "$schema": "../../../spec/docs/operation-map.schema.json",
   "operations": {
     "communication.capabilities": [
-      "com.convohop:convohop-server#ProjectServerClient.capabilities",
-      "com.convohop:convohop-server#CommunicationApi.capabilities",
-      "com.convohop:convohop-server-kotlin#CommunicationSuspendApi.capabilities"
+      "dev.instantrelay:relay-server#ProjectServerClient.capabilities",
+      "dev.instantrelay:relay-server#CommunicationApi.capabilities",
+      "dev.instantrelay:relay-server-kotlin#CommunicationSuspendApi.capabilities"
     ],
     "communication.route": [
-      "com.convohop:convohop-server#ProjectServerClient.initialize",
-      "com.convohop:convohop-server#CommunicationApi.route",
-      "com.convohop:convohop-server-kotlin#CommunicationSuspendApi.route"
+      "dev.instantrelay:relay-server#ProjectServerClient.initialize",
+      "dev.instantrelay:relay-server#CommunicationApi.route",
+      "dev.instantrelay:relay-server-kotlin#CommunicationSuspendApi.route"
     ],
     "communication.getPrincipal": [
-      "com.convohop:convohop-server#ProjectServerClient.principals.get",
-      "com.convohop:convohop-server#CommunicationApi.getPrincipal",
-      "com.convohop:convohop-server-kotlin#CommunicationSuspendApi.getPrincipal"
+      "dev.instantrelay:relay-server#ProjectServerClient.principals.get",
+      "dev.instantrelay:relay-server#CommunicationApi.getPrincipal",
+      "dev.instantrelay:relay-server-kotlin#CommunicationSuspendApi.getPrincipal"
     ],
     "communication.getConversation": [
-      "com.convohop:convohop-server#ServerConversation.get",
-      "com.convohop:convohop-server#CommunicationApi.getConversation",
-      "com.convohop:convohop-server-kotlin#CommunicationSuspendApi.getConversation"
+      "dev.instantrelay:relay-server#ServerConversation.get",
+      "dev.instantrelay:relay-server#CommunicationApi.getConversation",
+      "dev.instantrelay:relay-server-kotlin#CommunicationSuspendApi.getConversation"
     ],
     "communication.members": [
-      "com.convohop:convohop-server#ServerConversation.members.list",
-      "com.convohop:convohop-server#CommunicationApi.members",
-      "com.convohop:convohop-server#CommunicationApi.membersPages",
-      "com.convohop:convohop-server-kotlin#CommunicationSuspendApi.members",
-      "com.convohop:convohop-server-kotlin#CommunicationSuspendApi.membersPages"
+      "dev.instantrelay:relay-server#ServerConversation.members.list",
+      "dev.instantrelay:relay-server#CommunicationApi.members",
+      "dev.instantrelay:relay-server#CommunicationApi.membersPages",
+      "dev.instantrelay:relay-server-kotlin#CommunicationSuspendApi.members",
+      "dev.instantrelay:relay-server-kotlin#CommunicationSuspendApi.membersPages"
     ],
     "communication.messages": [
-      "com.convohop:convohop-server#ServerConversation.messages.list",
-      "com.convohop:convohop-server#CommunicationApi.messages",
-      "com.convohop:convohop-server#CommunicationApi.messagesPages",
-      "com.convohop:convohop-server-kotlin#CommunicationSuspendApi.messages",
-      "com.convohop:convohop-server-kotlin#CommunicationSuspendApi.messagesPages"
+      "dev.instantrelay:relay-server#ServerConversation.messages.list",
+      "dev.instantrelay:relay-server#CommunicationApi.messages",
+      "dev.instantrelay:relay-server#CommunicationApi.messagesPages",
+      "dev.instantrelay:relay-server-kotlin#CommunicationSuspendApi.messages",
+      "dev.instantrelay:relay-server-kotlin#CommunicationSuspendApi.messagesPages"
     ],
     "communication.getMessage": [
-      "com.convohop:convohop-server#ServerConversation.messages.get",
-      "com.convohop:convohop-server#CommunicationApi.getMessage",
-      "com.convohop:convohop-server-kotlin#CommunicationSuspendApi.getMessage"
+      "dev.instantrelay:relay-server#ServerConversation.messages.get",
+      "dev.instantrelay:relay-server#CommunicationApi.getMessage",
+      "dev.instantrelay:relay-server-kotlin#CommunicationSuspendApi.getMessage"
     ],
     "communication.inbox": [
-      "com.convohop:convohop-server#CommunicationApi.inbox",
-      "com.convohop:convohop-server#CommunicationApi.inboxPages",
-      "com.convohop:convohop-server-kotlin#CommunicationSuspendApi.inbox",
-      "com.convohop:convohop-server-kotlin#CommunicationSuspendApi.inboxPages"
+      "dev.instantrelay:relay-server#CommunicationApi.inbox",
+      "dev.instantrelay:relay-server#CommunicationApi.inboxPages",
+      "dev.instantrelay:relay-server-kotlin#CommunicationSuspendApi.inbox",
+      "dev.instantrelay:relay-server-kotlin#CommunicationSuspendApi.inboxPages"
     ],
     "communication.search": [
-      "com.convohop:convohop-server#CommunicationApi.search",
-      "com.convohop:convohop-server#CommunicationApi.searchPages",
-      "com.convohop:convohop-server-kotlin#CommunicationSuspendApi.search",
-      "com.convohop:convohop-server-kotlin#CommunicationSuspendApi.searchPages"
+      "dev.instantrelay:relay-server#CommunicationApi.search",
+      "dev.instantrelay:relay-server#CommunicationApi.searchPages",
+      "dev.instantrelay:relay-server-kotlin#CommunicationSuspendApi.search",
+      "dev.instantrelay:relay-server-kotlin#CommunicationSuspendApi.searchPages"
     ],
     "communication.resolveRequest": [
-      "com.convohop:convohop-server#Requests.resolve",
-      "com.convohop:convohop-server#Requests.retry",
-      "com.convohop:convohop-server#CommunicationApi.resolveRequest",
-      "com.convohop:convohop-server-kotlin#CommunicationSuspendApi.resolveRequest"
+      "dev.instantrelay:relay-server#Requests.resolve",
+      "dev.instantrelay:relay-server#Requests.retry",
+      "dev.instantrelay:relay-server#CommunicationApi.resolveRequest",
+      "dev.instantrelay:relay-server-kotlin#CommunicationSuspendApi.resolveRequest"
     ],
     "communication.getOperation": [
-      "com.convohop:convohop-server#ProjectServerClient.operation",
-      "com.convohop:convohop-server#CommunicationApi.getOperation",
-      "com.convohop:convohop-server-kotlin#CommunicationSuspendApi.getOperation"
+      "dev.instantrelay:relay-server#ProjectServerClient.operation",
+      "dev.instantrelay:relay-server#CommunicationApi.getOperation",
+      "dev.instantrelay:relay-server-kotlin#CommunicationSuspendApi.getOperation"
     ],
     "communication.conversationMute": [
-      "com.convohop:convohop-server#CommunicationApi.conversationMute",
-      "com.convohop:convohop-server-kotlin#CommunicationSuspendApi.conversationMute"
+      "dev.instantrelay:relay-server#CommunicationApi.conversationMute",
+      "dev.instantrelay:relay-server-kotlin#CommunicationSuspendApi.conversationMute"
     ],
     "communication.currentLiveSession": [
-      "com.convohop:convohop-server#CommunicationApi.currentLiveSession",
-      "com.convohop:convohop-server-kotlin#CommunicationSuspendApi.currentLiveSession"
+      "dev.instantrelay:relay-server#CommunicationApi.currentLiveSession",
+      "dev.instantrelay:relay-server-kotlin#CommunicationSuspendApi.currentLiveSession"
     ],
     "communication.liveSession": [
-      "com.convohop:convohop-server#CommunicationApi.liveSession",
-      "com.convohop:convohop-server-kotlin#CommunicationSuspendApi.liveSession"
+      "dev.instantrelay:relay-server#CommunicationApi.liveSession",
+      "dev.instantrelay:relay-server-kotlin#CommunicationSuspendApi.liveSession"
     ],
     "communication.liveSessions": [
-      "com.convohop:convohop-server#CommunicationApi.liveSessions",
-      "com.convohop:convohop-server#CommunicationApi.liveSessionsPages",
-      "com.convohop:convohop-server-kotlin#CommunicationSuspendApi.liveSessions",
-      "com.convohop:convohop-server-kotlin#CommunicationSuspendApi.liveSessionsPages"
+      "dev.instantrelay:relay-server#CommunicationApi.liveSessions",
+      "dev.instantrelay:relay-server#CommunicationApi.liveSessionsPages",
+      "dev.instantrelay:relay-server-kotlin#CommunicationSuspendApi.liveSessions",
+      "dev.instantrelay:relay-server-kotlin#CommunicationSuspendApi.liveSessionsPages"
     ],
     "communication.liveSessionParticipants": [
-      "com.convohop:convohop-server#CommunicationApi.liveSessionParticipants",
-      "com.convohop:convohop-server#CommunicationApi.liveSessionParticipantsPages",
-      "com.convohop:convohop-server-kotlin#CommunicationSuspendApi.liveSessionParticipants",
-      "com.convohop:convohop-server-kotlin#CommunicationSuspendApi.liveSessionParticipantsPages"
+      "dev.instantrelay:relay-server#CommunicationApi.liveSessionParticipants",
+      "dev.instantrelay:relay-server#CommunicationApi.liveSessionParticipantsPages",
+      "dev.instantrelay:relay-server-kotlin#CommunicationSuspendApi.liveSessionParticipants",
+      "dev.instantrelay:relay-server-kotlin#CommunicationSuspendApi.liveSessionParticipantsPages"
     ],
     "communication.liveSessionOperation": [
-      "com.convohop:convohop-server#CommunicationApi.liveSessionOperation",
-      "com.convohop:convohop-server-kotlin#CommunicationSuspendApi.liveSessionOperation"
+      "dev.instantrelay:relay-server#CommunicationApi.liveSessionOperation",
+      "dev.instantrelay:relay-server-kotlin#CommunicationSuspendApi.liveSessionOperation"
     ],
     "communication.sessionRequestOutcome": [
-      "com.convohop:convohop-server#CommunicationApi.sessionRequestOutcome",
-      "com.convohop:convohop-server-kotlin#CommunicationSuspendApi.sessionRequestOutcome"
+      "dev.instantrelay:relay-server#CommunicationApi.sessionRequestOutcome",
+      "dev.instantrelay:relay-server-kotlin#CommunicationSuspendApi.sessionRequestOutcome"
     ],
     "communication.createPrincipal": [
-      "com.convohop:convohop-server#ProjectServerClient.principals.create",
-      "com.convohop:convohop-server#CommunicationApi.createPrincipal",
-      "com.convohop:convohop-server-kotlin#CommunicationSuspendApi.createPrincipal"
+      "dev.instantrelay:relay-server#ProjectServerClient.principals.create",
+      "dev.instantrelay:relay-server#CommunicationApi.createPrincipal",
+      "dev.instantrelay:relay-server-kotlin#CommunicationSuspendApi.createPrincipal"
     ],
     "communication.disablePrincipal": [
-      "com.convohop:convohop-server#ProjectServerClient.principals.disable",
-      "com.convohop:convohop-server#CommunicationApi.disablePrincipal",
-      "com.convohop:convohop-server-kotlin#CommunicationSuspendApi.disablePrincipal"
+      "dev.instantrelay:relay-server#ProjectServerClient.principals.disable",
+      "dev.instantrelay:relay-server#CommunicationApi.disablePrincipal",
+      "dev.instantrelay:relay-server-kotlin#CommunicationSuspendApi.disablePrincipal"
     ],
     "communication.issueSession": [
-      "com.convohop:convohop-server#ProjectServerClient.sessions.issue",
-      "com.convohop:convohop-server#CommunicationApi.issueSession",
-      "com.convohop:convohop-server-kotlin#CommunicationSuspendApi.issueSession"
+      "dev.instantrelay:relay-server#ProjectServerClient.sessions.issue",
+      "dev.instantrelay:relay-server#CommunicationApi.issueSession",
+      "dev.instantrelay:relay-server-kotlin#CommunicationSuspendApi.issueSession"
     ],
     "communication.renewSession": [
-      "com.convohop:convohop-server#ProjectServerClient.sessions.renew",
-      "com.convohop:convohop-server#CommunicationApi.renewSession",
-      "com.convohop:convohop-server-kotlin#CommunicationSuspendApi.renewSession"
+      "dev.instantrelay:relay-server#ProjectServerClient.sessions.renew",
+      "dev.instantrelay:relay-server#CommunicationApi.renewSession",
+      "dev.instantrelay:relay-server-kotlin#CommunicationSuspendApi.renewSession"
     ],
     "communication.revokeSession": [
-      "com.convohop:convohop-server#ProjectServerClient.sessions.revoke",
-      "com.convohop:convohop-server#CommunicationApi.revokeSession",
-      "com.convohop:convohop-server-kotlin#CommunicationSuspendApi.revokeSession"
+      "dev.instantrelay:relay-server#ProjectServerClient.sessions.revoke",
+      "dev.instantrelay:relay-server#CommunicationApi.revokeSession",
+      "dev.instantrelay:relay-server-kotlin#CommunicationSuspendApi.revokeSession"
     ],
     "communication.createConversation": [
-      "com.convohop:convohop-server#ProjectServerClient.conversations.create",
-      "com.convohop:convohop-server#CommunicationApi.createConversation",
-      "com.convohop:convohop-server-kotlin#CommunicationSuspendApi.createConversation"
+      "dev.instantrelay:relay-server#ProjectServerClient.conversations.create",
+      "dev.instantrelay:relay-server#CommunicationApi.createConversation",
+      "dev.instantrelay:relay-server-kotlin#CommunicationSuspendApi.createConversation"
     ],
     "communication.updateConversation": [
-      "com.convohop:convohop-server#CommunicationApi.updateConversation",
-      "com.convohop:convohop-server-kotlin#CommunicationSuspendApi.updateConversation"
+      "dev.instantrelay:relay-server#CommunicationApi.updateConversation",
+      "dev.instantrelay:relay-server-kotlin#CommunicationSuspendApi.updateConversation"
     ],
     "communication.addMember": [
-      "com.convohop:convohop-server#ServerConversation.members.add",
-      "com.convohop:convohop-server#CommunicationApi.addMember",
-      "com.convohop:convohop-server-kotlin#CommunicationSuspendApi.addMember"
+      "dev.instantrelay:relay-server#ServerConversation.members.add",
+      "dev.instantrelay:relay-server#CommunicationApi.addMember",
+      "dev.instantrelay:relay-server-kotlin#CommunicationSuspendApi.addMember"
     ],
     "communication.addMembers": [
-      "com.convohop:convohop-server#ServerConversation.members.addBatch",
-      "com.convohop:convohop-server#CommunicationApi.addMembers",
-      "com.convohop:convohop-server-kotlin#CommunicationSuspendApi.addMembers"
+      "dev.instantrelay:relay-server#ServerConversation.members.addBatch",
+      "dev.instantrelay:relay-server#CommunicationApi.addMembers",
+      "dev.instantrelay:relay-server-kotlin#CommunicationSuspendApi.addMembers"
     ],
     "communication.removeMember": [
-      "com.convohop:convohop-server#ServerConversation.members.remove",
-      "com.convohop:convohop-server#CommunicationApi.removeMember",
-      "com.convohop:convohop-server-kotlin#CommunicationSuspendApi.removeMember"
+      "dev.instantrelay:relay-server#ServerConversation.members.remove",
+      "dev.instantrelay:relay-server#CommunicationApi.removeMember",
+      "dev.instantrelay:relay-server-kotlin#CommunicationSuspendApi.removeMember"
     ],
     "communication.historyGrant": [
-      "com.convohop:convohop-server#CommunicationApi.historyGrant",
-      "com.convohop:convohop-server-kotlin#CommunicationSuspendApi.historyGrant"
+      "dev.instantrelay:relay-server#CommunicationApi.historyGrant",
+      "dev.instantrelay:relay-server-kotlin#CommunicationSuspendApi.historyGrant"
     ],
     "communication.sendMessage": [
-      "com.convohop:convohop-server#ServerConversation.messages.send",
-      "com.convohop:convohop-server#CommunicationApi.sendMessage",
-      "com.convohop:convohop-server-kotlin#CommunicationSuspendApi.sendMessage"
+      "dev.instantrelay:relay-server#ServerConversation.messages.send",
+      "dev.instantrelay:relay-server#CommunicationApi.sendMessage",
+      "dev.instantrelay:relay-server-kotlin#CommunicationSuspendApi.sendMessage"
     ],
     "communication.editMessage": [
-      "com.convohop:convohop-server#ServerConversation.messages.edit",
-      "com.convohop:convohop-server#CommunicationApi.editMessage",
-      "com.convohop:convohop-server-kotlin#CommunicationSuspendApi.editMessage"
+      "dev.instantrelay:relay-server#ServerConversation.messages.edit",
+      "dev.instantrelay:relay-server#CommunicationApi.editMessage",
+      "dev.instantrelay:relay-server-kotlin#CommunicationSuspendApi.editMessage"
     ],
     "communication.deleteMessage": [
-      "com.convohop:convohop-server#ServerConversation.messages.delete",
-      "com.convohop:convohop-server#CommunicationApi.deleteMessage",
-      "com.convohop:convohop-server-kotlin#CommunicationSuspendApi.deleteMessage"
+      "dev.instantrelay:relay-server#ServerConversation.messages.delete",
+      "dev.instantrelay:relay-server#CommunicationApi.deleteMessage",
+      "dev.instantrelay:relay-server-kotlin#CommunicationSuspendApi.deleteMessage"
     ],
     "communication.setBroadcastPermission": [
-      "com.convohop:convohop-server#CommunicationApi.setBroadcastPermission",
-      "com.convohop:convohop-server-kotlin#CommunicationSuspendApi.setBroadcastPermission"
+      "dev.instantrelay:relay-server#CommunicationApi.setBroadcastPermission",
+      "dev.instantrelay:relay-server-kotlin#CommunicationSuspendApi.setBroadcastPermission"
     ],
     "communication.setConversationMute": [
-      "com.convohop:convohop-server#CommunicationApi.setConversationMute",
-      "com.convohop:convohop-server-kotlin#CommunicationSuspendApi.setConversationMute"
+      "dev.instantrelay:relay-server#CommunicationApi.setConversationMute",
+      "dev.instantrelay:relay-server-kotlin#CommunicationSuspendApi.setConversationMute"
     ],
     "communication.alertLiveSession": [
-      "com.convohop:convohop-server#CommunicationApi.alertLiveSession",
-      "com.convohop:convohop-server-kotlin#CommunicationSuspendApi.alertLiveSession"
+      "dev.instantrelay:relay-server#CommunicationApi.alertLiveSession",
+      "dev.instantrelay:relay-server-kotlin#CommunicationSuspendApi.alertLiveSession"
     ],
     "communication.endLiveSession": [
-      "com.convohop:convohop-server#CommunicationApi.endLiveSession",
-      "com.convohop:convohop-server-kotlin#CommunicationSuspendApi.endLiveSession"
+      "dev.instantrelay:relay-server#CommunicationApi.endLiveSession",
+      "dev.instantrelay:relay-server-kotlin#CommunicationSuspendApi.endLiveSession"
     ],
     "communication.redeemCredential": [
-      "com.convohop:convohop-server#CommunicationApi.redeemCredential",
-      "com.convohop:convohop-server-kotlin#CommunicationSuspendApi.redeemCredential"
+      "dev.instantrelay:relay-server#CommunicationApi.redeemCredential",
+      "dev.instantrelay:relay-server-kotlin#CommunicationSuspendApi.redeemCredential"
     ],
     "communication.acknowledgeCredential": [
-      "com.convohop:convohop-server#CommunicationApi.acknowledgeCredential",
-      "com.convohop:convohop-server-kotlin#CommunicationSuspendApi.acknowledgeCredential"
+      "dev.instantrelay:relay-server#CommunicationApi.acknowledgeCredential",
+      "dev.instantrelay:relay-server-kotlin#CommunicationSuspendApi.acknowledgeCredential"
     ],
     "management.capabilities": [
-      "com.convohop:convohop-server#ManagementApi.capabilities",
-      "com.convohop:convohop-server-kotlin#ManagementSuspendApi.capabilities"
+      "dev.instantrelay:relay-server#ManagementApi.capabilities",
+      "dev.instantrelay:relay-server-kotlin#ManagementSuspendApi.capabilities"
     ],
     "management.organizations": [
-      "com.convohop:convohop-server#ManagementApi.organizations",
-      "com.convohop:convohop-server-kotlin#ManagementSuspendApi.organizations"
+      "dev.instantrelay:relay-server#ManagementApi.organizations",
+      "dev.instantrelay:relay-server-kotlin#ManagementSuspendApi.organizations"
     ],
     "management.getOrganization": [
-      "com.convohop:convohop-server#ManagementApi.getOrganization",
-      "com.convohop:convohop-server-kotlin#ManagementSuspendApi.getOrganization"
+      "dev.instantrelay:relay-server#ManagementApi.getOrganization",
+      "dev.instantrelay:relay-server-kotlin#ManagementSuspendApi.getOrganization"
     ],
     "management.getDeployment": [
-      "com.convohop:convohop-server#ManagementApi.getDeployment",
-      "com.convohop:convohop-server-kotlin#ManagementSuspendApi.getDeployment"
+      "dev.instantrelay:relay-server#ManagementApi.getDeployment",
+      "dev.instantrelay:relay-server-kotlin#ManagementSuspendApi.getDeployment"
     ],
     "management.getProject": [
-      "com.convohop:convohop-server#ManagementApi.getProject",
-      "com.convohop:convohop-server-kotlin#ManagementSuspendApi.getProject"
+      "dev.instantrelay:relay-server#ManagementApi.getProject",
+      "dev.instantrelay:relay-server-kotlin#ManagementSuspendApi.getProject"
     ],
     "management.deploymentHealth": [
-      "com.convohop:convohop-server#ManagementApi.deploymentHealth",
-      "com.convohop:convohop-server-kotlin#ManagementSuspendApi.deploymentHealth"
+      "dev.instantrelay:relay-server#ManagementApi.deploymentHealth",
+      "dev.instantrelay:relay-server-kotlin#ManagementSuspendApi.deploymentHealth"
     ],
     "management.deploymentUsage": [
-      "com.convohop:convohop-server#ManagementApi.deploymentUsage",
-      "com.convohop:convohop-server-kotlin#ManagementSuspendApi.deploymentUsage"
+      "dev.instantrelay:relay-server#ManagementApi.deploymentUsage",
+      "dev.instantrelay:relay-server-kotlin#ManagementSuspendApi.deploymentUsage"
     ],
     "management.projectUsage": [
-      "com.convohop:convohop-server#ManagementApi.projectUsage",
-      "com.convohop:convohop-server-kotlin#ManagementSuspendApi.projectUsage"
+      "dev.instantrelay:relay-server#ManagementApi.projectUsage",
+      "dev.instantrelay:relay-server-kotlin#ManagementSuspendApi.projectUsage"
     ],
     "management.organizationUsage": [
-      "com.convohop:convohop-server#ManagementApi.organizationUsage",
-      "com.convohop:convohop-server-kotlin#ManagementSuspendApi.organizationUsage"
+      "dev.instantrelay:relay-server#ManagementApi.organizationUsage",
+      "dev.instantrelay:relay-server-kotlin#ManagementSuspendApi.organizationUsage"
     ],
     "management.webhookEndpoints": [
-      "com.convohop:convohop-server#ManagementApi.webhookEndpoints",
-      "com.convohop:convohop-server-kotlin#ManagementSuspendApi.webhookEndpoints"
+      "dev.instantrelay:relay-server#ManagementApi.webhookEndpoints",
+      "dev.instantrelay:relay-server-kotlin#ManagementSuspendApi.webhookEndpoints"
     ],
     "management.webhookDeliveries": [
-      "com.convohop:convohop-server#ManagementApi.webhookDeliveries",
-      "com.convohop:convohop-server-kotlin#ManagementSuspendApi.webhookDeliveries"
+      "dev.instantrelay:relay-server#ManagementApi.webhookDeliveries",
+      "dev.instantrelay:relay-server-kotlin#ManagementSuspendApi.webhookDeliveries"
     ],
     "management.resolveRequest": [
-      "com.convohop:convohop-server#Requests.resolve",
-      "com.convohop:convohop-server#Requests.retry",
-      "com.convohop:convohop-server#ManagementApi.resolveRequest",
-      "com.convohop:convohop-server-kotlin#ManagementSuspendApi.resolveRequest"
+      "dev.instantrelay:relay-server#Requests.resolve",
+      "dev.instantrelay:relay-server#Requests.retry",
+      "dev.instantrelay:relay-server#ManagementApi.resolveRequest",
+      "dev.instantrelay:relay-server-kotlin#ManagementSuspendApi.resolveRequest"
     ],
     "management.getOperation": [
-      "com.convohop:convohop-server#ManagementApi.getOperation",
-      "com.convohop:convohop-server-kotlin#ManagementSuspendApi.getOperation"
+      "dev.instantrelay:relay-server#ManagementApi.getOperation",
+      "dev.instantrelay:relay-server-kotlin#ManagementSuspendApi.getOperation"
     ],
     "management.createOrganization": [
-      "com.convohop:convohop-server#ManagementApi.createOrganization",
-      "com.convohop:convohop-server-kotlin#ManagementSuspendApi.createOrganization"
+      "dev.instantrelay:relay-server#ManagementApi.createOrganization",
+      "dev.instantrelay:relay-server-kotlin#ManagementSuspendApi.createOrganization"
     ],
     "management.createDeployment": [
-      "com.convohop:convohop-server#ManagementApi.createDeployment",
-      "com.convohop:convohop-server-kotlin#ManagementSuspendApi.createDeployment"
+      "dev.instantrelay:relay-server#ManagementApi.createDeployment",
+      "dev.instantrelay:relay-server-kotlin#ManagementSuspendApi.createDeployment"
     ],
     "management.createProject": [
-      "com.convohop:convohop-server#ManagementApi.createProject",
-      "com.convohop:convohop-server-kotlin#ManagementSuspendApi.createProject"
+      "dev.instantrelay:relay-server#ManagementApi.createProject",
+      "dev.instantrelay:relay-server-kotlin#ManagementSuspendApi.createProject"
     ],
     "management.issueBackendKey": [
-      "com.convohop:convohop-server#ManagementClient.issueBackendKey",
-      "com.convohop:convohop-server#ManagementApi.issueBackendKey",
-      "com.convohop:convohop-server-kotlin#ManagementSuspendApi.issueBackendKey"
+      "dev.instantrelay:relay-server#ManagementClient.issueBackendKey",
+      "dev.instantrelay:relay-server#ManagementApi.issueBackendKey",
+      "dev.instantrelay:relay-server-kotlin#ManagementSuspendApi.issueBackendKey"
     ],
     "management.revokeBackendKey": [
-      "com.convohop:convohop-server#ManagementApi.revokeBackendKey",
-      "com.convohop:convohop-server-kotlin#ManagementSuspendApi.revokeBackendKey"
+      "dev.instantrelay:relay-server#ManagementApi.revokeBackendKey",
+      "dev.instantrelay:relay-server-kotlin#ManagementSuspendApi.revokeBackendKey"
     ],
     "management.projectPolicy": [
-      "com.convohop:convohop-server#ManagementApi.projectPolicy",
-      "com.convohop:convohop-server-kotlin#ManagementSuspendApi.projectPolicy"
+      "dev.instantrelay:relay-server#ManagementApi.projectPolicy",
+      "dev.instantrelay:relay-server-kotlin#ManagementSuspendApi.projectPolicy"
     ],
     "management.credentialPermit": [
-      "com.convohop:convohop-server#ManagementApi.credentialPermit",
-      "com.convohop:convohop-server-kotlin#ManagementSuspendApi.credentialPermit"
+      "dev.instantrelay:relay-server#ManagementApi.credentialPermit",
+      "dev.instantrelay:relay-server-kotlin#ManagementSuspendApi.credentialPermit"
     ],
     "management.pauseOperation": [
-      "com.convohop:convohop-server#ManagementApi.pauseOperation",
-      "com.convohop:convohop-server-kotlin#ManagementSuspendApi.pauseOperation"
+      "dev.instantrelay:relay-server#ManagementApi.pauseOperation",
+      "dev.instantrelay:relay-server-kotlin#ManagementSuspendApi.pauseOperation"
     ],
     "management.resumeOperation": [
-      "com.convohop:convohop-server#ManagementApi.resumeOperation",
-      "com.convohop:convohop-server-kotlin#ManagementSuspendApi.resumeOperation"
+      "dev.instantrelay:relay-server#ManagementApi.resumeOperation",
+      "dev.instantrelay:relay-server-kotlin#ManagementSuspendApi.resumeOperation"
     ],
     "management.configureWebhook": [
-      "com.convohop:convohop-server#ManagementApi.configureWebhook",
-      "com.convohop:convohop-server-kotlin#ManagementSuspendApi.configureWebhook"
+      "dev.instantrelay:relay-server#ManagementApi.configureWebhook",
+      "dev.instantrelay:relay-server-kotlin#ManagementSuspendApi.configureWebhook"
     ],
     "management.updateWebhook": [
-      "com.convohop:convohop-server#ManagementApi.updateWebhook",
-      "com.convohop:convohop-server-kotlin#ManagementSuspendApi.updateWebhook"
+      "dev.instantrelay:relay-server#ManagementApi.updateWebhook",
+      "dev.instantrelay:relay-server-kotlin#ManagementSuspendApi.updateWebhook"
     ],
     "management.rotateWebhookSecret": [
-      "com.convohop:convohop-server#ManagementApi.rotateWebhookSecret",
-      "com.convohop:convohop-server-kotlin#ManagementSuspendApi.rotateWebhookSecret"
+      "dev.instantrelay:relay-server#ManagementApi.rotateWebhookSecret",
+      "dev.instantrelay:relay-server-kotlin#ManagementSuspendApi.rotateWebhookSecret"
     ],
     "management.disableWebhook": [
-      "com.convohop:convohop-server#ManagementApi.disableWebhook",
-      "com.convohop:convohop-server-kotlin#ManagementSuspendApi.disableWebhook"
+      "dev.instantrelay:relay-server#ManagementApi.disableWebhook",
+      "dev.instantrelay:relay-server-kotlin#ManagementSuspendApi.disableWebhook"
     ],
     "management.replayWebhookDeliveries": [
-      "com.convohop:convohop-server#ManagementApi.replayWebhookDeliveries",
-      "com.convohop:convohop-server-kotlin#ManagementSuspendApi.replayWebhookDeliveries"
+      "dev.instantrelay:relay-server#ManagementApi.replayWebhookDeliveries",
+      "dev.instantrelay:relay-server-kotlin#ManagementSuspendApi.replayWebhookDeliveries"
     ]
   }
 }

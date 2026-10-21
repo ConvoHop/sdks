@@ -145,7 +145,7 @@ export function createSbom({ lock, path, tarball }) {
     metadata: {
       lifecycles: [{ phase: 'build' }],
       tools: {
-        components: [{ type: 'application', name: 'ConvoHop SDK release scripts', externalReferences: VCS }],
+        components: [{ type: 'application', name: 'Relay SDK release scripts', externalReferences: VCS }],
       },
       component: root,
     },

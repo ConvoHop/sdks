@@ -2,17 +2,17 @@
 
 // #region provider
 import type { ReactNode } from "react";
-import type { ConvoHopClient, Outbox } from "@convohop/client";
-import { ConvoHopProvider, useSessionRefresh } from "@convohop/react";
+import type { RelayClient, Outbox } from "@instantrelay/client";
+import { RelayProvider, useSessionRefresh } from "@instantrelay/react";
 
 // Wrap the signed-in screens. When the user signs in, create the client with connectUser, passing renewSession as
 // sessionRefresh, and the outbox with openOutbox. When they sign out, unmount this, then call signOut.
-export function SignedIn({ client, outbox, children }: { client: ConvoHopClient; outbox: Outbox; children: ReactNode }) {
+export function SignedIn({ client, outbox, children }: { client: RelayClient; outbox: Outbox; children: ReactNode }) {
   return (
-    <ConvoHopProvider client={client} outbox={outbox}>
+    <RelayProvider client={client} outbox={outbox}>
       <KeepSessionAlive />
       {children}
-    </ConvoHopProvider>
+    </RelayProvider>
   );
 }
 
@@ -26,7 +26,7 @@ function KeepSessionAlive(): null {
 // #region conversation
 import { useState } from "react";
 import { Button, FlatList, Text, TextInput, View } from "react-native";
-import { useConversation, useTyping } from "@convohop/react";
+import { useConversation, useTyping } from "@instantrelay/react";
 import { pendingLabel } from "./client.ts";
 
 // typing: whether the project has typing indicators, from (await client.capabilities()).features?.typing.

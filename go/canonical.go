@@ -1,4 +1,4 @@
-package convohop
+package relay
 
 import (
 	"bytes"
@@ -21,7 +21,7 @@ const maxSafeInteger = 1<<53 - 1
 
 var errUnsafeNumber = errors.New("unsafe protocol number")
 
-// canonical encodes a decoded JSON value the way every ConvoHop SDK does for
+// canonical encodes a decoded JSON value the way every Relay SDK does for
 // request identity: object keys sorted by UTF-16 code units, JSON.stringify
 // string escaping and ECMAScript number formatting. Values are nil, bool,
 // string, json.Number, []any and map[string]any.

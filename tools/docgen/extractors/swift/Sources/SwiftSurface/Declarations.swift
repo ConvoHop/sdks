@@ -117,7 +117,7 @@ final class ExtensionDecl {
         self.platforms = platforms
     }
 
-    /// The extended type's name as written, such as `ConvoHopOutbox.Entry`.
+    /// The extended type's name as written, such as `RelayOutbox.Entry`.
     var extendedName: String? { dottedName(node.extendedType) }
 }
 

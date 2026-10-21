@@ -34,7 +34,7 @@ jobs:
       confirmation: ${{ inputs.confirmation }}
 
   publish:
-    name: Publish convohop to PyPI
+    name: Publish instantrelay to PyPI
     needs: prepare
     if: needs.prepare.outputs.publish == 'true'
     runs-on: ubuntu-24.04

@@ -59,7 +59,7 @@ test("the emitter owns its directory, takes no options and writes one file per c
   const files = renderEmitters(edge(), [android]);
   assert.deepEqual(files.map(file => file.path), FILES.map(name => `${DIRECTORY}/${name}`));
   for (const file of files) {
-    assert.match(file.contents, /^\/\/ Generated from the current unversioned GraphQL schemas\. Run npm run generate:graphql\.\npackage com\.convohop\.android\.generated\n/);
+    assert.match(file.contents, /^\/\/ Generated from the current unversioned GraphQL schemas\. Run npm run generate:graphql\.\npackage dev\.instantrelay\.android\.generated\n/);
     assert.ok(file.contents.endsWith("\n") && !file.contents.endsWith("\n\n"), file.path);
     assert.doesNotMatch(file.contents, /[ \t]+$/m, file.path);
   }

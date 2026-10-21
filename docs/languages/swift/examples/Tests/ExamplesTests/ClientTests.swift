@@ -1,5 +1,5 @@
 // Runs the client quickstart's snippets against the conformance mock.
-import ConvoHop
+import Relay
 import Foundation
 import XCTest
 
@@ -54,7 +54,7 @@ final class ClientTests: XCTestCase {
         do {
             _ = try await sendMessage(bob, to: conversationId, text: "Still there??", requestId: requestId)
             XCTFail("Changed text reused the request ID")
-        } catch let error as ConvoHopError {
+        } catch let error as RelayError {
             XCTAssertEqual(error.code, .idempotencyConflict)
         }
     }
@@ -89,7 +89,7 @@ final class ClientTests: XCTestCase {
     }
 
     @MainActor
-    func testTheConversationModelShowsADraftAtOnceThenTheMessagesConvoHopCommitted() async throws {
+    func testTheConversationModelShowsADraftAtOnceThenTheMessagesRelayCommitted() async throws {
         let mock = try await startMock()
         let (aliceSignIn, bobSignIn, conversationId) = try await Backend(target: mock).twoMembers("Store")
         let conversation = try await startModel(of: conversationId, in: openChat(aliceSignIn))
@@ -135,7 +135,7 @@ final class ClientTests: XCTestCase {
             outgoing(in: conversation).isEmpty && messages(in: conversation).count == 1
         }
         XCTAssertEqual(messages(in: conversation).map(\.text), ["Still there?"])
-        // The outbox sends it again with the same request ID, so ConvoHop stores it once whether or not it committed
+        // The outbox sends it again with the same request ID, so Relay stores it once whether or not it committed
         // the dropped attempt.
         let attempts = try await mock.attempts("sendMessage", item.requestId)
         XCTAssertEqual(attempts, [true, false])
@@ -153,7 +153,7 @@ final class ClientTests: XCTestCase {
         let queued = try await alice.outbox.enqueue("Am I in?", to: elsewhere)
         XCTAssertEqual(pendingLabel(queued), "Waiting to send")
         try await alice.outbox.start()
-        // Alice isn't a member, so ConvoHop refuses the message.
+        // Alice isn't a member, so Relay refuses the message.
         let failed = try await item(queued.id, in: alice) { $0.state == .failed }
         XCTAssertEqual(pendingLabel(failed), "Not sent (NOT_FOUND)")
 
@@ -248,7 +248,7 @@ final class ClientTests: XCTestCase {
                 try? FileManager.default.removeItem(at: root)
             }
         }
-        XCTAssertEqual(Array(storage.directory.pathComponents.suffix(3)), ["ConvoHop", projectId, principalId])
+        XCTAssertEqual(Array(storage.directory.pathComponents.suffix(3)), ["Relay", projectId, principalId])
         XCTAssertTrue(FileManager.default.fileExists(atPath: storage.directory.path))
     }
 
@@ -259,7 +259,7 @@ final class ClientTests: XCTestCase {
         do {
             _ = try await send()
             XCTFail("The connection didn't drop", file: file, line: line)
-        } catch let error as ConvoHopError {
+        } catch let error as RelayError {
             XCTAssertEqual(error.outcome, .unknown, file: file, line: line)
         }
     }
@@ -267,9 +267,9 @@ final class ClientTests: XCTestCase {
     // Waits for an outbox item to match condition.
     @MainActor
     private func item(
-        _ id: UUID, in chat: Chat, where condition: (ConvoHopOutbox.Item) -> Bool
-    ) async throws -> ConvoHopOutbox.Item {
-        var found: ConvoHopOutbox.Item?
+        _ id: UUID, in chat: Chat, where condition: (RelayOutbox.Item) -> Bool
+    ) async throws -> RelayOutbox.Item {
+        var found: RelayOutbox.Item?
         try await eventually("the outbox item") {
             found = try await chat.outbox.items().first { $0.id == id }
             return found.map(condition) ?? false
@@ -284,7 +284,7 @@ final class Renders {
 }
 
 @MainActor
-func messages(in conversation: ConvoHopConversationModel) -> [Message] {
+func messages(in conversation: RelayConversationModel) -> [Message] {
     conversation.entries.compactMap { entry in
         guard case .message(let message) = entry else { return nil }
         return message
@@ -292,7 +292,7 @@ func messages(in conversation: ConvoHopConversationModel) -> [Message] {
 }
 
 @MainActor
-func outgoing(in conversation: ConvoHopConversationModel) -> [ConvoHopOutbox.Item] {
+func outgoing(in conversation: RelayConversationModel) -> [RelayOutbox.Item] {
     conversation.entries.compactMap { entry in
         guard case .outgoing(let item) = entry else { return nil }
         return item

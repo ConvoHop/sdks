@@ -5,8 +5,8 @@
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:convohop/convohop.dart';
-import 'package:convohop/io.dart';
+import 'package:instantrelay/instantrelay.dart';
+import 'package:instantrelay/io.dart';
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 
@@ -16,14 +16,14 @@ import 'package:http/http.dart' as http;
 // login is what your backend's login endpoint returned, decoded with jsonDecode: the session bootstrap from the
 // server SDK, with baseUrl and projectId. See the server quickstart. storage is a directory that only your app can
 // read, for example one under path_provider's getApplicationSupportDirectory().
-Future<ConvoHopClient> connectUser(Object? login, Directory storage, {SessionRefresh? sessionRefresh}) async {
+Future<RelayClient> connectUser(Object? login, Directory storage, {SessionRefresh? sessionRefresh}) async {
   final (baseUrl, projectId) = switch (login) {
     {'baseUrl': final String baseUrl, 'projectId': final String projectId} => (baseUrl, projectId),
     _ => throw const FormatException('Invalid login response'),
   };
   final bootstrap = SessionBootstrap.fromJson(login);
   final session = bootstrap.session ?? (throw const FormatException('The login response has no session'));
-  final client = ConvoHopClient(
+  final client = RelayClient(
     baseUrl: baseUrl,
     projectId: projectId,
     incarnation: session.incarnation,
@@ -61,14 +61,14 @@ SessionRefresh renewWith(http.Client backend, Uri endpoint) {
     if (response.statusCode != 200) {
       throw http.ClientException('Session renewal failed with HTTP ${response.statusCode}', endpoint);
     }
-    // The client checks the renewed session with ConvoHop before it uses it.
+    // The client checks the renewed session with Relay before it uses it.
     return SessionBootstrap.fromJson(jsonDecode(response.body));
   };
 }
 
 // Renews the session before it expires, 5 minutes ahead by default, and again before each renewal expires, until you
 // close the refresher. Close it before the client.
-SessionRefresher keepSessionAlive(ConvoHopClient client, {required void Function() signInAgain}) {
+SessionRefresher keepSessionAlive(RelayClient client, {required void Function() signInAgain}) {
   late final SessionRefresher refresher;
   refresher = SessionRefresher(
     client,
@@ -85,16 +85,16 @@ SessionRefresher keepSessionAlive(ConvoHopClient client, {required void Function
 // #region store
 // One outbox for the signed-in user. It keeps unsent messages in the client's recoveryStorage, so they survive app
 // restarts. Close it when the user signs out.
-Future<ConvoHopOutbox> openOutbox(ConvoHopClient client) async {
-  final outbox = ConvoHopOutbox(client, onError: (error) => debugPrint("A message wasn't sent: $error"));
+Future<RelayOutbox> openOutbox(RelayClient client) async {
+  final outbox = RelayOutbox(client, onError: (error) => debugPrint("A message wasn't sent: $error"));
   await outbox.initialize(); // Loads what an earlier run left unsent, and starts sending it.
   return outbox;
 }
 
 // Loads a conversation, keeps it current and renders every change. Close the store when the view goes away.
 ConversationStore showConversation(
-  ConvoHopClient client,
-  ConvoHopOutbox outbox,
+  RelayClient client,
+  RelayOutbox outbox,
   String conversationId,
   void Function(ConversationSnapshot snapshot) render,
 ) {
@@ -112,7 +112,7 @@ ConversationStore showConversation(
 // #endregion store
 
 // #region outbox
-// The message shows in snapshot.pending at once, and moves to snapshot.messages once ConvoHop commits it.
+// The message shows in snapshot.pending at once, and moves to snapshot.messages once Relay commits it.
 Future<OutboxItem?> sendDraft(ConversationStore store, String draft) async {
   final text = draft.trim();
   if (text.isEmpty) return null;
@@ -152,7 +152,7 @@ String? readLabel(ConversationSnapshot snapshot, Message message) {
 
 // #region typing
 // One indicator per conversation view. Close it when the view goes away.
-TypingIndicator typingIn(ConvoHopClient client, String conversationId) =>
+TypingIndicator typingIn(RelayClient client, String conversationId) =>
     TypingIndicator(client, conversationId, onError: (error) => debugPrint("Couldn't signal typing: $error"));
 
 // Call it from the text field's onChanged, and call typing.stop() when the user sends.
@@ -175,8 +175,8 @@ String? activityLabel(ConversationSnapshot snapshot, String principalId) =>
 // storage is the directory you gave the client's FileRecoveryStorage. It holds unsent messages and stored
 // conversations, including their text.
 Future<void> signOut({
-  required ConvoHopClient client,
-  required ConvoHopOutbox outbox,
+  required RelayClient client,
+  required RelayOutbox outbox,
   required Iterable<ConversationStore> stores,
   required Directory storage,
   SessionRefresher? refresher,
@@ -193,7 +193,7 @@ Future<void> signOut({
 // #region watch
 // Renders the newest messages and keeps them current. Close the stream when the view goes away.
 Future<ConversationStream> watchConversation(
-  ConvoHopClient client,
+  RelayClient client,
   String conversationId,
   void Function(List<Message> messages) render,
 ) async {
@@ -208,7 +208,7 @@ Future<ConversationStream> watchConversation(
 
 // #region send
 // Keep requestId with the draft until the send succeeds, and reuse it if you send the draft again.
-Future<String> sendMessage(ConvoHopClient client, String conversationId, String text, String requestId) async {
+Future<String> sendMessage(RelayClient client, String conversationId, String text, String requestId) async {
   final ack = await client.send(conversationId, text, requestId: requestId);
   return ack.messageId; // Committed by the authority. Other devices get it through their streams.
 }

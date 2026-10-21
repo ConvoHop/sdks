@@ -1,12 +1,12 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
-import { ConvoHopProblem } from "@convohop/core";
-import { closeProblem, reconnectAction, reconnectDelay, retryableCode } from "@convohop/core/internal";
+import { RelayProblem } from "@instantrelay/core";
+import { closeProblem, reconnectAction, reconnectDelay, retryableCode } from "@instantrelay/core/internal";
 
 const ir = JSON.parse(readFileSync(new URL("../../../schema/ir.json", import.meta.url), "utf8"));
 const requestId = crypto.randomUUID();
-const problem = (code, status) => new ConvoHopProblem(code, requestId, "rejected", status, code);
+const problem = (code, status) => new RelayProblem(code, requestId, "rejected", status, code);
 
 test("one classifier decides whether initialization, the realtime stream and queued sends try again", () => {
   for (const [code, status, expected] of [
@@ -81,7 +81,7 @@ test("a realtime close reports the problem its reason names, whatever the close 
     [4400, "GRAPHQL_ERROR", ["GRAPHQL_ERROR", 400, undefined], "stop"],
   ]) {
     const reported = closeProblem(code, reason, requestId);
-    assert.ok(reported instanceof ConvoHopProblem, reason);
+    assert.ok(reported instanceof RelayProblem, reason);
     assert.deepEqual([reported.code, reported.status, reported.retryAfter], expected, reason);
     assert.deepEqual([reported.requestId, reported.outcome], [requestId, "rejected"]);
     assert.equal(reconnectAction(reported), action, reason);

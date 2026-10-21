@@ -1,9 +1,9 @@
 import {
-  ConvoHopProblem, parseCounter, parseCursor, parseId, parseObject, parseString, type AsyncRecoveryStorage, type Connectivity,
+  RelayProblem, parseCounter, parseCursor, parseId, parseObject, parseString, type AsyncRecoveryStorage, type Connectivity,
   type ProtocolObject, type RecoveryState, type SendReceipt,
-} from "@convohop/core";
-import { adoptRecovery, beforeSubmitting, jsonClone, randomUUID, reconnectAction, retainRecovery } from "@convohop/core/internal";
-import type { ConvoHopClient } from "./client.js";
+} from "@instantrelay/core";
+import { adoptRecovery, beforeSubmitting, jsonClone, randomUUID, reconnectAction, retainRecovery } from "@instantrelay/core/internal";
+import type { RelayClient } from "./client.js";
 import { abortReason, connectivityOf, lifecycleOf, listen, storageWrites, throwIfAborted } from "./platform.js";
 import { asError, frozen, notify } from "./util.js";
 
@@ -69,7 +69,7 @@ interface Item {
   holdUntil: number;
 }
 type Phase = "submit" | "retry" | "resolve";
-type Resolution = Awaited<ReturnType<ConvoHopClient["requests"]["resolve"]>>;
+type Resolution = Awaited<ReturnType<RelayClient["requests"]["resolve"]>>;
 
 const maxUnsent = 100, maxSent = 100;
 const waiting = new Set(["UNAUTHENTICATED", "SESSION_REFRESH_REQUIRED", "RATE_LIMITED", "RECOVERY_LIMIT"]);
@@ -141,7 +141,7 @@ const peers = new Map<string, Set<(key: string) => void>>();
  * Whether a definitive rejection may pass. Waiting for a session or for room in the recovery store isn't refusing the
  * message, and neither is a failure the realtime stream reconnects after. A quota, plan limit or missing scope is.
  */
-function retryable(problem: ConvoHopProblem): boolean {
+function retryable(problem: RelayProblem): boolean {
   return waiting.has(problem.code) || reconnectAction(problem) !== "stop";
 }
 /**
@@ -150,7 +150,7 @@ function retryable(problem: ConvoHopProblem): boolean {
  * sent or fails. A failed entry is only sent again, as a new message, through {@link Outbox.resend}.
  */
 export class Outbox {
-  readonly client: ConvoHopClient;
+  readonly client: RelayClient;
   readonly #items = new Map<string, Item>();
   readonly #listeners = new Set<() => void>();
   readonly #lanes = new Map<string, Promise<void>>();
@@ -181,7 +181,7 @@ export class Outbox {
   readonly #takes = new Set<Promise<void>>();
   #deferredSave = false;
   #writing: Promise<void> = Promise.resolve();
-  constructor(client: ConvoHopClient, options: OutboxOptions = {}) {
+  constructor(client: RelayClient, options: OutboxOptions = {}) {
     this.client = client; this.#onError = options.onError;
     this.#connectivity = options.connectivity ?? connectivityOf(client.platform);
     if (options.persist) {
@@ -376,7 +376,7 @@ export class Outbox {
     this.#changed();
   }
   async #failed(item: Item, error: unknown, phase: Phase): Promise<void> {
-    const problem = error instanceof ConvoHopProblem ? error : undefined, failure = asError(error, "Message send failed");
+    const problem = error instanceof RelayProblem ? error : undefined, failure = asError(error, "Message send failed");
     const state = this.#state(item.requestId);
     if (phase === "submit" && !state) {
       // Refused before submission, so nothing was sent.
@@ -398,7 +398,7 @@ export class Outbox {
     return this.#wait(item, failure, problem);
   }
   /** Schedules the entry's next attempt. After `WRONG_REGION` it routes again first, so that attempt has the current route. */
-  async #wait(item: Item, failure: Error, problem: ConvoHopProblem | undefined): Promise<void> {
+  async #wait(item: Item, failure: Error, problem: RelayProblem | undefined): Promise<void> {
     if (problem && reconnectAction(problem) === "reroute") await this.client.initialize().catch(() => undefined);
     this.#later(item, failure, problem?.retryAfter);
   }
@@ -411,7 +411,7 @@ export class Outbox {
       return this.#later(item, new Error("The message's outcome is not known yet"));
     }
     if (resolution.state !== "notObservedYet") return this.#fail(item, new TypeError("Unknown request resolution state"), true);
-    this.#fail(item, item.uncertain || !item.error ? new ConvoHopProblem("RESOLUTION_REQUIRED", item.requestId, "unknown", 409,
+    this.#fail(item, item.uncertain || !item.error ? new RelayProblem("RESOLUTION_REQUIRED", item.requestId, "unknown", 409,
       "The message was not observed and its request can't be resent; resend it as a new message if it should still be sent")
       : item.error, item.uncertain);
   }

@@ -5,7 +5,7 @@ import { mkdtempSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import cliOperations, {
-  DIRECTORY, WITHHELD, cliOperationEntries, cliOperationList, cliScopeEntries, cliTypeEntries,
+  DIRECTORY, WITHHELD, cliOperationEntries, cliOperationList, cliScopeEntries, cliTypeEntries, renderOperations,
 } from "../emitters/cli-operations.mjs";
 import { mcpToolDefinitions } from "../emitters/mcp-tools.mjs";
 import { EmitterError, renderEmitters } from "../lib/emitter.mjs";
@@ -113,20 +113,33 @@ test("deprecated fields, enum descriptions and recursive input types are kept", 
 test("the repository catalog withholds credential-returning and consent operations and marks destructive ones", () => {
   const ir = buildIr(repoSources());
   const entries = Object.values(cliOperationEntries(ir));
+  assert.equal(entries.length, 61);
   const ids = new Set(ir.operations.map(operation => operation.id));
-  for (const id of Object.keys(WITHHELD)) {
-    assert.ok(ids.has(id), `withheld operation ${id} no longer exists; update WITHHELD_OPERATIONS`);
+  const withheld = Object.keys(WITHHELD).filter(id => ids.has(id)).sort();
+  assert.deepEqual(withheld, [
+    "communication.issueSession", "communication.renewSession", "management.createBillingCheckoutSession",
+    "management.createBillingPortalSession", "management.credentialPermit",
+  ]);
+  for (const id of withheld) {
     assert.ok(!entries.some(entry => entry.id === id), `${id} must not be in the catalog`);
   }
-  const approve = ir.operations.find(operation => operation.id === "management.approveAgentSignup");
-  assert.equal(serverCredential(ir, approve, "test"), "portalCredential",
+  assert.doesNotMatch(renderOperations(ir), /management\.(?:agentCredentialPermit|approveAgentSignup)/);
+  assert.match(renderOperations(edge()), /withheldOperations: Readonly<Record<string, string>> = \{\};/);
+  const approve = {
+    ...structuredClone(ir.operations.find(operation => operation.id === "management.createOrganization")),
+    id: "management.approveAgentSignup", field: "approveAgentSignup", operationName: "ManagementApproveAgentSignup",
+  };
+  const withConsent = { ...ir, operations: [...ir.operations, approve] };
+  assert.equal(serverCredential(withConsent, approve, "test"), "portalCredential",
     "the portal credential could send the owner's approval, so only the consent rule keeps it out");
+  assert.ok(!cliOperationList(withConsent).includes(approve), "the absent launch operation's consent rule remains enforced");
+  assert.match(renderOperations(withConsent), /"management\.approveAgentSignup": "records an owner's consent/);
   assert.match(WITHHELD["management.approveAgentSignup"], /^records an owner's consent/);
   assert.ok(entries.every(entry => entry.credential === (entry.plane === "management" ? "portalCredential" : "backendKey")),
     "the CLI sends the portal credential to the management plane and a backend key to the communication plane");
   assert.deepEqual(entries.filter(entry => entry.destructive).map(entry => entry.id).sort(), [
     "communication.deleteMessage", "communication.disablePrincipal", "communication.endLiveSession", "communication.removeMember",
-    "communication.revokeSession", "management.disableWebhook", "management.revokeAgentGrant", "management.revokeBackendKey",
+    "communication.revokeSession", "management.disableWebhook", "management.revokeBackendKey",
     "management.rotateWebhookSecret", "management.updateWebhook",
   ]);
   const revoke = entries.find(entry => entry.id === "management.revokeBackendKey");

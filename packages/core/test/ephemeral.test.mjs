@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { ConvoHopProblem, ConvoHopTransport, operationCatalog } from "@convohop/core";
+import { RelayProblem, RelayTransport, operationCatalog } from "@instantrelay/core";
 import { reply } from "../../../test/graphql-fixtures.mjs";
 
 const projectId = crypto.randomUUID();
@@ -9,7 +9,7 @@ function storage() {
   return { values, getItem: key => values.get(key) ?? null, setItem: (key, value) => values.set(key, value), removeItem: key => values.delete(key) };
 }
 function transport(respond, recoveryStorage = storage()) {
-  return { recoveryStorage, transport: new ConvoHopTransport({ baseUrl: "http://127.0.0.1:18080", credential: "fixture-private-session",
+  return { recoveryStorage, transport: new RelayTransport({ baseUrl: "http://127.0.0.1:18080", credential: "fixture-private-session",
     namespace: crypto.randomUUID(), incarnation: crypto.randomUUID(), recoveryStorage,
     fetch: async (_url, init) => respond(JSON.parse(init.body)) }) };
 }
@@ -17,11 +17,9 @@ const typing = { conversationId: crypto.randomUUID(), isTyping: true };
 
 test("the core catalog carries every operation's idempotency class", () => {
   const classes = new Set(Object.values(operationCatalog).map(entry => entry.idempotency));
-  assert.deepEqual([...classes].sort(), ["ephemeral", "idempotent", "permitBound", "replayOnly", "safe", "singleUse"]);
-  assert.deepEqual(Object.keys(operationCatalog).filter(id => operationCatalog[id].idempotency === "replayOnly").sort(), [
-    "management.agentCredentialPermit", "management.issueAgentKey", "management.purchaseAgentCredits",
-    "management.rejectAgentSignup", "management.requestAgentSignup",
-  ], "only agent-signup operations whose requests the authority cannot look up are replay-only");
+  assert.deepEqual([...classes].sort(), ["ephemeral", "idempotent", "permitBound", "safe", "singleUse"]);
+  assert.deepEqual(Object.keys(operationCatalog).filter(id => operationCatalog[id].idempotency === "replayOnly"), [],
+    "the launch contract exposes no replay-only operation");
   assert.equal(operationCatalog["communication.typing"].kind, "mutation");
   assert.equal(operationCatalog["communication.typing"].idempotency, "ephemeral");
   for (const entry of Object.values(operationCatalog)) if (entry.kind !== "mutation") assert.equal(entry.idempotency, "safe");
@@ -48,7 +46,7 @@ test("an ephemeral transport failure stays unknown, is not resent and leaves not
   const { transport: client, recoveryStorage } = transport(() => { requests++; throw new TypeError("connection lost"); });
   const requestId = crypto.randomUUID();
   await assert.rejects(client.execute("communication.typing", projectId, typing, requestId), error =>
-    error instanceof ConvoHopProblem && error.code === "TRANSPORT_UNKNOWN" && error.outcome === "unknown" && error.requestId === requestId);
+    error instanceof RelayProblem && error.code === "TRANSPORT_UNKNOWN" && error.outcome === "unknown" && error.requestId === requestId);
   assert.equal(requests, 1);
   assert.deepEqual(client.recoveryStates, []);
   assert.equal(recoveryStorage.values.size, 0);

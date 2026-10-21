@@ -1,4 +1,4 @@
-# `@convohop/client/push`
+# `@instantrelay/client/push`
 
 Web Push for browsers and service workers: subscribe a browser, then show and open the notifications your backend sends. It ships with the client SDK.
 
@@ -499,7 +499,7 @@ interface WebPushEventOptions extends WebPushHandlerOptions
 onError?: (error: Error) => Promise<void> | void
 ```
 
-Receives payloads that aren't ConvoHop notifications and failures to show them. The event waits for it, so it
+Receives payloads that aren't Relay notifications and failures to show them. The event waits for it, so it
 can show a notification of its own: browsers expect one for every push.
 
 #### `WebPushEventOptions.handler` property
@@ -643,8 +643,8 @@ type PushRegistration = {
 }
 ```
 
-Where your backend sends one device's pushes. Every ConvoHop client hands your app this shape, so one backend
-endpoint can store registrations from browsers and native apps. ConvoHop never sees them.
+Where your backend sends one device's pushes. Every Relay client hands your app this shape, so one backend
+endpoint can store registrations from browsers and native apps. Relay never sees them.
 
 - `webPush`: a browser subscription; your backend signs pushes with its VAPID private key.
 - `apns`: an iOS device token for alerts. `environment` says which APNs host accepts it, when the app knows.
@@ -680,10 +680,10 @@ function handleNotification(payload: unknown, now?: number): NotificationAction
 function handleNotificationClick(clients: WebClients, event: WebNotificationClickEvent, url: (notification: PushNotification, action: string | undefined) => string): boolean
 ```
 
-Handles a `notificationclick` for a ConvoHop notification: closes it, then focuses a window already showing `url`
+Handles a `notificationclick` for a Relay notification: closes it, then focuses a window already showing `url`
 or opens one. `url` maps the notification (and the clicked action, if any) to a URL of your app: relative to the
 service worker, such as `/conversations/${notification.conversationId}`, or absolute on its origin. Another origin
-is a TypeError, and the notification stays open. Returns whether the notification was a ConvoHop one.
+is a TypeError, and the notification stays open. Returns whether the notification was a Relay one.
 
 ### `handlePushEvent` function
 

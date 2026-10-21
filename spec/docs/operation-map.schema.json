@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "title": "ConvoHop SDK operation map",
+  "title": "Relay SDK operation map",
   "description": "For one language, the public SDK members that send each GraphQL operation: docs/languages/<id>/operations.json. Keys are operation IDs from schema/ir.json. Values are references, <package>#<Symbol>[.<member>...], where a static member's name is followed by :static. docgen checks that each operation exists, that its layer allows the package's layer and that each reference names a member in surface.json. Operations without an entry are listed as not wrapped. See docs/docs-pipeline.md.",
   "type": "object",
   "additionalProperties": false,

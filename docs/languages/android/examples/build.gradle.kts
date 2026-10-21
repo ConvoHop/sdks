@@ -10,7 +10,7 @@ plugins {
 
 android {
     // The snippets' package, so they use R without an import.
-    namespace = "com.convohop.examples"
+    namespace = "dev.instantrelay.examples"
     compileSdk = 36
 
     defaultConfig {
@@ -46,7 +46,7 @@ kotlin {
 }
 
 dependencies {
-    implementation(project(":convohop"))
+    implementation(project(":relay"))
     // The SDK only compiles against FCM. Apps add it, and the push snippets extend its FirebaseMessagingService.
     implementation(libs.firebase.messaging)
 

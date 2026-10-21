@@ -64,7 +64,7 @@ jobs:
       - run: npm ci --no-audit --no-fund
       # The example isn't a workspace; it compiles against the root node_modules.
       - name: Type-check the example app
-        run: npm run typecheck:example -w @convohop/react-native
+        run: npm run typecheck:example -w @instantrelay/react-native
 
   android:
     name: Android modules (JVM tests) and example app (debug build)
@@ -103,7 +103,7 @@ jobs:
             packages/react-native/example/android/**/*.gradle
             packages/react-native/example/android/gradle/wrapper/gradle-wrapper.properties
       # Until the Android SDK is on Maven Central, the example app takes the
-      # com.convohop group from this Maven repository in the build directory.
+      # dev.instantrelay group from this Maven repository in the build directory.
       - name: Publish the Android SDK's push library to android/build/repo
         working-directory: android
         run: ./gradlew --no-daemon --console=plain :push:publishAllPublicationsToBuildRepository
@@ -113,7 +113,7 @@ jobs:
         working-directory: packages/react-native/example/android
         run: >-
           ./gradlew --no-daemon --console=plain --continue
-          :convohop_react-native:testDebugUnitTest :app:assembleDebug
+          :instantrelay_react-native:testDebugUnitTest :app:assembleDebug
           -PreactNativeArchitectures=arm64-v8a
       - name: Upload the test reports
         if: failure()
@@ -172,7 +172,7 @@ jobs:
         working-directory: packages/react-native/example/ios
         run: >-
           xcodebuild build -quiet
-          -workspace ConvoHopExample.xcworkspace -scheme ConvoHopExample
+          -workspace RelayExample.xcworkspace -scheme RelayExample
           -configuration Debug -destination "generic/platform=iOS Simulator"
           -derivedDataPath "$RUNNER_TEMP/DerivedData"
           ARCHS=arm64 ONLY_ACTIVE_ARCH=YES
@@ -241,7 +241,7 @@ jobs:
           import { readFileSync } from "node:fs";
           const allowed = [
             /^it only uses (?:backend|management)(?:, (?:backend|management))* clients, which the driver under test does not declare$/,
-            /^driver convohop-react-native does not declare feature webhooks\.verify$/,
+            /^driver relay-react-native does not declare feature webhooks\.verify$/,
           ];
           const summary = JSON.parse(readFileSync("conformance/reports/react-native/summary.json", "utf8"));
           const scenarios = summary.suites.flatMap((suite) => suite.scenarios);
@@ -253,7 +253,7 @@ jobs:
             console.log(`::error::${scenario.id} ${scenario.status}: ${scenario.reason ?? "no reason"}`);
           }
           console.log(`${summary.driver.name}: ${passed.length} of ${scenarios.length} passed`);
-          if (summary.driver.name !== "convohop-react-native" || passed.length === 0 || other.length > 0) process.exit(1);
+          if (summary.driver.name !== "relay-react-native" || passed.length === 0 || other.length > 0) process.exit(1);
           SCRIPT
       - name: Upload JUnit and summary reports
         if: always()
@@ -265,7 +265,7 @@ jobs:
           retention-days: 14
 
   # Like the dev-stack job in conformance.yml, runs the scenarios against the
-  # ConvoHop dev stack: the private, development-only linux/arm64 image that
+  # Relay dev stack: the private, development-only linux/arm64 image that
   # runs the whole platform in one container (see spec/conformance/targets.md),
   # which conformance/dev-stack.mjs starts. The job runs only when the
   # CONVOHOP_DEV_STACK_IMAGE repository variable names the image, and never for

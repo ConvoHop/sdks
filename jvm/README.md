@@ -1,7 +1,7 @@
-# ConvoHop Java and Kotlin server SDK
+# Relay Java and Kotlin server SDK
 
-`com.convohop:convohop-server` is the Java SDK for the current Conversation
-and Management APIs. `com.convohop:convohop-server-kotlin` adds coroutine
+`dev.instantrelay:relay-server` is the Java SDK for the current Conversation
+and Management APIs. `dev.instantrelay:relay-server-kotlin` adds coroutine
 extensions to it. Use them only in trusted JVM backends, because they hold
 secret backend keys and operator credentials. Never put them, or a backend
 key, in an Android app or any other client. They aren't published to a
@@ -12,11 +12,11 @@ tested code and the API reference. License: [Apache-2.0](../LICENSE).
 ## Requirements
 
 - Java 11 or later. CI runs the tests on Java 11, 17, 21 and 25.
-- `convohop-server` uses the JDK's `java.net.http.HttpClient` and its own
+- `relay-server` uses the JDK's `java.net.http.HttpClient` and its own
   JSON codec. Its only dependency is the [JSpecify](https://jspecify.dev)
   nullness annotations, and every package is `@NullMarked`, so Kotlin sees
   exact nullability.
-- `convohop-server-kotlin` adds `kotlinx-coroutines-core` and needs Kotlin
+- `relay-server-kotlin` adds `kotlinx-coroutines-core` and needs Kotlin
   2.2 or later.
 - Calls block the calling thread. Clients are safe for concurrent use.
 
@@ -38,13 +38,13 @@ repositories {
 }
 
 dependencies {
-    implementation("com.convohop:convohop-server:0.1.0-SNAPSHOT")
+    implementation("dev.instantrelay:relay-server:0.1.0-SNAPSHOT")
     // Optional, for coroutines.
-    implementation("com.convohop:convohop-server-kotlin:0.1.0-SNAPSHOT")
+    implementation("dev.instantrelay:relay-server-kotlin:0.1.0-SNAPSHOT")
 }
 ```
 
-The Maven group stays `com.convohop`. Central publication is paused until
+The Maven group stays `dev.instantrelay`. Central publication is paused until
 domain ownership verifies that namespace; it does not fall back to another
 coordinate. [Central preparation](../RELEASING.md#maven-central-preparation-while-the-domain-is-deferred)
 can build unsigned artifacts or assemble an explicitly signed bundle from
@@ -56,8 +56,8 @@ Authenticate the application user before looking up its project-scoped
 principal. A caller-supplied principal ID is not proof of login.
 
 ```java
-import com.convohop.server.ProjectServerClient;
-import com.convohop.server.model.SessionBootstrap;
+import dev.instantrelay.server.ProjectServerClient;
+import dev.instantrelay.server.model.SessionBootstrap;
 
 ProjectServerClient server = ProjectServerClient.builder()
     .baseUrl(communicationBase)
@@ -94,8 +94,8 @@ SessionBootstrap bootstrap = server.sessions().issue(principalId, deviceId);
 it. The helpers check that each reply names the resource the request did.
 
 ```java
-import com.convohop.server.ServerConversation;
-import com.convohop.server.model.MessageAck;
+import dev.instantrelay.server.ServerConversation;
+import dev.instantrelay.server.model.MessageAck;
 
 ServerConversation conversation = server.conversation(conversationId);
 MessageAck sent = conversation.messages().send("Your order shipped.");
@@ -114,7 +114,7 @@ conversation.members().add(principalId, "member", expectedRevision);
 
 ### Errors
 
-Failures are `ConvoHopProblem`, an unchecked exception.
+Failures are `RelayProblem`, an unchecked exception.
 
 - `getCode()` is the stable error code, such as `RATE_LIMITED`. Always
   handle codes you don't know.
@@ -154,8 +154,8 @@ Each cursor-paginated query also gets a `…Pages` method: `membersPages`,
 `liveSessionParticipantsPages`. It returns a lazy `Iterable` of pages.
 
 ```java
-import com.convohop.server.model.MemberPage;
-import com.convohop.server.model.MembersRequestInput;
+import dev.instantrelay.server.model.MemberPage;
+import dev.instantrelay.server.model.MembersRequestInput;
 
 MembersRequestInput input = MembersRequestInput.builder().conversationId(conversationId).limit(100).build();
 for (MemberPage page : server.communication().membersPages(input)) {
@@ -179,15 +179,15 @@ for (MemberPage page : server.communication().membersPages(input)) {
 
 ## Kotlin
 
-`convohop-server-kotlin` turns each plane API into a suspending one. Calls
+`relay-server-kotlin` turns each plane API into a suspending one. Calls
 run on `Dispatchers.IO` unless you pass another dispatcher, and pages
 methods return a cold `Flow`. For the blocking client helpers, use
 `interruptible`.
 
 ```kotlin
-import com.convohop.server.kotlin.interruptible
-import com.convohop.server.kotlin.suspending
-import com.convohop.server.model.MembersRequestInput
+import dev.instantrelay.server.kotlin.interruptible
+import dev.instantrelay.server.kotlin.suspending
+import dev.instantrelay.server.model.MembersRequestInput
 
 val api = server.communication().suspending()
 val principal = interruptible { server.principals().create(accountId) }
@@ -235,19 +235,19 @@ RequestResolution resolution = server.requests().retry(problem.getRequestId());
   spent request throws `RESOLUTION_REQUIRED` instead of being sent, and
   `requests().resolve(id)` still looks it up once its record is gone.
   With no final record to forget, the new request fails with
-  `ConvoHopProblem` code `RECOVERY_LIMIT`, outcome `rejected` and status 409
+  `RelayProblem` code `RECOVERY_LIMIT`, outcome `rejected` and status 409
   before it is sent; resend or resolve the kept requests first.
 
 ## Webhooks
 
-`WebhookVerifier` checks a delivery and returns its event. ConvoHop signs
+`WebhookVerifier` checks a delivery and returns its event. Relay signs
 deliveries with the Standard Webhooks symmetric `v1` scheme.
 
 ```java
-import com.convohop.server.webhooks.VerifiedWebhook;
-import com.convohop.server.webhooks.WebhookHeaders;
-import com.convohop.server.webhooks.WebhookVerificationException;
-import com.convohop.server.webhooks.WebhookVerifier;
+import dev.instantrelay.server.webhooks.VerifiedWebhook;
+import dev.instantrelay.server.webhooks.WebhookHeaders;
+import dev.instantrelay.server.webhooks.WebhookVerificationException;
+import dev.instantrelay.server.webhooks.WebhookVerifier;
 
 WebhookVerifier verifier = WebhookVerifier.builder().secrets(webhookSecrets).build();
 
@@ -276,7 +276,7 @@ event delivered to two endpoints has the same event ID and different
   `WebhookHeaders.ofMultiValued(map)`. Names match case-insensitively.
 - The body is the exact bytes received, or a string that is their exact
   UTF-8 decoding. Never re-serialize it.
-- Pass every `whsec_` secret you hold. ConvoHop signs with the current
+- Pass every `whsec_` secret you hold. Relay signs with the current
   secret, with the next secret while a rotation is pending (at most 5
   minutes), and with the replaced secret for 24 hours after the rotation. A
   `v1` entry that matches any secret is accepted. Entries with other version
@@ -314,13 +314,13 @@ signatures or the body.
 | `TIMESTAMP_EXPIRED` | The timestamp is more than the tolerance before now. |
 | `TIMESTAMP_FUTURE` | The timestamp is more than the tolerance after now. |
 | `BODY_TOO_LARGE` | The body is over 4096 bytes. |
-| `TOO_MANY_SIGNATURES` | `webhook-signature` has more than 8 entries. ConvoHop sends 1 to 3. |
+| `TOO_MANY_SIGNATURES` | `webhook-signature` has more than 8 entries. Relay sends 1 to 3. |
 | `NO_MATCHING_SIGNATURE` | No `v1` entry matches any secret. |
 | `INVALID_BODY` | `verify()` only: the signed body isn't a UTF-8 JSON event envelope. |
 
 ## Push payloads
 
-ConvoHop doesn't send push notifications for you
+Relay doesn't send push notifications for you
 ([bring your own](../docs/sdk-strategy.md#push-notifications-bring-your-own)).
 `PushPayloads` builds APNs, FCM and Web Push requests from a notification
 event, following the [push payload contract](../spec/push-payload/README.md).
@@ -331,9 +331,9 @@ VAPID-signs Web Push messages, and sends them. Subscribe a webhook endpoint to
 `notification.callCancelled`, and de-duplicate on the event ID.
 
 ```java
-import com.convohop.server.push.ApnsRequest;
-import com.convohop.server.push.PushOptions;
-import com.convohop.server.push.PushPayloads;
+import dev.instantrelay.server.push.ApnsRequest;
+import dev.instantrelay.server.push.PushOptions;
+import dev.instantrelay.server.push.PushPayloads;
 
 PushOptions options = PushOptions.builder().title(displayName(event.getSenderId())).build();
 // A CallKit app gets incoming calls as VoIP pushes. apnsVoip returns null for other events.
@@ -376,7 +376,7 @@ a notification event you stored or received another way.
 an authorized operator access token.
 
 ```java
-import com.convohop.server.ManagementClient;
+import dev.instantrelay.server.ManagementClient;
 
 ManagementClient management = ManagementClient.builder()
     .baseUrl(managementBase)
@@ -390,13 +390,13 @@ management.issueBackendKey(projectId, "orders-service", scopes, expiresAt);
 `issueBackendKey` accepts the request as an operation. The key is handed over
 once, through credential delivery, never as an ordinary result. Redeeming a
 delivery needs a transport without a bearer credential, which this SDK
-doesn't have yet, so redeem with `@convohop/server`
+doesn't have yet, so redeem with `@instantrelay/server`
 ([credential delivery](../packages/server/README.md#management-and-credential-delivery)).
 `management.management()` reaches every other management operation.
 
 ## Not yet ported
 
-`@convohop/server` has helpers that this SDK doesn't: inbox, search, calls,
+`@instantrelay/server` has helpers that this SDK doesn't: inbox, search, calls,
 mute, history grants, broadcast, conversation updates, organization,
 deployment and project provisioning, credential delivery, and the read-only
 session request outcomes. Their operations are all in the generated APIs,
@@ -442,11 +442,11 @@ the repository root, `npm run generate:graphql` regenerates it and
 
 | Path | Contents |
 | --- | --- |
-| `convohop-server/src/main/java` | The hand-written runtime: clients, transport, recovery, errors, webhooks and push |
-| `convohop-server/src/generated/java` | Generated models, the operation catalog and one API class per plane |
-| `convohop-server/src/testFixtures/java` | The fake authority and fixtures that the tests share |
-| `convohop-server-kotlin/src/main/kotlin` | `interruptible` and the page flows |
-| `convohop-server-kotlin/src/generated/kotlin` | Generated suspending APIs |
+| `relay-server/src/main/java` | The hand-written runtime: clients, transport, recovery, errors, webhooks and push |
+| `relay-server/src/generated/java` | Generated models, the operation catalog and one API class per plane |
+| `relay-server/src/testFixtures/java` | The fake authority and fixtures that the tests share |
+| `relay-server-kotlin/src/main/kotlin` | `interruptible` and the page flows |
+| `relay-server-kotlin/src/generated/kotlin` | Generated suspending APIs |
 | `sdkgen-edge` | Compiles the generator's edge-case golden output against the runtime |
 | [`../conformance/drivers/jvm`](../conformance/drivers/jvm) | The conformance driver |
 | [`../tools/docgen/extractors/jvm`](../tools/docgen/extractors/jvm) | `docs-surface`: the public API extractor that the docs generator runs |

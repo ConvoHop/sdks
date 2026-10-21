@@ -1,15 +1,12 @@
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import test from "node:test";
-import { REDACTED, redact, redactObject, redactedFields, withheldOperations } from "@convohop/mcp";
+import { REDACTED, redact, redactObject, redactedFields, withheldOperations } from "@instantrelay/mcp";
 
 const ir = JSON.parse(readFileSync(new URL("../../../schema/ir.json", import.meta.url), "utf8"));
 const credentialLike = /token|secret|key|permit|ticket|password|credential|lease|proof|signature/i;
 // Result fields that look like credentials but aren't, each with the reason tool results may carry them.
 const notCredentials = {
-  "AgentGrant.keys": "key summaries whose own fields are checked",
-  "AgentKey.keyId": "identifies the key, which is not a secret",
-  "AgentSignupStatus.keys": "key summaries whose own fields are checked",
   "Capabilities.serverRelease": "a release name",
   "CredentialCapsule.keyId": "identifies the key, which is not a secret",
   "CredentialCapsule.secretVersion": "a rotation version",
@@ -27,9 +24,8 @@ const notCredentials = {
   "SessionBootstrap.tokenExpiresAt": "a timestamp",
   "WebhookEndpoint.secretVersion": "a rotation version",
   "CredentialPermitReply.result": "only management.credentialPermit returns it, and no tool runs that operation",
-  "AgentCredentialPermitReply.result": "only management.agentCredentialPermit returns it, and no tool runs that operation",
 };
-const permitReplies = ["CredentialPermitReply", "AgentCredentialPermitReply"];
+const permitReplies = ["CredentialPermitReply"];
 const typeName = type => (type.kind === "list" ? typeName(type.ofType) : type.name);
 
 test("every credential, secret or signed proof that a result can carry is redacted", () => {
@@ -48,7 +44,7 @@ test("every credential, secret or signed proof that a result can carry is redact
   assert.deepEqual(redactedFields.filter(name => !fieldNames.has(name)), [], "redactedFields names no result field");
   const permits = ir.operations.filter(operation => permitReplies.includes(typeName(operation.result.type)));
   assert.deepEqual(permits.map(operation => operation.id).sort(),
-    ["management.agentCredentialPermit", "management.credentialPermit"]);
+    ["management.credentialPermit"]);
   assert.deepEqual(permits.map(operation => operation.id).filter(id => !Object.hasOwn(withheldOperations, id)), []);
 });
 

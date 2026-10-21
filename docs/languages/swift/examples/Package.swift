@@ -18,18 +18,18 @@ let package = Package(
         .target(
             name: "Examples",
             dependencies: [
-                .product(name: "ConvoHop", package: "swift"),
-                .product(name: "ConvoHopCalls", package: "swift"),
-                .product(name: "ConvoHopLiveKit", package: "swift"),
-                .product(name: "ConvoHopNotificationService", package: "swift"),
+                .product(name: "Relay", package: "swift"),
+                .product(name: "RelayCalls", package: "swift"),
+                .product(name: "RelayLiveKit", package: "swift"),
+                .product(name: "RelayNotificationService", package: "swift"),
             ]
         ),
         .testTarget(
             name: "ExamplesTests",
             dependencies: [
                 "Examples",
-                .product(name: "ConvoHop", package: "swift"),
-                .product(name: "ConvoHopNotificationService", package: "swift"),
+                .product(name: "Relay", package: "swift"),
+                .product(name: "RelayNotificationService", package: "swift"),
             ]
         ),
     ]

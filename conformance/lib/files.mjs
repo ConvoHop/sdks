@@ -8,7 +8,7 @@ export const SPEC_DIR = fileURLToPath(new URL("../../spec/conformance/", import.
 export const SCENARIO_DIR = fileURLToPath(new URL("../../spec/conformance/scenarios/", import.meta.url));
 export const REPORT_DIR = fileURLToPath(new URL("../reports/", import.meta.url));
 export const REFERENCE_DRIVER = fileURLToPath(new URL("../drivers/ts/dist/driver.mjs", import.meta.url));
-export const RUNNER = Object.freeze({ name: "convohop-conformance-runner", version: "0.1.0" });
+export const RUNNER = Object.freeze({ name: "relay-conformance-runner", version: "0.1.0" });
 
 export async function readJson(path) {
   const text = await readFile(path, "utf8");

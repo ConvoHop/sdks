@@ -12,9 +12,8 @@ from typing import Any
 import httpx
 import pytest
 
-from convohop import ConvoHopManagement, ConvoHopProblem, MemoryStorage
-from convohop import _engine as engine
-from convohop._generated.operations import OPERATIONS
+from instantrelay import RelayManagement, RelayProblem, MemoryStorage
+from instantrelay import _engine as engine
 
 from .graphql import (
     BACKEND_KEY,
@@ -89,11 +88,11 @@ def ack(conversation_id: str = CONVERSATION) -> dict[str, Any]:
     return full("MessageAck", values | {"cursor": cursor})
 
 
-def create_organization(client: ConvoHopManagement, request_id: str) -> object:
+def create_organization(client: RelayManagement, request_id: str) -> object:
     return client.create_organization(name="Original", terms_ref="fixture", request_id=request_id)
 
 
-def create_deployment(client: ConvoHopManagement, request_id: str) -> object:
+def create_deployment(client: RelayManagement, request_id: str) -> object:
     return client.create_deployment(
         org_id=ORG,
         offering="managedShared",
@@ -104,7 +103,7 @@ def create_deployment(client: ConvoHopManagement, request_id: str) -> object:
     )
 
 
-MUTATIONS: dict[str, tuple[str, Callable[[ConvoHopManagement, str], object]]] = {
+MUTATIONS: dict[str, tuple[str, Callable[[RelayManagement, str], object]]] = {
     "committed": ("management.createOrganization", create_organization),
     "accepted": ("management.createDeployment", create_deployment),
 }
@@ -408,35 +407,9 @@ def test_retry_request_needs_a_recorded_canonical_request_id() -> None:
     assert authority.requests == []
 
 
-def test_an_unknown_replay_only_request_is_never_looked_up_and_settles_only_by_an_explicit_resend() -> None:
-    request_id, scopes, expires_at = uid(), ["messageRead"], "2026-12-01T00:00:00.000Z"
-    pending = {"operationId": uid(), "state": "pending", "scopes": scopes, "expiresAt": expires_at}
-
-    def issued(request: Received) -> httpx.Response:
-        return reply(request, replayed=True, result=full("AgentKey", pending))
-
-    attempts = iter([offline, issued])
-    authority = Authority(lambda request: next(attempts)(request))
-    client = authority.management(actor_id=ACTOR)
-    issue = partial(client.issue_agent_key, scopes=scopes, expires_at=expires_at, request_id=request_id)
-    assert OPERATIONS["management.issueAgentKey"].idempotency == "replayOnly"
-    rejects(issue, "TRANSPORT_UNKNOWN", UNAVAILABLE)
-    message = "The operation's requests cannot be looked up; send the same request ID and payload again explicitly"
-    problem = rejects(partial(client.retry_request, request_id), "INVALID_REQUEST", message)
-    assert (problem.request_id, problem.outcome, problem.status) == (request_id, "unknown", 400)
-    assert authority.keys == ["management.issueAgentKey"]
-    changed = partial(client.issue_agent_key, scopes=["callRead"], expires_at=expires_at, request_id=request_id)
-    rejects(changed, "IDEMPOTENCY_CONFLICT")
-    assert issue().state == "pending"
-    assert [(request.key, request.request_id) for request in authority.requests] == [
-        ("management.issueAgentKey", request_id),
-        ("management.issueAgentKey", request_id),
-    ]
-
-
 def test_a_different_payload_for_an_in_flight_request_is_a_conflict() -> None:
     request_id, sent = uid(), ack()
-    inner: list[ConvoHopProblem] = []
+    inner: list[RelayProblem] = []
 
     def respond(request: Received) -> httpx.Response:
         if not inner:

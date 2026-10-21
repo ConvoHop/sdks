@@ -1,9 +1,9 @@
 import 'dart:async';
 import 'dart:math';
 
-import 'package:convohop/convohop.dart';
-import 'package:convohop/src/failures.dart';
-import 'package:convohop/src/protocol.dart' show maxSafeInteger;
+import 'package:instantrelay/instantrelay.dart';
+import 'package:instantrelay/src/failures.dart';
+import 'package:instantrelay/src/protocol.dart' show maxSafeInteger;
 import 'package:flutter_test/flutter_test.dart';
 
 import 'support/fake_time.dart';
@@ -21,8 +21,8 @@ final class _MaxJitter implements Random {
   bool nextBool() => true;
 }
 
-ConvoHopProblem _problem(String code, int status, {int? retryAfter}) =>
-    ConvoHopProblem(code, requestId, 'rejected', status, code, retryAfter: retryAfter);
+RelayProblem _problem(String code, int status, {int? retryAfter}) =>
+    RelayProblem(code, requestId, 'rejected', status, code, retryAfter: retryAfter);
 
 void main() {
   group('reconnectAction', () {
@@ -90,7 +90,7 @@ void main() {
   });
 
   group('closeProblem', () {
-    Matcher problem(String code, int status, {int? retryAfter}) => isA<ConvoHopProblem>()
+    Matcher problem(String code, int status, {int? retryAfter}) => isA<RelayProblem>()
         .having((problem) => problem.code, 'code', code)
         .having((problem) => problem.status, 'status', status)
         .having((problem) => problem.outcome, 'outcome', 'rejected')

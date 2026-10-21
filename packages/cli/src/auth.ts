@@ -1,5 +1,5 @@
 import { randomUUID } from "node:crypto";
-import { ConvoHopTransport } from "@convohop/server";
+import { RelayTransport } from "@instantrelay/server";
 import type { Args } from "./args.js";
 import { query } from "./call.js";
 import { flag, text, type Command } from "./command.js";
@@ -22,7 +22,7 @@ async function pipedToken(context: Context): Promise<string> {
   }
   if (bytes === undefined) throw new CliError(`The portal token must be at most ${tokenLimit} bytes`);
   const token = bytes.toString("utf8").trim();
-  if (!token) throw new UsageError("Pipe the portal token to standard input, or run convohop login in a terminal", "login");
+  if (!token) throw new UsageError("Pipe the portal token to standard input, or run relay login in a terminal", "login");
   return token;
 }
 
@@ -75,10 +75,10 @@ const login: Command = {
   name: "login",
   summary: "Save a portal token for a profile, after checking it with the management authority.",
   usage: "[--management-url URL] [--communication-url URL] [--credential-store STORE] [--no-verify]",
-  details: "Type the token at the hidden prompt, or pipe it to standard input; convohop never takes it as an argument " +
+  details: "Type the token at the hidden prompt, or pipe it to standard input; relay never takes it as an argument " +
     "and never prints it. The token goes to the OS credential store (the macOS keychain or the Secret Service) or, with " +
     "--credential-store file or when no OS store works, to credentials.json in the configuration directory, readable " +
-    "only by you. CONVOHOP_CONFIG_DIR moves that directory.",
+    "only by you. RELAY_CONFIG_DIR moves that directory.",
   options: {
     "credential-store": text("STORE", "auto (default), keychain, secret-service or file."),
     "no-verify": flag("Save the token without checking it with the management authority."),
@@ -87,16 +87,16 @@ const login: Command = {
     const name = selectedProfile(args.string("profile"), context.env);
     const config = await context.files.read();
     const existing = Object.hasOwn(config.profiles, name) ? config.profiles[name] : undefined;
-    const managementUrl = originOption(args, context, "management-url", "CONVOHOP_MANAGEMENT_URL") ?? existing?.managementUrl;
-    if (managementUrl === undefined) throw new UsageError("Set --management-url or CONVOHOP_MANAGEMENT_URL", args.command);
-    const communicationUrl = originOption(args, context, "communication-url", "CONVOHOP_COMMUNICATION_URL") ??
+    const managementUrl = originOption(args, context, "management-url", "RELAY_MANAGEMENT_URL") ?? existing?.managementUrl;
+    if (managementUrl === undefined) throw new UsageError("Set --management-url or RELAY_MANAGEMENT_URL", args.command);
+    const communicationUrl = originOption(args, context, "communication-url", "RELAY_COMMUNICATION_URL") ??
       existing?.communicationUrl;
     const choice = storeChoice(args);
     const token = await readToken(context);
 
     let portalIdentity: string | null | undefined;
     if (!args.flag("no-verify")) {
-      const transport = new ConvoHopTransport({ baseUrl: managementUrl, credential: token, namespace: "cli:management",
+      const transport = new RelayTransport({ baseUrl: managementUrl, credential: token, namespace: "cli:management",
         fetch: context.fetch });
       const reply = await query(context, { name: "management", transport, projectId: undefined }, "management.capabilities", {});
       portalIdentity = reply.result?.portalIdentity ?? null;
@@ -159,12 +159,12 @@ const status: Command = {
     const name = selectedProfile(args.string("profile"), context.env);
     const { profiles } = await context.files.read();
     const profile = Object.hasOwn(profiles, name) ? profiles[name] : undefined;
-    const fromEnvironment = variable(context.env, "CONVOHOP_PORTAL_TOKEN") !== undefined ||
-      variable(context.env, "CONVOHOP_PORTAL_TOKEN_FILE") !== undefined;
+    const fromEnvironment = variable(context.env, "RELAY_PORTAL_TOKEN") !== undefined ||
+      variable(context.env, "RELAY_PORTAL_TOKEN_FILE") !== undefined;
     const stored = !fromEnvironment && profile !== undefined &&
       await loadToken(vault(profile.credentialStore, context.files, context.runCommand), profile.credentialRef) !== undefined;
-    const managementUrl = originOption(args, context, "management-url", "CONVOHOP_MANAGEMENT_URL") ?? profile?.managementUrl;
-    const communicationUrl = originOption(args, context, "communication-url", "CONVOHOP_COMMUNICATION_URL") ??
+    const managementUrl = originOption(args, context, "management-url", "RELAY_MANAGEMENT_URL") ?? profile?.managementUrl;
+    const communicationUrl = originOption(args, context, "communication-url", "RELAY_COMMUNICATION_URL") ??
       profile?.communicationUrl;
     const summary = {
       profile: name, loggedIn: profile !== undefined, managementUrl: managementUrl ?? null,

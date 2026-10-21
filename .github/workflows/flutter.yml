@@ -186,7 +186,7 @@ jobs:
           const allowed = new Set([
             "it only uses backend clients, which the driver under test does not declare",
             "it only uses management clients, which the driver under test does not declare",
-            "driver convohop-dart does not declare feature webhooks.verify",
+            "driver relay-dart does not declare feature webhooks.verify",
           ]);
           const summary = JSON.parse(readFileSync("conformance/reports/dart/summary.json", "utf8"));
           const scenarios = summary.suites.flatMap((suite) => suite.scenarios);
@@ -197,7 +197,7 @@ jobs:
             console.log(`::error::${scenario.id} ${scenario.status}: ${scenario.reason ?? "no reason"}`);
           }
           console.log(`${summary.driver.name}: ${passed.length} of ${scenarios.length} passed`);
-          if (summary.driver.name !== "convohop-dart" || passed.length === 0 || other.length > 0) process.exit(1);
+          if (summary.driver.name !== "relay-dart" || passed.length === 0 || other.length > 0) process.exit(1);
           EOF
       - name: Upload JUnit and summary reports
         if: always()
@@ -209,7 +209,7 @@ jobs:
           retention-days: 14
 
   # Like the dev-stack job in conformance.yml, runs the scenarios against the
-  # ConvoHop dev stack: the private, development-only linux/arm64 image that
+  # Relay dev stack: the private, development-only linux/arm64 image that
   # runs the whole platform in one container (see spec/conformance/targets.md),
   # which conformance/dev-stack.mjs starts. The job runs only when the
   # CONVOHOP_DEV_STACK_IMAGE repository variable names the image, and never for
@@ -290,7 +290,7 @@ jobs:
           channel: stable
       - name: Create the Android project
         working-directory: flutter/example
-        run: flutter create --platforms=android --org com.convohop --project-name convohop_example .
+        run: flutter create --platforms=android --org dev.instantrelay --project-name relay_example .
       - name: Build a debug APK
         working-directory: flutter/example
         run: flutter build apk --debug
@@ -311,7 +311,7 @@ jobs:
           channel: stable
       - name: Create the iOS project
         working-directory: flutter/example
-        run: flutter create --platforms=ios --org com.convohop --project-name convohop_example .
+        run: flutter create --platforms=ios --org dev.instantrelay --project-name relay_example .
       - name: Build for the iOS simulator
         working-directory: flutter/example
         run: flutter build ios --simulator --debug --no-codesign

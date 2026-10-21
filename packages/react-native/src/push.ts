@@ -1,8 +1,8 @@
-import type { PushRegistration } from "@convohop/client";
-import { parsePushPayload, type PushNotification } from "@convohop/client/push";
+import type { PushRegistration } from "@instantrelay/client";
+import { parsePushPayload, type PushNotification } from "@instantrelay/client/push";
 import { Platform } from "react-native";
 import { callsModule, pushModule, report } from "./native.js";
-import type { NotificationEvent } from "./specs/NativeConvoHopPush.js";
+import type { NotificationEvent } from "./specs/NativeRelayPush.js";
 
 /** Whether the app may show notifications. `provisional` is iOS's quiet delivery to Notification Center. */
 export type PushPermission = "granted" | "provisional" | "denied" | "undetermined";
@@ -56,12 +56,12 @@ export interface AbortSignalLike {
   addEventListener(type: "abort", listener: () => void): void;
   removeEventListener(type: "abort", listener: () => void): void;
 }
-/** A ConvoHop push the app received while running (`received`) or that the user opened (`opened`). */
+/** A Relay push the app received while running (`received`) or that the user opened (`opened`). */
 export interface NotificationResponse {
   readonly action: "received" | "opened";
   readonly notification: PushNotification;
 }
-/** The user whose ConvoHop pushes this device accepts: the signed-in user. */
+/** The user whose Relay pushes this device accepts: the signed-in user. */
 export interface PushRecipient {
   /** The client's `projectId`. */
   readonly projectId: string;
@@ -70,18 +70,18 @@ export interface PushRecipient {
 }
 /**
  * What the native handler did with an Android data message:
- * - `notConvoHop`: the message isn't a ConvoHop push. Handle it yourself.
- * - `invalid`: it is a ConvoHop push that doesn't match the push payload contract. It was dropped.
+ * - `notRelay`: the message isn't a Relay push. Handle it yourself.
+ * - `invalid`: it is a Relay push that doesn't match the push payload contract. It was dropped.
  * - `ignored`: a duplicate, or a ring for a call that already stopped.
  * - `message`: it showed a message notification.
  * - `ringing`: it started ringing an incoming call.
  * - `stopped`: it stopped a ring that was answered or declined, on any device.
  * - `missed`: it stopped a ring nobody answered and showed a missed call.
  */
-export type RemoteMessageResult = "notConvoHop" | "invalid" | "ignored" | "message" | "ringing" | "stopped" | "missed";
+export type RemoteMessageResult = "notRelay" | "invalid" | "ignored" | "message" | "ringing" | "stopped" | "missed";
 
 const permissions = new Set<string>(["granted", "provisional", "denied", "undetermined"]);
-const results = new Set<string>(["notConvoHop", "invalid", "ignored", "message", "ringing", "stopped", "missed"]);
+const results = new Set<string>(["notRelay", "invalid", "ignored", "message", "ringing", "stopped", "missed"]);
 // FCM tokens are opaque, so only printable ASCII without spaces is required. FIDs are 22 URL-safe base64 characters,
 // or 11 when Firebase kept an earlier Instance ID.
 const APNS_TOKEN = /^(?:[0-9a-f]{2}){8,256}$/, FCM_TOKEN = /^[!-~]{1,4096}$/, FID = /^[A-Za-z0-9_-]{11,64}$/;
@@ -89,7 +89,7 @@ const APNS_TOKEN = /^(?:[0-9a-f]{2}){8,256}$/, FCM_TOKEN = /^[!-~]{1,4096}$/, FI
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/, NIL_UUID = "00000000-0000-0000-0000-000000000000";
 
 function permission(value: unknown): PushPermission {
-  if (typeof value !== "string" || !permissions.has(value)) throw new TypeError("ConvoHopPush returned an unknown permission status");
+  if (typeof value !== "string" || !permissions.has(value)) throw new TypeError("RelayPush returned an unknown permission status");
   return value as PushPermission;
 }
 function flag(request: PushPermissionRequest, name: keyof PushPermissionRequest, fallback: boolean): boolean {
@@ -133,7 +133,7 @@ type RegistrationKind = NativePushRegistration["kind"];
 function primaryKind(): "apns" | "fcm" {
   if (Platform.OS === "ios") return "apns";
   if (Platform.OS === "android") return "fcm";
-  throw new Error("ConvoHop pushes need iOS or Android");
+  throw new Error("Relay pushes need iOS or Android");
 }
 /** Validates a registration of `kind` from the native modules. Returns `undefined` for anything else. */
 function registration(value: unknown, kind: RegistrationKind): NativePushRegistration | undefined {
@@ -149,8 +149,8 @@ function registration(value: unknown, kind: RegistrationKind): NativePushRegistr
   if (absent(environment)) return Object.freeze({ kind, token });
   return environment === "development" || environment === "production" ? Object.freeze({ kind, token, environment }) : undefined;
 }
-const malformedRegistrations = (): TypeError => new TypeError("ConvoHopPush returned malformed registrations");
-const malformedRegistration = (): TypeError => new TypeError("ConvoHop sent a malformed push registration");
+const malformedRegistrations = (): TypeError => new TypeError("RelayPush returned malformed registrations");
+const malformedRegistration = (): TypeError => new TypeError("Relay sent a malformed push registration");
 /** Tells registrations apart: the same token with another APNs environment is another registration. */
 function keyOf(found: NativePushRegistration): string {
   return "fid" in found ? "fid\n" + found.fid
@@ -170,7 +170,7 @@ export async function getPushRegistrations(): Promise<NativePushRegistration[]> 
 }
 
 /**
- * Registers this device for ConvoHop pushes. It starts the platform's registration and passes each registration to
+ * Registers this device for Relay pushes. It starts the platform's registration and passes each registration to
  * your `register` callback, which stores it with your backend. It resolves once the APNs token (iOS) or the FCM
  * registration (Android) is stored, and keeps passing new registrations until you call the function it resolves or
  * abort `signal`. It rejects when the platform can't register, `register` fails for that registration, `timeoutMs`
@@ -295,9 +295,9 @@ function response(event: unknown): NotificationResponse | undefined {
     return undefined;
   }
 }
-const invalidNotification = (): TypeError => new TypeError("ConvoHopPush sent a notification that isn't a valid ConvoHop push");
+const invalidNotification = (): TypeError => new TypeError("RelayPush sent a notification that isn't a valid Relay push");
 /**
- * Calls `listener` for each ConvoHop push the app receives while running and each one the user opens. The native
+ * Calls `listener` for each Relay push the app receives while running and each one the user opens. The native
  * modules present pushes and ring calls themselves; use this to update your UI or navigate.
  */
 export function onNotification(listener: (response: NotificationResponse) => void): () => void {
@@ -314,7 +314,7 @@ export function onNotification(listener: (response: NotificationResponse) => voi
     subscription.remove();
   };
 }
-/** The ConvoHop notification the user opened to launch the app. Resolves it once, then `null`. */
+/** The Relay notification the user opened to launch the app. Resolves it once, then `null`. */
 export async function takeInitialNotification(): Promise<NotificationResponse | null> {
   const event = await pushModule().takeInitialNotification();
   if (event === null || event === undefined) return null;
@@ -329,13 +329,13 @@ function recipientField(source: Readonly<Record<string, unknown>>, field: keyof 
   return value;
 }
 /**
- * Sets the user whose ConvoHop pushes this device shows and rings, or `null` for nobody. Call it with the client's
+ * Sets the user whose Relay pushes this device shows and rings, or `null` for nobody. Call it with the client's
  * `projectId` and `principalId` after sign-in, before `registerForPush`, and with `null` when sign-out starts. The
  * device keeps the two IDs, never a credential, so the filter also applies to a push that starts the app before
  * JavaScript runs.
  *
- * The native handlers drop every ConvoHop push for anyone else, and `onNotification` and `takeInitialNotification`
- * never see it. Until the first call, and after `null`, they drop every ConvoHop push, so a registration your backend
+ * The native handlers drop every Relay push for anyone else, and `onNotification` and `takeInitialNotification`
+ * never see it. Until the first call, and after `null`, they drop every Relay push, so a registration your backend
  * failed to delete reaches nobody. iOS still reports a dropped VoIP push to CallKit, which ends it at once. On iOS, a
  * message push that arrives while the app isn't in the foreground is shown by iOS itself: see the README.
  */
@@ -363,19 +363,19 @@ export async function unregisterFromPush(): Promise<NativePushRegistration | nul
   const removed: unknown = await pushModule().unregister();
   if (removed === null || removed === undefined) return null;
   const found = registration(removed, "fcm");
-  if (!found) throw new TypeError("ConvoHopPush returned a malformed registration");
+  if (!found) throw new TypeError("RelayPush returned a malformed registration");
   return found;
 }
 /**
- * Android: hands an FCM data message to the native ConvoHop handler, which shows message notifications and rings
+ * Android: hands an FCM data message to the native Relay handler, which shows message notifications and rings
  * calls. Use it when another library, such as React Native Firebase, owns your `FirebaseMessagingService`. Without
- * one, the ConvoHop service receives pushes itself and you don't need this.
+ * one, the Relay service receives pushes itself and you don't need this.
  */
 export async function handleRemoteMessage(data: Readonly<Record<string, string>>): Promise<RemoteMessageResult> {
   if (Platform.OS !== "android") throw new Error("handleRemoteMessage is only available on Android");
   const source = objectOf(data);
   if (!source || Object.values(source).some(value => typeof value !== "string")) throw new TypeError("data must be an object of strings");
   const result: unknown = await pushModule().handleRemoteMessage(JSON.stringify(source));
-  if (typeof result !== "string" || !results.has(result)) throw new TypeError("ConvoHopPush returned an unknown result");
+  if (typeof result !== "string" || !results.has(result)) throw new TypeError("RelayPush returned an unknown result");
   return result as RemoteMessageResult;
 }

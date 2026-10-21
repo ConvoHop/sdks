@@ -1,4 +1,4 @@
-import type { Connectivity, ConvoHopPlatform, Lifecycle, LifecycleState, PlatformURLConstructor } from "@convohop/client";
+import type { Connectivity, RelayPlatform, Lifecycle, LifecycleState, PlatformURLConstructor } from "@instantrelay/client";
 import { AppState } from "react-native";
 import { report } from "./native.js";
 import { randomUUID } from "./random.js";
@@ -16,8 +16,8 @@ export interface PlatformOptions {
    */
   netInfo?: NetInfoSource;
 }
-/** A {@link ConvoHopPlatform} for React Native: pass it as `ConvoHopClient`'s `platform` option. */
-export interface ReactNativePlatform extends ConvoHopPlatform {
+/** A {@link RelayPlatform} for React Native: pass it as `RelayClient`'s `platform` option. */
+export interface ReactNativePlatform extends RelayPlatform {
   /** Version 4 UUIDs from the platform's secure generator. */
   readonly randomUUID: () => string;
   readonly sha256: (data: Uint8Array) => Promise<Uint8Array>;
@@ -52,7 +52,7 @@ class Listeners<T> {
 }
 
 /**
- * Creates the React Native platform for `@convohop/client`. It listens to `AppState`, and to NetInfo when you pass
+ * Creates the React Native platform for `@instantrelay/client`. It listens to `AppState`, and to NetInfo when you pass
  * it, from creation until {@link ReactNativePlatform.dispose}. Create one for the app and share it between clients.
  */
 export function createPlatform(options: PlatformOptions = {}): ReactNativePlatform {

@@ -1,4 +1,4 @@
-import type { PlatformURLConstructor } from "@convohop/client";
+import type { PlatformURLConstructor } from "@instantrelay/client";
 import { URL as WhatwgURL } from "whatwg-url-without-unicode";
 
 const special = new Set(["http:", "https:", "ws:", "wss:", "ftp:", "file:"]);
@@ -18,7 +18,7 @@ function endsInNumber(domain: string): boolean {
 // (full-width digits are an IPv4 address there), so it is rejected. It also predates two rules of the current
 // standard, which this applies: a domain that ends in a number must be an IPv4 address, and domains can't contain
 // controls, DEL or `<>^|`.
-class ConvoHopURL extends WhatwgURL {
+class RelayURL extends WhatwgURL {
   constructor(url: string, base?: string) {
     super(url, base);
     if (!special.has(this.protocol)) return;
@@ -33,11 +33,11 @@ class ConvoHopURL extends WhatwgURL {
   // A blob URL's origin is that of the http(s) URL it wraps, which the polyfill parses without the rules above.
   override get origin(): string {
     if (this.protocol !== "blob:") return super.origin;
-    let inner: ConvoHopURL;
-    try { inner = new ConvoHopURL(this.pathname); } catch { return "null"; }
+    let inner: RelayURL;
+    try { inner = new RelayURL(this.pathname); } catch { return "null"; }
     return inner.protocol === "http:" || inner.protocol === "https:" ? inner.origin : "null";
   }
 }
 
 /** A WHATWG URL constructor for Hermes, which has no complete `URL`. Hosts must be ASCII (Punycode for IDNs). */
-export const URL: PlatformURLConstructor = ConvoHopURL;
+export const URL: PlatformURLConstructor = RelayURL;

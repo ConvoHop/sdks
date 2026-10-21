@@ -1,12 +1,12 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import * as core from "@convohop/core";
-import * as internal from "@convohop/core/internal";
-import * as generated from "@convohop/core/internal/generated";
+import * as core from "@instantrelay/core";
+import * as internal from "@instantrelay/core/internal";
+import * as generated from "@instantrelay/core/internal/generated";
 import { builtImportSpecifiers, sortedKeys } from "../../../test/package-fixtures.mjs";
 
 const publicValues = [
-  "ConvoHopProblem", "ConvoHopTransport", "ScopeRequiredProblem", "operationCatalog", "parseConversation",
+  "RelayProblem", "RelayTransport", "ScopeRequiredProblem", "operationCatalog", "parseConversation",
   "parseCounter", "parseCursor", "parseId", "parseMembership", "parseMessage", "parseObject", "parsePage",
   "parseSearchHit", "parseString",
 ];
@@ -28,7 +28,7 @@ test("flat generated types are type-only and kept behind the internal entry poin
 
 test("built modules are reachable only through the exports map", async () => {
   for (const path of ["dist/index.js", "dist/protocol.js", "dist/generated/operations.js", "src/index.ts"]) {
-    await assert.rejects(import(`@convohop/core/${path}`), { code: "ERR_PACKAGE_PATH_NOT_EXPORTED" }, path);
+    await assert.rejects(import(`@instantrelay/core/${path}`), { code: "ERR_PACKAGE_PATH_NOT_EXPORTED" }, path);
   }
 });
 

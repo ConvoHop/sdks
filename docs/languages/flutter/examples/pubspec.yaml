@@ -1,4 +1,4 @@
-name: convohop_docs_examples
+name: relay_docs_examples
 description: The Flutter SDK documentation's code examples, analyzed and tested against the conformance mock.
 publish_to: none
 version: 0.0.0
@@ -8,7 +8,7 @@ environment:
   flutter: ">=3.38.0"
 
 dependencies:
-  convohop:
+  instantrelay:
     path: ../../../../flutter
   flutter:
     sdk: flutter

@@ -1,7 +1,7 @@
-"""ConvoHop conformance driver for the Python SDK: NDJSON over stdio (spec/conformance/driver-protocol.md).
+"""Relay conformance driver for the Python SDK: NDJSON over stdio (spec/conformance/driver-protocol.md).
 
 Run it with the SDK's environment, for example ``python/.venv/bin/python conformance/drivers/python/driver.py``.
-``--api async`` drives ``AsyncConvoHop`` and ``AsyncConvoHopManagement`` instead of the synchronous clients, and
+``--api async`` drives ``AsyncRelay`` and ``AsyncRelayManagement`` instead of the synchronous clients, and
 ``--roles`` narrows the declared roles.
 """
 
@@ -129,7 +129,7 @@ class Driver:
         self._negotiated = True
         return {
             "driver": {
-                "name": "convohop-python-async" if self._api == "async" else "convohop-python",
+                "name": "relay-python-async" if self._api == "async" else "relay-python",
                 "version": _VERSION,
                 "language": "python",
                 "packages": dict(PACKAGES),
@@ -253,7 +253,7 @@ def _write(output: BinaryIO, line: bytes) -> bool:
 
 
 def _options(argv: list[str] | None = None) -> tuple[tuple[Role, ...], Api]:
-    parser = argparse.ArgumentParser(description="ConvoHop conformance driver for the Python SDK", allow_abbrev=False)
+    parser = argparse.ArgumentParser(description="Relay conformance driver for the Python SDK", allow_abbrev=False)
     parser.add_argument("--roles", help=f"comma-separated subset of {', '.join(ROLES)} to declare (default: all)")
     parser.add_argument("--api", choices=("sync", "async"), default="sync", help="client API to drive")
     options = parser.parse_args(argv)

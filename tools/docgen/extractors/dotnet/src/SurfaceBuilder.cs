@@ -6,7 +6,7 @@ using System.Text;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 
-namespace ConvoHop.Docgen;
+namespace Relay.Docgen;
 
 /// <summary>Builds the documented surface of a compilation's public types, one package per namespace.</summary>
 /// <remarks>

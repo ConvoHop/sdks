@@ -144,7 +144,7 @@ function prepare(input: unknown, raw: unknown, apns: boolean): Prepared {
 
 function seconds(timestamp: string): number {
   const value = epochSeconds(timestamp);
-  if (value === undefined) throw new Error("ConvoHop push: a validated timestamp didn't parse");
+  if (value === undefined) throw new Error("Relay push: a validated timestamp didn't parse");
   return value;
 }
 const missedCall = (event: WebhookCallCancelledNotificationEvent): boolean =>
@@ -208,7 +208,7 @@ function fit<T>(limit: number, input: Text, build: (text: Text) => T, measure: (
     text = shortened(best);
     request = build(text);
   }
-  if (measure(request) > limit) throw new Error(`ConvoHop push: notification metadata exceeds ${limit} bytes`);
+  if (measure(request) > limit) throw new Error(`Relay push: notification metadata exceeds ${limit} bytes`);
   return request;
 }
 function apnsHeaders(type: "alert" | "voip", topic: string, expiration: number, collapse?: string): ApnsHeaders {

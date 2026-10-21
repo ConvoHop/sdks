@@ -1,5 +1,5 @@
 import type { RemoteTrack, Room } from "livekit-client";
-import { parseId, parseObject, parseString } from "@convohop/core";
+import { parseId, parseObject, parseString } from "@instantrelay/core";
 import { admitConnection } from "./admission.js";
 import type { LiveParticipationHandle, LiveConnectOptions, LiveConnectionAttempt } from "./live.js";
 

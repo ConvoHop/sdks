@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { ConvoHopClient } from "@convohop/client";
+import { RelayClient } from "@instantrelay/client";
 import { event, reply } from "../../../test/graphql-fixtures.mjs";
 import { asyncStorage } from "../../../test/recovery-fixtures.mjs";
 
@@ -35,7 +35,7 @@ function options(extra = {}) {
 }
 function replay(extra) {
   const settings = options(extra), conversationId = id(), afters = [];
-  const client = new ConvoHopClient(settings);
+  const client = new RelayClient(settings);
   const route = { projectId: settings.projectId, incarnation: settings.incarnation, servingEpoch: "1", wssUrl: "ws://localhost:18080/graphql" };
   const setup = { client, conversationId, afters, initializations: 0,
     key: `convohop.cursor:${settings.projectId}:${settings.principalId}:${conversationId}`, incarnation: settings.incarnation };
@@ -57,9 +57,9 @@ function withoutGlobalWebSocket(t) {
 
 test("the client takes one kind of recovery storage, checks its platform and draws request IDs from it", async () => {
   const sync = { getItem: () => null, setItem() {}, removeItem() {} };
-  assert.throws(() => new ConvoHopClient(options({ recoveryStorage: sync, asyncRecoveryStorage: asyncStorage() })),
+  assert.throws(() => new RelayClient(options({ recoveryStorage: sync, asyncRecoveryStorage: asyncStorage() })),
     { name: "TypeError", message: "Choose recoveryStorage or asyncRecoveryStorage, not both" });
-  assert.throws(() => new ConvoHopClient(options({ platform: { WebSocket: "socket" } })),
+  assert.throws(() => new RelayClient(options({ platform: { WebSocket: "socket" } })),
     { name: "TypeError", message: "platform.WebSocket must be a function" });
   const issued = [id(), id()], supplied = [...issued], seen = [], conversationId = id();
   const platform = { randomUUID: () => supplied.shift() };
@@ -69,7 +69,7 @@ test("the client takes one kind of recovery storage, checks its platform and dra
     return reply(request, { result: { messageId: id(), conversationId, sequence: "1", revision: "1", status: "sent",
       cursor: { incarnation: settings.incarnation, conversationId, sequence: "1" } } });
   } });
-  const client = new ConvoHopClient(settings);
+  const client = new RelayClient(settings);
   assert.ok(Object.isFrozen(client.platform));
   assert.notEqual(client.platform, platform, "the client keeps its own frozen copy");
   await client.send(conversationId, "hello");

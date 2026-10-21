@@ -1,14 +1,14 @@
-// One call at a time: the system call UI (CallKit on iOS, Telecom on Android) around a ConvoHop live session, with
+// One call at a time: the system call UI (CallKit on iOS, Telecom on Android) around a Relay live session, with
 // LiveKit's React Native SDK for the media.
 import { Platform } from "react-native";
 import { ConnectionState, RoomEvent, type Room } from "livekit-client";
 import { AudioSession } from "@livekit/react-native";
-import { ConvoHopProblem, type ConvoHopClient, type LiveConnector, type LiveParticipationHandle, type LiveSessionHandle } from "@convohop/client";
+import { RelayProblem, type RelayClient, type LiveConnector, type LiveParticipationHandle, type LiveSessionHandle } from "@instantrelay/client";
 import {
   endCall, getCalls, onCallEvent, reportConnected, reportConnecting, setAudioRoute, setMuted as setSystemMuted,
   startOutgoingCall, subscribeAnsweredCalls, type AudioRoute, type Call, type CallEvent,
-} from "@convohop/react-native";
-import { createRoom, createRoomConnector, type RoomConnection } from "@convohop/react-native/media";
+} from "@instantrelay/react-native";
+import { createRoom, createRoomConnector, type RoomConnection } from "@instantrelay/react-native/media";
 
 export type CallStatus = "joining" | "calling" | "connected" | "reconnecting" | "held";
 export interface CallView {
@@ -90,7 +90,7 @@ export interface CallControllerOptions {
  * `useSyncExternalStore`.
  */
 export class CallController {
-  readonly #client: ConvoHopClient;
+  readonly #client: RelayClient;
   readonly #randomUUID: () => string;
   readonly #onError: (error: unknown) => void;
   readonly #listeners = new Set<() => void>();
@@ -102,7 +102,7 @@ export class CallController {
   #released: Promise<void> = Promise.resolve();
   #closed = false;
 
-  constructor(client: ConvoHopClient, { randomUUID, onError }: CallControllerOptions) {
+  constructor(client: RelayClient, { randomUUID, onError }: CallControllerOptions) {
     this.#client = client;
     this.#randomUUID = randomUUID;
     this.#onError = onError;
@@ -255,7 +255,7 @@ export class CallController {
     } catch (error) {
       if (active.ended) return;
       // The call ended before this device joined it.
-      if (!(error instanceof ConvoHopProblem && error.code === "LIVE_SESSION_CLOSED")) this.#onError(error);
+      if (!(error instanceof RelayProblem && error.code === "LIVE_SESSION_CLOSED")) this.#onError(error);
       this.#finish(active);
     }
   }
@@ -298,7 +298,7 @@ export class CallController {
       // No abort signal: a call hung up meanwhile still ends the session once it is ready.
       active.live = await start.ready({ timeoutMs: 30_000 });
     } catch (error) {
-      if (!(error instanceof ConvoHopProblem) || error.code !== "LIVE_SESSION_EXISTS") throw error;
+      if (!(error instanceof RelayProblem) || error.code !== "LIVE_SESSION_EXISTS") throw error;
       // Someone already started a call here: join it.
       const current = await live.current();
       if (current === null) throw error;
@@ -344,7 +344,7 @@ export class CallController {
         return;
       } catch (error) {
         // Retrying a rejected request won't change its outcome.
-        if (error instanceof CallEnded || (error instanceof ConvoHopProblem && error.outcome === "rejected")) throw error;
+        if (error instanceof CallEnded || (error instanceof RelayProblem && error.outcome === "rejected")) throw error;
         failure = error;
       }
     }
@@ -489,7 +489,7 @@ export class CallController {
         await live.end(requestId === undefined ? {} : { requestId });
         return;
       } catch (error) {
-        if (!(error instanceof ConvoHopProblem)) throw error;
+        if (!(error instanceof RelayProblem)) throw error;
         if (error.code === "LIVE_SESSION_CLOSED") return;
         // Someone joined or left meanwhile. A new request reads the session's current revision; retry once.
         if (error.code !== "REVISION_CONFLICT" || requestId !== undefined) throw error;

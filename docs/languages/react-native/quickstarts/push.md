@@ -1,22 +1,22 @@
 # React Native push notifications quickstart
 
-Show ConvoHop's push notifications in your React Native app with `@convohop/react-native`: register the device with APNs or FCM, open the conversation that a notification is about, and show message text whether or not the project sends message previews.
+Show Relay's push notifications in your React Native app with `@instantrelay/react-native`: register the device with APNs or FCM, open the conversation that a notification is about, and show message text whether or not the project sends message previews.
 
 ## Before you start
 
-ConvoHop doesn't send push notifications itself. Your backend receives its notification events and sends APNs and FCM requests with your own push credentials, as the [TypeScript push notifications quickstart](../../typescript/quickstarts/push.md#build-and-send-the-requests) shows. Your push credentials stay on your backend, never in your app. In your app, you need:
+Relay doesn't send push notifications itself. Your backend receives its notification events and sends APNs and FCM requests with your own push credentials, as the [TypeScript push notifications quickstart](../../typescript/quickstarts/push.md#build-and-send-the-requests) shows. Your push credentials stay on your backend, never in your app. In your app, you need:
 
 - A client connected with the user's session, as the [client quickstart](client.md#connect) shows.
-- The native setup that the package's README describes for [iOS](https://github.com/ConvoHop/sdks/blob/main/packages/react-native/README.md#ios) and [Android](https://github.com/ConvoHop/sdks/blob/main/packages/react-native/README.md#android): `ConvoHopReactNative.configure` at launch, the Push Notifications capability on iOS, and Firebase on Android.
+- The native setup that the package's README describes for [iOS](https://github.com/ConvoHop/sdks/blob/main/packages/react-native/README.md#ios) and [Android](https://github.com/ConvoHop/sdks/blob/main/packages/react-native/README.md#android): `RelayReactNative.configure` at launch, the Push Notifications capability on iOS, and Firebase on Android.
 - `CONVOHOP_MESSAGE`, `CONVOHOP_CALL` and `CONVOHOP_MISSED_CALL` in your iOS app's `Localizable.strings`. Alerts without text show them.
-- An endpoint on your backend that stores each device's registration for the signed-in user. ConvoHop never stores registrations, as [bring your own push](https://github.com/ConvoHop/sdks/blob/main/docs/sdk-strategy.md#push-notifications-bring-your-own) explains.
+- An endpoint on your backend that stores each device's registration for the signed-in user. Relay never stores registrations, as [bring your own push](https://github.com/ConvoHop/sdks/blob/main/docs/sdk-strategy.md#push-notifications-bring-your-own) explains.
 
 ## Register the device
 
 ```ts include=examples/src/push.ts#register
 ```
 
-`setPushRecipient` tells the native code whose pushes to show and ring. It drops ConvoHop pushes for anyone else, even one that starts the app before JavaScript runs, and keeps only the two IDs, never a credential. Until you first set a recipient, and after you set `null` at sign-out, it drops every ConvoHop push.
+`setPushRecipient` tells the native code whose pushes to show and ring. It drops Relay pushes for anyone else, even one that starts the app before JavaScript runs, and keeps only the two IDs, never a credential. Until you first set a recipient, and after you set `null` at sign-out, it drops every Relay push.
 
 `registerForPush` passes each of the device's registrations to `register`, which sends it to your backend for the signed-in user. It resolves once your backend stored the APNs token on iOS, or the FCM registration on Android, and keeps passing new ones until you abort its signal. The same registration arrives again on later launches, so store it idempotently, keyed by its token or FID. Tokens and FIDs address the device, so don't log them.
 
@@ -44,16 +44,16 @@ Message previews are off unless the project turns them on, so a message push usu
 The notifications that the native code shows can't use your app's session:
 
 - On Android, a message notification without text shows "New message", the `convohop_message_fallback` string resource, which your app can override.
-- On iOS, the system shows a message push that arrives while your app isn't in the foreground before your app sees it, with `CONVOHOP_MESSAGE` as its text. To show the message's text, add a Notification Service Extension. React Native doesn't run in an extension, so the extension is native code that uses the Swift SDK's `ConvoHopNotificationService`, with a short-lived session of its own for the push's recipient, as the [Swift push notifications quickstart](../../swift/quickstarts/push.md#message-previews) shows.
+- On iOS, the system shows a message push that arrives while your app isn't in the foreground before your app sees it, with `CONVOHOP_MESSAGE` as its text. To show the message's text, add a Notification Service Extension. React Native doesn't run in an extension, so the extension is native code that uses the Swift SDK's `RelayNotificationService`, with a short-lived session of its own for the push's recipient, as the [Swift push notifications quickstart](../../swift/quickstarts/push.md#message-previews) shows.
 
-Give the extension a `ConvoHopNotificationLedger` on the App Group that you pass to `configure` as `appGroup`. It then hides the text of a push for anyone but the recipient that `setPushRecipient` set: no title, and a `CONVOHOP_*` string as its body.
+Give the extension a `RelayNotificationLedger` on the App Group that you pass to `configure` as `appGroup`. It then hides the text of a push for anyone but the recipient that `setPushRecipient` set: no title, and a `RELAY_*` string as its body.
 
 ## Sign out
 
 ```ts include=examples/src/push.ts#sign-out
 ```
 
-When the user signs out, call `stopPush` before you sign out with your backend, which deletes the registrations that it stored for the user's sign-in. With no recipient, the device drops every ConvoHop push that still arrives, and rings for none.
+When the user signs out, call `stopPush` before you sign out with your backend, which deletes the registrations that it stored for the user's sign-in. With no recipient, the device drops every Relay push that still arrives, and rings for none.
 
 - On Android, `unregisterFromPush` also stops FCM from sending to the device, even if your backend can't be reached. It deletes your app's FCM token, which every library in your app shares, or unregisters the installation ID.
 - On iOS, the system shows a message push that arrives while your app isn't in the foreground, so until your backend deletes the registration, such a push still shows. A Notification Service Extension with the ledger hides its title and text.

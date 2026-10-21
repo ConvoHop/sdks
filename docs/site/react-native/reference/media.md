@@ -1,8 +1,8 @@
-# `@convohop/react-native/media`
+# `@instantrelay/react-native/media`
 
-Call media through LiveKit's React Native SDK: set LiveKit up, then connect each admitted participation to a LiveKit room. It ships with @convohop/react-native.
+Call media through LiveKit's React Native SDK: set LiveKit up, then connect each admitted participation to a LiveKit room. It ships with @instantrelay/react-native.
 
-**Layer:** Client. **Runtime:** As @convohop/react-native, with @livekit/react-native 3, @livekit/react-native-webrtc 144.2 or later and livekit-client 2.22.3 or later. **Source:** `packages/react-native`.
+**Layer:** Client. **Runtime:** As @instantrelay/react-native, with @livekit/react-native 3, @livekit/react-native-webrtc 144.2 or later and livekit-client 2.22.3 or later. **Source:** `packages/react-native`.
 
 ## Interfaces
 
@@ -19,7 +19,7 @@ callKit?: boolean
 ```
 
 iOS: CallKit owns the audio session. Set it when calls go through CallKit, as incoming calls rung by
-`@convohop/react-native` do: LiveKit then leaves the session to CallKit, and the SDK tells WebRTC each time CallKit
+`@instantrelay/react-native` do: LiveKit then leaves the session to CallKit, and the SDK tells WebRTC each time CallKit
 activates or deactivates it. Start every call with CallKit, including outgoing calls with `startOutgoingCall`,
 or it has no audio. Ignored on Android. Default `false`.
 
@@ -117,7 +117,7 @@ Connect again with `participation.connectWith`, which obtains fresh credentials.
 function createRoom(): Room
 ```
 
-A LiveKit room with ConvoHop's media policy, the same as the Web SDK's: one peer connection per direction, no
+A LiveKit room with Relay's media policy, the same as the Web SDK's: one peer connection per direction, no
 simulcast, adaptive stream or dynacast, and VP8 video at up to 320x240, 15 frames per second and 350 kbit/s.
 
 ### `createRoomConnector` function

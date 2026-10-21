@@ -6,15 +6,15 @@ import PackageDescription
 // because SwiftPM names a path package after its directory: a package in a directory named swift couldn't depend on
 // the SDK, whose directory is also named swift.
 let package = Package(
-    name: "ConvoHopConformanceDriver",
+    name: "RelayConformanceDriver",
     platforms: [.macOS(.v12)],
     dependencies: [
         .package(path: "../../../../swift"),
     ],
     targets: [
         .executableTarget(
-            name: "ConvoHopConformanceDriver",
-            dependencies: [.product(name: "ConvoHop", package: "swift")]
+            name: "RelayConformanceDriver",
+            dependencies: [.product(name: "Relay", package: "swift")]
         ),
     ]
 )

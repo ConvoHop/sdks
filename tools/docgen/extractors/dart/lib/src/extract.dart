@@ -22,7 +22,7 @@ typedef Json = Map<String, Object?>;
 /// The surface (spec/docs/surface.schema.json) of the libraries that the
 /// language file at [languageFile] documents, reading sources from [root].
 ///
-/// Each documented package is a library such as `package:convohop/calls.dart`
+/// Each documented package is a library such as `package:instantrelay/calls.dart`
 /// whose pub package lives in the package's `source` directory. Its symbols
 /// are the public declarations the library exports. Libraries of the same pub
 /// package share declarations, so none of them is another's origin.
@@ -48,7 +48,7 @@ Json extract(String root, String languageFile) {
     final source = p.normalize(p.join(root, package['source']! as String));
     final match = _packageName.firstMatch(name);
     if (match == null) {
-      throw ExtractError('$languageFile: $name is not a library URI such as package:convohop/convohop.dart');
+      throw ExtractError('$languageFile: $name is not a library URI such as package:instantrelay/instantrelay.dart');
     }
     final pubName = _pubName(source, root);
     if (match[1] != pubName) throw ExtractError('$languageFile: $name is not in pub package $pubName');

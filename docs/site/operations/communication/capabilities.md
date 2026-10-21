@@ -110,12 +110,12 @@ query CommunicationCapabilities($context: RequestContextInput!) {
 
 | Language | Members |
 | --- | --- |
-| [TypeScript](../../typescript/reference/operations.md) | [`ProjectServerClient.capabilities`](../../typescript/reference/server.md#projectserverclientcapabilities-method), [`ConvoHopClient.capabilities`](../../typescript/reference/client.md#convohopclientcapabilities-method) |
-| [Python](../../python/reference/operations.md) | [`ConvoHop.capabilities`](../../python/reference/convohop.md#convohopcapabilities-method), [`AsyncConvoHop.capabilities`](../../python/reference/convohop.md#asyncconvohopcapabilities-method) |
-| [.NET](../../dotnet/reference/operations.md) | [`ProjectServerClient.GetCapabilitiesAsync`](../../dotnet/reference/convohop.md#projectserverclientgetcapabilitiesasync-method), [`CommunicationApi.CapabilitiesAsync`](../../dotnet/reference/api.md#communicationapicapabilitiesasync-method) |
+| [TypeScript](../../typescript/reference/operations.md) | [`ProjectServerClient.capabilities`](../../typescript/reference/server.md#projectserverclientcapabilities-method), [`RelayClient.capabilities`](../../typescript/reference/client.md#relayclientcapabilities-method) |
+| [Python](../../python/reference/operations.md) | [`Relay.capabilities`](../../python/reference/instantrelay.md#relaycapabilities-method), [`AsyncRelay.capabilities`](../../python/reference/instantrelay.md#asyncrelaycapabilities-method) |
+| [.NET](../../dotnet/reference/operations.md) | [`ProjectServerClient.GetCapabilitiesAsync`](../../dotnet/reference/relay.md#projectserverclientgetcapabilitiesasync-method), [`CommunicationApi.CapabilitiesAsync`](../../dotnet/reference/api.md#communicationapicapabilitiesasync-method) |
 | [Java and Kotlin](../../jvm/reference/operations.md) | [`ProjectServerClient.capabilities`](../../jvm/reference/server.md#projectserverclientcapabilities-method), [`CommunicationApi.capabilities`](../../jvm/reference/server.md#communicationapicapabilities-method), [`CommunicationSuspendApi.capabilities`](../../jvm/reference/server-kotlin.md#communicationsuspendapicapabilities-method) |
-| [Go](../../go/reference/operations.md) | [`ProjectClient.Capabilities`](../../go/reference/convohop.md#projectclientcapabilities-method) |
-| [Swift](../../swift/reference/operations.md) | [`ConvoHopClient.capabilities`](../../swift/reference/convohop.md#convohopclientcapabilities-method), [`ConvoHopTypingIndicator.textChanged`](../../swift/reference/convohop.md#convohoptypingindicatortextchanged-method), [`ConvoHopConversationModel.textChanged`](../../swift/reference/convohop.md#convohopconversationmodeltextchanged-method) |
-| [Android](../../android/reference/operations.md) | [`ConvoHopClient.capabilities`](../../android/reference/android-core.md#convohopclientcapabilities-method) |
-| [Flutter](../../flutter/reference/operations.md) | [`CommunicationOperations.capabilities`](../../flutter/reference/convohop.md#communicationoperationscapabilities-method) |
-| [React Native](../../react-native/reference/operations.md) | [`ConvoHopClient.capabilities`](../../react-native/reference/client.md#convohopclientcapabilities-method) |
+| [Go](../../go/reference/operations.md) | [`ProjectClient.Capabilities`](../../go/reference/relay.md#projectclientcapabilities-method) |
+| [Swift](../../swift/reference/operations.md) | [`RelayClient.capabilities`](../../swift/reference/relay.md#relayclientcapabilities-method), [`RelayTypingIndicator.textChanged`](../../swift/reference/relay.md#relaytypingindicatortextchanged-method), [`RelayConversationModel.textChanged`](../../swift/reference/relay.md#relayconversationmodeltextchanged-method) |
+| [Android](../../android/reference/operations.md) | [`RelayClient.capabilities`](../../android/reference/android-core.md#relayclientcapabilities-method) |
+| [Flutter](../../flutter/reference/operations.md) | [`CommunicationOperations.capabilities`](../../flutter/reference/instantrelay.md#communicationoperationscapabilities-method) |
+| [React Native](../../react-native/reference/operations.md) | [`RelayClient.capabilities`](../../react-native/reference/client.md#relayclientcapabilities-method) |

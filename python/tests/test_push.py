@@ -17,10 +17,10 @@ from typing import Any
 
 import pytest
 
-import convohop
-from convohop import push, webhooks
-from convohop.push import PushPayloadError
-from convohop.webhooks import WebhookDelivery, WebhookResourceEvent, WebhookUnknownEvent
+import instantrelay
+from instantrelay import push, webhooks
+from instantrelay.push import PushPayloadError
+from instantrelay.webhooks import WebhookDelivery, WebhookResourceEvent, WebhookUnknownEvent
 
 from .support import dumps, new_secret, sign, spec
 
@@ -740,5 +740,5 @@ def test_the_module_exports_four_builders_encode_the_request_types_and_its_error
     assert all(hasattr(push, name) for name in push.__all__)
     functions = sorted(name for name in push.__all__ if inspect.isfunction(getattr(push, name)))
     assert functions == ["apns_alert", "apns_voip", "encode", "fcm", "web_push"]
-    assert convohop.PushPayloadError is PushPayloadError
-    assert convohop.push is push
+    assert instantrelay.PushPayloadError is PushPayloadError
+    assert instantrelay.push is push

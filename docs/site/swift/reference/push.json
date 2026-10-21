@@ -1,342 +1,338 @@
 {
   "$schema": "../../../../spec/docs/reference.schema.json",
   "language": "swift",
-  "package": "ConvoHopPush",
+  "package": "RelayPush",
   "layer": "client",
   "page": "push.md",
   "symbols": [
     {
-      "name": "ConvoHopNotificationLedger",
+      "name": "RelayNotificationLedger",
       "kind": "class",
-      "ref": "ConvoHopPush#ConvoHopNotificationLedger",
-      "anchor": "convohopnotificationledger-class",
-      "signatures": ["public final class ConvoHopNotificationLedger: @unchecked Sendable"],
-      "docs": "Remembers the notification events this device handled and the rings that stopped.\n\nDelivery is at least once and unordered: a redelivered event has the same `eventId`, and a cancellation can arrive\nbefore its ring. Record each event once, and drop a ring the ledger reports as stopped.\n\nPass the same App Group suite in your app and its Notification Service Extension to share one ledger. Two processes\nwriting at the same moment can drop an entry, so treat the ledger as best effort. At sign-out, set `recipient` to\n`ConvoHopPushRecipient.nobody` and call `removeAll()`.",
+      "ref": "RelayPush#RelayNotificationLedger",
+      "anchor": "relaynotificationledger-class",
+      "signatures": ["public final class RelayNotificationLedger: @unchecked Sendable"],
+      "docs": "Remembers the notification events this device handled and the rings that stopped.\n\nDelivery is at least once and unordered: a redelivered event has the same `eventId`, and a cancellation can arrive\nbefore its ring. Record each event once, and drop a ring the ledger reports as stopped.\n\nPass the same App Group suite in your app and its Notification Service Extension to share one ledger. Two processes\nwriting at the same moment can drop an entry, so treat the ledger as best effort. At sign-out, set `recipient` to\n`RelayPushRecipient.nobody` and call `removeAll()`.",
       "members": [
         {
           "name": "init",
           "kind": "constructor",
-          "ref": "ConvoHopPush#ConvoHopNotificationLedger.init",
-          "anchor": "convohopnotificationledger-constructor",
+          "ref": "RelayPush#RelayNotificationLedger.init",
+          "anchor": "relaynotificationledger-constructor",
           "signatures": ["public init(suiteName: String? = nil, capacity: Int = 512)"],
           "docs": "Parameters:\n\n- `suiteName`: An App Group suite to share with your extensions, or `nil` for the app's standard defaults.\n- `capacity`: How many event IDs and stopped rings to remember, at least 16."
         },
         {
           "name": "record",
           "kind": "method",
-          "ref": "ConvoHopPush#ConvoHopNotificationLedger.record",
-          "anchor": "convohopnotificationledgerrecord-method",
+          "ref": "RelayPush#RelayNotificationLedger.record",
+          "anchor": "relaynotificationledgerrecord-method",
           "signatures": [
-            "@discardableResult\npublic func record(_ notification: ConvoHopNotification) -> Bool"
+            "@discardableResult\npublic func record(_ notification: RelayNotification) -> Bool"
           ],
           "docs": "Records the event, and the stopped ring of a cancellation. Returns `false` when the event was already recorded."
         },
         {
           "name": "contains",
           "kind": "method",
-          "ref": "ConvoHopPush#ConvoHopNotificationLedger.contains",
-          "anchor": "convohopnotificationledgercontains-method",
+          "ref": "RelayPush#RelayNotificationLedger.contains",
+          "anchor": "relaynotificationledgercontains-method",
           "signatures": ["public func contains(eventId: String) -> Bool"],
           "docs": "Whether the event was recorded."
         },
         {
           "name": "markStopped",
           "kind": "method",
-          "ref": "ConvoHopPush#ConvoHopNotificationLedger.markStopped",
-          "anchor": "convohopnotificationledgermarkstopped-method",
+          "ref": "RelayPush#RelayNotificationLedger.markStopped",
+          "anchor": "relaynotificationledgermarkstopped-method",
           "signatures": [
-            "public func markStopped(_ alert: ConvoHopCallAlert, reason: ConvoHopCallEndReason)"
+            "public func markStopped(_ alert: RelayCallAlert, reason: RelayCallEndReason)"
           ],
           "docs": "Records that a ring stopped, for example when your app ended it."
         },
         {
           "name": "stopReason",
           "kind": "method",
-          "ref": "ConvoHopPush#ConvoHopNotificationLedger.stopReason",
-          "anchor": "convohopnotificationledgerstopreason-method",
-          "signatures": ["public func stopReason(alertId: String) -> ConvoHopCallEndReason?"],
+          "ref": "RelayPush#RelayNotificationLedger.stopReason",
+          "anchor": "relaynotificationledgerstopreason-method",
+          "signatures": ["public func stopReason(alertId: String) -> RelayCallEndReason?"],
           "docs": "Why the ring stopped, if a cancellation or stop was recorded for its `alertId`."
         },
         {
           "name": "isStopped",
           "kind": "method",
-          "ref": "ConvoHopPush#ConvoHopNotificationLedger.isStopped",
-          "anchor": "convohopnotificationledgerisstopped-method",
+          "ref": "RelayPush#RelayNotificationLedger.isStopped",
+          "anchor": "relaynotificationledgerisstopped-method",
           "signatures": [
-            "public func isStopped(_ alert: ConvoHopCallAlert, at now: Date = Date()) -> Bool"
+            "public func isStopped(_ alert: RelayCallAlert, at now: Date = Date()) -> Bool"
           ],
           "docs": "Whether the ring has stopped: a cancellation was recorded or its deadline has passed."
         },
         {
           "name": "recipient",
           "kind": "property",
-          "ref": "ConvoHopPush#ConvoHopNotificationLedger.recipient",
-          "anchor": "convohopnotificationledgerrecipient-property",
-          "signatures": ["public var recipient: ConvoHopPushRecipient { get set }"],
-          "docs": "Whose pushes this device rings for and shows. `ConvoHopPushRecipient.any` until you set one.\n\nIt's stored in the ledger's suite, so a Notification Service Extension that shares the suite, and your app\nafter a relaunch, see it. A stored value this version can't read counts as `ConvoHopPushRecipient.nobody`."
+          "ref": "RelayPush#RelayNotificationLedger.recipient",
+          "anchor": "relaynotificationledgerrecipient-property",
+          "signatures": ["public var recipient: RelayPushRecipient { get set }"],
+          "docs": "Whose pushes this device rings for and shows. `RelayPushRecipient.any` until you set one.\n\nIt's stored in the ledger's suite, so a Notification Service Extension that shares the suite, and your app\nafter a relaunch, see it. A stored value this version can't read counts as `RelayPushRecipient.nobody`."
         },
         {
           "name": "removeAll",
           "kind": "method",
-          "ref": "ConvoHopPush#ConvoHopNotificationLedger.removeAll",
-          "anchor": "convohopnotificationledgerremoveall-method",
+          "ref": "RelayPush#RelayNotificationLedger.removeAll",
+          "anchor": "relaynotificationledgerremoveall-method",
           "signatures": ["public func removeAll()"],
           "docs": "Forgets every event and ring. It keeps `recipient`."
         }
       ]
     },
     {
-      "name": "ConvoHopCallAlert",
+      "name": "RelayCallAlert",
       "kind": "struct",
-      "ref": "ConvoHopPush#ConvoHopCallAlert",
-      "anchor": "convohopcallalert-struct",
-      "signatures": ["public struct ConvoHopCallAlert: Sendable, Hashable"],
+      "ref": "RelayPush#RelayCallAlert",
+      "anchor": "relaycallalert-struct",
+      "signatures": ["public struct RelayCallAlert: Sendable, Hashable"],
       "docs": "One ring of a call for one recipient. A later ring of the same call has a new `alertId`.",
       "members": [
         {
           "name": "liveSessionId",
           "kind": "property",
-          "ref": "ConvoHopPush#ConvoHopCallAlert.liveSessionId",
-          "anchor": "convohopcallalertlivesessionid-property",
+          "ref": "RelayPush#RelayCallAlert.liveSessionId",
+          "anchor": "relaycallalertlivesessionid-property",
           "signatures": ["public let liveSessionId: String"],
           "docs": ""
         },
         {
           "name": "alertId",
           "kind": "property",
-          "ref": "ConvoHopPush#ConvoHopCallAlert.alertId",
-          "anchor": "convohopcallalertalertid-property",
+          "ref": "RelayPush#RelayCallAlert.alertId",
+          "anchor": "relaycallalertalertid-property",
           "signatures": ["public let alertId: String"],
           "docs": ""
         },
         {
           "name": "expiresAt",
           "kind": "property",
-          "ref": "ConvoHopPush#ConvoHopCallAlert.expiresAt",
-          "anchor": "convohopcallalertexpiresat-property",
+          "ref": "RelayPush#RelayCallAlert.expiresAt",
+          "anchor": "relaycallalertexpiresat-property",
           "signatures": ["public let expiresAt: Date"],
           "docs": "When the ring stops if nobody answers. A cancellation carries the stopped ring's original deadline."
         },
         {
           "name": "mediaProfile",
           "kind": "property",
-          "ref": "ConvoHopPush#ConvoHopCallAlert.mediaProfile",
-          "anchor": "convohopcallalertmediaprofile-property",
+          "ref": "RelayPush#RelayCallAlert.mediaProfile",
+          "anchor": "relaycallalertmediaprofile-property",
           "signatures": ["public let mediaProfile: String"],
           "docs": "`AUDIO_ONLY`, `AUDIO_VIDEO` or a later profile."
         },
         {
           "name": "uuid",
           "kind": "property",
-          "ref": "ConvoHopPush#ConvoHopCallAlert.uuid",
-          "anchor": "convohopcallalertuuid-property",
+          "ref": "RelayPush#RelayCallAlert.uuid",
+          "anchor": "relaycallalertuuid-property",
           "signatures": ["public let uuid: UUID"],
           "docs": "The ring's CallKit UUID: `alertId`."
         },
         {
           "name": "hasVideo",
           "kind": "property",
-          "ref": "ConvoHopPush#ConvoHopCallAlert.hasVideo",
-          "anchor": "convohopcallalerthasvideo-property",
+          "ref": "RelayPush#RelayCallAlert.hasVideo",
+          "anchor": "relaycallalerthasvideo-property",
           "signatures": ["public var hasVideo: Bool { get }"],
           "docs": "Whether the call starts with video."
         }
       ]
     },
     {
-      "name": "ConvoHopCallEndReason",
+      "name": "RelayCallEndReason",
       "kind": "struct",
-      "ref": "ConvoHopPush#ConvoHopCallEndReason",
-      "anchor": "convohopcallendreason-struct",
+      "ref": "RelayPush#RelayCallEndReason",
+      "anchor": "relaycallendreason-struct",
       "signatures": [
-        "public struct ConvoHopCallEndReason: RawRepresentable, Hashable, Sendable, CustomStringConvertible"
+        "public struct RelayCallEndReason: RawRepresentable, Hashable, Sendable, CustomStringConvertible"
       ],
       "docs": "Why a ring stopped. The set is open: treat a reason you don't know as \"stop ringing\", without a missed call.",
       "members": [
         {
           "name": "rawValue",
           "kind": "property",
-          "ref": "ConvoHopPush#ConvoHopCallEndReason.rawValue",
-          "anchor": "convohopcallendreasonrawvalue-property",
+          "ref": "RelayPush#RelayCallEndReason.rawValue",
+          "anchor": "relaycallendreasonrawvalue-property",
           "signatures": ["public let rawValue: String"],
           "docs": ""
         },
         {
           "name": "init",
           "kind": "constructor",
-          "ref": "ConvoHopPush#ConvoHopCallEndReason.init",
-          "anchor": "convohopcallendreason-constructor",
+          "ref": "RelayPush#RelayCallEndReason.init",
+          "anchor": "relaycallendreason-constructor",
           "signatures": ["public init(rawValue: String)"],
           "docs": ""
         },
         {
           "name": "answered",
           "kind": "property",
-          "ref": "ConvoHopPush#ConvoHopCallEndReason.answered:static",
-          "anchor": "convohopcallendreasonanswered-static-property",
-          "signatures": [
-            "public static let answered = ConvoHopCallEndReason(rawValue: \"answered\")"
-          ],
+          "ref": "RelayPush#RelayCallEndReason.answered:static",
+          "anchor": "relaycallendreasonanswered-static-property",
+          "signatures": ["public static let answered = RelayCallEndReason(rawValue: \"answered\")"],
           "docs": "The recipient answered, on any device. Only stops the ringing.",
           "static": true
         },
         {
           "name": "declined",
           "kind": "property",
-          "ref": "ConvoHopPush#ConvoHopCallEndReason.declined:static",
-          "anchor": "convohopcallendreasondeclined-static-property",
-          "signatures": [
-            "public static let declined = ConvoHopCallEndReason(rawValue: \"declined\")"
-          ],
+          "ref": "RelayPush#RelayCallEndReason.declined:static",
+          "anchor": "relaycallendreasondeclined-static-property",
+          "signatures": ["public static let declined = RelayCallEndReason(rawValue: \"declined\")"],
           "docs": "The recipient declined, on any device. Only stops the ringing.",
           "static": true
         },
         {
           "name": "ended",
           "kind": "property",
-          "ref": "ConvoHopPush#ConvoHopCallEndReason.ended:static",
-          "anchor": "convohopcallendreasonended-static-property",
-          "signatures": ["public static let ended = ConvoHopCallEndReason(rawValue: \"ended\")"],
+          "ref": "RelayPush#RelayCallEndReason.ended:static",
+          "anchor": "relaycallendreasonended-static-property",
+          "signatures": ["public static let ended = RelayCallEndReason(rawValue: \"ended\")"],
           "docs": "The call ended or stopped ringing first: a missed call.",
           "static": true
         },
         {
           "name": "expired",
           "kind": "property",
-          "ref": "ConvoHopPush#ConvoHopCallEndReason.expired:static",
-          "anchor": "convohopcallendreasonexpired-static-property",
-          "signatures": ["public static let expired = ConvoHopCallEndReason(rawValue: \"expired\")"],
+          "ref": "RelayPush#RelayCallEndReason.expired:static",
+          "anchor": "relaycallendreasonexpired-static-property",
+          "signatures": ["public static let expired = RelayCallEndReason(rawValue: \"expired\")"],
           "docs": "Nobody answered by the ring's deadline: a missed call.",
           "static": true
         },
         {
           "name": "failed",
           "kind": "property",
-          "ref": "ConvoHopPush#ConvoHopCallEndReason.failed:static",
-          "anchor": "convohopcallendreasonfailed-static-property",
-          "signatures": ["public static let failed = ConvoHopCallEndReason(rawValue: \"failed\")"],
-          "docs": "This device couldn't handle the call. ConvoHop never sends it; the SDK and your app use it locally.",
+          "ref": "RelayPush#RelayCallEndReason.failed:static",
+          "anchor": "relaycallendreasonfailed-static-property",
+          "signatures": ["public static let failed = RelayCallEndReason(rawValue: \"failed\")"],
+          "docs": "This device couldn't handle the call. Relay never sends it; the SDK and your app use it locally.",
           "static": true
         },
         {
           "name": "isMissedCall",
           "kind": "property",
-          "ref": "ConvoHopPush#ConvoHopCallEndReason.isMissedCall",
-          "anchor": "convohopcallendreasonismissedcall-property",
+          "ref": "RelayPush#RelayCallEndReason.isMissedCall",
+          "anchor": "relaycallendreasonismissedcall-property",
           "signatures": ["public var isMissedCall: Bool { get }"],
           "docs": "Whether the user missed the call."
         },
         {
           "name": "description",
           "kind": "property",
-          "ref": "ConvoHopPush#ConvoHopCallEndReason.description",
-          "anchor": "convohopcallendreasondescription-property",
+          "ref": "RelayPush#RelayCallEndReason.description",
+          "anchor": "relaycallendreasondescription-property",
           "signatures": ["public var description: String { get }"],
           "docs": ""
         }
       ]
     },
     {
-      "name": "ConvoHopNotification",
+      "name": "RelayNotification",
       "kind": "struct",
-      "ref": "ConvoHopPush#ConvoHopNotification",
-      "anchor": "convohopnotification-struct",
-      "signatures": ["public struct ConvoHopNotification: Sendable, Hashable"],
-      "docs": "A ConvoHop notification event from an APNs, PushKit or FCM payload.\n\nEvents carry identifiers and, only when the project opts in to message previews, visible text. Delivery is at\nleast once and unordered: deduplicate on `eventId` with `ConvoHopNotificationLedger`.",
+      "ref": "RelayPush#RelayNotification",
+      "anchor": "relaynotification-struct",
+      "signatures": ["public struct RelayNotification: Sendable, Hashable"],
+      "docs": "A Relay notification event from an APNs, PushKit or FCM payload.\n\nEvents carry identifiers and, only when the project opts in to message previews, visible text. Delivery is at\nleast once and unordered: deduplicate on `eventId` with `RelayNotificationLedger`.",
       "members": [
         {
           "name": "eventId",
           "kind": "property",
-          "ref": "ConvoHopPush#ConvoHopNotification.eventId",
-          "anchor": "convohopnotificationeventid-property",
+          "ref": "RelayPush#RelayNotification.eventId",
+          "anchor": "relaynotificationeventid-property",
           "signatures": ["public let eventId: String"],
           "docs": ""
         },
         {
           "name": "eventType",
           "kind": "property",
-          "ref": "ConvoHopPush#ConvoHopNotification.eventType",
-          "anchor": "convohopnotificationeventtype-property",
+          "ref": "RelayPush#RelayNotification.eventType",
+          "anchor": "relaynotificationeventtype-property",
           "signatures": ["public let eventType: String"],
           "docs": "`notification.message`, `notification.call` or `notification.callCancelled`."
         },
         {
           "name": "projectId",
           "kind": "property",
-          "ref": "ConvoHopPush#ConvoHopNotification.projectId",
-          "anchor": "convohopnotificationprojectid-property",
+          "ref": "RelayPush#RelayNotification.projectId",
+          "anchor": "relaynotificationprojectid-property",
           "signatures": ["public let projectId: String"],
           "docs": ""
         },
         {
           "name": "recipientId",
           "kind": "property",
-          "ref": "ConvoHopPush#ConvoHopNotification.recipientId",
-          "anchor": "convohopnotificationrecipientid-property",
+          "ref": "RelayPush#RelayNotification.recipientId",
+          "anchor": "relaynotificationrecipientid-property",
           "signatures": ["public let recipientId: String"],
           "docs": ""
         },
         {
           "name": "conversationId",
           "kind": "property",
-          "ref": "ConvoHopPush#ConvoHopNotification.conversationId",
-          "anchor": "convohopnotificationconversationid-property",
+          "ref": "RelayPush#RelayNotification.conversationId",
+          "anchor": "relaynotificationconversationid-property",
           "signatures": ["public let conversationId: String"],
           "docs": ""
         },
         {
           "name": "senderId",
           "kind": "property",
-          "ref": "ConvoHopPush#ConvoHopNotification.senderId",
-          "anchor": "convohopnotificationsenderid-property",
+          "ref": "RelayPush#RelayNotification.senderId",
+          "anchor": "relaynotificationsenderid-property",
           "signatures": ["public let senderId: String"],
           "docs": ""
         },
         {
           "name": "occurredAt",
           "kind": "property",
-          "ref": "ConvoHopPush#ConvoHopNotification.occurredAt",
-          "anchor": "convohopnotificationoccurredat-property",
+          "ref": "RelayPush#RelayNotification.occurredAt",
+          "anchor": "relaynotificationoccurredat-property",
           "signatures": ["public let occurredAt: Date"],
           "docs": ""
         },
         {
           "name": "title",
           "kind": "property",
-          "ref": "ConvoHopPush#ConvoHopNotification.title",
-          "anchor": "convohopnotificationtitle-property",
+          "ref": "RelayPush#RelayNotification.title",
+          "anchor": "relaynotificationtitle-property",
           "signatures": ["public let title: String?"],
           "docs": "The visible title, if the push carries one."
         },
         {
           "name": "body",
           "kind": "property",
-          "ref": "ConvoHopPush#ConvoHopNotification.body",
-          "anchor": "convohopnotificationbody-property",
+          "ref": "RelayPush#RelayNotification.body",
+          "anchor": "relaynotificationbody-property",
           "signatures": ["public let body: String?"],
           "docs": "The visible body, if the push carries one: your backend's text or, when the project opts in, the message\npreview. Absent by default."
         },
         {
           "name": "kind",
           "kind": "property",
-          "ref": "ConvoHopPush#ConvoHopNotification.kind",
-          "anchor": "convohopnotificationkind-property",
+          "ref": "RelayPush#RelayNotification.kind",
+          "anchor": "relaynotificationkind-property",
           "signatures": ["public let kind: Kind"],
           "docs": ""
         },
         {
           "name": "callAlert",
           "kind": "property",
-          "ref": "ConvoHopPush#ConvoHopNotification.callAlert",
-          "anchor": "convohopnotificationcallalert-property",
-          "signatures": ["public var callAlert: ConvoHopCallAlert? { get }"],
+          "ref": "RelayPush#RelayNotification.callAlert",
+          "anchor": "relaynotificationcallalert-property",
+          "signatures": ["public var callAlert: RelayCallAlert? { get }"],
           "docs": "The ring, for calls and cancellations."
         },
         {
           "name": "init",
           "kind": "constructor",
-          "ref": "ConvoHopPush#ConvoHopNotification.init",
-          "anchor": "convohopnotification-constructor",
+          "ref": "RelayPush#RelayNotification.init",
+          "anchor": "relaynotification-constructor",
           "signatures": [
             "public init?(userInfo: [AnyHashable: Any])",
             "public init(jsonObject: Any) throws",
@@ -347,29 +343,29 @@
         {
           "name": "parse",
           "kind": "method",
-          "ref": "ConvoHopPush#ConvoHopNotification.parse:static",
-          "anchor": "convohopnotificationparse-static-method",
+          "ref": "RelayPush#RelayNotification.parse:static",
+          "anchor": "relaynotificationparse-static-method",
           "signatures": [
-            "public static func parse(userInfo: [AnyHashable: Any]) throws -> ConvoHopNotification?"
+            "public static func parse(userInfo: [AnyHashable: Any]) throws -> RelayNotification?"
           ],
-          "docs": "Reads a push's `userInfo` like `init(userInfo:)`, but throws `ConvoHopPushPayloadError` when the `convohop`\nobject is malformed.\n\nReturns `nil` when the push has no `convohop` object or its event type isn't one this SDK supports.",
+          "docs": "Reads a push's `userInfo` like `init(userInfo:)`, but throws `RelayPushPayloadError` when the `convohop`\nobject is malformed.\n\nReturns `nil` when the push has no `convohop` object or its event type isn't one this SDK supports.",
           "static": true
         }
       ]
     },
     {
-      "name": "ConvoHopDeliveredNotifications",
+      "name": "RelayDeliveredNotifications",
       "kind": "enum",
-      "ref": "ConvoHopPush#ConvoHopDeliveredNotifications",
-      "anchor": "convohopdeliverednotifications-enum",
-      "signatures": ["public enum ConvoHopDeliveredNotifications"],
+      "ref": "RelayPush#RelayDeliveredNotifications",
+      "anchor": "relaydeliverednotifications-enum",
+      "signatures": ["public enum RelayDeliveredNotifications"],
       "docs": "Removes notifications that iOS or macOS already shows for a ring.",
       "members": [
         {
           "name": "remove",
           "kind": "method",
-          "ref": "ConvoHopPush#ConvoHopDeliveredNotifications.remove:static",
-          "anchor": "convohopdeliverednotificationsremove-static-method",
+          "ref": "RelayPush#RelayDeliveredNotifications.remove:static",
+          "anchor": "relaydeliverednotificationsremove-static-method",
           "signatures": ["public static func remove(alertId: String) async"],
           "docs": "Removes delivered notifications whose `convohop.alertId` is `alertId`.\n\nA ring the user answered or declined gets no push, so an incoming-call alert stays until your app removes it.",
           "static": true
@@ -377,154 +373,154 @@
       ]
     },
     {
-      "name": "ConvoHopNotification.Kind",
+      "name": "RelayNotification.Kind",
       "kind": "enum",
-      "ref": "ConvoHopPush#ConvoHopNotification.Kind",
-      "anchor": "convohopnotificationkind-enum",
+      "ref": "RelayPush#RelayNotification.Kind",
+      "anchor": "relaynotificationkind-enum",
       "signatures": ["public enum Kind: Sendable, Hashable"],
       "docs": "",
       "members": [
         {
           "name": "message",
           "kind": "case",
-          "ref": "ConvoHopPush#ConvoHopNotification.Kind.message",
-          "anchor": "convohopnotificationkindmessage-case",
+          "ref": "RelayPush#RelayNotification.Kind.message",
+          "anchor": "relaynotificationkindmessage-case",
           "signatures": ["case message(messageId: String)"],
           "docs": "A new message. Open the conversation; fetch the message with the user's session."
         },
         {
           "name": "call",
           "kind": "case",
-          "ref": "ConvoHopPush#ConvoHopNotification.Kind.call",
-          "anchor": "convohopnotificationkindcall-case",
-          "signatures": ["case call(ConvoHopCallAlert)"],
+          "ref": "RelayPush#RelayNotification.Kind.call",
+          "anchor": "relaynotificationkindcall-case",
+          "signatures": ["case call(RelayCallAlert)"],
           "docs": "An incoming call. On iOS, report it to CallKit."
         },
         {
           "name": "callCancelled",
           "kind": "case",
-          "ref": "ConvoHopPush#ConvoHopNotification.Kind.callCancelled",
-          "anchor": "convohopnotificationkindcallcancelled-case",
-          "signatures": ["case callCancelled(ConvoHopCallAlert, reason: ConvoHopCallEndReason)"],
-          "docs": "A ring stopped. `reason` `ConvoHopCallEndReason.ended` and `ConvoHopCallEndReason.expired` are missed\ncalls."
+          "ref": "RelayPush#RelayNotification.Kind.callCancelled",
+          "anchor": "relaynotificationkindcallcancelled-case",
+          "signatures": ["case callCancelled(RelayCallAlert, reason: RelayCallEndReason)"],
+          "docs": "A ring stopped. `reason` `RelayCallEndReason.ended` and `RelayCallEndReason.expired` are missed\ncalls."
         }
       ]
     },
     {
-      "name": "ConvoHopPushPayloadError",
+      "name": "RelayPushPayloadError",
       "kind": "enum",
-      "ref": "ConvoHopPush#ConvoHopPushPayloadError",
-      "anchor": "convohoppushpayloaderror-enum",
+      "ref": "RelayPush#RelayPushPayloadError",
+      "anchor": "relaypushpayloaderror-enum",
       "signatures": [
-        "public enum ConvoHopPushPayloadError: Error, Sendable, Equatable, CustomStringConvertible, LocalizedError"
+        "public enum RelayPushPayloadError: Error, Sendable, Equatable, CustomStringConvertible, LocalizedError"
       ],
-      "docs": "A payload that isn't a ConvoHop notification event under the push payload contract.",
+      "docs": "A payload that isn't a Relay notification event under the push payload contract.",
       "members": [
         {
           "name": "missing",
           "kind": "case",
-          "ref": "ConvoHopPush#ConvoHopPushPayloadError.missing",
-          "anchor": "convohoppushpayloaderrormissing-case",
+          "ref": "RelayPush#RelayPushPayloadError.missing",
+          "anchor": "relaypushpayloaderrormissing-case",
           "signatures": ["case missing"],
           "docs": "The payload has no `convohop` object."
         },
         {
           "name": "notAnObject",
           "kind": "case",
-          "ref": "ConvoHopPush#ConvoHopPushPayloadError.notAnObject",
-          "anchor": "convohoppushpayloaderrornotanobject-case",
+          "ref": "RelayPush#RelayPushPayloadError.notAnObject",
+          "anchor": "relaypushpayloaderrornotanobject-case",
           "signatures": ["case notAnObject"],
           "docs": "`convohop` isn't a JSON object."
         },
         {
           "name": "unsupportedEventType",
           "kind": "case",
-          "ref": "ConvoHopPush#ConvoHopPushPayloadError.unsupportedEventType",
-          "anchor": "convohoppushpayloaderrorunsupportedeventtype-case",
+          "ref": "RelayPush#RelayPushPayloadError.unsupportedEventType",
+          "anchor": "relaypushpayloaderrorunsupportedeventtype-case",
           "signatures": ["case unsupportedEventType(String)"],
           "docs": "An event type this SDK doesn't know. Ignore the push."
         },
         {
           "name": "invalidField",
           "kind": "case",
-          "ref": "ConvoHopPush#ConvoHopPushPayloadError.invalidField",
-          "anchor": "convohoppushpayloaderrorinvalidfield-case",
+          "ref": "RelayPush#RelayPushPayloadError.invalidField",
+          "anchor": "relaypushpayloaderrorinvalidfield-case",
           "signatures": ["case invalidField(String)"],
           "docs": "A field the event type requires is missing or malformed."
         },
         {
           "name": "description",
           "kind": "property",
-          "ref": "ConvoHopPush#ConvoHopPushPayloadError.description",
-          "anchor": "convohoppushpayloaderrordescription-property",
+          "ref": "RelayPush#RelayPushPayloadError.description",
+          "anchor": "relaypushpayloaderrordescription-property",
           "signatures": ["public var description: String { get }"],
           "docs": ""
         },
         {
           "name": "errorDescription",
           "kind": "property",
-          "ref": "ConvoHopPush#ConvoHopPushPayloadError.errorDescription",
-          "anchor": "convohoppushpayloaderrorerrordescription-property",
+          "ref": "RelayPush#RelayPushPayloadError.errorDescription",
+          "anchor": "relaypushpayloaderrorerrordescription-property",
           "signatures": ["public var errorDescription: String? { get }"],
           "docs": ""
         }
       ]
     },
     {
-      "name": "ConvoHopPushRecipient",
+      "name": "RelayPushRecipient",
       "kind": "enum",
-      "ref": "ConvoHopPush#ConvoHopPushRecipient",
-      "anchor": "convohoppushrecipient-enum",
-      "signatures": ["public enum ConvoHopPushRecipient: Sendable, Hashable"],
-      "docs": "Whose ConvoHop pushes this device rings for and shows.\n\nSet it at sign-in to the signed-in user, and to `nobody` at sign-out: your backend can still hold the device's\ntokens, and their pushes keep arriving. Store it with `ConvoHopNotificationLedger.recipient`, or set\n`ConvoHopCalls.recipient`, so your Notification Service Extension and a relaunch for a VoIP push see it.",
+      "ref": "RelayPush#RelayPushRecipient",
+      "anchor": "relaypushrecipient-enum",
+      "signatures": ["public enum RelayPushRecipient: Sendable, Hashable"],
+      "docs": "Whose Relay pushes this device rings for and shows.\n\nSet it at sign-in to the signed-in user, and to `nobody` at sign-out: your backend can still hold the device's\ntokens, and their pushes keep arriving. Store it with `RelayNotificationLedger.recipient`, or set\n`RelayCalls.recipient`, so your Notification Service Extension and a relaunch for a VoIP push see it.",
       "members": [
         {
           "name": "any",
           "kind": "case",
-          "ref": "ConvoHopPush#ConvoHopPushRecipient.any",
-          "anchor": "convohoppushrecipientany-case",
+          "ref": "RelayPush#RelayPushRecipient.any",
+          "anchor": "relaypushrecipientany-case",
           "signatures": ["case any"],
-          "docs": "Every ConvoHop push. The default until you set a recipient."
+          "docs": "Every Relay push. The default until you set a recipient."
         },
         {
           "name": "only",
           "kind": "case",
-          "ref": "ConvoHopPush#ConvoHopPushRecipient.only",
-          "anchor": "convohoppushrecipientonly-case",
+          "ref": "RelayPush#RelayPushRecipient.only",
+          "anchor": "relaypushrecipientonly-case",
           "signatures": ["case only(projectId: String, recipientId: String)"],
           "docs": "Only pushes for this user in this project."
         },
         {
           "name": "nobody",
           "kind": "case",
-          "ref": "ConvoHopPush#ConvoHopPushRecipient.nobody",
-          "anchor": "convohoppushrecipientnobody-case",
+          "ref": "RelayPush#RelayPushRecipient.nobody",
+          "anchor": "relaypushrecipientnobody-case",
           "signatures": ["case nobody"],
-          "docs": "No ConvoHop push, for example after sign-out."
+          "docs": "No Relay push, for example after sign-out."
         },
         {
           "name": "accepts",
           "kind": "method",
-          "ref": "ConvoHopPush#ConvoHopPushRecipient.accepts",
-          "anchor": "convohoppushrecipientaccepts-method",
-          "signatures": ["public func accepts(_ notification: ConvoHopNotification) -> Bool"],
+          "ref": "RelayPush#RelayPushRecipient.accepts",
+          "anchor": "relaypushrecipientaccepts-method",
+          "signatures": ["public func accepts(_ notification: RelayNotification) -> Bool"],
           "docs": "Whether the push is for this recipient."
         }
       ]
     },
     {
-      "name": "ConvoHopPushToken",
+      "name": "RelayPushToken",
       "kind": "enum",
-      "ref": "ConvoHopPush#ConvoHopPushToken",
-      "anchor": "convohoppushtoken-enum",
-      "signatures": ["public enum ConvoHopPushToken"],
-      "docs": "Device tokens for your backend. ConvoHop never stores them.",
+      "ref": "RelayPush#RelayPushToken",
+      "anchor": "relaypushtoken-enum",
+      "signatures": ["public enum RelayPushToken"],
+      "docs": "Device tokens for your backend. Relay never stores them.",
       "members": [
         {
           "name": "hex",
           "kind": "method",
-          "ref": "ConvoHopPush#ConvoHopPushToken.hex:static",
-          "anchor": "convohoppushtokenhex-static-method",
+          "ref": "RelayPush#RelayPushToken.hex:static",
+          "anchor": "relaypushtokenhex-static-method",
           "signatures": ["public static func hex(_ token: Data) -> String"],
           "docs": "An APNs or PushKit token as lowercase hex, the form APNs requests use.",
           "static": true

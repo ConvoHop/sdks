@@ -1,6 +1,6 @@
 # `github.com/ConvoHop/sdks/go/webhooks`
 
-Verifies Standard Webhooks signatures and parses ConvoHop webhook deliveries into typed events.
+Verifies Standard Webhooks signatures and parses Relay webhook deliveries into typed events.
 
 **Layer:** Server. **Runtime:** Go 1.26 or later. **Source:** `go/webhooks`.
 

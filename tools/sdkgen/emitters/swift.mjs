@@ -3,8 +3,8 @@ import { byName, namedTypeRef, printTypeRef, requireType } from "../lib/ir-model
 import { camelCase, codeUnitCompare, naturalCompare } from "../lib/naming.mjs";
 
 /**
- * Swift models and the operation catalog for the ConvoHop Swift package
- * (`swift/`, product `ConvoHop`).
+ * Swift models and the operation catalog for the Relay Swift package
+ * (`swift/`, product `Relay`).
  *
  * A client SDK includes the `client` and `both` operations. Types.swift
  * declares every enum, input and object type that those operations reach,
@@ -16,12 +16,12 @@ import { camelCase, codeUnitCompare, naturalCompare } from "../lib/naming.mjs";
  *
  * Scalars map by `representation` (Decimal counters stay `String`). GraphQL
  * type names are kept, except names that would clash with the Swift standard
- * library, Foundation or the runtime; those get a `ConvoHop` prefix, for
- * example `Operation` becomes `ConvoHopOperation`. Deprecations are documented
+ * library, Foundation or the runtime; those get a `Relay` prefix, for
+ * example `Operation` becomes `RelayOperation`. Deprecations are documented
  * in comments only, because availability attributes would break synthesized
  * conformances and warn inside the generated initializers.
  */
-export const DEFAULT_DIRECTORY = "swift/Sources/ConvoHop/Generated";
+export const DEFAULT_DIRECTORY = "swift/Sources/Relay/Generated";
 
 const NOTICE = "// Generated from the current unversioned GraphQL schemas. Run npm run generate:graphql.\n";
 const CLIENT_LAYERS = new Set(["client", "both"]);
@@ -52,7 +52,7 @@ const RESERVED_TYPE_NAMES = new Set([
   "Double", "Error", "Float", "Int", "JSONObject", "JSONValue", "Locale", "Never", "Notification", "NoInput",
   "Operation", "Optional", "Predicate", "Process", "Progress", "Protocol", "Result", "Self", "Sequence", "Set",
   "String", "Substring", "Task", "Thread", "TimeZone", "Timer", "Type", "URL", "UUID", "Void",
-  "ConvoHopErrorCode", "ConvoHopOperations", "ConversationEventType", "GraphQLCatalog", "GraphQLContextField",
+  "RelayErrorCode", "RelayOperations", "ConversationEventType", "GraphQLCatalog", "GraphQLContextField",
   "GraphQLContextUse", "GraphQLIdempotency", "GraphQLOperation", "GraphQLOperationDescriptor",
   "GraphQLOperationKind", "GraphQLOutputField", "GraphQLOutputShape", "GraphQLRealtime", "GraphQLRealtimeChannel",
   "GraphQLRepresentation", "GraphQLRetry", "GraphQLRetryBudget", "GraphQLScalarShape", "GraphQLTransport",
@@ -60,7 +60,7 @@ const RESERVED_TYPE_NAMES = new Set([
 
 /** The Swift name of a GraphQL type. */
 export function swiftTypeName(name) {
-  return RESERVED_TYPE_NAMES.has(name) ? `ConvoHop${name}` : name;
+  return RESERVED_TYPE_NAMES.has(name) ? `Relay${name}` : name;
 }
 
 /** A property or case name, escaped with backticks when it is a keyword. */
@@ -450,7 +450,7 @@ function operationsDeclaration(model) {
     return `${doc}${INDENT}public static let ${swiftIdentifier(operationMember(operation))} = GraphQLOperation<${input}, ${output}>(\n` +
       `${INDENT.repeat(2)}GraphQLCatalog.operations[${swiftString(operation.id)}]!)`;
   });
-  return `/// The operations a client may send, keyed in the catalog by operation ID.\npublic enum ConvoHopOperations {\n${members.join("\n")}\n}\n`;
+  return `/// The operations a client may send, keyed in the catalog by operation ID.\npublic enum RelayOperations {\n${members.join("\n")}\n}\n`;
 }
 
 function catalogDeclaration(ir, model) {
@@ -482,13 +482,13 @@ function errorCodesDeclaration(ir, model) {
   const codes = all.filter(code => referenced.has(code.name) || code.origin === "sdk");
   uniqueNames(codes, code => caseName(code.name), "error codes");
   const members = codes.map(code =>
-    `${docComment(code.summary, 1)}${INDENT}public static let ${swiftIdentifier(caseName(code.name))} = ConvoHopErrorCode(rawValue: ${swiftString(code.name)})`);
+    `${docComment(code.summary, 1)}${INDENT}public static let ${swiftIdentifier(caseName(code.name))} = RelayErrorCode(rawValue: ${swiftString(code.name)})`);
   const catalog = all.map(code =>
     `${INDENT.repeat(2)}${swiftString(code.name)}: (status: ${code.status ?? "nil"}, retryable: ${code.retryable})`);
-  return "/// A ConvoHop error code. Codes that this list doesn't name can still arrive, so handle unknown codes.\n" +
-    "public struct ConvoHopErrorCode: RawRepresentable, Hashable, Sendable {\n" +
+  return "/// A Relay error code. Codes that this list doesn't name can still arrive, so handle unknown codes.\n" +
+    "public struct RelayErrorCode: RawRepresentable, Hashable, Sendable {\n" +
     `${INDENT}public let rawValue: String\n\n${INDENT}public init(rawValue: String) {\n${INDENT.repeat(2)}self.rawValue = rawValue\n${INDENT}}\n}\n\n` +
-    `extension ConvoHopErrorCode {\n${members.join("\n")}\n\n` +
+    `extension RelayErrorCode {\n${members.join("\n")}\n\n` +
     `${INDENT}/// The documented HTTP-equivalent status and retryability of every code the schema lists, including codes that\n` +
     `${INDENT}/// only server operations return.\n` +
     `${INDENT}static let catalog: [String: (status: Int?, retryable: Bool)] = [\n${catalog.join(",\n")},\n${INDENT}]\n}\n`;
@@ -545,7 +545,7 @@ export function renderSwiftOperations(ir) {
 
 export default defineEmitter({
   name: "swift",
-  description: "Swift models and operation catalog for the ConvoHop Swift package",
+  description: "Swift models and operation catalog for the Relay Swift package",
   owns: [DEFAULT_DIRECTORY],
   emit(ir, { directory = DEFAULT_DIRECTORY } = {}) {
     return [

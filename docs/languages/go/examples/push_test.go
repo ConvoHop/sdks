@@ -174,7 +174,7 @@ func TestFCMSenderSendsTheRequestToTheTarget(t *testing.T) {
 	})
 	server := httptest.NewServer(handler)
 	defer server.Close()
-	sender := &examples.FCMSender{Client: server.Client(), ProjectID: "convohop-example", Endpoint: server.URL}
+	sender := &examples.FCMSender{Client: server.Client(), ProjectID: "relay-example", Endpoint: server.URL}
 
 	requests := 0
 	for _, vector := range pushVectors(t) {
@@ -198,7 +198,7 @@ func TestFCMSenderSendsTheRequestToTheTarget(t *testing.T) {
 			}
 			got := <-posts
 			requests++
-			if got.method != http.MethodPost || got.path != "/v1/projects/convohop-example/messages:send" || got.header.Get("Content-Type") != "application/json" {
+			if got.method != http.MethodPost || got.path != "/v1/projects/relay-example/messages:send" || got.header.Get("Content-Type") != "application/json" {
 				t.Errorf("%s: the sender posted %s %s with Content-Type %q", vector.ID, got.method, got.path, got.header.Get("Content-Type"))
 			}
 			want := jsonValue(t, expected.Request).(map[string]any)
