@@ -63,7 +63,7 @@ jobs:
         run: npm run check:graphql
       - name: Test the generators against their golden files
         run: npm run test:sdkgen
-      - uses: actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68 # v6.0.0
+      - uses: actions/setup-dotnet@0f4a354dd5547a28c70b7853dbd95d5b67886e73 # v6.1.0
         with:
           global-json-file: global.json
       # The test job runs the tests on every supported .NET version.
@@ -196,7 +196,7 @@ jobs:
         with:
           persist-credentials: false
       # The SDK that global.json selects builds every target; the other SDK brings the runtime the tests run on.
-      - uses: actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68 # v6.0.0
+      - uses: actions/setup-dotnet@0f4a354dd5547a28c70b7853dbd95d5b67886e73 # v6.1.0
         with:
           global-json-file: global.json
           dotnet-version: ${{ matrix.runtime }}
@@ -239,7 +239,7 @@ jobs:
       # The samples' tests start the conformance mock, which imports graphql.
       - run: npm ci --no-audit --no-fund
       # The .NET 8 SDK brings the runtime that the samples' net8.0 tests run on.
-      - uses: actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68 # v6.0.0
+      - uses: actions/setup-dotnet@0f4a354dd5547a28c70b7853dbd95d5b67886e73 # v6.1.0
         with:
           global-json-file: global.json
           dotnet-version: 8.0.x
@@ -268,7 +268,7 @@ jobs:
           cache: npm
       - run: npm ci --no-audit --no-fund
       # The .NET 8 SDK brings the runtime that the driver's netstandard2.0 build runs on.
-      - uses: actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68 # v6.0.0
+      - uses: actions/setup-dotnet@0f4a354dd5547a28c70b7853dbd95d5b67886e73 # v6.1.0
         with:
           global-json-file: global.json
           dotnet-version: 8.0.x
@@ -343,7 +343,7 @@ jobs:
           node-version: "24"
           cache: npm
       - run: npm ci --no-audit --no-fund
-      - uses: actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68 # v6.0.0
+      - uses: actions/setup-dotnet@0f4a354dd5547a28c70b7853dbd95d5b67886e73 # v6.1.0
         with:
           global-json-file: global.json
       - name: Build the .NET driver
